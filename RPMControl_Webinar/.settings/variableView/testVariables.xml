@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <project>
-    <configuration name="LocalConfiguration">
-        <resource name="local">
-            <variable instancePath="Counter.up"/>
-            <variable instancePath="Counter.count"/>
+    <configuration name="ConfRevPi">
+        <resource name="ResRevPi">
+            <variable instancePath="INST_AppTimer_FBD.gui_RTSInitCycles"/>
+            <variable instancePath="INST_AppTimer_FBD.gui_RTSShutDownCycles"/>
+            <variable instancePath="INST_AppTimer_FBD.gui_RTSTermCycles"/>
+            <variable instancePath="INST_AppTimer_FBD.gudi_RTSRunCycles"/>
         </resource>
     </configuration>
 </project>

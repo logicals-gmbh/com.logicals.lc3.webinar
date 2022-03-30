@@ -1,0 +1,48 @@
+GLOBALS GV_SFC
+	VAR_GLOBAL
+     gx_SFC_Reset : BOOL;	
+     gx_SFC_Start : BOOL;	
+     gx_SFC_Stop  : BOOL;	
+     gx_SFC_Loop  : BOOL;	
+
+     gx_SFC_StartState : BOOL;	
+     gx_SFC_StopState  : BOOL;	
+     gx_SFC_LoopState  : BOOL;	
+
+    /*
+     * Status, SFC ist gestartet
+     */
+     gx_SFC_Action_State     : BOOL;
+
+    /*
+     * Status, SFC ist im Init
+     */
+     gx_SFC_Action_Init      : BOOL;
+    
+    /*
+     * Status, SFC-Schritte
+     */
+     gxarr_SFC_Action_State : ARRAY[1..8] OF BOOL;
+
+    /*
+     * Verweilzeiten
+     */ 
+     gtarr_SFCTime     : ARRAY[1..8] OF TIME := [T#3s,T#1s,T#10s,T#5s,T#1s,T#0s,T#0s,T#0s];
+//     grarr_SFCTime     : ARRAY[1..8] OF REAL := [3.0,1.0,10.0,5.0,1.0,0.0,0.0,0.0];
+     grarr_SFCTime     : ARRAY[1..8] OF REAL := [20.0,20.0,20.0,20.0,20.0,20.0,20.0,20.0];
+
+    /*
+     * Aktuelle Zeiten als TIME
+     */ 
+     gtarr_SFCTime_Act : ARRAY[1..8] OF TIME;
+    /*
+     * Aktuelle Zeiten als REAL
+     */ 
+     grarr_SFCTime_Act : ARRAY[1..8] OF REAL;
+    /*
+     * InfoAnzeige SFC (Visu)
+     */ 
+     gstr_SFC_Statetext : STRING[40];
+
+	END_VAR
+END_GLOBALS

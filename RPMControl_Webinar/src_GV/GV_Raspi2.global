@@ -1,0 +1,6 @@
+GLOBALS GV_Raspi2
+	VAR_GLOBAL
+		gstr_IPAddr : STRING[15] := '192.168.128.150';
+		gstr_ResName : STRING[15] :='Raspi2';
+	END_VAR
+END_GLOBALS

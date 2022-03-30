@@ -1,0 +1,62 @@
+GLOBALS GV_MQTT
+	VAR_GLOBAL
+		/*
+		 * State und Channel vom Connect
+		 */ 
+		 MQTT_State   : MQTT_SUBSCRIBER_STATE;
+		 MQTT_Channel : DINT;
+
+        /*
+         * Conecting Status an WebCon
+         */ 
+         gui_MQTTConnecting    : UINT; // Anzahl der Zyklen in MQTTConnecting
+        /*
+         * Conect und DisConnect Status an WebCon
+         */ 
+	     gui_MQTTConOkCycle    : UINT; // Anzahl der Zyklen bis MQTT Connect
+	     gui_MQTTConNotOkCycle : UINT; // Anzahl der Zyklen wenn MQTT DisConnect
+        /*
+         * Conect Status an WebCon
+         */ 
+         gx_MQTTConOk      : BOOL;
+        /*
+         * Funktion ReConnect starten (WebCon)
+         */ 
+         gx_MQTTReConnect  : BOOL;
+        /*
+         * Funktion DisConnect starten (WebCon)
+         */ 
+         gx_MQTTDisConnect : BOOL;
+
+        /*
+         * Publish und Subsribe Status an WebCon
+         */ 
+	     gui_MQTTPublishOkCycle    : UINT; // Anzahl der Zyklen bis MQTT Publish
+	     gui_MQTTSubscribeOkCycle  : UINT; // Anzahl der Zyklen wenn MQTT Subsribe
+
+
+        /*
+         * MQTT Header
+         */ 
+         MQTTHeader : MQTTHeader;
+
+        /*
+         * Funktion Publish starten (WebCon)
+         */ 
+         gx_MQTTPublish      : BOOL;
+         gx_MQTTPublishState : BOOL;
+
+        /*
+         * Funktion Subscribe starten (WebCon)
+         */ 
+         gx_MQTTSubscribe      : BOOL;
+         gx_MQTTSubscribeState : BOOL;
+         
+        /*
+         * Global Sruktur MQTT-Parameter fuer Client
+         * Dient zum Anzeigen der MQTT-Einstellungen
+         */ 
+         gstruc_MQTTClient    : DT_MQTTClient;
+
+	END_VAR
+END_GLOBALS

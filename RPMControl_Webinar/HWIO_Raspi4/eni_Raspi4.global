@@ -1,0 +1,32 @@
+/***** Generated File - DO NOT EDIT - Last updated: 2020-09-07 17:01:23 *****/
+/** generated from RESOURCE "Raspi4" with the following directive: **/
+/** { IO_IMPORT PROVIDER := EtherCatProvider, SERVICE := EtherCAT, PARAMS := "HWIO_Raspi4/eni_Raspi4.xml", GLOBALS := "HWIO_Raspi4/eni_Raspi4" } **/
+GLOBALS eni_Raspi4
+    VAR_GLOBAL
+        Slave_1002EL3162Channel1Status AT %IB1.0 : USINT;
+        Slave_1002EL3162Channel1Value AT %IW1.1 : INT;
+        Slave_1002EL3162Channel2Status AT %IB1.3 : USINT;
+        Slave_1002EL3162Channel2Value AT %IW1.4 : INT;
+        
+        Slave_1004EL1008Channel1Input AT %IX1.6 : BOOL;
+        Slave_1004EL1008Channel2Input AT %IX1.6.1 : BOOL;
+        Slave_1004EL1008Channel3Input AT %IX1.6.2 : BOOL;
+        Slave_1004EL1008Channel4Input AT %IX1.6.3 : BOOL;
+        Slave_1004EL1008Channel5Input AT %IX1.6.4 : BOOL;
+        Slave_1004EL1008Channel6Input AT %IX1.6.5 : BOOL;
+        Slave_1004EL1008Channel7Input AT %IX1.6.6 : BOOL;
+        Slave_1004EL1008Channel8Input AT %IX1.6.7 : BOOL;
+       
+        Slave_1003EL4102Channel1Output AT %QW1.0 : INT;
+        Slave_1003EL4102Channel2Output AT %QW1.2 : INT;
+       
+        Slave_1005EL2008Channel1Output AT %QX1.4 : BOOL;
+        Slave_1005EL2008Channel2Output AT %QX1.4.1 : BOOL;
+        Slave_1005EL2008Channel3Output AT %QX1.4.2 : BOOL;
+        Slave_1005EL2008Channel4Output AT %QX1.4.3 : BOOL;
+        Slave_1005EL2008Channel5Output AT %QX1.4.4 : BOOL;
+        Slave_1005EL2008Channel6Output AT %QX1.4.5 : BOOL;
+        Slave_1005EL2008Channel7Output AT %QX1.4.6 : BOOL;
+        Slave_1005EL2008Channel8Output AT %QX1.4.7 : BOOL;
+    END_VAR
+END_GLOBALS

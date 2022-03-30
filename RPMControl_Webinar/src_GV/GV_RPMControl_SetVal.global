@@ -1,0 +1,94 @@
+GLOBALS GV_RPMControl_SetVal 
+   /*
+    * Retained
+    */	
+	VAR_GLOBAL RETAIN
+
+     /*
+      * Glaettung PT1-Verzoegerung
+      */    
+      gr_PV_PT1_T1 : REAL := 0.2;
+
+     /*
+      * Regler Einstellungen
+      * Per Regler-Task = 10ms Zyklszeit!
+      */    
+      gr_PID_TI  : REAL := 50.0;    // 10.0
+      gr_PID_Kv  : REAL;
+      gr_PID_T1  : REAL := 0.2  ;   // 0.0015
+      gr_PID_Lvu : REAL := 100.0;
+      gr_PID_Lvd : REAL := -100.0;
+      gr_PID_Kp  : REAL := 0.1;     // 0.8
+
+     /*
+      * Regeler Status Ausgangsinformationen
+      */
+      gx_PID_Lu  : BOOL;
+      gx_PID_Ld  : BOOL;
+      gr_PID_Out : REAL;
+      gr_PID_P   : REAL;
+      gr_PID_I   : REAL;
+      gr_PID_D   : REAL;
+
+      gx_PID_Auto : BOOL;
+      gr_PID_YManual : REAL;
+
+     /*
+      * Ramp Eingangsinformationen
+      */ 
+      gr_Ramp_OPC   : USINT := 0;     // OPC-Handling ist noch nicht eingebaut!
+      gr_Ramp_In    : REAL  := 0.0;   // Ramp_In = X1 per MQTT
+      gr_Ramp_SV    : REAL  := 30.0;  // SetValue wenn OPC = ??    
+      gr_Ramp_XSum  : REAL;           // Wird berechnet
+      gr_Ramp_SpdUp : REAL := 2.0;
+      gr_Ramp_SpdDn : REAL := 4.0;
+      gr_Ramp_UpMax : REAL := 100.0;
+      gr_Ramp_DnMax : REAL := 0.0;
+      gx_Ramp_Stp   : BOOL := FALSE;
+      gx_Ramp_Auto  : BOOL := FALSE;
+     /*
+      * Ramp Status Ausgangsinformationen
+      */ 
+      gr_Ramp_Y   : REAL;
+      gx_Ramp_QU  : BOOL;
+      gx_Ramp_QE  : BOOL;
+      gx_Ramp_QL  : BOOL;
+      gx_Ramp_In  : REAL;
+      gx_Ramp_St  : WORD;
+      gx_Ramp_Exc : USINT;
+      
+      gui_Ramp_XSumChg : UINT;
+
+     /*
+      * Einstellwerte von Visu!
+      */
+
+     /*
+      * Glaettung PT1-Verzoegerung
+      */    
+      gr_PV_PT1_Set_T1 : REAL := 0.2;
+
+     /*
+      * Regler Einstellungen
+      * Per Regler-Task = 10ms Zyklszeit!
+      */    
+      gr_PID_Set_TI : REAL := 10.0;
+      gr_PID_Set_Kv : REAL;
+      gr_PID_Set_T1 : REAL := 0.0015;
+      gr_PID_Set_Lvu : REAL := 100.0;
+      gr_PID_Set_Lvd : REAL := -100.0;
+      gr_PID_Set_Kp : REAL := 0.8;
+
+     /*
+      * Rampe Einstellungen fuer Regler
+      */    
+      gr_Ramp_Set_OPC   : USINT;
+      gr_Ramp_Set_SV    : REAL;
+      gr_Ramp_Set_SpdUp : REAL;
+      gr_Ramp_Set_SpdDn : REAL;
+      gr_Ramp_Set_UpMax : REAL;
+      gr_Ramp_Set_DnMax : REAL;
+      gx_Ramp_Set_Stp   : BOOL;
+
+	END_VAR
+END_GLOBALS

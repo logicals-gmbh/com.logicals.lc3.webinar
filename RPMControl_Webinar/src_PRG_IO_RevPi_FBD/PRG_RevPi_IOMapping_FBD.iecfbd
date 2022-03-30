@@ -1,0 +1,781 @@
+PROGRAM PRG_RevPi_IOMapping_FBD
+  VAR
+    lx_I_01 : BOOL;
+    lx_I_02 : BOOL;
+    lx_I_03 : BOOL;
+    lx_I_04 : BOOL;
+    lx_I_05 : BOOL;
+    lx_I_06 : BOOL;
+    lx_I_07 : BOOL;
+    lx_I_08 : BOOL;
+    lx_I_09 : BOOL;
+    lx_I_10 : BOOL;
+    lx_I_11 : BOOL;
+    lx_I_12 : BOOL;
+    lx_I_13 : BOOL;
+    lx_I_14 : BOOL;
+    lx_O_01 : BOOL;
+    lx_O_02 : BOOL;
+    lx_O_03 : BOOL;
+    lx_O_04 : BOOL;
+    lx_O_05 : BOOL;
+    lx_O_06 : BOOL;
+    lx_O_07 : BOOL;
+    lx_O_08 : BOOL;
+    lx_O_09 : BOOL;
+    lx_O_10 : BOOL;
+    lx_O_11 : BOOL;
+    lx_O_12 : BOOL;
+    lx_O_13 : BOOL;
+    lx_O_14 : BOOL;
+    FORCEMRK7 : FORCEMRK;
+    FORCEMRK12 : FORCEMRK;
+    FORCEMRK13 : FORCEMRK;
+    FORCEMRK14 : FORCEMRK;
+    FORCEMRK15 : FORCEMRK;
+    FORCEMRK16 : FORCEMRK;
+    FORCEMRK17 : FORCEMRK;
+    FORCEMRK18 : FORCEMRK;
+    FORCEMRK2 : FORCEMRK;
+    FORCEMRK3 : FORCEMRK;
+    FORCEMRK4 : FORCEMRK;
+    FORCEMRK5 : FORCEMRK;
+    FORCEMRK6 : FORCEMRK;
+    FORCEMRK9 : FORCEMRK;
+    FORCEMRK10 : FORCEMRK;
+    FORCEMRK11 : FORCEMRK;
+    FORCEMRK19 : FORCEMRK;
+    FORCEMRK20 : FORCEMRK;
+    FORCEMRK21 : FORCEMRK;
+    FORCEMRK22 : FORCEMRK;
+    FORCEMRK23 : FORCEMRK;
+    lt_ActCycleTime : TIME;
+    lt_CycleTime : TIME;
+  END_VAR
+  VAR
+    li_InputValue_1 : INT;
+    li_InputValue_2 : INT;
+    li_InputValue_3 : INT;
+    li_InputValue_4 : INT;
+    lb_InputStatus_1 : BYTE;
+    lb_InputStatus_2 : BYTE;
+    lb_InputStatus_3 : BYTE;
+    lb_InputStatus_4 : BYTE;
+  END_VAR
+  VAR
+    lb_OutputStatus_1 : BYTE;
+    lb_OutputStatus_2 : BYTE;
+    li_OutputValue_1 : INT;
+    li_OutputValue_2 : INT;
+    lb_Output1Range : BYTE;
+    lb_Output2Range : BYTE;
+  END_VAR
+  VAR
+    R_TRIG1 : R_TRIG;
+    lx_CycleInit : BOOL;
+    lx_CyclePulse : BOOL;
+    lui_CycleCount : UINT;
+    FORCEMRK8 : FORCEMRK;
+  END_VAR
+  VAR_EXTERNAL
+    RevPiLED : BYTE;
+    gi_Value_AI3 : INT;
+    gi_Value_AI4 : INT;
+  END_VAR
+  VAR_EXTERNAL
+    I_1 : BOOL;
+    I_2 : BOOL;
+    I_3 : BOOL;
+    I_4 : BOOL;
+    I_5 : BOOL;
+    I_6 : BOOL;
+    I_7 : BOOL;
+    I_8 : BOOL;
+    I_9 : BOOL;
+    I_10 : BOOL;
+    I_11 : BOOL;
+    I_12 : BOOL;
+    I_13 : BOOL;
+    I_14 : BOOL;
+    I_15 : BOOL;
+    I_16 : BOOL;
+    O_1 : BOOL;
+    O_2 : BOOL;
+    O_3 : BOOL;
+    O_4 : BOOL;
+    O_5 : BOOL;
+    O_6 : BOOL;
+    O_7 : BOOL;
+    O_8 : BOOL;
+    O_9 : BOOL;
+    O_10 : BOOL;
+    O_11 : BOOL;
+    O_12 : BOOL;
+    O_13 : BOOL;
+    O_14 : BOOL;
+    O_15 : BOOL;
+    O_16 : BOOL;
+  END_VAR
+  VAR_EXTERNAL
+    InputValue_1 : INT;
+    InputValue_2 : INT;
+    InputValue_3 : INT;
+    InputValue_4 : INT;
+    InputStatus_1 : BYTE;
+    InputStatus_2 : BYTE;
+    InputStatus_3 : BYTE;
+    InputStatus_4 : BYTE;
+  END_VAR
+  VAR_EXTERNAL
+    OutputValue_1 : INT;
+    OutputValue_2 : INT;
+    Output1Range : BYTE;
+    Output2Range : BYTE;
+    OutputStatus_1 : BYTE;
+    OutputStatus_2 : BYTE;
+  END_VAR
+  VAR_EXTERNAL
+    gr_PV : REAL;
+    gr_SP : REAL;
+    gr_Y : REAL;
+    gr_PV_Scale : REAL;
+    gr_SP_Scale : REAL;
+    gr_Y_Scale : REAL;
+    gx_RPM0 : BOOL;
+    gx_RPM1 : BOOL;
+    gx_RPM2 : BOOL;
+    gx_RPM3 : BOOL;
+    gx_ResetRPM : BOOL;
+    gx_ModeRPM0 : BOOL;
+    gx_ModeRPM1 : BOOL;
+    gx_ModeRPM2 : BOOL;
+    gx_ModeRPM3 : BOOL;
+  END_VAR
+  VAR_EXTERNAL
+    gusi_Status_AI1 : USINT;
+    gi_Value_AI1 : INT;
+    gusi_Status_AI2 : USINT;
+    gi_Value_AI2 : INT;
+    gi_Value_AO1 : INT;
+    gi_Value_AO2 : INT;
+  END_VAR
+  VAR_EXTERNAL
+    gx_In1 : BOOL;
+    gx_In2 : BOOL;
+    gx_In3 : BOOL;
+    gx_In4 : BOOL;
+    gx_In5 : BOOL;
+    gx_In6 : BOOL;
+    gx_In7 : BOOL;
+    gx_In8 : BOOL;
+  END_VAR
+  VAR_EXTERNAL
+    gx_Out1 : BOOL;
+    gx_Out2 : BOOL;
+    gx_Out3 : BOOL;
+    gx_Out4 : BOOL;
+    gx_Out5 : BOOL;
+    gx_Out6 : BOOL;
+    gx_Out7 : BOOL;
+    gx_Out8 : BOOL;
+  END_VAR
+
+  (*
+
+    // Network 1:
+    R_TRIG1(CLK := TRUE, Q => lx_CycleInit);
+
+    // Network 2:
+    NOT(IN := lx_CyclePulse, NOT => lx_CyclePulse);
+
+    // Network 3:
+    ADD(IN1 := lui_CycleCount, IN2 := 1, ADD => lui_CycleCount);
+
+    // Network 4:
+    NOT(IN := RevPiLED, NOT => RevPiLED);
+
+    // Network 5:
+    SysTaskActualCycleTime(SysTaskActualCycleTime => lt_ActCycleTime);
+
+    // Network 6:
+    SysTaskCycleTime(SysTaskCycleTime => lt_CycleTime);
+
+    // Network 7:
+    FORCEMRK2(IN := I_1);
+    MOVE(IN := FORCEMRK2.OUT, MOVE => gx_In1);
+    gx_RPM0 := gx_In1;
+
+    // Network 8:
+    FORCEMRK3(IN := I_2);
+    MOVE(IN := FORCEMRK3.OUT, MOVE => gx_In2);
+    gx_RPM1 := gx_In2;
+
+    // Network 9:
+    FORCEMRK4(IN := I_3);
+    MOVE(IN := FORCEMRK4.OUT, MOVE => gx_In3);
+    gx_RPM2 := gx_In3;
+
+    // Network 10:
+    FORCEMRK5(IN := I_4);
+    MOVE(IN := FORCEMRK5.OUT, MOVE => gx_In4);
+    gx_RPM3 := gx_In4;
+
+    // Network 11:
+    FORCEMRK9(IN := I_5);
+    MOVE(IN := FORCEMRK9.OUT, MOVE => gx_In5);
+
+    // Network 12:
+    FORCEMRK10(IN := I_6);
+    MOVE(IN := FORCEMRK10.OUT, MOVE => gx_In6);
+
+    // Network 13:
+    FORCEMRK11(IN := I_7);
+    MOVE(IN := FORCEMRK11.OUT, MOVE => gx_In7);
+
+    // Network 14:
+    FORCEMRK6(IN := I_8);
+    MOVE(IN := FORCEMRK6.OUT, MOVE => gx_In8);
+    gx_ResetRPM := gx_In8;
+
+    // Network 15:
+    TO_INT(IN := gr_Y, TO_INT => gi_Value_AO1);
+    RTSCycleInfo(Run => , Shutdown => @C(192).Shutdown, Term => @C(192).Term);
+    MOVE(EN := @C(192).Run, IN := InputValue_1, MOVE => @C(169).MOVE);
+    FORCEMRK8(IN := @C(169).MOVE, OUT => gi_Value_AI1);
+    TO_REAL(IN := gi_Value_AI1, TO_REAL => gr_PV);
+    MOVE(EN := @C(192).Run, IN := InputValue_2, MOVE => @C(174).MOVE);
+    FORCEMRK21(IN := @C(174).MOVE, OUT => gi_Value_AI2);
+    MOVE(EN := @C(192).Run, IN := InputValue_3, MOVE => @C(188).MOVE);
+    FORCEMRK22(IN := @C(188).MOVE, OUT => gi_Value_AI3);
+    MOVE(EN := @C(192).Run, IN := InputValue_4, MOVE => @C(232).MOVE);
+    FORCEMRK23(IN := @C(232).MOVE, OUT => gi_Value_AI4);
+    MOVE(EN := @C(192).Run, IN := gi_Value_AO1, MOVE => @C(129).MOVE);
+    FORCEMRK20(IN := @C(129).MOVE, OUT => OutputValue_1);
+    OR(IN1 := @C(192).Shutdown, IN2 := @C(192).Term, OR => @C(196).OR);
+    MOVE(EN := @C(196).OR, IN := FALSE, MOVE => (gx_Out1, gx_Out2));
+    MOVE(EN := @C(196).OR, IN := 0, MOVE => (gi_Value_AO1, gi_Value_AO2));
+    MOVE(EN := @C(192).Run, IN := gi_Value_AO2, MOVE => @C(128).MOVE);
+    FORCEMRK19(IN := @C(128).MOVE, OUT => OutputValue_2);
+
+    // Network 16:
+    MOVE(IN := gx_ModeRPM0, MOVE => gx_Out1);
+    FORCEMRK7(IN := gx_Out1, OUT => O_1);
+
+    // Network 17:
+    MOVE(IN := gx_ModeRPM1, MOVE => gx_Out2);
+    FORCEMRK13(IN := gx_Out2, OUT => O_2);
+
+    // Network 18:
+    MOVE(IN := gx_ModeRPM2, MOVE => gx_Out3);
+    FORCEMRK12(IN := gx_Out3, OUT => O_3);
+
+    // Network 19:
+    MOVE(IN := gx_ModeRPM3, MOVE => gx_Out4);
+    FORCEMRK14(IN := gx_Out4, OUT => O_4);
+
+    // Network 20:
+    FORCEMRK15(IN := gx_Out5, OUT => O_5);
+
+    // Network 21:
+    FORCEMRK17(IN := gx_Out6, OUT => O_6);
+
+    // Network 22:
+    FORCEMRK16(IN := gx_Out7, OUT => O_7);
+
+    // Network 23:
+    FORCEMRK18(IN := gx_Out8, OUT => O_8);
+
+  *)
+
+  @C(432) : @FB(R_TRIG1), @R(860.0, 140.0, 140.0, 18.0), @I(@N(CLK), @L(9.5)), @O(@N(Q), @R(9.5));
+  @C(13) : @F(NOT), @R(900.0, 250.0, 60.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(NOT), @R(9.5));
+  @C(18) : @F(ADD), @R(920.0, 280.0, 40.0, 38.0), UINT, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(ADD), @R(9.5));
+  @VF(433) : @E(TRUE), @R(670.0, 140.0, 140.0, 19.0);
+  @VF(435) : @E(lx_CycleInit), @R(1060.0, 140.0, 140.0, 19.0);
+  @VF(12) : @E(lx_CyclePulse), @R(740.0, 250.0, 140.0, 19.0);
+  @VF(14) : @E(lx_CyclePulse), @R(990.0, 250.0, 140.0, 19.0);
+  @VF(17) : @E(lui_CycleCount), @R(740.0, 280.0, 140.0, 19.0);
+  @VF(19) : @E(lui_CycleCount), @R(990.0, 280.0, 140.0, 19.0);
+  @VF(22) : @E(1), @R(740.0, 300.0, 140.0, 19.0), UINT;
+  @OLT(67) : @R(1230.0, 260.0, 80.0, 19.0), @S(19);
+  @OLT(71) : @R(610.0, 270.0, 80.0, 19.0), @S(17);
+  @CF(10) : @R(740.0, 70.0, 390.0, 39.0), @T("Initialisierungsmerker"), @POU;
+  @CF(437) : @R(740.0, 190.0, 390.0, 39.0), @T("Life-Tick"), @POU;
+  @CF(48) : @R(750.0, 1360.0, 390.0, 39.0), @T("RevPi Binaer-Eingaenge"), @POU;
+  @VF(69) : @E(gx_In1), @R(1060.0, 1440.0, 140.0, 19.0);
+  @VF(70) : @E(gx_In2), @R(1060.0, 1460.0, 140.0, 19.0);
+  @VF(72) : @E(gx_In3), @R(1060.0, 1480.0, 140.0, 19.0);
+  @VF(73) : @E(gx_In4), @R(1060.0, 1500.0, 140.0, 19.0);
+  @VF(74) : @E(gx_In5), @R(1060.0, 1520.0, 140.0, 19.0);
+  @VF(75) : @E(gx_In6), @R(1060.0, 1540.0, 140.0, 19.0);
+  @VF(76) : @E(gx_In7), @R(1060.0, 1560.0, 140.0, 19.0);
+  @VF(77) : @E(gx_In8), @R(1060.0, 1580.0, 140.0, 19.0);
+  @C(78) : @F(MOVE), @R(940.0, 1440.0, 60.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(MOVE), @R(9.5));
+  @C(80) : @F(MOVE), @R(940.0, 1460.0, 60.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(MOVE), @R(9.5));
+  @C(81) : @F(MOVE), @R(940.0, 1480.0, 60.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(MOVE), @R(9.5));
+  @C(82) : @F(MOVE), @R(940.0, 1500.0, 60.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(MOVE), @R(9.5));
+  @C(83) : @F(MOVE), @R(940.0, 1520.0, 60.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(MOVE), @R(9.5));
+  @C(84) : @F(MOVE), @R(940.0, 1540.0, 60.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(MOVE), @R(9.5));
+  @C(85) : @F(MOVE), @R(940.0, 1560.0, 60.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(MOVE), @R(9.5));
+  @C(86) : @F(MOVE), @R(940.0, 1580.0, 60.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(MOVE), @R(9.5));
+  @VF(112) : @E(gx_RPM0), @R(1310.0, 1440.0, 140.0, 19.0);
+  @VF(114) : @E(gx_RPM1), @R(1310.0, 1460.0, 140.0, 19.0);
+  @VF(115) : @E(gx_RPM2), @R(1310.0, 1480.0, 140.0, 19.0);
+  @VF(116) : @E(gx_RPM3), @R(1310.0, 1500.0, 140.0, 19.0);
+  @VF(117) : @E(gx_ResetRPM), @R(1310.0, 1580.0, 140.0, 19.0);
+  @CF(41) : @R(760.0, 1640.0, 390.0, 39.0), @T("RevPi Analog-Ausgaenge (Wert)"), @POU;
+  @C(45) : @FB(FORCEMRK8), @R(950.0, 1750.0, 120.0, 18.0), INT, @I(@N(IN), @L(9.5)), @O(@N(OUT), @R(9.5));
+  @VF(47) : @E(gi_Value_AI1), @R(1190.0, 1750.0, 140.0, 19.0);
+  @CF(136) : @R(770.0, 2020.0, 390.0, 39.0), @T("RevPi Binaer-Ausgaenge (Wert)"), @POU;
+  @VF(137) : @E(gx_ModeRPM0), @R(610.0, 2100.0, 140.0, 19.0);
+  @C(138) : @F(MOVE), @R(810.0, 2100.0, 60.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(MOVE), @R(9.5));
+  @VF(142) : @E(gx_Out1), @R(920.0, 2100.0, 130.0, 19.0);
+  @C(147) : @F(MOVE), @R(810.0, 2120.0, 60.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(MOVE), @R(9.5));
+  @VF(148) : @E(gx_ModeRPM1), @R(610.0, 2120.0, 140.0, 19.0);
+  @VF(149) : @E(gx_Out2), @R(920.0, 2120.0, 130.0, 19.0);
+  @C(156) : @F(MOVE), @R(810.0, 2140.0, 60.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(MOVE), @R(9.5));
+  @VF(157) : @E(gx_ModeRPM2), @R(610.0, 2140.0, 140.0, 19.0);
+  @VF(158) : @E(gx_Out3), @R(920.0, 2140.0, 130.0, 19.0);
+  @C(165) : @F(MOVE), @R(810.0, 2160.0, 60.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(MOVE), @R(9.5));
+  @VF(166) : @E(gx_ModeRPM3), @R(610.0, 2160.0, 140.0, 19.0);
+  @VF(167) : @E(gx_Out4), @R(920.0, 2160.0, 130.0, 19.0);
+  @VF(176) : @E(gx_Out5), @R(920.0, 2180.0, 130.0, 19.0);
+  @VF(185) : @E(gx_Out6), @R(920.0, 2200.0, 130.0, 19.0);
+  @VF(194) : @E(gx_Out7), @R(920.0, 2220.0, 130.0, 19.0);
+  @VF(203) : @E(gx_Out8), @R(920.0, 2240.0, 130.0, 19.0);
+  @OLT(180) : @R(1190.0, 1730.0, 80.0, 19.0), @S(47);
+  @OLT(184) : @R(950.0, 1710.0, 120.0, 39.0), @S(45);
+  @C(196) : @F(OR), @R(950.0, 2850.0, 40.0, 38.0), BOOL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(OR), @R(9.5));
+  @C(192) : @F(RTSCycleInfo), @R(780.0, 2810.0, 120.0, 78.0), @O(@N(Init), @R(9.5)), @O(@N(Run), @R(29.5)), @O(@N(Shutdown), @R(49.5)), @O(@N(Term), @R(69.5));
+  @C(193) : @F(MOVE), @R(1030.0, 2890.0, 60.0, 38.0), BOOL, @I(@N(EN), @L(9.5)), @I(@N(IN), @L(29.5)), @O(@N(ENO), @R(9.5)), @O(@N(MOVE), @R(29.5));
+  @C(214) : @F(MOVE), @R(1030.0, 3210.0, 60.0, 38.0), INT, @I(@N(EN), @L(9.5)), @I(@N(IN), @L(29.5)), @O(@N(ENO), @R(9.5)), @O(@N(MOVE), @R(29.5));
+  @VF(212) : @E(FALSE), @R(760.0, 2910.0, 140.0, 19.0), BOOL;
+  @VF(205) : @E(gx_Out2), @R(1150.0, 2930.0, 130.0, 19.0);
+  @VF(207) : @E(gx_Out6), @R(1150.0, 3010.0, 130.0, 19.0);
+  @VF(206) : @E(gx_Out4), @R(1150.0, 2970.0, 130.0, 19.0);
+  @VF(201) : @E(gx_Out1), @R(1150.0, 2910.0, 130.0, 19.0);
+  @VF(202) : @E(gx_Out3), @R(1150.0, 2950.0, 130.0, 19.0);
+  @VF(209) : @E(gx_Out5), @R(1150.0, 2990.0, 130.0, 19.0);
+  @VF(211) : @E(gx_Out7), @R(1150.0, 3030.0, 130.0, 19.0);
+  @VF(210) : @E(gx_Out8), @R(1150.0, 3050.0, 130.0, 19.0);
+  @VF(216) : @E(0), @R(770.0, 3230.0, 140.0, 19.0), INT;
+  @VF(215) : @E(gi_Value_AO1), @R(1140.0, 3230.0, 140.0, 19.0);
+  @VF(220) : @E(gi_Value_AO2), @R(1140.0, 3250.0, 140.0, 19.0);
+  @CF(1) : @R(740.0, 380.0, 390.0, 39.0), @T("Life-Tick RevPi LED"), @POU;
+  @VF(2) : @E(RevPiLED), @R(740.0, 470.0, 140.0, 19.0);
+  @C(3) : @F(NOT), @R(900.0, 470.0, 60.0, 18.0), BYTE, @I(@N(IN), @L(9.5)), @O(@N(NOT), @R(9.5));
+  @VF(4) : @E(RevPiLED), @R(990.0, 470.0, 140.0, 19.0);
+  @CF(7) : @R(800.0, 2730.0, 390.0, 39.0), @T("RevPi Binaer-Ausgaenge (Wert)"), @POU;
+  @VF(8) : @E(OutputValue_1), @R(1240.0, 2410.0, 140.0, 19.0);
+  @VF(11) : @E(OutputValue_2), @R(1240.0, 2470.0, 140.0, 19.0);
+  @VF(27) : @E(I_1), @R(570.0, 1440.0, 140.0, 19.0);
+  @VF(29) : @E(I_2), @R(570.0, 1460.0, 140.0, 19.0);
+  @VF(30) : @E(I_3), @R(570.0, 1480.0, 140.0, 19.0);
+  @VF(31) : @E(I_4), @R(570.0, 1500.0, 140.0, 19.0);
+  @VF(32) : @E(I_5), @R(570.0, 1520.0, 140.0, 19.0);
+  @VF(33) : @E(I_6), @R(570.0, 1540.0, 140.0, 19.0);
+  @VF(34) : @E(I_7), @R(570.0, 1560.0, 140.0, 19.0);
+  @VF(35) : @E(I_8), @R(570.0, 1580.0, 140.0, 19.0);
+  @VF(51) : @E(O_1), @R(1250.0, 2100.0, 140.0, 19.0);
+  @VF(52) : @E(O_2), @R(1250.0, 2120.0, 140.0, 19.0);
+  @VF(53) : @E(O_3), @R(1250.0, 2140.0, 140.0, 19.0);
+  @VF(54) : @E(O_4), @R(1250.0, 2160.0, 140.0, 19.0);
+  @VF(55) : @E(O_5), @R(1250.0, 2180.0, 140.0, 19.0);
+  @VF(56) : @E(O_6), @R(1250.0, 2200.0, 140.0, 19.0);
+  @VF(57) : @E(O_7), @R(1250.0, 2220.0, 140.0, 19.0);
+  @VF(58) : @E(O_8), @R(1250.0, 2240.0, 140.0, 19.0);
+  @C(59) : @FB(FORCEMRK7), @R(1090.0, 2100.0, 120.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(OUT), @R(9.5));
+  @C(60) : @FB(FORCEMRK12), @R(1090.0, 2140.0, 120.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(OUT), @R(9.5));
+  @C(61) : @FB(FORCEMRK13), @R(1090.0, 2120.0, 120.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(OUT), @R(9.5));
+  @C(62) : @FB(FORCEMRK14), @R(1090.0, 2160.0, 120.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(OUT), @R(9.5));
+  @C(63) : @FB(FORCEMRK15), @R(1090.0, 2180.0, 120.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(OUT), @R(9.5));
+  @C(64) : @FB(FORCEMRK16), @R(1090.0, 2220.0, 120.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(OUT), @R(9.5));
+  @C(65) : @FB(FORCEMRK17), @R(1090.0, 2200.0, 120.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(OUT), @R(9.5));
+  @C(66) : @FB(FORCEMRK18), @R(1090.0, 2240.0, 120.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(OUT), @R(9.5));
+  @C(102) : @FB(FORCEMRK2), @R(760.0, 1440.0, 120.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(OUT), @R(9.5));
+  @C(103) : @FB(FORCEMRK3), @R(760.0, 1460.0, 120.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(OUT), @R(9.5));
+  @C(104) : @FB(FORCEMRK4), @R(760.0, 1480.0, 120.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(OUT), @R(9.5));
+  @C(105) : @FB(FORCEMRK5), @R(760.0, 1500.0, 120.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(OUT), @R(9.5));
+  @C(106) : @FB(FORCEMRK6), @R(760.0, 1580.0, 120.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(OUT), @R(9.5));
+  @C(28) : @FB(FORCEMRK9), @R(760.0, 1520.0, 120.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(OUT), @R(9.5));
+  @C(36) : @FB(FORCEMRK10), @R(760.0, 1540.0, 120.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(OUT), @R(9.5));
+  @C(37) : @FB(FORCEMRK11), @R(760.0, 1560.0, 120.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(OUT), @R(9.5));
+  @VF(42) : @E(InputValue_1), @R(580.0, 1750.0, 140.0, 19.0);
+  @C(24) : @FB(FORCEMRK19), @R(920.0, 2470.0, 120.0, 18.0), INT, @I(@N(IN), @L(9.5)), @O(@N(OUT), @R(9.5));
+  @C(25) : @FB(FORCEMRK20), @R(920.0, 2410.0, 120.0, 18.0), INT, @I(@N(IN), @L(9.5)), @O(@N(OUT), @R(9.5));
+  @VF(46) : @E(gi_Value_AO1), @R(600.0, 2410.0, 140.0, 19.0);
+  @C(128) : @F(MOVE), @R(800.0, 2450.0, 60.0, 38.0), INT, @I(@N(EN), @L(9.5)), @I(@N(IN), @L(29.5)), @O(@N(ENO), @R(9.5)), @O(@N(MOVE), @R(29.5));
+  @C(129) : @F(MOVE), @R(800.0, 2390.0, 60.0, 38.0), INT, @I(@N(EN), @L(9.5)), @I(@N(IN), @L(29.5)), @O(@N(ENO), @R(9.5)), @O(@N(MOVE), @R(29.5));
+  @VF(154) : @E(gi_Value_AO2), @R(600.0, 2470.0, 140.0, 19.0);
+  @CONN(159) : @IT(RTSRun), @R(950.0, 2830.0, 100.0, 19.0), BOOL;
+  @CONT(161) : @IT(RTSRun), @CONN(159), @R(600.0, 2390.0, 140.0, 19.0), BOOL;
+  @CONT(168) : @IT(RTSRun), @CONN(159), @R(590.0, 1730.0, 130.0, 19.0), BOOL;
+  @C(169) : @F(MOVE), @R(830.0, 1730.0, 60.0, 38.0), INT, @I(@N(EN), @L(9.5)), @I(@N(IN), @L(29.5)), @O(@N(ENO), @R(9.5)), @O(@N(MOVE), @R(29.5));
+  @C(173) : @FB(FORCEMRK21), @R(950.0, 1810.0, 120.0, 18.0), INT, @I(@N(IN), @L(9.5)), @O(@N(OUT), @R(9.5));
+  @C(174) : @F(MOVE), @R(830.0, 1790.0, 60.0, 38.0), INT, @I(@N(EN), @L(9.5)), @I(@N(IN), @L(29.5)), @O(@N(ENO), @R(9.5)), @O(@N(MOVE), @R(29.5));
+  @VF(175) : @E(InputValue_2), @R(580.0, 1810.0, 140.0, 19.0);
+  @VF(177) : @E(gi_Value_AI2), @R(1190.0, 1810.0, 140.0, 19.0);
+  @OLT(179) : @R(950.0, 1770.0, 120.0, 39.0), @S(173);
+  @OLT(181) : @R(1190.0, 1790.0, 80.0, 19.0), @S(177);
+  @OLT(204) : @R(930.0, 2430.0, 100.0, 39.0), @S(24);
+  @OLT(208) : @R(930.0, 2370.0, 100.0, 39.0), @S(25);
+  @C(183) : @FB(FORCEMRK22), @R(950.0, 1870.0, 120.0, 18.0), INT, @I(@N(IN), @L(9.5)), @O(@N(OUT), @R(9.5));
+  @C(188) : @F(MOVE), @R(830.0, 1850.0, 60.0, 38.0), INT, @I(@N(EN), @L(9.5)), @I(@N(IN), @L(29.5)), @O(@N(ENO), @R(9.5)), @O(@N(MOVE), @R(29.5));
+  @VF(190) : @E(InputValue_3), @R(580.0, 1870.0, 140.0, 19.0);
+  @OLT(230) : @R(960.0, 1830.0, 100.0, 39.0), @S(183);
+  @C(231) : @FB(FORCEMRK23), @R(950.0, 1930.0, 120.0, 18.0), INT, @I(@N(IN), @L(9.5)), @O(@N(OUT), @R(9.5));
+  @C(232) : @F(MOVE), @R(830.0, 1910.0, 60.0, 38.0), INT, @I(@N(EN), @L(9.5)), @I(@N(IN), @L(29.5)), @O(@N(ENO), @R(9.5)), @O(@N(MOVE), @R(29.5));
+  @VF(234) : @E(InputValue_4), @R(580.0, 1930.0, 140.0, 19.0);
+  @OLT(236) : @R(960.0, 1890.0, 100.0, 39.0), @S(231);
+  @VF(242) : @E(gi_Value_AI3), @R(1190.0, 1870.0, 140.0, 19.0);
+  @VF(244) : @E(gi_Value_AI4), @R(1190.0, 1930.0, 140.0, 19.0);
+  @CF(195) : @R(780.0, 2310.0, 390.0, 39.0), @T("RevPi Analog-Ausgaenge (Wert)"), @POU;
+  @OLT(233) : @R(1240.0, 2390.0, 80.0, 19.0), @S(8);
+  @OLT(235) : @R(1240.0, 2450.0, 80.0, 19.0), @S(11);
+  @OLT(237) : @R(640.0, 1770.0, 80.0, 19.0), @S(42);
+  @OLT(243) : @R(640.0, 1830.0, 80.0, 19.0), @S(175);
+  @OLT(245) : @R(640.0, 1890.0, 80.0, 19.0), @S(190);
+  @OLT(246) : @R(640.0, 1950.0, 80.0, 19.0), @S(234);
+  @OLT(247) : @R(1190.0, 1850.0, 80.0, 19.0), @S(242);
+  @OLT(248) : @R(1190.0, 1910.0, 80.0, 19.0), @S(244);
+  @VF(249) : @E(gr_PV), @R(1510.0, 1750.0, 140.0, 19.0);
+  @C(250) : @F(TO_REAL), @R(1360.0, 1750.0, 120.0, 18.0), INT, @I(@N(IN), @L(9.5)), @O(@N(TO_REAL), @R(9.5));
+  @VF(253) : @E(gr_Y), @R(300.0, 2410.0, 140.0, 19.0);
+  @C(254) : @F(TO_INT), @R(460.0, 2410.0, 120.0, 18.0), REAL, @I(@N(IN), @L(9.5)), @O(@N(TO_INT), @R(9.5));
+  @OLT(257) : @R(990.0, 450.0, 80.0, 19.0), @S(4);
+  @C(514) : @F(SysTaskActualCycleTime), @R(690.0, 630.0, 184.0, 18.0), @O(@N(SysTaskActualCycleTime), @R(9.5));
+  @C(515) : @F(SysTaskCycleTime), @R(690.0, 700.0, 190.0, 18.0), @O(@N(SysTaskCycleTime), @R(9.5));
+  @VF(516) : @E(lt_ActCycleTime), @R(950.0, 630.0, 140.0, 19.0);
+  @VF(517) : @E(lt_CycleTime), @R(950.0, 700.0, 140.0, 19.0);
+  @OLT(519) : @R(1100.0, 600.0, 180.0, 19.0), @S(516);
+  @OLT(518) : @R(1100.0, 670.0, 180.0, 19.0), @S(517);
+  @CF(520) : @R(690.0, 540.0, 490.0, 39.0), @T("Read CycleTime"), @POU;
+  @CP(218) : 1009.5, 2899.5;
+  @CP(222) : 1109.5, 2919.5;
+  @CP(223) : 1109.5, 2939.5;
+  @CP(224) : 1109.5, 2959.5;
+  @CP(225) : 1109.5, 2979.5;
+  @CP(226) : 1109.5, 2999.5;
+  @CP(227) : 1109.5, 3019.5;
+  @CP(228) : 1109.5, 3039.5;
+  @CP(9) : 1119.5, 3239.5;
+  @CP(164) : 779.5, 2399.5;
+  @CP(178) : 799.5, 1739.5;
+  @CP(240) : 799.5, 1799.5;
+  @CP(241) : 799.5, 1859.5;
+
+  @G(434) :
+     @L(@VF(433).o, @C(432).CLK)
+    ;
+  @G(436) :
+     @L(@C(432).Q, @VF(435).i)
+    ;
+  @G(15) :
+     @L(@VF(12).o, @C(13).IN)
+    ;
+  @G(16) :
+     @L(@C(13).NOT, @VF(14).i)
+    ;
+  @G(20) :
+     @L(@C(18).ADD, @VF(19).i)
+    ;
+  @G(21) :
+     @L(@VF(17).o, @C(18).IN1)
+    ;
+  @G(23) :
+     @L(@VF(22).o, @C(18).IN2)
+    ;
+  @G(94) :
+     @L(@C(78).MOVE, @VF(69).i)
+    ;
+  @G(95) :
+     @L(@C(80).MOVE, @VF(70).i)
+    ;
+  @G(96) :
+     @L(@C(81).MOVE, @VF(72).i)
+    ;
+  @G(97) :
+     @L(@C(82).MOVE, @VF(73).i)
+    ;
+  @G(98) :
+     @L(@C(83).MOVE, @VF(74).i)
+    ;
+  @G(99) :
+     @L(@C(84).MOVE, @VF(75).i)
+    ;
+  @G(100) :
+     @L(@C(85).MOVE, @VF(76).i)
+    ;
+  @G(101) :
+     @L(@C(86).MOVE, @VF(77).i)
+    ;
+  @G(130) :
+     @L(@C(45).OUT, @VF(47).i)
+    ;
+  @G(143) :
+     @L(@C(138).MOVE, @VF(142).i)
+    ;
+  @G(153) :
+     @L(@C(147).MOVE, @VF(149).i)
+    ;
+  @G(162) :
+     @L(@C(156).MOVE, @VF(158).i)
+    ;
+  @G(171) :
+     @L(@C(165).MOVE, @VF(167).i)
+    ;
+  @G(197) :
+     @L(@C(192).Shutdown, @C(196).IN1)
+    ;
+  @G(198) :
+     @L(@C(192).Term, @C(196).IN2)
+    ;
+  @G(200) :
+     @L(@C(196).OR, @CP(218)),
+     @L(@CP(218), @C(193).EN),
+     @L(@CP(218), @C(214).EN)
+    ;
+  @G(213) :
+     @L(@VF(212).o, @C(193).IN)
+    ;
+  @G(221) :
+     @L(@C(193).MOVE, @CP(222)),
+     @L(@CP(222), @VF(201).i),
+     @L(@CP(222), @CP(223)),
+     @L(@CP(223), @VF(205).i),
+     @L(@CP(223), @CP(224)),
+     @L(@CP(224), @VF(202).i),
+     @L(@CP(224), @CP(225)),
+     @L(@CP(225), @VF(206).i),
+     @L(@CP(225), @CP(226)),
+     @L(@CP(226), @VF(209).i),
+     @L(@CP(226), @CP(227)),
+     @L(@CP(227), @VF(207).i),
+     @L(@CP(227), @CP(228)),
+     @L(@CP(228), @VF(211).i),
+     @L(@CP(228), @VF(210).i)
+    ;
+  @G(217) :
+     @L(@VF(216).o, @C(214).IN)
+    ;
+  @G(219) :
+     @L(@C(214).MOVE, @CP(9)),
+     @L(@CP(9), @VF(215).i),
+     @L(@CP(9), @VF(220).i)
+    ;
+  @G(5) :
+     @L(@VF(2).o, @C(3).IN)
+    ;
+  @G(6) :
+     @L(@C(3).NOT, @VF(4).i)
+    ;
+  @G(68) :
+     @L(@VF(142).o, @C(59).IN)
+    ;
+  @G(79) :
+     @L(@VF(149).o, @C(61).IN)
+    ;
+  @G(87) :
+     @L(@VF(158).o, @C(60).IN)
+    ;
+  @G(88) :
+     @L(@VF(167).o, @C(62).IN)
+    ;
+  @G(89) :
+     @L(@VF(176).o, @C(63).IN)
+    ;
+  @G(90) :
+     @L(@VF(185).o, @C(65).IN)
+    ;
+  @G(91) :
+     @L(@VF(194).o, @C(64).IN)
+    ;
+  @G(92) :
+     @L(@VF(203).o, @C(66).IN)
+    ;
+  @G(93) :
+     @L(@C(66).OUT, @VF(58).i)
+    ;
+  @G(122) :
+     @L(@C(64).OUT, @VF(57).i)
+    ;
+  @G(123) :
+     @L(@C(65).OUT, @VF(56).i)
+    ;
+  @G(124) :
+     @L(@C(63).OUT, @VF(55).i)
+    ;
+  @G(125) :
+     @L(@C(62).OUT, @VF(54).i)
+    ;
+  @G(126) :
+     @L(@C(60).OUT, @VF(53).i)
+    ;
+  @G(127) :
+     @L(@C(61).OUT, @VF(52).i)
+    ;
+  @G(131) :
+     @L(@C(59).OUT, @VF(51).i)
+    ;
+  @G(132) :
+     @L(@VF(137).o, @C(138).IN)
+    ;
+  @G(133) :
+     @L(@VF(157).o, @C(156).IN)
+    ;
+  @G(134) :
+     @L(@VF(148).o, @C(147).IN)
+    ;
+  @G(135) :
+     @L(@VF(166).o, @C(165).IN)
+    ;
+  @G(38) :
+     @L(@VF(27).o, @C(102).IN)
+    ;
+  @G(39) :
+     @L(@VF(29).o, @C(103).IN)
+    ;
+  @G(40) :
+     @L(@VF(30).o, @C(104).IN)
+    ;
+  @G(49) :
+     @L(@VF(31).o, @C(105).IN)
+    ;
+  @G(50) :
+     @L(@VF(32).o, @C(28).IN)
+    ;
+  @G(107) :
+     @L(@VF(33).o, @C(36).IN)
+    ;
+  @G(108) :
+     @L(@VF(34).o, @C(37).IN)
+    ;
+  @G(109) :
+     @L(@VF(35).o, @C(106).IN)
+    ;
+  @G(110) :
+     @L(@C(102).OUT, @C(78).IN)
+    ;
+  @G(111) :
+     @L(@C(103).OUT, @C(80).IN)
+    ;
+  @G(113) :
+     @L(@C(104).OUT, @C(81).IN)
+    ;
+  @G(118) :
+     @L(@C(105).OUT, @C(82).IN)
+    ;
+  @G(119) :
+     @L(@C(28).OUT, @C(83).IN)
+    ;
+  @G(120) :
+     @L(@C(36).OUT, @C(84).IN)
+    ;
+  @G(121) :
+     @L(@C(37).OUT, @C(85).IN)
+    ;
+  @G(139) :
+     @L(@C(106).OUT, @C(86).IN)
+    ;
+  @G(140) :
+     @L(@VF(69).o, @VF(112).i)
+    ;
+  @G(141) :
+     @L(@VF(70).o, @VF(114).i)
+    ;
+  @G(144) :
+     @L(@VF(72).o, @VF(115).i)
+    ;
+  @G(145) :
+     @L(@VF(73).o, @VF(116).i)
+    ;
+  @G(146) :
+     @L(@VF(77).o, @VF(117).i)
+    ;
+  @G(26) :
+     @L(@C(25).OUT, @VF(8).i)
+    ;
+  @G(44) :
+     @L(@C(24).OUT, @VF(11).i)
+    ;
+  @G(150) :
+     @L(@C(129).MOVE, @C(25).IN)
+    ;
+  @G(151) :
+     @L(@VF(46).o, @C(129).IN)
+    ;
+  @G(152) :
+     @L(@C(128).MOVE, @C(24).IN)
+    ;
+  @G(155) :
+     @L(@VF(154).o, @C(128).IN)
+    ;
+  @G(160) :
+     @L(@C(192).Run, @CONN(159).i)
+    ;
+  @G(163) :
+     @L(@CONT(161).o, @CP(164)),
+     @L(@CP(164), @C(129).EN),
+     @L(@CP(164), @C(128).EN)
+    ;
+  @G(43) :
+     @L(@VF(42).o, @C(169).IN)
+    ;
+  @G(170) :
+     @L(@C(169).MOVE, @C(45).IN)
+    ;
+  @G(172) :
+     @L(@CONT(168).o, @CP(178)),
+     @L(@CP(178), @C(169).EN),
+     @L(@CP(178), @CP(240)),
+     @L(@CP(240), @C(174).EN),
+     @L(@CP(240), @CP(241)),
+     @L(@CP(241), @C(188).EN),
+     @L(@CP(241), @C(232).EN)
+    ;
+  @G(182) :
+     @L(@VF(175).o, @C(174).IN)
+    ;
+  @G(186) :
+     @L(@C(174).MOVE, @C(173).IN)
+    ;
+  @G(187) :
+     @L(@C(173).OUT, @VF(177).i)
+    ;
+  @G(199) :
+     @L(@C(188).MOVE, @C(183).IN)
+    ;
+  @G(229) :
+     @L(@VF(190).o, @C(188).IN)
+    ;
+  @G(238) :
+     @L(@C(232).MOVE, @C(231).IN)
+    ;
+  @G(239) :
+     @L(@VF(234).o, @C(232).IN)
+    ;
+  @G(189) :
+     @L(@C(231).OUT, @VF(244).i)
+    ;
+  @G(191) :
+     @L(@C(183).OUT, @VF(242).i)
+    ;
+  @G(251) :
+     @L(@VF(47).o, @C(250).IN)
+    ;
+  @G(252) :
+     @L(@C(250).TO_REAL, @VF(249).i)
+    ;
+  @G(255) :
+     @L(@VF(253).o, @C(254).IN)
+    ;
+  @G(256) :
+     @L(@C(254).TO_INT, @VF(46).i)
+    ;
+  @G(521) :
+     @L(@C(514).SysTaskActualCycleTime, @VF(516).i)
+    ;
+  @G(522) :
+     @L(@C(515).SysTaskCycleTime, @VF(517).i)
+    ;
+END_PROGRAM

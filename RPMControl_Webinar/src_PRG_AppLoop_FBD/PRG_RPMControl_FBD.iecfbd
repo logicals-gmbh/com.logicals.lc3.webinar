@@ -1,0 +1,2007 @@
+PROGRAM PRG_RPMControl_FBD
+  VAR
+    lr_PV_PT1_Out : REAL;
+    lr_PV_PT1_T1 : REAL := 0.2;
+    lr_PID_Out : REAL;
+    lx_Test : BOOL;
+    lx_RPM0_V : BOOL;
+    lx_RPM1_V : BOOL;
+    lx_RPM3_V : BOOL;
+    lx_RPM2_V : BOOL;
+    lx_ResetRPM_V : BOOL;
+    lx_RPM0 : BOOL;
+    lx_RPM1 : BOOL;
+    lx_RPM2 : BOOL;
+    lx_RPM3 : BOOL;
+    lstruc_PID_In : DT_PID_In;
+    lstruc_PID_Out : DT_PID_Out;
+    lr_PID_In : REAL;
+    R_TRIG1 : R_TRIG;
+    lt_ActCycleTime : TIME;
+    lt_CycleTime : TIME;
+    lx_InitTest : BOOL;
+    lui_CycleCountInit : UINT;
+    lr_SP_Val : REAL;
+    lir_RampIn : REAL;
+    lir_RampUpMax : REAL := 100.0;
+    lir_RampDnMax : REAL := 0.0;
+    lir_Ramp_Y : REAL;
+    lir_Ramp_XSum : REAL;
+    lir_RampSpdUp : REAL := 1.0;
+    lir_RampSpdDn : REAL := 2.0;
+    lx_RampStp : BOOL := TRUE;
+    lx_Ramp : BOOL;
+    lui_MinData_Struc : UINT := 1;
+    lui_Max_Data_Struc : UINT := 1000;
+    lui_IdxData_Struc : UINT := 0;
+    lx_RPM4 : BOOL;
+    lx_RPM4_V : BOOL;
+    lx_RampAuto : BOOL;
+    lx_SwitchPID : BOOL;
+    SP_MotorAnalogScale : FB_MotorAnalogScale_ST;
+    SP_MotorControl_PT1 : FB_MotorControl_PT1_ST;
+    FORCEMRK4 : FORCEMRK;
+    PV_MotorAnalogScale : FB_MotorAnalogScale_ST;
+    FORCEMRK3 : FORCEMRK;
+    PV_MotorControl_PT1 : FB_MotorControl_PT1_ST;
+    lr_SP_PT1_Out : REAL;
+    lr_SP_PT1_T1 : REAL := 0.2;
+    Init_R_TRIG : R_TRIG;
+    Init_R_TRIG2 : R_TRIG;
+    Init_R_TRIG1 : R_TRIG;
+    Init_R_TRIG6 : R_TRIG;
+    Init_R_TRIG5 : R_TRIG;
+    Init_R_TRIG4 : R_TRIG;
+    Init_R_TRIG3 : R_TRIG;
+    Init_R_TRIG7 : R_TRIG;
+    RS7 : RS;
+    RS6 : RS;
+    RS5 : RS;
+    RS1 : RS;
+    RS4 : RS;
+    RS2 : RS;
+    RS3 : RS;
+    RS8 : RS;
+    MotorControl_PID : FB_MotorControl_PID_ST;
+    Y_MotorAnalogScale : FB_MotorAnalogScale_ST;
+    FORCEMRK2 : FORCEMRK;
+    lr_Inp : REAL;
+    lr_TI : REAL := 50.0;
+    lx_Ld : BOOL;
+    lx_Lu : BOOL;
+    lr_Kv : REAL;
+    lr_T1 : REAL;
+    lr_P : REAL;
+    lr_Out : REAL;
+    lr_I : REAL;
+    lr_Lvu : REAL := 100.0;
+    lr_YManual : REAL;
+    lr_D : REAL;
+    lr_Lvd : REAL := -100.0;
+    lr_Kp : REAL := 0.1;
+    R_TRIG2 : R_TRIG;
+    R_TRIG3 : R_TRIG;
+    Init_R_TRIG8 : R_TRIG;
+    RS9 : RS;
+    RS10 : RS;
+    Init_R_TRIG9 : R_TRIG;
+    lx_ManualMode : BOOL;
+    lx_ManualTest : BOOL := TRUE;
+    lr_ManualTestVal : REAL := 0.0;
+    com_logicals_Basic_Flash_FB_lc_Flash_2Hz_FBD1 : com.logicals.Basic.Flash.FB_lc_Flash_2Hz_FBD;
+  END_VAR
+  VAR
+    lr_PV_In : REAL;
+    lr_PV_MaxInVal : REAL := 10000.0;
+    lr_PV_MinInVal : REAL := 0.0;
+    lr_PV_MaxPhysVal : REAL := 100.0;
+    lr_PV_MinPhysVal : REAL := 0.0;
+    lr_PV_OffsetPhysVal : REAL := 0.0;
+    lx_PV_InValError : BOOL;
+    lr_PV_OutPhysVal : REAL;
+    lx_PV_PhysValError : BOOL;
+  END_VAR
+  VAR
+    lr_SP_In : REAL;
+    lr_SP_MaxInVal : REAL := 10000.0;
+    lr_SP_MinInVal : REAL := 0.0;
+    lr_SP_MaxPhysVal : REAL := 100.0;
+    lr_SP_MinPhysVal : REAL := 0.0;
+    lr_SP_OffsetPhysVal : REAL := 0.0;
+    lx_SP_InValError : BOOL;
+    lr_SP_OutPhysVal : REAL;
+    lx_SP_PhysValError : BOOL;
+  END_VAR
+  VAR
+    lr_Y_In : REAL;
+    lr_Y_MaxInVal : REAL := 100.0;
+    lr_Y_MinInVal : REAL := 0.0;
+    lr_Y_MaxPhysVal : REAL := 10000.0;
+    lr_Y_MinPhysVal : REAL := 0.0;
+    lr_Y_OffsetPhysVal : REAL := 0.0;
+    lx_Y_InValError : BOOL;
+    lr_Y_OutPhysVal : REAL;
+    lx_Y_PhysValError : BOOL;
+  END_VAR
+  VAR
+    lx_Auto : BOOL;
+  END_VAR
+  VAR
+    lr_Test : REAL;
+  END_VAR
+  VAR
+    lx_CycleInit : BOOL;
+    lx_CyclePulse : BOOL;
+    lui_CycleCount : UINT;
+  END_VAR
+  VAR_EXTERNAL
+    gr_RPMSetVal : REAL;
+    gr_RPMActVal : REAL;
+    gr_RPMDevVal : REAL;
+    gr_RPMOutVal : REAL;
+  END_VAR
+  VAR_EXTERNAL
+    gstruc_PID_In : DT_PID_In;
+    gstruc_PID_Out : DT_PID_Out;
+    gr_PV_PT1_T1 : REAL;
+    gr_PV_In : REAL;
+    gr_PV_MaxInVal : REAL;
+    gr_PV_MinInVal : REAL;
+    gr_PV_MaxPhysVal : REAL;
+    gr_PV_MinPhysVal : REAL;
+    gr_PV_OffsetPhysVal : REAL;
+    gx_PV_InValError : BOOL;
+    gr_PV_OutPhysVal : REAL;
+    gx_PV_PhysValError : BOOL;
+    gr_SP_In : REAL;
+    gr_SP_MaxInVal : REAL;
+    gr_SP_MinInVal : REAL;
+    gr_SP_MaxPhysVal : REAL;
+    gr_SP_MinPhysVal : REAL;
+    gr_SP_OffsetPhysVal : REAL;
+    gx_SP_InValError : BOOL;
+    gr_SP_OutPhysVal : REAL;
+    gx_SP_PhysValError : BOOL;
+    gr_Y_In : REAL;
+    gr_Y_MaxInVal : REAL;
+    gr_Y_MinInVal : REAL;
+    gr_Y_MaxPhysVal : REAL;
+    gr_Y_MinPhysVal : REAL;
+    gr_Y_OffsetPhysVal : REAL;
+    gx_Y_InValError : BOOL;
+    gr_Y_OutPhysVal : REAL;
+    gx_Y_PhysValError : BOOL;
+    gr_Manual : REAL;
+    gui_CycleCountAppLogic : UINT;
+    gui_CycleCountAppLoop : UINT;
+    gui_CycleCountAppTimer : UINT;
+    gx_SetControlPar : BOOL;
+    gx_ResetRPM_V : BOOL;
+    gx_SetControlParState : UINT;
+    gx_ModeRPM4 : BOOL;
+    gx_RPM4_V : BOOL;
+    gx_RPM4 : BOOL;
+    gstruc_Action : DT_Action;
+    gx_Ramp_Auto : BOOL;
+    gui_Ramp_XSumChg : UINT;
+    gx_ModeManual : BOOL;
+  END_VAR
+  VAR_EXTERNAL
+    gr_PV : REAL;
+    gr_SP : REAL;
+    gr_Y : REAL;
+    gx_RPM0 : BOOL;
+    gx_RPM1 : BOOL;
+    gx_RPM2 : BOOL;
+    gx_ModeRPM0 : BOOL;
+    gx_ModeRPM1 : BOOL;
+    gx_ModeRPM2 : BOOL;
+    gr_PV_Scale : REAL;
+    gr_SP_Scale : REAL;
+    gr_Y_Scale : REAL;
+    gx_RPM3 : BOOL;
+    gx_ModeRPM3 : BOOL;
+    gx_RPM0_V : BOOL;
+    gx_RPM1_V : BOOL;
+    gx_RPM2_V : BOOL;
+    gx_RPM3_V : BOOL;
+    gx_ModeRamp_V : BOOL;
+    gx_ResetRPM : BOOL;
+  END_VAR
+  VAR_EXTERNAL
+    gr_PID_TI : REAL;
+    gr_PID_Kv : REAL;
+    gr_PID_T1 : REAL;
+    gr_PID_Lvu : REAL;
+    gr_PID_Lvd : REAL;
+    gr_PID_Kp : REAL;
+    gx_PID_Lu : BOOL;
+    gx_PID_Ld : BOOL;
+    gr_PID_Out : REAL;
+    gr_PID_P : REAL;
+    gr_PID_I : REAL;
+    gr_PID_D : REAL;
+    gx_PID_Auto : BOOL;
+    gr_PID_YManual : REAL;
+  END_VAR
+  VAR_EXTERNAL
+    gr_PID_Set_TI : REAL;
+    gr_PID_Set_Kv : REAL;
+    gr_PID_Set_T1 : REAL;
+    gr_PID_Set_Lvu : REAL;
+    gr_PID_Set_Lvd : REAL;
+    gr_PID_Set_Kp : REAL;
+  END_VAR
+  VAR_EXTERNAL
+    gr_Ramp_OPC : USINT;
+    gr_Ramp_Y : REAL;
+    gr_Ramp_SV : REAL;
+    gr_Ramp_XSum : REAL;
+    gr_Ramp_SpdUp : REAL;
+    gr_Ramp_SpdDn : REAL;
+    gr_Ramp_UpMax : REAL;
+    gr_Ramp_DnMax : REAL;
+    gx_Ramp_Stp : BOOL;
+    gx_Ramp_QU : BOOL;
+    gx_Ramp_QE : BOOL;
+    gx_Ramp_QL : BOOL;
+    gr_Ramp_In : REAL;
+    gx_Ramp_St : WORD;
+    gx_Ramp_Exc : USINT;
+  END_VAR
+  VAR_EXTERNAL
+    gr_Ramp_Set_OPC : USINT;
+    gr_Ramp_Set_SV : REAL;
+    gr_Ramp_Set_SpdUp : REAL;
+    gr_Ramp_Set_SpdDn : REAL;
+    gr_Ramp_Set_UpMax : REAL;
+    gr_Ramp_Set_DnMax : REAL;
+    gx_Ramp_Set_Stp : BOOL;
+  END_VAR
+
+  (*
+
+    // Network 1:
+    SysTaskActualCycleTime(SysTaskActualCycleTime => lt_ActCycleTime);
+
+    // Network 2:
+    SysTaskCycleTime(SysTaskCycleTime => lt_CycleTime);
+
+    // Network 3:
+    FORCEMRK3(IN := gr_PV);
+    PV_MotorControl_PT1(vir_x := FORCEMRK3.OUT, vir_T1 := lr_PV_PT1_T1, vor_y => lr_PV_PT1_Out);
+
+    // Network 4:
+    lr_PV_In := lr_PV_PT1_Out;
+    PV_MotorAnalogScale(vir_In := lr_PV_In, vir_MaxInVal := lr_PV_MaxInVal, vir_MinInVal := lr_PV_MinInVal, vir_MaxPhysVal := lr_PV_MaxPhysVal, vir_MinPhysVal := lr_PV_MinPhysVal, vir_OffsetPhysVal := lr_PV_OffsetPhysVal, vox_InValError => lx_PV_InValError, vor_OutPhysVal => lr_PV_OutPhysVal, vox_PhysValError => lx_PV_PhysValError);
+    gr_PV_Scale := lr_PV_OutPhysVal;
+
+    // Network 5:
+    FORCEMRK4(IN := gr_SP);
+    SP_MotorControl_PT1(vir_x := FORCEMRK4.OUT, vir_T1 := lr_SP_PT1_T1, vor_y => lr_SP_PT1_Out);
+
+    // Network 6:
+    lr_SP_In := lr_SP_PT1_Out;
+    SP_MotorAnalogScale(vir_In := lr_SP_In, vir_MaxInVal := lr_SP_MaxInVal, vir_MinInVal := lr_SP_MinInVal, vir_MaxPhysVal := lr_SP_MaxPhysVal, vir_MinPhysVal := lr_SP_MinPhysVal, vir_OffsetPhysVal := lr_SP_OffsetPhysVal, vox_InValError => lx_SP_InValError, vor_OutPhysVal => lr_SP_OutPhysVal, vox_PhysValError => lx_SP_PhysValError);
+    gr_SP_Scale := lr_SP_OutPhysVal;
+
+    // Network 7:
+    Init_R_TRIG4(CLK := gx_RPM0);
+    Init_R_TRIG6(CLK := gx_RPM1);
+    Init_R_TRIG5(CLK := gx_RPM2);
+    Init_R_TRIG7(CLK := gx_RPM3);
+    Init_R_TRIG8(CLK := gx_RPM4);
+    OR(IN1 := lx_ResetRPM_V, IN2 := gx_ResetRPM, IN3 := gx_ResetRPM_V, OR => @C(377).OR);
+    RS5(S := Init_R_TRIG4.Q, R1 := @C(377).OR, Q1 => lx_RPM0);
+    RS6(S := Init_R_TRIG6.Q, R1 := @C(377).OR, Q1 => lx_RPM1);
+    RS7(S := Init_R_TRIG5.Q, R1 := @C(377).OR, Q1 => lx_RPM2);
+    RS8(S := Init_R_TRIG7.Q, R1 := @C(377).OR, Q1 => lx_RPM3);
+    RS9(S := Init_R_TRIG8.Q, R1 := @C(377).OR, Q1 => lx_RPM4);
+
+    // Network 8:
+    MOVE(IN := lr_PV_OutPhysVal, MOVE => gr_RPMActVal);
+
+    // Network 9:
+    R_TRIG1(CLK := TRUE, Q => lx_CycleInit);
+    Trace(EN := lx_CycleInit, Msg := 'RPMControl_Init');
+    R_TRIG2(CLK := lx_InitTest);
+    OR(IN1 := lx_CycleInit, IN2 := R_TRIG2.Q, OR => @C(569).OR);
+    MOVE(EN := @C(569).OR, IN := gr_PID_TI, MOVE => (lstruc_PID_In.r_TI, gr_PID_Set_TI));
+    MOVE(EN := @C(569).OR, IN := gr_PID_Kv, MOVE => (lstruc_PID_In.r_Kv, gr_PID_Set_Kv));
+    MOVE(EN := @C(569).OR, IN := gr_PID_T1, MOVE => (lstruc_PID_In.r_T1, gr_PID_Set_T1));
+    MOVE(EN := @C(569).OR, IN := gr_PID_Lvu, MOVE => (lstruc_PID_In.r_Lvu, gr_PID_Set_Lvu));
+    MOVE(EN := @C(569).OR, IN := gr_PID_Lvd, MOVE => (lstruc_PID_In.r_Lvd, gr_PID_Set_Lvd));
+    MOVE(EN := @C(569).OR, IN := gr_PID_Kp, MOVE => (lstruc_PID_In.r_Kp, gr_PID_Set_Kp));
+    MOVE(EN := @C(569).OR, IN := gr_Ramp_SpdUp, MOVE => gr_Ramp_Set_SpdUp);
+    MOVE(EN := @C(569).OR, IN := gr_Ramp_SpdDn, MOVE => gr_Ramp_Set_SpdDn);
+    MOVE(EN := @C(569).OR, IN := gr_Ramp_SV, MOVE => gr_Ramp_Set_SV);
+    MOVE(EN := @C(569).OR, IN := gr_Ramp_UpMax, MOVE => gr_Ramp_Set_UpMax);
+    MOVE(EN := @C(569).OR, IN := gr_Ramp_DnMax, MOVE => gr_Ramp_Set_DnMax);
+    MOVE(EN := lx_CycleInit, IN := lstruc_PID_In, MOVE => gstruc_PID_In);
+    MOVE(EN := @C(569).OR, IN := gr_Ramp_Set_OPC, MOVE => gr_Ramp_Set_OPC);
+    ADD(EN := lx_CycleInit, IN1 := lui_CycleCountInit, IN2 := 1, ADD => lui_CycleCountInit);
+
+    // Network 10:
+    R_TRIG3(CLK := gx_SetControlPar);
+    MOVE(EN := R_TRIG3.Q, IN := gr_PID_Set_TI, MOVE => (lstruc_PID_In.r_TI, gr_PID_TI));
+    MOVE(EN := R_TRIG3.Q, IN := gr_PID_Set_Kv, MOVE => (lstruc_PID_In.r_Kv, gr_PID_Kv));
+    MOVE(EN := R_TRIG3.Q, IN := gr_PID_Set_T1, MOVE => (lstruc_PID_In.r_T1, gr_PID_T1));
+    MOVE(EN := R_TRIG3.Q, IN := gr_PID_Set_Lvu, MOVE => (lstruc_PID_In.r_Lvu, gr_PID_Lvu));
+    MOVE(EN := R_TRIG3.Q, IN := gr_PID_Set_Lvd, MOVE => (lstruc_PID_In.r_Lvd, gr_PID_Lvd));
+    MOVE(EN := R_TRIG3.Q, IN := gr_PID_Set_Kp, MOVE => (lstruc_PID_In.r_Kp, gr_PID_Kp));
+    MOVE(EN := R_TRIG3.Q, IN := gr_Ramp_Set_OPC, MOVE => gr_Ramp_OPC);
+    MOVE(EN := R_TRIG3.Q, IN := gr_Ramp_Set_SpdUp, MOVE => gr_Ramp_SpdUp);
+    MOVE(EN := R_TRIG3.Q, IN := gr_Ramp_Set_SpdDn, MOVE => gr_Ramp_SpdDn);
+    MOVE(EN := R_TRIG3.Q, IN := gr_Ramp_Set_SV, MOVE => gr_Ramp_SV);
+    MOVE(EN := R_TRIG3.Q, IN := gr_Ramp_Set_UpMax, MOVE => gr_Ramp_UpMax);
+    MOVE(EN := R_TRIG3.Q, IN := gr_Ramp_Set_DnMax, MOVE => gr_Ramp_DnMax);
+    MOVE(EN := R_TRIG3.Q, IN := gx_Ramp_Set_Stp, MOVE => gx_Ramp_Stp);
+    MOVE(EN := R_TRIG3.Q, IN := lstruc_PID_In, MOVE => gstruc_PID_In);
+    ADD(EN := R_TRIG3.Q, IN1 := gx_SetControlParState, IN2 := 1, ADD => gx_SetControlParState);
+
+    // Network 11:
+    Init_R_TRIG(CLK := gx_RPM0_V);
+    OR(IN1 := Init_R_TRIG.Q, IN2 := lx_CycleInit, OR => @C(326).OR);
+    Init_R_TRIG1(CLK := gx_RPM1_V);
+    Init_R_TRIG2(CLK := gx_RPM2_V);
+    Init_R_TRIG3(CLK := gx_RPM3_V);
+    Init_R_TRIG9(CLK := gx_RPM4_V);
+    OR(IN1 := lx_ResetRPM_V, IN2 := gx_ResetRPM_V, IN3 := gx_ResetRPM, OR => @C(343).OR);
+    RS1(S := @C(326).OR, R1 := @C(343).OR, Q1 => lx_RPM0_V);
+    RS2(S := Init_R_TRIG1.Q, R1 := @C(343).OR, Q1 => lx_RPM1_V);
+    RS3(S := Init_R_TRIG2.Q, R1 := @C(343).OR, Q1 => lx_RPM2_V);
+    RS4(S := Init_R_TRIG3.Q, R1 := @C(343).OR, Q1 => lx_RPM3_V);
+    RS10(S := Init_R_TRIG9.Q, R1 := @C(343).OR, Q1 => lx_RPM4_V);
+
+    // Network 12:
+    OR(IN1 := lx_RPM0, IN2 := lx_RPM0_V, OR => @C(240).OR);
+    NOT(IN := @C(240).OR, NOT => @C(194).NOT);
+    OR(IN1 := lx_RPM1, IN2 := lx_RPM1_V, OR => @C(295).OR);
+    NOT(IN := @C(295).OR, NOT => @C(459).NOT);
+    NOT(IN := @C(240).OR, NOT => @C(198).NOT);
+    NOT(IN := @C(295).OR, NOT => @C(454).NOT);
+    OR(IN1 := lx_RPM2, IN2 := lx_RPM2_V, OR => @C(298).OR);
+    NOT(IN := @C(298).OR, NOT => @C(461).NOT);
+    NOT(IN := @C(298).OR, NOT => @C(464).NOT);
+    NOT(IN := @C(240).OR, NOT => @C(213).NOT);
+    NOT(IN := @C(295).OR, NOT => @C(246).NOT);
+    NOT(IN := @C(298).OR, NOT => @C(247).NOT);
+    OR(IN1 := lx_RPM3, IN2 := lx_RPM3_V, OR => @C(301).OR);
+    NOT(IN := @C(301).OR, NOT => @C(468).NOT);
+    NOT(IN := @C(301).OR, NOT => @C(470).NOT);
+    NOT(IN := @C(301).OR, NOT => @C(455).NOT);
+    NOT(IN := @C(240).OR, NOT => @C(488).NOT);
+    NOT(IN := @C(295).OR, NOT => @C(489).NOT);
+    NOT(IN := @C(298).OR, NOT => @C(490).NOT);
+    NOT(IN := @C(301).OR, NOT => @C(491).NOT);
+    OR(IN1 := lx_RPM4, IN2 := lx_RPM4_V, OR => @C(252).OR);
+    NOT(IN := @C(252).OR, NOT => @C(469).NOT);
+    AND(IN1 := @C(240).OR, IN2 := @C(459).NOT, IN3 := @C(461).NOT, IN4 := @C(468).NOT, IN5 := @C(469).NOT, AND => gx_ModeRPM0);
+    NOT(IN := @C(252).OR, NOT => @C(475).NOT);
+    AND(IN1 := @C(194).NOT, IN2 := @C(295).OR, IN3 := @C(464).NOT, IN4 := @C(470).NOT, IN5 := @C(475).NOT, AND => gx_ModeRPM1);
+    NOT(IN := @C(252).OR, NOT => @C(457).NOT);
+    AND(IN1 := @C(198).NOT, IN2 := @C(454).NOT, IN3 := @C(298).OR, IN4 := @C(455).NOT, IN5 := @C(457).NOT, AND => gx_ModeRPM2);
+    NOT(IN := @C(252).OR, NOT => @C(451).NOT);
+    AND(IN1 := @C(213).NOT, IN2 := @C(246).NOT, IN3 := @C(247).NOT, IN4 := @C(301).OR, IN5 := @C(451).NOT, AND => gx_ModeRPM3);
+    AND(IN1 := @C(488).NOT, IN2 := @C(489).NOT, IN3 := @C(490).NOT, IN4 := @C(491).NOT, IN5 := @C(252).OR, AND => gx_ModeRPM4);
+    OR(IN1 := gx_ModeRPM1, IN2 := gx_ModeRPM2, IN3 := gx_ModeRPM3, IN4 := gx_ModeRPM4, IN5 := lx_Test, OR => lx_Auto);
+
+    // Network 13:
+    NOT(IN := lx_Test, NOT => @C(234).NOT);
+    AND(IN1 := gx_ModeRPM0, IN2 := @C(234).NOT, AND => @C(224).AND);
+    MOVE(EN := @C(224).AND, IN := 0.0, MOVE => lr_Test);
+    NOT(IN := lx_Test, NOT => @C(266).NOT);
+    AND(IN1 := gx_ModeRPM1, IN2 := @C(266).NOT, AND => @C(272).AND);
+    MOVE(EN := @C(272).AND, IN := 35.0, MOVE => lr_Test);
+    NOT(IN := lx_Test, NOT => @C(267).NOT);
+    AND(IN1 := gx_ModeRPM2, IN2 := @C(267).NOT, AND => @C(273).AND);
+    MOVE(EN := @C(273).AND, IN := 70.0, MOVE => lr_Test);
+    NOT(IN := lx_Test, NOT => @C(268).NOT);
+    AND(IN1 := gx_ModeRPM3, IN2 := @C(268).NOT, AND => @C(274).AND);
+    MOVE(EN := @C(274).AND, IN := lr_SP_OutPhysVal, MOVE => lr_Test);
+    NOT(IN := lx_Test, NOT => @C(513).NOT);
+    AND(IN1 := gx_ModeRPM4, IN2 := @C(513).NOT, AND => @C(588).AND);
+    MOVE(EN := @C(588).AND, IN := gstruc_Action.rSP, MOVE => lr_Test);
+    NOT(IN := gx_ModeRPM0, NOT => @C(605).NOT);
+    NOT(IN := gx_ModeRPM1, NOT => @C(606).NOT);
+    NOT(IN := gx_ModeRPM2, NOT => @C(607).NOT);
+    NOT(IN := gx_ModeRPM3, NOT => @C(608).NOT);
+    NOT(IN := gx_ModeRPM4, NOT => @C(609).NOT);
+    AND(IN1 := @C(605).NOT, IN2 := @C(606).NOT, IN3 := @C(607).NOT, IN4 := @C(608).NOT, IN5 := @C(609).NOT, AND => (@C(602).AND, lx_ManualMode));
+    MOVE(EN := @C(602).AND, IN := gr_Manual, MOVE => @C(622).MOVE);
+    SEL(G := lx_ManualTest, IN0 := lr_ManualTestVal, IN1 := @C(622).MOVE, SEL => lr_YManual);
+
+    // Network 14:
+    com_logicals_Basic_Flash_FB_lc_Flash_2Hz_FBD1();
+    AND(IN1 := lx_ManualMode, IN2 := com_logicals_Basic_Flash_FB_lc_Flash_2Hz_FBD1.vox_Out, AND => gx_ModeManual);
+
+    // Network 15:
+    SUB(IN1 := lr_Test, IN2 := lr_PV_OutPhysVal, SUB => lr_Inp);
+
+    // Network 16:
+    MotorControl_PID(vir_Inp := lr_Inp, vir_TI := lr_TI, vir_Kv := lr_Kv, vir_T1 := lr_T1, vix_Auto := lx_Auto, vir_YManual := lr_YManual, vir_Lvu := lr_Lvu, vir_Lvd := lr_Lvd, vir_Kp := lr_Kp, vox_Lu => lx_Lu, vox_Ld => lx_Ld, vor_Out => lr_Out, vor_P => lr_P, vor_I => lr_I, vor_D => lr_D);
+
+    // Network 17:
+    MOVE(IN := lr_Out, MOVE => lr_Y_In);
+    gr_Y_Scale := lr_Y_In;
+
+    // Network 18:
+    Y_MotorAnalogScale(vir_In := lr_Y_In, vir_MaxInVal := lr_Y_MaxInVal, vir_MinInVal := lr_Y_MinInVal, vir_MaxPhysVal := lr_Y_MaxPhysVal, vir_MinPhysVal := lr_Y_MinPhysVal, vir_OffsetPhysVal := lr_Y_OffsetPhysVal, vox_InValError => lx_Y_InValError, vor_OutPhysVal => lr_Y_OutPhysVal, vox_PhysValError => lx_Y_PhysValError);
+
+    // Network 19:
+    MOVE(IN := lr_Y_OutPhysVal, MOVE => @C(135).MOVE);
+    FORCEMRK2(IN := @C(135).MOVE, OUT => gr_Y);
+
+    // Network 20:
+    MOVE(IN := lr_Test, MOVE => gr_RPMSetVal);
+
+    // Network 21:
+    MOVE(IN := lr_Inp, MOVE => gr_RPMDevVal);
+
+    // Network 22:
+    MOVE(IN := lr_Out, MOVE => gr_RPMOutVal);
+
+    // Network 23:
+    NOT(IN := lx_CyclePulse, NOT => lx_CyclePulse);
+
+    // Network 24:
+    NOT(IN := lx_CyclePulse, NOT => lx_CyclePulse);
+
+    // Network 25:
+    ADD(IN1 := lui_CycleCount, IN2 := 1, ADD => (lui_CycleCount, gui_CycleCountAppLoop));
+
+    // Network 26:
+    ADD(IN1 := lui_CycleCount, IN2 := 1, ADD => lui_CycleCount);
+
+  *)
+
+  @CF(10) : @R(820.0, -3450.0, 490.0, 39.0), @T("Initialisierungsmerker"), @POU;
+  @VF(12) : @E(lx_CyclePulse), @R(820.0, -3060.0, 140.0, 19.0);
+  @C(13) : @F(NOT), @R(980.0, -3060.0, 60.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(NOT), @R(9.5));
+  @VF(14) : @E(lx_CyclePulse), @R(1070.0, -3060.0, 140.0, 19.0);
+  @VF(17) : @E(lui_CycleCount), @R(820.0, -3030.0, 140.0, 19.0);
+  @C(18) : @F(ADD), @R(1000.0, -3030.0, 40.0, 38.0), UINT, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(ADD), @R(9.5));
+  @VF(19) : @E(lui_CycleCount), @R(1070.0, -3030.0, 140.0, 19.0);
+  @VF(22) : @E(1), @R(820.0, -3010.0, 140.0, 19.0), UINT;
+  @OLT(67) : @R(1310.0, -3050.0, 80.0, 19.0), @S(19);
+  @OLT(71) : @R(690.0, -3040.0, 80.0, 19.0), @S(17);
+  @CF(393) : @R(70.0, -3970.0, 790.0, 499.0), @T("Motordrehzahl Regelung mit logi.CAD 3$N$NBeschreibung$NF$fcr einen (Klein-)Motor soll die Drehzahl in % einstellbar und geregelt werden$NDer Motor hat einen Leistungssteller und einen (Klein-)Tacho als R$fcckmeldesignal$NEin Poti dient der Sollwertvorgabe in % (gx_RPM3 = TRUE)$N$NDie Betriebsart wird mit 4 Schalter eingestellt (1Aus4)$Ngx_RPM0 = Aus (Obere Reihe links)$Ngx_RPM1 = 25% (SetPoint)$N$NSetPointvorgabe (Untere Reihe von links nach rechts)$Ngx_RPM2 = 50% (SetPoint)$Ngx_RPM3 = SP per Poti1 $N$NDie Betriebsart wird mit LEDs angezeigt.$N"), @POU;
+  @C(432) : @FB(R_TRIG1), @R(940.0, -3380.0, 140.0, 18.0), @I(@N(CLK), @L(9.5)), @O(@N(Q), @R(9.5));
+  @VF(433) : @E(TRUE), @R(750.0, -3380.0, 140.0, 19.0);
+  @VF(435) : @E(lx_CycleInit), @R(1140.0, -3380.0, 140.0, 19.0);
+  @CF(437) : @R(820.0, -3120.0, 490.0, 39.0), @T("Life-Tick"), @POU;
+  @C(514) : @F(SysTaskActualCycleTime), @R(820.0, -3240.0, 184.0, 18.0), @O(@N(SysTaskActualCycleTime), @R(9.5));
+  @C(515) : @F(SysTaskCycleTime), @R(820.0, -3170.0, 190.0, 18.0), @O(@N(SysTaskCycleTime), @R(9.5));
+  @VF(516) : @E(lt_ActCycleTime), @R(1080.0, -3240.0, 140.0, 19.0);
+  @VF(517) : @E(lt_CycleTime), @R(1080.0, -3170.0, 140.0, 19.0);
+  @OLT(518) : @R(1230.0, -3200.0, 180.0, 19.0), @S(517);
+  @OLT(519) : @R(1230.0, -3270.0, 180.0, 19.0), @S(516);
+  @CF(520) : @R(820.0, -3330.0, 490.0, 39.0), @T("Read CycleTime"), @POU;
+  @VF(441) : @E(gui_CycleCountAppLogic), @R(1070.0, -2980.0, 250.0, 19.0);
+  @VF(442) : @E(gui_CycleCountAppLoop), @R(1070.0, -2940.0, 250.0, 19.0);
+  @VF(443) : @E(gui_CycleCountAppTimer), @R(1070.0, -2900.0, 250.0, 19.0);
+  @OLT(444) : @R(1240.0, -2920.0, 80.0, 19.0), @S(443);
+  @OLT(445) : @R(1240.0, -2960.0, 80.0, 19.0), @S(442);
+  @OLT(446) : @R(1240.0, -3000.0, 80.0, 19.0), @S(441);
+  @VF(580) : @E(lui_CycleCountInit), @R(820.0, -2840.0, 210.0, 19.0);
+  @C(581) : @F(ADD), @R(1050.0, -2860.0, 40.0, 58.0), UINT, @I(@N(EN), @L(9.5)), @I(@N(IN1), @L(29.5)), @I(@N(IN2), @L(49.5)), @O(@N(ENO), @R(9.5)), @O(@N(ADD), @R(29.5));
+  @VF(583) : @E(lui_CycleCountInit), @R(1110.0, -2840.0, 210.0, 19.0);
+  @VF(585) : @E(1), @R(890.0, -2820.0, 140.0, 19.0), UINT;
+  @OLT(589) : @R(1320.0, -2860.0, 80.0, 19.0), @S(583);
+  @CONN(590) : @IT(CycleInit), @R(1350.0, -3360.0, 120.0, 19.0), BOOL;
+  @CONT(592) : @IT(CycleInit), @CONN(590), @R(530.0, -2860.0, 120.0, 19.0), BOOL;
+  @C(1084) : @F(Trace), @R(1700.0, -3380.0, 120.0, 38.0), @I(@N(EN), @L(9.5)), @I(@N(Msg), @L(29.5)), @O(@N(ENO), @R(9.5));
+  @VF(1085) : @E('RPMControl_Init'), @R(1500.0, -3360.0, 190.0, 19.0);
+  @C(3) : @FB(SP_MotorAnalogScale), instanceNameVisible, @R(760.0, -320.0, 400.0, 118.0), @I(@N(vir_In), @L(9.5)), @I(@N(vir_MaxInVal), @L(29.5)), @I(@N(vir_MinInVal), @L(49.5)), @I(@N(vir_MaxPhysVal), @L(69.5)), @I(@N(vir_MinPhysVal), @L(89.5)), @I(@N(vir_OffsetPhysVal), @L(109.5)), @O(@N(vox_InValError), @R(9.5)), @O(@N(vor_OutPhysVal), @R(29.5)), @O(@N(vox_PhysValError), @R(49.5));
+  @C(178) : @FB(SP_MotorControl_PT1), instanceNameVisible, @R(760.0, -530.0, 390.0, 58.0), @I(@N(vir_x), @L(9.5)), @I(@N(vir_T1), @L(29.5)), @O(@N(vor_y), @R(9.5));
+  @C(177) : @FB(FORCEMRK4), @R(540.0, -530.0, 120.0, 18.0), REAL, @I(@N(IN), @L(9.5)), @O(@N(OUT), @R(9.5));
+  @C(1) : @FB(PV_MotorAnalogScale), instanceNameVisible, @R(750.0, -760.0, 400.0, 118.0), @I(@N(vir_In), @L(9.5)), @I(@N(vir_MaxInVal), @L(29.5)), @I(@N(vir_MinInVal), @L(49.5)), @I(@N(vir_MaxPhysVal), @L(69.5)), @I(@N(vir_MinPhysVal), @L(89.5)), @I(@N(vir_OffsetPhysVal), @L(109.5)), @O(@N(vox_InValError), @R(9.5)), @O(@N(vor_OutPhysVal), @R(29.5)), @O(@N(vox_PhysValError), @R(49.5));
+  @C(65) : @FB(FORCEMRK3), @R(530.0, -960.0, 120.0, 18.0), REAL, @I(@N(IN), @L(9.5)), @O(@N(OUT), @R(9.5));
+  @C(169) : @FB(PV_MotorControl_PT1), instanceNameVisible, @R(750.0, -960.0, 390.0, 58.0), @I(@N(vir_x), @L(9.5)), @I(@N(vir_T1), @L(29.5)), @O(@N(vor_y), @R(9.5));
+  @C(2) : @F(ADD), @R(930.0, -1100.0, 40.0, 38.0), UINT, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(ADD), @R(9.5));
+  @C(4) : @F(NOT), @R(910.0, -1130.0, 60.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(NOT), @R(9.5));
+  @VF(55) : @E(lr_SP_OutPhysVal), @R(1250.0, -300.0, 140.0, 19.0);
+  @VF(56) : @E(lx_SP_PhysValError), @R(1250.0, -280.0, 140.0, 19.0);
+  @VF(205) : @E(gr_SP_Scale), @R(1520.0, -300.0, 140.0, 19.0);
+  @VF(54) : @E(lx_SP_InValError), @R(1250.0, -320.0, 140.0, 19.0);
+  @VF(42) : @E(lr_SP_In), @R(530.0, -320.0, 140.0, 19.0);
+  @VF(43) : @E(lr_SP_MaxInVal), @R(530.0, -300.0, 140.0, 19.0);
+  @VF(46) : @E(lr_SP_MinPhysVal), @R(530.0, -240.0, 140.0, 19.0);
+  @VF(47) : @E(lr_SP_OffsetPhysVal), @R(530.0, -220.0, 140.0, 19.0);
+  @VF(44) : @E(lr_SP_MinInVal), @R(530.0, -280.0, 140.0, 19.0);
+  @VF(45) : @E(lr_SP_MaxPhysVal), @R(530.0, -260.0, 140.0, 19.0);
+  @VF(68) : @E(lr_SP_PT1_Out), @R(340.0, -320.0, 140.0, 19.0);
+  @VF(180) : @E(lr_SP_PT1_T1), @R(530.0, -510.0, 140.0, 19.0);
+  @VF(179) : @E(gr_SP), @R(340.0, -530.0, 140.0, 19.0);
+  @VF(181) : @E(lr_SP_PT1_Out), @R(1250.0, -530.0, 140.0, 19.0);
+  @VF(29) : @E(lr_PV_OffsetPhysVal), @R(520.0, -660.0, 140.0, 19.0);
+  @VF(28) : @E(lr_PV_MinPhysVal), @R(520.0, -680.0, 140.0, 19.0);
+  @VF(27) : @E(lr_PV_MaxPhysVal), @R(520.0, -700.0, 140.0, 19.0);
+  @VF(26) : @E(lr_PV_MinInVal), @R(520.0, -720.0, 140.0, 19.0);
+  @VF(38) : @E(lx_PV_PhysValError), @R(1240.0, -720.0, 140.0, 19.0);
+  @VF(25) : @E(lr_PV_MaxInVal), @R(520.0, -740.0, 140.0, 19.0);
+  @VF(37) : @E(lr_PV_OutPhysVal), @R(1240.0, -740.0, 140.0, 19.0);
+  @VF(202) : @E(gr_PV_Scale), @R(1510.0, -740.0, 140.0, 19.0);
+  @VF(24) : @E(lr_PV_In), @R(520.0, -760.0, 140.0, 19.0);
+  @VF(36) : @E(lx_PV_InValError), @R(1240.0, -760.0, 140.0, 19.0);
+  @VF(63) : @E(lr_PV_PT1_Out), @R(340.0, -760.0, 140.0, 19.0);
+  @VF(66) : @E(lr_PV_PT1_T1), @R(520.0, -940.0, 140.0, 19.0);
+  @VF(170) : @E(lr_PV_PT1_Out), @R(1240.0, -960.0, 140.0, 19.0);
+  @VF(168) : @E(gr_PV), @R(330.0, -960.0, 140.0, 19.0);
+  @VF(5) : @E(1), @R(750.0, -1080.0, 140.0, 19.0), UINT;
+  @VF(6) : @E(lui_CycleCount), @R(750.0, -1100.0, 140.0, 19.0);
+  @VF(7) : @E(lui_CycleCount), @R(1000.0, -1100.0, 140.0, 19.0);
+  @VF(8) : @E(lx_CyclePulse), @R(750.0, -1130.0, 140.0, 19.0);
+  @VF(9) : @E(lx_CyclePulse), @R(1000.0, -1130.0, 140.0, 19.0);
+  @OLT(144) : @R(1420.0, -350.0, 80.0, 19.0), @S(55);
+  @OLT(69) : @R(350.0, -340.0, 80.0, 19.0), @S(68);
+  @OLT(183) : @R(340.0, -510.0, 80.0, 19.0), @S(180);
+  @OLT(62) : @R(1250.0, -550.0, 80.0, 19.0), @S(181);
+  @OLT(182) : @R(400.0, -550.0, 80.0, 19.0), @S(179);
+  @OLT(141) : @R(1400.0, -760.0, 80.0, 19.0), @S(37);
+  @OLT(61) : @R(340.0, -780.0, 80.0, 19.0), @S(63);
+  @OLT(176) : @R(330.0, -940.0, 80.0, 19.0), @S(66);
+  @OLT(64) : @R(1240.0, -980.0, 80.0, 19.0), @S(170);
+  @OLT(174) : @R(390.0, -980.0, 80.0, 19.0), @S(168);
+  @OLT(11) : @R(620.0, -1110.0, 80.0, 19.0), @S(6);
+  @OLT(30) : @R(1240.0, -1120.0, 80.0, 19.0), @S(7);
+  @CF(143) : @R(1520.0, -330.0, 200.0, 29.0), @T("SP in %"), @POU;
+  @CF(31) : @R(760.0, -410.0, 400.0, 39.0), @T("Skalieren SP"), @POU;
+  @CF(185) : @R(760.0, -600.0, 390.0, 39.0), @T("Glaetten SP"), @POU;
+  @CF(142) : @R(1510.0, -770.0, 200.0, 29.0), @T("PV in %"), @POU;
+  @CF(32) : @R(750.0, -850.0, 400.0, 39.0), @T("Skalieren PV"), @POU;
+  @CF(167) : @R(750.0, -1030.0, 390.0, 39.0), @T("Glaetten PV"), @POU;
+  @CF(33) : @R(750.0, -1200.0, 390.0, 39.0), @T("Drehzahlregelung mit RevPi"), @POU;
+  @C(313) : @FB(Init_R_TRIG), @R(620.0, 70.0, 140.0, 18.0), @I(@N(CLK), @L(9.5)), @O(@N(Q), @R(9.5));
+  @C(319) : @FB(Init_R_TRIG2), @R(660.0, 160.0, 140.0, 18.0), @I(@N(CLK), @L(9.5)), @O(@N(Q), @R(9.5));
+  @C(318) : @FB(Init_R_TRIG1), @R(660.0, 120.0, 140.0, 18.0), @I(@N(CLK), @L(9.5)), @O(@N(Q), @R(9.5));
+  @C(348) : @FB(Init_R_TRIG6), @R(670.0, 420.0, 140.0, 18.0), @I(@N(CLK), @L(9.5)), @O(@N(Q), @R(9.5));
+  @C(347) : @FB(Init_R_TRIG5), @R(670.0, 460.0, 140.0, 18.0), @I(@N(CLK), @L(9.5)), @O(@N(Q), @R(9.5));
+  @C(346) : @FB(Init_R_TRIG4), @R(670.0, 380.0, 140.0, 18.0), @I(@N(CLK), @L(9.5)), @O(@N(Q), @R(9.5));
+  @C(320) : @FB(Init_R_TRIG3), @R(660.0, 200.0, 140.0, 18.0), @I(@N(CLK), @L(9.5)), @O(@N(Q), @R(9.5));
+  @C(352) : @FB(Init_R_TRIG7), @R(670.0, 500.0, 140.0, 18.0), @I(@N(CLK), @L(9.5)), @O(@N(Q), @R(9.5));
+  @C(351) : @FB(RS7), @R(880.0, 460.0, 80.0, 38.0), @I(@N(S), @L(9.5)), @I(@N(R1), @L(29.5)), @O(@N(Q1), @R(9.5));
+  @C(350) : @FB(RS6), @R(880.0, 420.0, 80.0, 38.0), @I(@N(S), @L(9.5)), @I(@N(R1), @L(29.5)), @O(@N(Q1), @R(9.5));
+  @C(349) : @FB(RS5), @R(880.0, 380.0, 80.0, 38.0), @I(@N(S), @L(9.5)), @I(@N(R1), @L(29.5)), @O(@N(Q1), @R(9.5));
+  @C(325) : @FB(RS1), @R(870.0, 70.0, 80.0, 38.0), @I(@N(S), @L(9.5)), @I(@N(R1), @L(29.5)), @O(@N(Q1), @R(9.5));
+  @C(330) : @FB(RS4), @R(870.0, 200.0, 80.0, 38.0), @I(@N(S), @L(9.5)), @I(@N(R1), @L(29.5)), @O(@N(Q1), @R(9.5));
+  @C(328) : @FB(RS2), @R(870.0, 120.0, 80.0, 38.0), @I(@N(S), @L(9.5)), @I(@N(R1), @L(29.5)), @O(@N(Q1), @R(9.5));
+  @C(329) : @FB(RS3), @R(870.0, 160.0, 80.0, 38.0), @I(@N(S), @L(9.5)), @I(@N(R1), @L(29.5)), @O(@N(Q1), @R(9.5));
+  @C(353) : @FB(RS8), @R(880.0, 500.0, 80.0, 38.0), @I(@N(S), @L(9.5)), @I(@N(R1), @L(29.5)), @O(@N(Q1), @R(9.5));
+  @C(81) : @FB(MotorControl_PID), instanceNameVisible, @R(770.0, 3030.0, 400.0, 178.0), @I(@N(vir_Inp), @L(9.5)), @I(@N(vir_TI), @L(29.5)), @I(@N(vir_Kv), @L(49.5)), @I(@N(vir_T1), @L(69.5)), @I(@N(vix_Auto), @L(89.5)), @I(@N(vir_YManual), @L(109.5)), @I(@N(vir_Lvu), @L(129.5)), @I(@N(vir_Lvd), @L(149.5)), @I(@N(vir_Kp), @L(169.5)), @O(@N(vox_Lu), @R(9.5)), @O(@N(vox_Ld), @R(29.5)), @O(@N(vor_Out), @R(49.5)), @O(@N(vor_P), @R(69.5)), @O(@N(vor_I), @R(89.5)), @O(@N(vor_D), @R(109.5));
+  @C(82) : @FB(Y_MotorAnalogScale), instanceNameVisible, @R(770.0, 3340.0, 400.0, 118.0), @I(@N(vir_In), @L(9.5)), @I(@N(vir_MaxInVal), @L(29.5)), @I(@N(vir_MinInVal), @L(49.5)), @I(@N(vir_MaxPhysVal), @L(69.5)), @I(@N(vir_MinPhysVal), @L(89.5)), @I(@N(vir_OffsetPhysVal), @L(109.5)), @O(@N(vox_InValError), @R(9.5)), @O(@N(vor_OutPhysVal), @R(29.5)), @O(@N(vox_PhysValError), @R(49.5));
+  @C(138) : @FB(FORCEMRK2), @R(1090.0, 3470.0, 120.0, 18.0), REAL, @I(@N(IN), @L(9.5)), @O(@N(OUT), @R(9.5));
+  @C(343) : @F(OR), @R(660.0, 260.0, 40.0, 58.0), BOOL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @I(@N(IN3), @L(49.5)), @O(@N(OR), @R(9.5));
+  @C(377) : @F(OR), @R(770.0, 590.0, 40.0, 58.0), BOOL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @I(@N(IN3), @L(49.5)), @O(@N(OR), @R(9.5));
+  @C(193) : @F(AND), @R(1060.0, 770.0, 40.0, 108.0), BOOL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @I(@N(IN3), @L(49.5)), @I(@N(IN4), @L(69.5)), @I(@N(IN5), @L(89.5)), @O(@N(AND), @R(9.5));
+  @C(194) : @F(NOT), @R(970.0, 770.0, 60.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(NOT), @R(9.5));
+  @C(240) : @F(OR), @R(640.0, 660.0, 40.0, 38.0), BOOL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(OR), @R(9.5));
+  @C(196) : @F(AND), @R(1060.0, 890.0, 40.0, 98.0), BOOL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @I(@N(IN3), @L(49.5)), @I(@N(IN4), @L(69.5)), @I(@N(IN5), @L(89.5)), @O(@N(AND), @R(9.5));
+  @C(198) : @F(NOT), @R(970.0, 890.0, 60.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(NOT), @R(9.5));
+  @C(213) : @F(NOT), @R(970.0, 1000.0, 60.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(NOT), @R(9.5));
+  @C(295) : @F(OR), @R(630.0, 790.0, 40.0, 38.0), BOOL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(OR), @R(9.5));
+  @C(298) : @F(OR), @R(640.0, 930.0, 40.0, 38.0), BOOL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(OR), @R(9.5));
+  @C(246) : @F(NOT), @R(970.0, 1020.0, 60.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(NOT), @R(9.5));
+  @C(247) : @F(NOT), @R(970.0, 1040.0, 60.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(NOT), @R(9.5));
+  @C(209) : @F(AND), @R(1060.0, 1000.0, 40.0, 98.0), BOOL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @I(@N(IN3), @L(49.5)), @I(@N(IN4), @L(69.5)), @I(@N(IN5), @L(89.5)), @O(@N(AND), @R(9.5));
+  @C(301) : @F(OR), @R(640.0, 1060.0, 40.0, 38.0), BOOL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(OR), @R(9.5));
+  @C(223) : @F(MOVE), @R(1010.0, 1540.0, 60.0, 38.0), REAL, @I(@N(EN), @L(9.5)), @I(@N(IN), @L(29.5)), @O(@N(ENO), @R(9.5)), @O(@N(MOVE), @R(29.5));
+  @C(234) : @F(NOT), @R(340.0, 1560.0, 60.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(NOT), @R(9.5));
+  @C(224) : @F(AND), @R(710.0, 1540.0, 40.0, 38.0), BOOL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(AND), @R(9.5));
+  @C(231) : @F(MOVE), @R(1010.0, 1660.0, 60.0, 38.0), REAL, @I(@N(EN), @L(9.5)), @I(@N(IN), @L(29.5)), @O(@N(ENO), @R(9.5)), @O(@N(MOVE), @R(29.5));
+  @C(228) : @F(MOVE), @R(1010.0, 1600.0, 60.0, 38.0), REAL, @I(@N(EN), @L(9.5)), @I(@N(IN), @L(29.5)), @O(@N(ENO), @R(9.5)), @O(@N(MOVE), @R(29.5));
+  @C(273) : @F(AND), @R(710.0, 1660.0, 40.0, 38.0), BOOL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(AND), @R(9.5));
+  @C(272) : @F(AND), @R(710.0, 1600.0, 40.0, 38.0), BOOL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(AND), @R(9.5));
+  @C(266) : @F(NOT), @R(340.0, 1620.0, 60.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(NOT), @R(9.5));
+  @C(267) : @F(NOT), @R(340.0, 1680.0, 60.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(NOT), @R(9.5));
+  @C(253) : @F(MOVE), @R(1010.0, 1720.0, 60.0, 38.0), REAL, @I(@N(EN), @L(9.5)), @I(@N(IN), @L(29.5)), @O(@N(ENO), @R(9.5)), @O(@N(MOVE), @R(29.5));
+  @C(274) : @F(AND), @R(710.0, 1720.0, 40.0, 38.0), BOOL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(AND), @R(9.5));
+  @C(268) : @F(NOT), @R(340.0, 1740.0, 60.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(NOT), @R(9.5));
+  @C(212) : @F(OR), @R(1470.0, 850.0, 40.0, 98.0), BOOL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @I(@N(IN3), @L(49.5)), @I(@N(IN4), @L(69.5)), @I(@N(IN5), @L(89.5)), @O(@N(OR), @R(9.5));
+  @C(83) : @F(SUB), @R(940.0, 2900.0, 40.0, 38.0), REAL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(SUB), @R(9.5));
+  @C(130) : @F(MOVE), @R(910.0, 3300.0, 60.0, 18.0), REAL, @I(@N(IN), @L(9.5)), @O(@N(MOVE), @R(9.5));
+  @C(135) : @F(MOVE), @R(920.0, 3470.0, 60.0, 18.0), REAL, @I(@N(IN), @L(9.5)), @O(@N(MOVE), @R(9.5));
+  @VF(315) : @E(gx_RPM1_V), @R(470.0, 120.0, 140.0, 19.0);
+  @VF(314) : @E(gx_RPM0_V), @R(470.0, 70.0, 140.0, 19.0);
+  @VF(317) : @E(gx_RPM3_V), @R(470.0, 200.0, 140.0, 19.0);
+  @VF(316) : @E(gx_RPM2_V), @R(470.0, 160.0, 140.0, 19.0);
+  @VF(337) : @E(lx_ResetRPM_V), @R(470.0, 260.0, 140.0, 19.0);
+  @VF(342) : @E(gx_ResetRPM_V), @R(470.0, 280.0, 140.0, 19.0);
+  @VF(385) : @E(gx_ResetRPM), @R(470.0, 300.0, 140.0, 19.0);
+  @VF(355) : @E(gx_RPM0), @R(470.0, 380.0, 140.0, 19.0);
+  @VF(356) : @E(gx_RPM1), @R(470.0, 420.0, 140.0, 19.0);
+  @VF(357) : @E(gx_RPM2), @R(470.0, 460.0, 140.0, 19.0);
+  @VF(358) : @E(gx_RPM3), @R(470.0, 500.0, 140.0, 19.0);
+  @VF(359) : @E(lx_ResetRPM_V), @R(470.0, 590.0, 140.0, 19.0);
+  @VF(360) : @E(gx_ResetRPM), @R(470.0, 610.0, 140.0, 19.0);
+  @VF(84) : @E(lx_RPM0), @R(470.0, 660.0, 140.0, 19.0);
+  @VF(145) : @E(lx_RPM1), @R(460.0, 790.0, 140.0, 19.0);
+  @VF(289) : @E(lx_RPM0_V), @R(470.0, 680.0, 140.0, 19.0);
+  @VF(175) : @E(lx_RPM2), @R(470.0, 930.0, 140.0, 19.0);
+  @VF(290) : @E(lx_RPM1_V), @R(460.0, 810.0, 140.0, 19.0);
+  @VF(291) : @E(lx_RPM2_V), @R(470.0, 950.0, 140.0, 19.0);
+  @VF(207) : @E(lx_RPM3), @R(470.0, 1060.0, 140.0, 19.0);
+  @VF(292) : @E(lx_RPM3_V), @R(470.0, 1080.0, 140.0, 19.0);
+  @VF(286) : @E(lx_Test), @R(470.0, 1250.0, 140.0, 19.0);
+  @VF(217) : @E(gx_ModeRPM0), @R(190.0, 1540.0, 140.0, 19.0);
+  @VF(226) : @E(0.0), @R(760.0, 1560.0, 140.0, 19.0), REAL;
+  @VF(258) : @E(lx_Test), @R(190.0, 1560.0, 140.0, 19.0);
+  @VF(218) : @E(gx_ModeRPM1), @R(190.0, 1600.0, 140.0, 19.0);
+  @VF(219) : @E(gx_ModeRPM2), @R(190.0, 1660.0, 140.0, 19.0);
+  @VF(232) : @E(70.0), @R(760.0, 1680.0, 140.0, 19.0), REAL;
+  @VF(229) : @E(35.0), @R(760.0, 1620.0, 140.0, 19.0), REAL;
+  @VF(263) : @E(lx_Test), @R(190.0, 1620.0, 140.0, 19.0);
+  @VF(264) : @E(lx_Test), @R(190.0, 1680.0, 140.0, 19.0);
+  @VF(85) : @E(lr_SP_OutPhysVal), @R(760.0, 1740.0, 170.0, 19.0);
+  @VF(184) : @E(gx_ModeRPM0), @R(1230.0, 660.0, 140.0, 19.0);
+  @VF(190) : @E(gx_ModeRPM1), @R(1230.0, 770.0, 140.0, 19.0);
+  @VF(191) : @E(gx_ModeRPM2), @R(1230.0, 890.0, 140.0, 19.0);
+  @VF(208) : @E(gx_ModeRPM3), @R(1230.0, 1000.0, 140.0, 19.0);
+  @VF(248) : @E(gx_ModeRPM3), @R(190.0, 1720.0, 140.0, 19.0);
+  @VF(265) : @E(lx_Test), @R(190.0, 1740.0, 140.0, 19.0);
+  @VF(309) : @E(lx_RPM0_V), @R(1230.0, 70.0, 140.0, 19.0);
+  @VF(311) : @E(lx_RPM2_V), @R(1230.0, 160.0, 140.0, 19.0);
+  @VF(310) : @E(lx_RPM1_V), @R(1230.0, 120.0, 140.0, 19.0);
+  @VF(312) : @E(lx_RPM3_V), @R(1230.0, 200.0, 140.0, 19.0);
+  @VF(364) : @E(lx_RPM3), @R(1240.0, 500.0, 140.0, 19.0);
+  @VF(361) : @E(lx_RPM0), @R(1240.0, 380.0, 140.0, 19.0);
+  @VF(362) : @E(lx_RPM2), @R(1240.0, 460.0, 140.0, 19.0);
+  @VF(363) : @E(lx_RPM1), @R(1240.0, 420.0, 140.0, 19.0);
+  @VF(220) : @E(lr_Test), @R(1250.0, 1560.0, 140.0, 19.0);
+  @VF(221) : @E(lr_Test), @R(1250.0, 1620.0, 140.0, 19.0);
+  @VF(222) : @E(lr_Test), @R(1250.0, 1680.0, 140.0, 19.0);
+  @VF(256) : @E(lr_Test), @R(1250.0, 1740.0, 140.0, 19.0);
+  @VF(86) : @E(lr_Test), @R(540.0, 2900.0, 140.0, 19.0);
+  @VF(87) : @E(lr_PV_OutPhysVal), @R(540.0, 2920.0, 140.0, 19.0);
+  @VF(109) : @E(lr_Inp), @R(1260.0, 2900.0, 140.0, 19.0);
+  @VF(88) : @E(lr_Inp), @R(540.0, 3030.0, 140.0, 19.0);
+  @VF(89) : @E(lr_TI), @R(540.0, 3050.0, 140.0, 19.0);
+  @VF(98) : @E(lx_Ld), @R(1260.0, 3050.0, 140.0, 19.0);
+  @VF(97) : @E(lx_Lu), @R(1260.0, 3030.0, 140.0, 19.0);
+  @VF(90) : @E(lr_Kv), @R(540.0, 3070.0, 140.0, 19.0);
+  @VF(91) : @E(lr_T1), @R(540.0, 3090.0, 140.0, 19.0);
+  @VF(100) : @E(lr_P), @R(1260.0, 3090.0, 140.0, 19.0);
+  @VF(99) : @E(lr_Out), @R(1260.0, 3070.0, 140.0, 19.0);
+  @VF(92) : @E(lx_Auto), @R(540.0, 3110.0, 140.0, 19.0);
+  @VF(101) : @E(lr_I), @R(1260.0, 3110.0, 140.0, 19.0);
+  @VF(93) : @E(lr_Lvu), @R(540.0, 3150.0, 140.0, 19.0);
+  @VF(94) : @E(lr_YManual), @R(540.0, 3130.0, 140.0, 19.0);
+  @VF(102) : @E(lr_D), @R(1260.0, 3130.0, 140.0, 19.0);
+  @VF(95) : @E(lr_Lvd), @R(540.0, 3170.0, 140.0, 19.0);
+  @VF(96) : @E(lr_Kp), @R(540.0, 3190.0, 140.0, 19.0);
+  @VF(215) : @E(lx_Auto), @R(1540.0, 850.0, 140.0, 19.0);
+  @VF(129) : @E(lr_Out), @R(540.0, 3300.0, 140.0, 19.0);
+  @VF(132) : @E(lr_Y_In), @R(1270.0, 3300.0, 140.0, 19.0);
+  @VF(259) : @E(gr_Y_Scale), @R(1480.0, 3300.0, 140.0, 19.0);
+  @VF(111) : @E(lr_Y_In), @R(540.0, 3340.0, 140.0, 19.0);
+  @VF(113) : @E(lr_Y_MinInVal), @R(540.0, 3380.0, 140.0, 19.0);
+  @VF(112) : @E(lr_Y_MaxInVal), @R(540.0, 3360.0, 140.0, 19.0);
+  @VF(126) : @E(lx_Y_PhysValError), @R(1270.0, 3380.0, 140.0, 19.0);
+  @VF(125) : @E(lr_Y_OutPhysVal), @R(1270.0, 3360.0, 140.0, 19.0);
+  @VF(123) : @E(lx_Y_InValError), @R(1270.0, 3340.0, 140.0, 19.0);
+  @VF(115) : @E(lr_Y_MinPhysVal), @R(540.0, 3420.0, 140.0, 19.0);
+  @VF(114) : @E(lr_Y_MaxPhysVal), @R(540.0, 3400.0, 140.0, 19.0);
+  @VF(121) : @E(lr_Y_OffsetPhysVal), @R(540.0, 3440.0, 140.0, 19.0);
+  @VF(137) : @E(gr_Y), @R(1270.0, 3470.0, 140.0, 19.0);
+  @VF(134) : @E(lr_Y_OutPhysVal), @R(540.0, 3470.0, 140.0, 19.0);
+  @OLT(305) : @R(350.0, 680.0, 80.0, 19.0), @S(289);
+  @OLT(307) : @R(350.0, 950.0, 80.0, 19.0), @S(291);
+  @OLT(306) : @R(340.0, 810.0, 80.0, 19.0), @S(290);
+  @OLT(308) : @R(350.0, 1080.0, 80.0, 19.0), @S(292);
+  @OLT(288) : @R(360.0, 1240.0, 80.0, 19.0), @S(286);
+  @OLT(285) : @R(80.0, 1730.0, 80.0, 19.0), @S(265);
+  @OLT(166) : @R(430.0, 2880.0, 80.0, 19.0), @S(86);
+  @OLT(238) : @R(1420.0, 1560.0, 80.0, 19.0), @S(220);
+  @OLT(147) : @R(1430.0, 2870.0, 80.0, 19.0), @S(109);
+  @OLT(165) : @R(430.0, 2950.0, 80.0, 19.0), @S(87);
+  @OLT(149) : @R(430.0, 3010.0, 80.0, 19.0), @S(88);
+  @OLT(150) : @R(430.0, 3030.0, 80.0, 19.0), @S(89);
+  @OLT(151) : @R(430.0, 3050.0, 80.0, 19.0), @S(90);
+  @OLT(152) : @R(430.0, 3070.0, 80.0, 19.0), @S(91);
+  @OLT(153) : @R(430.0, 3090.0, 80.0, 19.0), @S(92);
+  @OLT(159) : @R(1420.0, 3060.0, 80.0, 19.0), @S(99);
+  @OLT(161) : @R(1420.0, 3100.0, 80.0, 19.0), @S(101);
+  @OLT(160) : @R(1420.0, 3080.0, 80.0, 19.0), @S(100);
+  @OLT(154) : @R(430.0, 3110.0, 80.0, 19.0), @S(94);
+  @OLT(162) : @R(1420.0, 3120.0, 80.0, 19.0), @S(102);
+  @OLT(155) : @R(430.0, 3130.0, 80.0, 19.0), @S(93);
+  @OLT(156) : @R(430.0, 3150.0, 80.0, 19.0), @S(95);
+  @OLT(157) : @R(430.0, 3170.0, 80.0, 19.0), @S(96);
+  @OLT(163) : @R(430.0, 3270.0, 80.0, 19.0), @S(129);
+  @OLT(164) : @R(430.0, 3320.0, 80.0, 19.0), @S(111);
+  @CF(103) : @R(760.0, 330.0, 400.0, 39.0), @T("SP-Point per Schalter einstellbar"), @POU;
+  @CF(383) : @R(760.0, 10.0, 400.0, 39.0), @T("SP-Point per Visu einstellbar"), @POU;
+  @CF(284) : @R(480.0, 2760.0, 910.0, 59.0), @T("Mit lx_Test = TRUE kann lr_Tset per Online-Test geaendert werden!"), @POU;
+  @CF(104) : @R(770.0, 2850.0, 400.0, 39.0), @T("Regeldifferenz berechnen"), @POU;
+  @CF(105) : @R(770.0, 2970.0, 400.0, 39.0), @T("Regler aufrufen"), @POU;
+  @CF(158) : @R(290.0, 3060.0, 120.0, 99.0), @T("Wenn lx_Auto = FALSE, dann Manual Mode"), @POU;
+  @CF(148) : @R(1430.0, 2900.0, 200.0, 29.0), @T("Regeldifferenz in %"), @POU;
+  @CF(106) : @R(770.0, 3250.0, 400.0, 39.0), @T("Ausgangswert De-Skalieren"), @POU;
+  @CF(354) : @R(1540.0, 880.0, 340.0, 69.0), @T("Der Regler auf Auto setzen! Fuer RPM0 bis RPM4-Mode. Wenn alle auf FALSE sind, dann Handbetrieb freigeben!"), @POU;
+  @C(571) : @FB(R_TRIG2), @R(720.0, -2590.0, 140.0, 18.0), @I(@N(CLK), @L(9.5)), @O(@N(Q), @R(9.5));
+  @C(575) : @FB(R_TRIG3), @R(770.0, -2000.0, 140.0, 18.0), @I(@N(CLK), @L(9.5)), @O(@N(Q), @R(9.5));
+  @C(569) : @F(OR), @R(880.0, -2610.0, 40.0, 38.0), BOOL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(OR), @R(9.5));
+  @C(473) : @F(MOVE), @R(1020.0, -2580.0, 60.0, 38.0), REAL, @I(@N(EN), @L(9.5)), @I(@N(IN), @L(29.5)), @O(@N(ENO), @R(9.5)), @O(@N(MOVE), @R(29.5));
+  @C(533) : @F(MOVE), @R(1020.0, -2380.0, 60.0, 38.0), REAL, @I(@N(EN), @L(9.5)), @I(@N(IN), @L(29.5)), @O(@N(ENO), @R(9.5)), @O(@N(MOVE), @R(29.5));
+  @C(532) : @F(MOVE), @R(1020.0, -2420.0, 60.0, 38.0), REAL, @I(@N(EN), @L(9.5)), @I(@N(IN), @L(29.5)), @O(@N(ENO), @R(9.5)), @O(@N(MOVE), @R(29.5));
+  @C(529) : @F(MOVE), @R(1020.0, -2540.0, 60.0, 38.0), REAL, @I(@N(EN), @L(9.5)), @I(@N(IN), @L(29.5)), @O(@N(ENO), @R(9.5)), @O(@N(MOVE), @R(29.5));
+  @C(531) : @F(MOVE), @R(1020.0, -2460.0, 60.0, 38.0), REAL, @I(@N(EN), @L(9.5)), @I(@N(IN), @L(29.5)), @O(@N(ENO), @R(9.5)), @O(@N(MOVE), @R(29.5));
+  @C(530) : @F(MOVE), @R(1020.0, -2500.0, 60.0, 38.0), REAL, @I(@N(EN), @L(9.5)), @I(@N(IN), @L(29.5)), @O(@N(ENO), @R(9.5)), @O(@N(MOVE), @R(29.5));
+  @C(884) : @F(MOVE), @R(1020.0, -2340.0, 60.0, 38.0), USINT, @I(@N(EN), @L(9.5)), @I(@N(IN), @L(29.5)), @O(@N(ENO), @R(9.5)), @O(@N(MOVE), @R(29.5));
+  @C(866) : @F(MOVE), @R(1020.0, -2300.0, 60.0, 38.0), REAL, @I(@N(EN), @L(9.5)), @I(@N(IN), @L(29.5)), @O(@N(ENO), @R(9.5)), @O(@N(MOVE), @R(29.5));
+  @C(865) : @F(MOVE), @R(1020.0, -2260.0, 60.0, 38.0), REAL, @I(@N(EN), @L(9.5)), @I(@N(IN), @L(29.5)), @O(@N(ENO), @R(9.5)), @O(@N(MOVE), @R(29.5));
+  @C(864) : @F(MOVE), @R(1020.0, -2220.0, 60.0, 38.0), REAL, @I(@N(EN), @L(9.5)), @I(@N(IN), @L(29.5)), @O(@N(ENO), @R(9.5)), @O(@N(MOVE), @R(29.5));
+  @C(863) : @F(MOVE), @R(1020.0, -2180.0, 60.0, 38.0), REAL, @I(@N(EN), @L(9.5)), @I(@N(IN), @L(29.5)), @O(@N(ENO), @R(9.5)), @O(@N(MOVE), @R(29.5));
+  @C(862) : @F(MOVE), @R(1020.0, -2140.0, 60.0, 38.0), REAL, @I(@N(EN), @L(9.5)), @I(@N(IN), @L(29.5)), @O(@N(ENO), @R(9.5)), @O(@N(MOVE), @R(29.5));
+  @C(427) : @F(MOVE), @R(1020.0, -2090.0, 60.0, 38.0), DT_PID_In, @I(@N(EN), @L(9.5)), @I(@N(IN), @L(29.5)), @O(@N(ENO), @R(9.5)), @O(@N(MOVE), @R(29.5));
+  @C(576) : @F(MOVE), @R(1020.0, -1980.0, 60.0, 38.0), REAL, @I(@N(EN), @L(9.5)), @I(@N(IN), @L(29.5)), @O(@N(ENO), @R(9.5)), @O(@N(MOVE), @R(29.5));
+  @C(577) : @F(MOVE), @R(1020.0, -1940.0, 60.0, 38.0), REAL, @I(@N(EN), @L(9.5)), @I(@N(IN), @L(29.5)), @O(@N(ENO), @R(9.5)), @O(@N(MOVE), @R(29.5));
+  @C(750) : @F(MOVE), @R(1020.0, -1900.0, 60.0, 38.0), REAL, @I(@N(EN), @L(9.5)), @I(@N(IN), @L(29.5)), @O(@N(ENO), @R(9.5)), @O(@N(MOVE), @R(29.5));
+  @C(751) : @F(MOVE), @R(1020.0, -1860.0, 60.0, 38.0), REAL, @I(@N(EN), @L(9.5)), @I(@N(IN), @L(29.5)), @O(@N(ENO), @R(9.5)), @O(@N(MOVE), @R(29.5));
+  @C(752) : @F(MOVE), @R(1020.0, -1820.0, 60.0, 38.0), REAL, @I(@N(EN), @L(9.5)), @I(@N(IN), @L(29.5)), @O(@N(ENO), @R(9.5)), @O(@N(MOVE), @R(29.5));
+  @C(753) : @F(MOVE), @R(1020.0, -1780.0, 60.0, 38.0), REAL, @I(@N(EN), @L(9.5)), @I(@N(IN), @L(29.5)), @O(@N(ENO), @R(9.5)), @O(@N(MOVE), @R(29.5));
+  @C(827) : @F(MOVE), @R(1020.0, -1740.0, 60.0, 38.0), USINT, @I(@N(EN), @L(9.5)), @I(@N(IN), @L(29.5)), @O(@N(ENO), @R(9.5)), @O(@N(MOVE), @R(29.5));
+  @C(828) : @F(MOVE), @R(1020.0, -1700.0, 60.0, 38.0), REAL, @I(@N(EN), @L(9.5)), @I(@N(IN), @L(29.5)), @O(@N(ENO), @R(9.5)), @O(@N(MOVE), @R(29.5));
+  @C(829) : @F(MOVE), @R(1020.0, -1660.0, 60.0, 38.0), REAL, @I(@N(EN), @L(9.5)), @I(@N(IN), @L(29.5)), @O(@N(ENO), @R(9.5)), @O(@N(MOVE), @R(29.5));
+  @C(830) : @F(MOVE), @R(1020.0, -1620.0, 60.0, 38.0), REAL, @I(@N(EN), @L(9.5)), @I(@N(IN), @L(29.5)), @O(@N(ENO), @R(9.5)), @O(@N(MOVE), @R(29.5));
+  @C(831) : @F(MOVE), @R(1020.0, -1580.0, 60.0, 38.0), REAL, @I(@N(EN), @L(9.5)), @I(@N(IN), @L(29.5)), @O(@N(ENO), @R(9.5)), @O(@N(MOVE), @R(29.5));
+  @C(846) : @F(MOVE), @R(1020.0, -1540.0, 60.0, 38.0), REAL, @I(@N(EN), @L(9.5)), @I(@N(IN), @L(29.5)), @O(@N(ENO), @R(9.5)), @O(@N(MOVE), @R(29.5));
+  @C(919) : @F(MOVE), @R(1020.0, -1500.0, 60.0, 38.0), BOOL, @I(@N(EN), @L(9.5)), @I(@N(IN), @L(29.5)), @O(@N(ENO), @R(9.5)), @O(@N(MOVE), @R(29.5));
+  @C(804) : @F(MOVE), @R(1020.0, -1450.0, 60.0, 38.0), DT_PID_In, @I(@N(EN), @L(9.5)), @I(@N(IN), @L(29.5)), @O(@N(ENO), @R(9.5)), @O(@N(MOVE), @R(29.5));
+  @C(818) : @F(ADD), @R(1020.0, -1410.0, 40.0, 58.0), UINT, @I(@N(EN), @L(9.5)), @I(@N(IN1), @L(29.5)), @I(@N(IN2), @L(49.5)), @O(@N(ENO), @R(9.5)), @O(@N(ADD), @R(29.5));
+  @VF(568) : @E(lx_InitTest), @R(510.0, -2590.0, 140.0, 19.0);
+  @VF(485) : @E(gr_PID_TI), @R(780.0, -2560.0, 140.0, 19.0);
+  @VF(548) : @E(gr_PID_Lvd), @R(780.0, -2400.0, 140.0, 19.0);
+  @VF(549) : @E(gr_PID_Kp), @R(780.0, -2360.0, 140.0, 19.0);
+  @VF(546) : @E(gr_PID_T1), @R(780.0, -2480.0, 140.0, 19.0);
+  @VF(547) : @E(gr_PID_Lvu), @R(780.0, -2440.0, 140.0, 19.0);
+  @VF(527) : @E(gr_PID_Kv), @R(780.0, -2520.0, 140.0, 19.0);
+  @VF(877) : @E(gr_Ramp_Set_OPC), @R(720.0, -2320.0, 200.0, 19.0);
+  @VF(875) : @E(gr_Ramp_SpdUp), @R(720.0, -2280.0, 200.0, 19.0);
+  @VF(873) : @E(gr_Ramp_SpdDn), @R(720.0, -2240.0, 200.0, 19.0);
+  @VF(870) : @E(gr_Ramp_SV), @R(720.0, -2200.0, 200.0, 19.0);
+  @VF(474) : @E(lstruc_PID_In.r_T1), @R(1150.0, -2480.0, 220.0, 19.0);
+  @VF(524) : @E(lstruc_PID_In.r_Kv), @R(1150.0, -2520.0, 220.0, 19.0);
+  @VF(525) : @E(lstruc_PID_In.r_Lvd), @R(1150.0, -2400.0, 220.0, 19.0);
+  @VF(526) : @E(lstruc_PID_In.r_Kp), @R(1150.0, -2360.0, 220.0, 19.0);
+  @VF(523) : @E(lstruc_PID_In.r_TI), @R(1150.0, -2560.0, 220.0, 19.0);
+  @VF(528) : @E(lstruc_PID_In.r_Lvu), @R(1150.0, -2440.0, 220.0, 19.0);
+  @VF(868) : @E(gr_Ramp_Set_UpMax), @R(1150.0, -2160.0, 220.0, 19.0);
+  @VF(869) : @E(gr_Ramp_Set_SV), @R(1150.0, -2200.0, 220.0, 19.0);
+  @VF(871) : @E(gr_Ramp_UpMax), @R(720.0, -2160.0, 200.0, 19.0);
+  @VF(874) : @E(gr_Ramp_Set_SpdDn), @R(1150.0, -2240.0, 220.0, 19.0);
+  @VF(876) : @E(gr_Ramp_Set_SpdUp), @R(1150.0, -2280.0, 220.0, 19.0);
+  @VF(878) : @E(gr_Ramp_Set_OPC), @R(1150.0, -2320.0, 220.0, 19.0);
+  @VF(867) : @E(gr_Ramp_Set_DnMax), @R(1150.0, -2120.0, 220.0, 19.0);
+  @VF(872) : @E(gr_Ramp_DnMax), @R(720.0, -2120.0, 200.0, 19.0);
+  @VF(406) : @E(gstruc_PID_In), @R(1160.0, -2070.0, 210.0, 19.0);
+  @VF(429) : @E(lstruc_PID_In), @R(780.0, -2070.0, 150.0, 19.0);
+  @VF(739) : @E(gr_PID_Set_Lvd), @R(1530.0, -2380.0, 140.0, 19.0);
+  @VF(738) : @E(gr_PID_Set_TI), @R(1530.0, -2540.0, 140.0, 19.0);
+  @VF(743) : @E(gr_PID_Set_Kv), @R(1530.0, -2500.0, 140.0, 19.0);
+  @VF(742) : @E(gr_PID_Set_Lvu), @R(1530.0, -2420.0, 140.0, 19.0);
+  @VF(741) : @E(gr_PID_Set_T1), @R(1530.0, -2460.0, 140.0, 19.0);
+  @VF(740) : @E(gr_PID_Set_Kp), @R(1530.0, -2340.0, 140.0, 19.0);
+  @VF(574) : @E(gx_SetControlPar), @R(500.0, -2000.0, 170.0, 19.0);
+  @VF(762) : @E(lstruc_PID_In.r_TI), @R(1150.0, -1960.0, 220.0, 19.0);
+  @VF(766) : @E(gr_PID_Set_TI), @R(770.0, -1960.0, 140.0, 19.0);
+  @VF(754) : @E(gr_PID_TI), @R(1490.0, -1940.0, 140.0, 19.0);
+  @VF(760) : @E(lstruc_PID_In.r_Kv), @R(1150.0, -1920.0, 220.0, 19.0);
+  @VF(771) : @E(gr_PID_Set_Kv), @R(770.0, -1920.0, 140.0, 19.0);
+  @VF(755) : @E(gr_PID_Kv), @R(1490.0, -1900.0, 140.0, 19.0);
+  @VF(759) : @E(lstruc_PID_In.r_T1), @R(1150.0, -1880.0, 220.0, 19.0);
+  @VF(769) : @E(gr_PID_Set_T1), @R(770.0, -1880.0, 140.0, 19.0);
+  @VF(756) : @E(gr_PID_T1), @R(1490.0, -1860.0, 140.0, 19.0);
+  @VF(763) : @E(lstruc_PID_In.r_Lvu), @R(1150.0, -1840.0, 220.0, 19.0);
+  @VF(757) : @E(gr_PID_Lvu), @R(1490.0, -1820.0, 140.0, 19.0);
+  @VF(770) : @E(gr_PID_Set_Lvu), @R(770.0, -1840.0, 140.0, 19.0);
+  @VF(761) : @E(lstruc_PID_In.r_Lvd), @R(1150.0, -1800.0, 220.0, 19.0);
+  @VF(767) : @E(gr_PID_Set_Lvd), @R(770.0, -1800.0, 140.0, 19.0);
+  @VF(765) : @E(lstruc_PID_In.r_Kp), @R(1150.0, -1760.0, 220.0, 19.0);
+  @VF(758) : @E(gr_PID_Lvd), @R(1490.0, -1780.0, 140.0, 19.0);
+  @VF(768) : @E(gr_PID_Set_Kp), @R(770.0, -1760.0, 140.0, 19.0);
+  @VF(764) : @E(gr_PID_Kp), @R(1490.0, -1740.0, 140.0, 19.0);
+  @VF(826) : @E(gr_Ramp_Set_OPC), @R(710.0, -1720.0, 200.0, 19.0);
+  @VF(850) : @E(gr_Ramp_OPC), @R(1150.0, -1720.0, 200.0, 19.0);
+  @VF(851) : @E(gr_Ramp_SpdUp), @R(1150.0, -1680.0, 200.0, 19.0);
+  @VF(834) : @E(gr_Ramp_Set_SpdUp), @R(710.0, -1680.0, 200.0, 19.0);
+  @VF(852) : @E(gr_Ramp_SpdDn), @R(1150.0, -1640.0, 200.0, 19.0);
+  @VF(837) : @E(gr_Ramp_Set_SpdDn), @R(710.0, -1640.0, 200.0, 19.0);
+  @VF(853) : @E(gr_Ramp_SV), @R(1150.0, -1600.0, 200.0, 19.0);
+  @VF(838) : @E(gr_Ramp_Set_SV), @R(710.0, -1600.0, 200.0, 19.0);
+  @VF(854) : @E(gr_Ramp_UpMax), @R(1150.0, -1560.0, 200.0, 19.0);
+  @VF(843) : @E(gr_Ramp_Set_UpMax), @R(710.0, -1560.0, 200.0, 19.0);
+  @VF(855) : @E(gr_Ramp_DnMax), @R(1150.0, -1520.0, 200.0, 19.0);
+  @VF(847) : @E(gr_Ramp_Set_DnMax), @R(710.0, -1520.0, 200.0, 19.0);
+  @VF(922) : @E(gx_Ramp_Stp), @R(1150.0, -1480.0, 200.0, 19.0);
+  @VF(918) : @E(gx_Ramp_Set_Stp), @R(710.0, -1480.0, 200.0, 19.0);
+  @VF(805) : @E(lstruc_PID_In), @R(710.0, -1430.0, 200.0, 19.0);
+  @VF(806) : @E(gstruc_PID_In), @R(1150.0, -1430.0, 210.0, 19.0);
+  @VF(821) : @E(gx_SetControlParState), @R(1150.0, -1390.0, 210.0, 19.0);
+  @VF(817) : @E(gx_SetControlParState), @R(710.0, -1390.0, 200.0, 19.0);
+  @VF(823) : @E(1), @R(770.0, -1370.0, 140.0, 19.0), UINT;
+  @CONT(471) : @IT(CycleInit), @CONN(590), @R(530.0, -2610.0, 120.0, 19.0), BOOL;
+  @CONT(407) : @IT(CycleInit), @CONN(590), @R(550.0, -2090.0, 120.0, 19.0), BOOL;
+  @OLT(579) : @R(350.0, -2610.0, 80.0, 19.0), @S(568);
+  @OLT(565) : @R(670.0, -2450.0, 80.0, 19.0), @S(547);
+  @OLT(564) : @R(670.0, -2490.0, 80.0, 19.0), @S(546);
+  @OLT(563) : @R(670.0, -2530.0, 80.0, 19.0), @S(527);
+  @OLT(562) : @R(670.0, -2570.0, 80.0, 19.0), @S(485);
+  @OLT(566) : @R(670.0, -2410.0, 80.0, 19.0), @S(548);
+  @OLT(567) : @R(670.0, -2370.0, 80.0, 19.0), @S(549);
+  @OLT(558) : @R(1380.0, -2480.0, 80.0, 19.0), @S(474);
+  @OLT(559) : @R(1380.0, -2440.0, 80.0, 19.0), @S(528);
+  @OLT(556) : @R(1380.0, -2560.0, 80.0, 19.0), @S(523);
+  @OLT(557) : @R(1380.0, -2520.0, 80.0, 19.0), @S(524);
+  @OLT(561) : @R(1380.0, -2360.0, 80.0, 19.0), @S(526);
+  @OLT(560) : @R(1380.0, -2400.0, 80.0, 19.0), @S(525);
+  @OLT(811) : @R(770.0, -1980.0, 80.0, 19.0), @S(766);
+  @OLT(816) : @R(1700.0, -2340.0, 80.0, 19.0), @S(740);
+  @OLT(812) : @R(1700.0, -2500.0, 80.0, 19.0), @S(743);
+  @OLT(813) : @R(1700.0, -2460.0, 80.0, 19.0), @S(741);
+  @OLT(814) : @R(1700.0, -2420.0, 80.0, 19.0), @S(742);
+  @OLT(815) : @R(1700.0, -2380.0, 80.0, 19.0), @S(739);
+  @OLT(810) : @R(1700.0, -2540.0, 80.0, 19.0), @S(738);
+  @OLT(780) : @R(1380.0, -1960.0, 80.0, 19.0), @S(762);
+  @OLT(781) : @R(1380.0, -1920.0, 80.0, 19.0), @S(760);
+  @OLT(778) : @R(1380.0, -1880.0, 80.0, 19.0), @S(759);
+  @OLT(779) : @R(1380.0, -1840.0, 80.0, 19.0), @S(763);
+  @OLT(783) : @R(1380.0, -1800.0, 80.0, 19.0), @S(761);
+  @OLT(782) : @R(1380.0, -1760.0, 80.0, 19.0), @S(765);
+  @CF(578) : @R(230.0, -2580.0, 200.0, 19.0), @T("Von Visu"), @POU;
+  @CF(472) : @R(840.0, -2660.0, 390.0, 39.0), @T("Regelparameter"), @POU;
+  @CF(803) : @R(510.0, -2030.0, 860.0, 19.0), @T("Werte von Visu als Einstellung! Wenn gx_SetControl = TRUE!"), @POU;
+  @CF(439) : @R(1440.0, -2120.0, 290.0, 19.0), @T("Werte fuer Visu als Rueckmeldung!"), @POU;
+  @CF(825) : @R(1410.0, -1410.0, 210.0, 39.0), @T("RM Visu fuer Anzeige, das Daten uebernommen wurden!"), @POU;
+  @VF(403) : @E(gx_RPM4), @R(470.0, 540.0, 140.0, 19.0);
+  @C(404) : @FB(Init_R_TRIG8), @R(670.0, 540.0, 140.0, 18.0), @I(@N(CLK), @L(9.5)), @O(@N(Q), @R(9.5));
+  @C(408) : @FB(RS9), @R(880.0, 540.0, 80.0, 38.0), @I(@N(S), @L(9.5)), @I(@N(R1), @L(29.5)), @O(@N(Q1), @R(9.5));
+  @VF(412) : @E(lx_RPM4), @R(1240.0, 540.0, 140.0, 19.0);
+  @CF(414) : @R(1410.0, 540.0, 200.0, 19.0), @T("SFC"), @POU;
+  @CF(415) : @R(1410.0, 500.0, 200.0, 19.0), @T("Poti"), @POU;
+  @CF(416) : @R(1410.0, 460.0, 200.0, 19.0), @T("70%"), @POU;
+  @CF(417) : @R(1410.0, 420.0, 200.0, 19.0), @T("35%"), @POU;
+  @CF(418) : @R(1410.0, 380.0, 200.0, 19.0), @T("0%"), @POU;
+  @C(419) : @FB(RS10), @R(870.0, 240.0, 80.0, 38.0), @I(@N(S), @L(9.5)), @I(@N(R1), @L(29.5)), @O(@N(Q1), @R(9.5));
+  @VF(421) : @E(gx_RPM4_V), @R(470.0, 240.0, 140.0, 19.0);
+  @C(422) : @FB(Init_R_TRIG9), @R(660.0, 240.0, 140.0, 18.0), @I(@N(CLK), @L(9.5)), @O(@N(Q), @R(9.5));
+  @VF(425) : @E(lx_RPM4_V), @R(1230.0, 240.0, 140.0, 19.0);
+  @C(252) : @F(OR), @R(640.0, 1190.0, 40.0, 38.0), BOOL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(OR), @R(9.5));
+  @VF(438) : @E(lx_RPM4), @R(470.0, 1190.0, 140.0, 19.0);
+  @VF(440) : @E(lx_RPM4_V), @R(470.0, 1210.0, 140.0, 19.0);
+  @OLT(448) : @R(350.0, 1210.0, 80.0, 19.0), @S(440);
+  @C(451) : @F(NOT), @R(970.0, 1080.0, 60.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(NOT), @R(9.5));
+  @C(454) : @F(NOT), @R(970.0, 910.0, 60.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(NOT), @R(9.5));
+  @C(457) : @F(NOT), @R(970.0, 970.0, 60.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(NOT), @R(9.5));
+  @C(458) : @F(AND), @R(1060.0, 660.0, 40.0, 98.0), BOOL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @I(@N(IN3), @L(49.5)), @I(@N(IN4), @L(69.5)), @I(@N(IN5), @L(89.5)), @O(@N(AND), @R(9.5));
+  @C(459) : @F(NOT), @R(970.0, 680.0, 60.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(NOT), @R(9.5));
+  @C(461) : @F(NOT), @R(970.0, 700.0, 60.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(NOT), @R(9.5));
+  @CF(456) : @R(1120.0, 710.0, 140.0, 19.0), @T("Mode 0"), @POU;
+  @C(464) : @F(NOT), @R(970.0, 810.0, 60.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(NOT), @R(9.5));
+  @C(468) : @F(NOT), @R(970.0, 720.0, 60.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(NOT), @R(9.5));
+  @C(469) : @F(NOT), @R(970.0, 740.0, 60.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(NOT), @R(9.5));
+  @C(470) : @F(NOT), @R(970.0, 830.0, 60.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(NOT), @R(9.5));
+  @C(475) : @F(NOT), @R(970.0, 850.0, 60.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(NOT), @R(9.5));
+  @C(455) : @F(NOT), @R(970.0, 950.0, 60.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(NOT), @R(9.5));
+  @C(487) : @F(AND), @R(1060.0, 1110.0, 40.0, 98.0), BOOL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @I(@N(IN3), @L(49.5)), @I(@N(IN4), @L(69.5)), @I(@N(IN5), @L(89.5)), @O(@N(AND), @R(9.5));
+  @C(488) : @F(NOT), @R(970.0, 1110.0, 60.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(NOT), @R(9.5));
+  @C(489) : @F(NOT), @R(970.0, 1130.0, 60.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(NOT), @R(9.5));
+  @C(490) : @F(NOT), @R(970.0, 1150.0, 60.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(NOT), @R(9.5));
+  @C(491) : @F(NOT), @R(970.0, 1170.0, 60.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(NOT), @R(9.5));
+  @VF(499) : @E(gx_ModeRPM4), @R(1230.0, 1110.0, 140.0, 19.0);
+  @VF(506) : @E(gx_ResetRPM_V), @R(470.0, 630.0, 140.0, 19.0);
+  @C(326) : @F(OR), @R(780.0, 70.0, 40.0, 38.0), BOOL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(OR), @R(9.5));
+  @VF(509) : @E(lx_CycleInit), @R(470.0, 90.0, 140.0, 19.0);
+  @VF(511) : @E(gr_Manual), @R(760.0, 1940.0, 140.0, 19.0);
+  @VF(512) : @E(gstruc_Action.rSP), @R(760.0, 1800.0, 220.0, 19.0);
+  @C(513) : @F(NOT), @R(340.0, 1800.0, 60.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(NOT), @R(9.5));
+  @C(588) : @F(AND), @R(710.0, 1780.0, 40.0, 38.0), BOOL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(AND), @R(9.5));
+  @C(593) : @F(MOVE), @R(1010.0, 1780.0, 60.0, 38.0), REAL, @I(@N(EN), @L(9.5)), @I(@N(IN), @L(29.5)), @O(@N(ENO), @R(9.5)), @O(@N(MOVE), @R(29.5));
+  @VF(594) : @E(gx_ModeRPM4), @R(190.0, 1780.0, 140.0, 19.0);
+  @VF(595) : @E(lx_Test), @R(190.0, 1800.0, 140.0, 19.0);
+  @VF(597) : @E(lr_Test), @R(1250.0, 1800.0, 140.0, 19.0);
+  @OLT(598) : @R(80.0, 1790.0, 80.0, 19.0), @S(595);
+  @C(602) : @F(AND), @R(710.0, 1890.0, 40.0, 98.0), BOOL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @I(@N(IN3), @L(49.5)), @I(@N(IN4), @L(69.5)), @I(@N(IN5), @L(89.5)), @O(@N(AND), @R(9.5));
+  @C(605) : @F(NOT), @R(620.0, 1890.0, 60.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(NOT), @R(9.5));
+  @C(606) : @F(NOT), @R(620.0, 1910.0, 60.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(NOT), @R(9.5));
+  @C(607) : @F(NOT), @R(620.0, 1930.0, 60.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(NOT), @R(9.5));
+  @C(608) : @F(NOT), @R(620.0, 1950.0, 60.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(NOT), @R(9.5));
+  @C(609) : @F(NOT), @R(620.0, 1970.0, 60.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(NOT), @R(9.5));
+  @VF(620) : @E(lx_ManualMode), @R(1250.0, 1890.0, 140.0, 19.0);
+  @C(622) : @F(MOVE), @R(1010.0, 1920.0, 60.0, 38.0), REAL, @I(@N(EN), @L(9.5)), @I(@N(IN), @L(29.5)), @O(@N(ENO), @R(9.5)), @O(@N(MOVE), @R(29.5));
+  @CF(625) : @R(770.0, 1970.0, 200.0, 19.0), @T("Von Visu Vorgabewert."), @POU;
+  @VF(626) : @E(lr_YManual), @R(1250.0, 2000.0, 140.0, 19.0);
+  @CF(627) : @R(1180.0, 1940.0, 280.0, 19.0), @T("Regler MUSS in Hand stehen!"), @POU;
+  @C(628) : @F(SEL), @R(1110.0, 2000.0, 120.0, 58.0), REAL, @I(@N(G), @L(9.5)), @I(@N(IN0), @L(29.5)), @I(@N(IN1), @L(49.5)), @O(@N(SEL), @R(9.5));
+  @VF(631) : @E(lx_ManualTest), @R(770.0, 2000.0, 140.0, 19.0);
+  @VF(633) : @E(lr_ManualTestVal), @R(900.0, 2020.0, 170.0, 19.0);
+  @VF(635) : @E(lx_ManualMode), @R(320.0, 2090.0, 140.0, 19.0);
+  @C(636) : @FB(com_logicals_Basic_Flash_FB_lc_Flash_2Hz_FBD1), @R(320.0, 2130.0, 260.0, 58.0), @O(@N(vox_Out), @R(9.5));
+  @C(637) : @F(AND), @R(710.0, 2090.0, 40.0, 38.0), BOOL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(AND), @R(9.5));
+  @VF(640) : @E(gx_ModeManual), @R(1250.0, 2090.0, 140.0, 19.0);
+  @CF(642) : @R(1170.0, 2130.0, 280.0, 19.0), @T("Mode Manual als Blinksignal anzeigen!"), @POU;
+  @CF(643) : @R(770.0, 3540.0, 400.0, 39.0), @T("Werte f$fcr Visu$NSpiderControl"), @POU;
+  @VF(644) : @E(gr_RPMActVal), @R(1270.0, 3630.0, 140.0, 19.0);
+  @VF(645) : @E(gr_RPMSetVal), @R(1270.0, 3670.0, 140.0, 19.0);
+  @VF(646) : @E(gr_RPMDevVal), @R(1270.0, 3710.0, 140.0, 19.0);
+  @C(647) : @F(MOVE), @R(1060.0, 3630.0, 60.0, 18.0), REAL, @I(@N(IN), @L(9.5)), @O(@N(MOVE), @R(9.5));
+  @C(648) : @F(MOVE), @R(1060.0, 3670.0, 60.0, 18.0), REAL, @I(@N(IN), @L(9.5)), @O(@N(MOVE), @R(9.5));
+  @C(649) : @F(MOVE), @R(1060.0, 3710.0, 60.0, 18.0), REAL, @I(@N(IN), @L(9.5)), @O(@N(MOVE), @R(9.5));
+  @VF(650) : @E(lr_Out), @R(670.0, 3750.0, 220.0, 19.0);
+  @VF(653) : @E(lr_Test), @R(670.0, 3670.0, 220.0, 19.0);
+  @VF(654) : @E(lr_Inp), @R(670.0, 3710.0, 220.0, 19.0);
+  @VF(657) : @E(lr_PV_OutPhysVal), @R(670.0, 3630.0, 220.0, 19.0);
+  @VF(660) : @E(gr_RPMOutVal), @R(1270.0, 3750.0, 140.0, 19.0);
+  @C(661) : @F(MOVE), @R(1060.0, 3750.0, 60.0, 18.0), REAL, @I(@N(IN), @L(9.5)), @O(@N(MOVE), @R(9.5));
+  @CP(447) : 1059.5, -3020.5;
+  @CP(1087) : 1319.5, -3370.5;
+  @CP(339) : 839.5, 229.5;
+  @CP(340) : 839.5, 189.5;
+  @CP(341) : 839.5, 149.5;
+  @CP(365) : 849.5, 449.5;
+  @CP(366) : 849.5, 489.5;
+  @CP(200) : 719.5, 669.5;
+  @CP(239) : 719.5, 899.5;
+  @CP(541) : 979.5, -2570.5;
+  @CP(542) : 979.5, -2530.5;
+  @CP(543) : 979.5, -2490.5;
+  @CP(544) : 979.5, -2450.5;
+  @CP(545) : 979.5, -2410.5;
+  @CP(898) : 979.5, -2370.5;
+  @CP(899) : 979.5, -2330.5;
+  @CP(744) : 1119.5, -2550.5;
+  @CP(745) : 1119.5, -2510.5;
+  @CP(746) : 1119.5, -2470.5;
+  @CP(747) : 1119.5, -2430.5;
+  @CP(748) : 1119.5, -2390.5;
+  @CP(749) : 1119.5, -2350.5;
+  @CP(882) : 979.5, -2250.5;
+  @CP(883) : 979.5, -2290.5;
+  @CP(881) : 979.5, -2210.5;
+  @CP(880) : 979.5, -2170.5;
+  @CP(879) : 979.5, -2130.5;
+  @CP(784) : 979.5, -1970.5;
+  @CP(785) : 979.5, -1930.5;
+  @CP(791) : 1129.5, -1950.5;
+  @CP(792) : 1129.5, -1910.5;
+  @CP(786) : 979.5, -1890.5;
+  @CP(793) : 1129.5, -1870.5;
+  @CP(787) : 979.5, -1850.5;
+  @CP(799) : 1129.5, -1830.5;
+  @CP(788) : 979.5, -1810.5;
+  @CP(801) : 1129.5, -1790.5;
+  @CP(809) : 979.5, -1770.5;
+  @CP(802) : 1129.5, -1750.5;
+  @CP(832) : 979.5, -1730.5;
+  @CP(836) : 979.5, -1690.5;
+  @CP(841) : 979.5, -1650.5;
+  @CP(842) : 979.5, -1610.5;
+  @CP(845) : 979.5, -1570.5;
+  @CP(849) : 979.5, -1530.5;
+  @CP(920) : 979.5, -1490.5;
+  @CP(819) : 979.5, -1440.5;
+  @CP(410) : 849.5, 529.5;
+  @CP(411) : 849.5, 569.5;
+  @CP(420) : 839.5, 269.5;
+  @CP(201) : 719.5, 779.5;
+  @CP(465) : 759.5, 799.5;
+  @CP(466) : 799.5, 819.5;
+  @CP(480) : 799.5, 939.5;
+  @CP(481) : 759.5, 919.5;
+  @CP(249) : 849.5, 1069.5;
+  @CP(482) : 849.5, 959.5;
+  @CP(483) : 849.5, 839.5;
+  @CP(496) : 719.5, 1009.5;
+  @CP(497) : 759.5, 1029.5;
+  @CP(502) : 899.5, 1199.5;
+  @CP(503) : 899.5, 1089.5;
+  @CP(504) : 899.5, 979.5;
+  @CP(505) : 899.5, 859.5;
+  @CP(498) : 799.5, 1049.5;
+  @CP(615) : 449.5, 1549.5;
+  @CP(616) : 479.5, 1609.5;
+  @CP(617) : 509.5, 1669.5;
+  @CP(618) : 539.5, 1729.5;
+  @CP(619) : 569.5, 1789.5;
+  @CP(623) : 949.5, 1899.5;
+
+  @G(15) :
+     @L(@VF(12).o, @C(13).IN)
+    ;
+  @G(16) :
+     @L(@C(13).NOT, @VF(14).i)
+    ;
+  @G(20) :
+     @L(@C(18).ADD, @CP(447)),
+     @L(@CP(447), @VF(19).i),
+     @L(@CP(447), @VF(442).i)
+    ;
+  @G(21) :
+     @L(@VF(17).o, @C(18).IN1)
+    ;
+  @G(23) :
+     @L(@VF(22).o, @C(18).IN2)
+    ;
+  @G(434) :
+     @L(@VF(433).o, @C(432).CLK)
+    ;
+  @G(436) :
+     @L(@C(432).Q, @VF(435).i)
+    ;
+  @G(521) :
+     @L(@C(514).SysTaskActualCycleTime, @VF(516).i)
+    ;
+  @G(522) :
+     @L(@C(515).SysTaskCycleTime, @VF(517).i)
+    ;
+  @G(582) :
+     @L(@VF(580).o, @C(581).IN1)
+    ;
+  @G(584) :
+     @L(@C(581).ADD, @VF(583).i)
+    ;
+  @G(586) :
+     @L(@VF(585).o, @C(581).IN2)
+    ;
+  @G(591) :
+     @L(@VF(435).o, @CP(1087)),
+     @L(@CP(1087), @CONN(590).i),
+     @L(@CP(1087), @C(1084).EN)
+    ;
+  @G(587) :
+     @L(@CONT(592).o, @C(581).EN)
+    ;
+  @G(1086) :
+     @L(@VF(1085).o, @C(1084).Msg)
+    ;
+  @G(59) :
+     @L(@C(3).vox_PhysValError, @VF(56).i)
+    ;
+  @G(58) :
+     @L(@C(3).vor_OutPhysVal, @VF(55).i)
+    ;
+  @G(206) :
+     @L(@VF(55).o, @VF(205).i)
+    ;
+  @G(57) :
+     @L(@C(3).vox_InValError, @VF(54).i)
+    ;
+  @G(48) :
+     @L(@VF(42).o, @C(3).vir_In)
+    ;
+  @G(49) :
+     @L(@VF(43).o, @C(3).vir_MaxInVal)
+    ;
+  @G(50) :
+     @L(@VF(44).o, @C(3).vir_MinInVal)
+    ;
+  @G(51) :
+     @L(@VF(45).o, @C(3).vir_MaxPhysVal)
+    ;
+  @G(52) :
+     @L(@VF(46).o, @C(3).vir_MinPhysVal)
+    ;
+  @G(53) :
+     @L(@VF(47).o, @C(3).vir_OffsetPhysVal)
+    ;
+  @G(70) :
+     @L(@VF(68).o, @VF(42).i)
+    ;
+  @G(188) :
+     @L(@VF(180).o, @C(178).vir_T1)
+    ;
+  @G(186) :
+     @L(@VF(179).o, @C(177).IN)
+    ;
+  @G(187) :
+     @L(@C(177).OUT, @C(178).vir_x)
+    ;
+  @G(189) :
+     @L(@C(178).vor_y, @VF(181).i)
+    ;
+  @G(35) :
+     @L(@VF(29).o, @C(1).vir_OffsetPhysVal)
+    ;
+  @G(34) :
+     @L(@VF(28).o, @C(1).vir_MinPhysVal)
+    ;
+  @G(39) :
+     @L(@VF(27).o, @C(1).vir_MaxPhysVal)
+    ;
+  @G(40) :
+     @L(@VF(26).o, @C(1).vir_MinInVal)
+    ;
+  @G(41) :
+     @L(@C(1).vox_PhysValError, @VF(38).i)
+    ;
+  @G(60) :
+     @L(@VF(25).o, @C(1).vir_MaxInVal)
+    ;
+  @G(72) :
+     @L(@C(1).vor_OutPhysVal, @VF(37).i)
+    ;
+  @G(203) :
+     @L(@VF(37).o, @VF(202).i)
+    ;
+  @G(73) :
+     @L(@VF(24).o, @C(1).vir_In)
+    ;
+  @G(74) :
+     @L(@C(1).vox_InValError, @VF(36).i)
+    ;
+  @G(75) :
+     @L(@VF(63).o, @VF(24).i)
+    ;
+  @G(173) :
+     @L(@VF(66).o, @C(169).vir_T1)
+    ;
+  @G(171) :
+     @L(@C(169).vor_y, @VF(170).i)
+    ;
+  @G(146) :
+     @L(@VF(168).o, @C(65).IN)
+    ;
+  @G(172) :
+     @L(@C(65).OUT, @C(169).vir_x)
+    ;
+  @G(76) :
+     @L(@VF(5).o, @C(2).IN2)
+    ;
+  @G(77) :
+     @L(@C(2).ADD, @VF(7).i)
+    ;
+  @G(78) :
+     @L(@VF(6).o, @C(2).IN1)
+    ;
+  @G(79) :
+     @L(@VF(8).o, @C(4).IN)
+    ;
+  @G(80) :
+     @L(@C(4).NOT, @VF(9).i)
+    ;
+  @G(321) :
+     @L(@VF(314).o, @C(313).CLK)
+    ;
+  @G(322) :
+     @L(@VF(315).o, @C(318).CLK)
+    ;
+  @G(323) :
+     @L(@VF(316).o, @C(319).CLK)
+    ;
+  @G(324) :
+     @L(@VF(317).o, @C(320).CLK)
+    ;
+  @G(344) :
+     @L(@VF(337).o, @C(343).IN1)
+    ;
+  @G(345) :
+     @L(@VF(342).o, @C(343).IN2)
+    ;
+  @G(386) :
+     @L(@VF(385).o, @C(343).IN3)
+    ;
+  @G(368) :
+     @L(@VF(355).o, @C(346).CLK)
+    ;
+  @G(369) :
+     @L(@VF(356).o, @C(348).CLK)
+    ;
+  @G(338) :
+     @L(@CP(339), @C(330).R1),
+     @L(@CP(339), @CP(340)),
+     @L(@CP(340), @C(329).R1),
+     @L(@CP(340), @CP(341)),
+     @L(@CP(341), @C(328).R1),
+     @L(@CP(341), @C(325).R1),
+     @L(@C(343).OR, @CP(420)),
+     @L(@CP(420), @CP(339)),
+     @L(@CP(420), @C(419).R1)
+    ;
+  @G(370) :
+     @L(@VF(357).o, @C(347).CLK)
+    ;
+  @G(374) :
+     @L(@C(377).OR, @CP(411)),
+     @L(@CP(366), @C(351).R1),
+     @L(@CP(366), @CP(365)),
+     @L(@CP(365), @C(350).R1),
+     @L(@CP(365), @C(349).R1),
+     @L(@CP(410), @CP(366)),
+     @L(@CP(410), @C(353).R1),
+     @L(@CP(411), @CP(410)),
+     @L(@CP(411), @C(408).R1)
+    ;
+  @G(375) :
+     @L(@VF(358).o, @C(352).CLK)
+    ;
+  @G(382) :
+     @L(@VF(359).o, @C(377).IN1)
+    ;
+  @G(331) :
+     @L(@C(320).Q, @C(330).S)
+    ;
+  @G(332) :
+     @L(@C(318).Q, @C(328).S)
+    ;
+  @G(333) :
+     @L(@C(319).Q, @C(329).S)
+    ;
+  @G(371) :
+     @L(@C(346).Q, @C(349).S)
+    ;
+  @G(372) :
+     @L(@C(348).Q, @C(350).S)
+    ;
+  @G(373) :
+     @L(@C(347).Q, @C(351).S)
+    ;
+  @G(376) :
+     @L(@C(352).Q, @C(353).S)
+    ;
+  @G(384) :
+     @L(@VF(360).o, @C(377).IN2)
+    ;
+  @G(192) :
+     @L(@CP(200), @CP(201)),
+     @L(@CP(239), @C(198).IN),
+     @L(@CP(239), @CP(496)),
+     @L(@C(240).OR, @CP(200)),
+     @L(@CP(200), @C(458).IN1),
+     @L(@CP(201), @CP(239)),
+     @L(@CP(201), @C(194).IN),
+     @L(@CP(496), @C(213).IN),
+     @L(@CP(496), @C(488).IN)
+    ;
+  @G(195) :
+     @L(@CP(465), @C(459).IN),
+     @L(@C(295).OR, @CP(465)),
+     @L(@CP(465), @C(193).IN2),
+     @L(@CP(465), @CP(481)),
+     @L(@CP(481), @CP(497)),
+     @L(@CP(481), @C(454).IN),
+     @L(@CP(497), @C(246).IN),
+     @L(@CP(497), @C(489).IN)
+    ;
+  @G(204) :
+     @L(@C(194).NOT, @C(193).IN1)
+    ;
+  @G(293) :
+     @L(@VF(84).o, @C(240).IN1)
+    ;
+  @G(294) :
+     @L(@VF(289).o, @C(240).IN2)
+    ;
+  @G(296) :
+     @L(@VF(145).o, @C(295).IN1)
+    ;
+  @G(297) :
+     @L(@VF(290).o, @C(295).IN2)
+    ;
+  @G(197) :
+     @L(@C(198).NOT, @C(196).IN1)
+    ;
+  @G(214) :
+     @L(@C(213).NOT, @C(209).IN1)
+    ;
+  @G(299) :
+     @L(@VF(175).o, @C(298).IN1)
+    ;
+  @G(300) :
+     @L(@VF(291).o, @C(298).IN2)
+    ;
+  @G(250) :
+     @L(@C(246).NOT, @C(209).IN2)
+    ;
+  @G(251) :
+     @L(@C(247).NOT, @C(209).IN3)
+    ;
+  @G(302) :
+     @L(@VF(207).o, @C(301).IN1)
+    ;
+  @G(303) :
+     @L(@VF(292).o, @C(301).IN2)
+    ;
+  @G(304) :
+     @L(@C(301).OR, @CP(249)),
+     @L(@CP(249), @C(209).IN4),
+     @L(@CP(249), @CP(482)),
+     @L(@CP(482), @C(455).IN),
+     @L(@CP(482), @CP(483)),
+     @L(@CP(483), @C(470).IN),
+     @L(@CP(483), @C(468).IN),
+     @L(@CP(249), @C(491).IN)
+    ;
+  @G(210) :
+     @L(@C(193).AND, @VF(190).i)
+    ;
+  @G(211) :
+     @L(@C(196).AND, @VF(191).i)
+    ;
+  @G(241) :
+     @L(@C(209).AND, @VF(208).i)
+    ;
+  @G(327) :
+     @L(@C(325).Q1, @VF(309).i)
+    ;
+  @G(334) :
+     @L(@C(328).Q1, @VF(310).i)
+    ;
+  @G(335) :
+     @L(@C(329).Q1, @VF(311).i)
+    ;
+  @G(336) :
+     @L(@C(330).Q1, @VF(312).i)
+    ;
+  @G(378) :
+     @L(@C(349).Q1, @VF(361).i)
+    ;
+  @G(379) :
+     @L(@C(350).Q1, @VF(363).i)
+    ;
+  @G(380) :
+     @L(@C(351).Q1, @VF(362).i)
+    ;
+  @G(381) :
+     @L(@C(353).Q1, @VF(364).i)
+    ;
+  @G(227) :
+     @L(@VF(226).o, @C(223).IN)
+    ;
+  @G(235) :
+     @L(@VF(258).o, @C(234).IN)
+    ;
+  @G(254) :
+     @L(@C(234).NOT, @C(224).IN2)
+    ;
+  @G(261) :
+     @L(@VF(217).o, @CP(615)),
+     @L(@CP(615), @C(224).IN1),
+     @L(@CP(615), @C(605).IN)
+    ;
+  @G(262) :
+     @L(@C(224).AND, @C(223).EN)
+    ;
+  @G(225) :
+     @L(@C(223).MOVE, @VF(220).i)
+    ;
+  @G(230) :
+     @L(@VF(229).o, @C(228).IN)
+    ;
+  @G(233) :
+     @L(@VF(232).o, @C(231).IN)
+    ;
+  @G(236) :
+     @L(@C(231).MOVE, @VF(222).i)
+    ;
+  @G(237) :
+     @L(@C(228).MOVE, @VF(221).i)
+    ;
+  @G(269) :
+     @L(@VF(263).o, @C(266).IN)
+    ;
+  @G(270) :
+     @L(@VF(264).o, @C(267).IN)
+    ;
+  @G(276) :
+     @L(@C(267).NOT, @C(273).IN2)
+    ;
+  @G(277) :
+     @L(@C(266).NOT, @C(272).IN2)
+    ;
+  @G(278) :
+     @L(@VF(219).o, @CP(617)),
+     @L(@CP(617), @C(273).IN1),
+     @L(@CP(617), @C(607).IN)
+    ;
+  @G(281) :
+     @L(@C(273).AND, @C(231).EN)
+    ;
+  @G(282) :
+     @L(@C(272).AND, @C(228).EN)
+    ;
+  @G(283) :
+     @L(@VF(218).o, @CP(616)),
+     @L(@CP(616), @C(272).IN1),
+     @L(@CP(616), @C(606).IN)
+    ;
+  @G(255) :
+     @L(@VF(85).o, @C(253).IN)
+    ;
+  @G(257) :
+     @L(@C(253).MOVE, @VF(256).i)
+    ;
+  @G(271) :
+     @L(@VF(265).o, @C(268).IN)
+    ;
+  @G(275) :
+     @L(@C(268).NOT, @C(274).IN2)
+    ;
+  @G(279) :
+     @L(@VF(248).o, @CP(618)),
+     @L(@CP(618), @C(274).IN1),
+     @L(@CP(618), @C(608).IN)
+    ;
+  @G(280) :
+     @L(@C(274).AND, @C(253).EN)
+    ;
+  @G(242) :
+     @L(@VF(190).o, @C(212).IN1)
+    ;
+  @G(243) :
+     @L(@VF(191).o, @C(212).IN2)
+    ;
+  @G(244) :
+     @L(@VF(208).o, @C(212).IN3)
+    ;
+  @G(287) :
+     @L(@VF(286).o, @C(212).IN5)
+    ;
+  @G(107) :
+     @L(@VF(86).o, @C(83).IN1)
+    ;
+  @G(110) :
+     @L(@C(83).SUB, @VF(109).i)
+    ;
+  @G(216) :
+     @L(@C(212).OR, @VF(215).i)
+    ;
+  @G(108) :
+     @L(@VF(87).o, @C(83).IN2)
+    ;
+  @G(116) :
+     @L(@VF(88).o, @C(81).vir_Inp)
+    ;
+  @G(117) :
+     @L(@VF(89).o, @C(81).vir_TI)
+    ;
+  @G(118) :
+     @L(@C(81).vox_Lu, @VF(97).i)
+    ;
+  @G(119) :
+     @L(@C(81).vox_Ld, @VF(98).i)
+    ;
+  @G(120) :
+     @L(@VF(90).o, @C(81).vir_Kv)
+    ;
+  @G(122) :
+     @L(@VF(91).o, @C(81).vir_T1)
+    ;
+  @G(124) :
+     @L(@VF(92).o, @C(81).vix_Auto)
+    ;
+  @G(127) :
+     @L(@C(81).vor_Out, @VF(99).i)
+    ;
+  @G(128) :
+     @L(@C(81).vor_P, @VF(100).i)
+    ;
+  @G(131) :
+     @L(@C(81).vor_I, @VF(101).i)
+    ;
+  @G(133) :
+     @L(@VF(94).o, @C(81).vir_YManual)
+    ;
+  @G(136) :
+     @L(@C(81).vor_D, @VF(102).i)
+    ;
+  @G(139) :
+     @L(@VF(93).o, @C(81).vir_Lvu)
+    ;
+  @G(140) :
+     @L(@VF(95).o, @C(81).vir_Lvd)
+    ;
+  @G(260) :
+     @L(@VF(96).o, @C(81).vir_Kp)
+    ;
+  @G(387) :
+     @L(@VF(111).o, @C(82).vir_In)
+    ;
+  @G(388) :
+     @L(@C(82).vox_InValError, @VF(123).i)
+    ;
+  @G(389) :
+     @L(@VF(129).o, @C(130).IN)
+    ;
+  @G(390) :
+     @L(@C(130).MOVE, @VF(132).i)
+    ;
+  @G(391) :
+     @L(@VF(132).o, @VF(259).i)
+    ;
+  @G(392) :
+     @L(@VF(112).o, @C(82).vir_MaxInVal)
+    ;
+  @G(394) :
+     @L(@VF(113).o, @C(82).vir_MinInVal)
+    ;
+  @G(395) :
+     @L(@C(82).vor_OutPhysVal, @VF(125).i)
+    ;
+  @G(396) :
+     @L(@C(82).vox_PhysValError, @VF(126).i)
+    ;
+  @G(397) :
+     @L(@VF(114).o, @C(82).vir_MaxPhysVal)
+    ;
+  @G(398) :
+     @L(@VF(115).o, @C(82).vir_MinPhysVal)
+    ;
+  @G(399) :
+     @L(@VF(121).o, @C(82).vir_OffsetPhysVal)
+    ;
+  @G(400) :
+     @L(@C(135).MOVE, @C(138).IN)
+    ;
+  @G(401) :
+     @L(@C(138).OUT, @VF(137).i)
+    ;
+  @G(402) :
+     @L(@VF(134).o, @C(135).IN)
+    ;
+  @G(572) :
+     @L(@VF(568).o, @C(571).CLK)
+    ;
+  @G(573) :
+     @L(@C(571).Q, @C(569).IN2)
+    ;
+  @G(570) :
+     @L(@CONT(471).o, @C(569).IN1)
+    ;
+  @G(540) :
+     @L(@CP(541), @C(473).EN),
+     @L(@CP(541), @CP(542)),
+     @L(@CP(542), @C(529).EN),
+     @L(@CP(542), @CP(543)),
+     @L(@CP(543), @C(530).EN),
+     @L(@CP(543), @CP(544)),
+     @L(@CP(544), @C(531).EN),
+     @L(@CP(544), @CP(545)),
+     @L(@CP(545), @C(532).EN),
+     @L(@C(569).OR, @CP(541)),
+     @L(@CP(545), @CP(898)),
+     @L(@CP(898), @C(533).EN),
+     @L(@CP(898), @CP(899)),
+     @L(@CP(899), @C(884).EN),
+     @L(@CP(899), @CP(883)),
+     @L(@CP(883), @CP(882)),
+     @L(@CP(883), @C(866).EN),
+     @L(@CP(882), @CP(881)),
+     @L(@CP(882), @C(865).EN),
+     @L(@CP(881), @CP(880)),
+     @L(@CP(881), @C(864).EN),
+     @L(@CP(880), @CP(879)),
+     @L(@CP(880), @C(863).EN),
+     @L(@CP(879), @C(862).EN)
+    ;
+  @G(550) :
+     @L(@VF(549).o, @C(533).IN)
+    ;
+  @G(551) :
+     @L(@VF(548).o, @C(532).IN)
+    ;
+  @G(552) :
+     @L(@VF(547).o, @C(531).IN)
+    ;
+  @G(553) :
+     @L(@VF(546).o, @C(530).IN)
+    ;
+  @G(554) :
+     @L(@VF(527).o, @C(529).IN)
+    ;
+  @G(555) :
+     @L(@VF(485).o, @C(473).IN)
+    ;
+  @G(885) :
+     @L(@VF(877).o, @C(884).IN)
+    ;
+  @G(534) :
+     @L(@C(473).MOVE, @CP(744)),
+     @L(@CP(744), @VF(523).i),
+     @L(@CP(744), @VF(738).i)
+    ;
+  @G(535) :
+     @L(@C(529).MOVE, @CP(745)),
+     @L(@CP(745), @VF(524).i),
+     @L(@CP(745), @VF(743).i)
+    ;
+  @G(536) :
+     @L(@C(530).MOVE, @CP(746)),
+     @L(@CP(746), @VF(474).i),
+     @L(@CP(746), @VF(741).i)
+    ;
+  @G(537) :
+     @L(@C(531).MOVE, @CP(747)),
+     @L(@CP(747), @VF(528).i),
+     @L(@CP(747), @VF(742).i)
+    ;
+  @G(538) :
+     @L(@C(532).MOVE, @CP(748)),
+     @L(@CP(748), @VF(525).i),
+     @L(@CP(748), @VF(739).i)
+    ;
+  @G(539) :
+     @L(@C(533).MOVE, @CP(749)),
+     @L(@CP(749), @VF(526).i),
+     @L(@CP(749), @VF(740).i)
+    ;
+  @G(895) :
+     @L(@VF(875).o, @C(866).IN)
+    ;
+  @G(896) :
+     @L(@C(866).MOVE, @VF(876).i)
+    ;
+  @G(897) :
+     @L(@C(884).MOVE, @VF(878).i)
+    ;
+  @G(893) :
+     @L(@VF(873).o, @C(865).IN)
+    ;
+  @G(894) :
+     @L(@C(865).MOVE, @VF(874).i)
+    ;
+  @G(891) :
+     @L(@VF(870).o, @C(864).IN)
+    ;
+  @G(892) :
+     @L(@C(864).MOVE, @VF(869).i)
+    ;
+  @G(888) :
+     @L(@VF(871).o, @C(863).IN)
+    ;
+  @G(890) :
+     @L(@C(863).MOVE, @VF(868).i)
+    ;
+  @G(430) :
+     @L(@CONT(407).o, @C(427).EN)
+    ;
+  @G(886) :
+     @L(@C(862).MOVE, @VF(867).i)
+    ;
+  @G(889) :
+     @L(@VF(872).o, @C(862).IN)
+    ;
+  @G(428) :
+     @L(@C(427).MOVE, @VF(406).i)
+    ;
+  @G(431) :
+     @L(@VF(429).o, @C(427).IN)
+    ;
+  @G(789) :
+     @L(@CP(784), @C(576).EN),
+     @L(@CP(784), @CP(785)),
+     @L(@CP(785), @C(577).EN),
+     @L(@CP(785), @CP(786)),
+     @L(@CP(786), @C(750).EN),
+     @L(@CP(786), @CP(787)),
+     @L(@CP(787), @C(751).EN),
+     @L(@CP(787), @CP(788)),
+     @L(@CP(788), @C(752).EN),
+     @L(@CP(788), @CP(809)),
+     @L(@C(575).Q, @CP(784)),
+     @L(@CP(809), @C(753).EN),
+     @L(@CP(809), @CP(832)),
+     @L(@CP(819), @C(804).EN),
+     @L(@CP(819), @C(818).EN),
+     @L(@CP(832), @CP(836)),
+     @L(@CP(832), @C(827).EN),
+     @L(@CP(836), @CP(841)),
+     @L(@CP(836), @C(828).EN),
+     @L(@CP(841), @CP(842)),
+     @L(@CP(841), @C(829).EN),
+     @L(@CP(842), @CP(845)),
+     @L(@CP(842), @C(830).EN),
+     @L(@CP(845), @CP(849)),
+     @L(@CP(845), @C(831).EN),
+     @L(@CP(849), @CP(920)),
+     @L(@CP(849), @C(846).EN),
+     @L(@CP(920), @CP(819)),
+     @L(@CP(920), @C(919).EN)
+    ;
+  @G(772) :
+     @L(@VF(574).o, @C(575).CLK)
+    ;
+  @G(794) :
+     @L(@C(576).MOVE, @CP(791)),
+     @L(@CP(791), @VF(762).i),
+     @L(@CP(791), @VF(754).i)
+    ;
+  @G(773) :
+     @L(@VF(766).o, @C(576).IN)
+    ;
+  @G(795) :
+     @L(@C(577).MOVE, @CP(792)),
+     @L(@CP(792), @VF(760).i),
+     @L(@CP(792), @VF(755).i)
+    ;
+  @G(774) :
+     @L(@VF(771).o, @C(577).IN)
+    ;
+  @G(796) :
+     @L(@C(750).MOVE, @CP(793)),
+     @L(@CP(793), @VF(759).i),
+     @L(@CP(793), @VF(756).i)
+    ;
+  @G(775) :
+     @L(@VF(769).o, @C(750).IN)
+    ;
+  @G(797) :
+     @L(@C(751).MOVE, @CP(799)),
+     @L(@CP(799), @VF(763).i),
+     @L(@CP(799), @VF(757).i)
+    ;
+  @G(776) :
+     @L(@VF(770).o, @C(751).IN)
+    ;
+  @G(798) :
+     @L(@C(752).MOVE, @CP(801)),
+     @L(@CP(801), @VF(761).i),
+     @L(@CP(801), @VF(758).i)
+    ;
+  @G(777) :
+     @L(@VF(767).o, @C(752).IN)
+    ;
+  @G(800) :
+     @L(@C(753).MOVE, @CP(802)),
+     @L(@CP(802), @VF(765).i),
+     @L(@CP(802), @VF(764).i)
+    ;
+  @G(790) :
+     @L(@VF(768).o, @C(753).IN)
+    ;
+  @G(833) :
+     @L(@VF(826).o, @C(827).IN)
+    ;
+  @G(856) :
+     @L(@C(827).MOVE, @VF(850).i)
+    ;
+  @G(835) :
+     @L(@VF(834).o, @C(828).IN)
+    ;
+  @G(857) :
+     @L(@C(828).MOVE, @VF(851).i)
+    ;
+  @G(840) :
+     @L(@VF(837).o, @C(829).IN)
+    ;
+  @G(861) :
+     @L(@C(829).MOVE, @VF(852).i)
+    ;
+  @G(839) :
+     @L(@VF(838).o, @C(830).IN)
+    ;
+  @G(860) :
+     @L(@C(830).MOVE, @VF(853).i)
+    ;
+  @G(844) :
+     @L(@VF(843).o, @C(831).IN)
+    ;
+  @G(859) :
+     @L(@C(831).MOVE, @VF(854).i)
+    ;
+  @G(848) :
+     @L(@VF(847).o, @C(846).IN)
+    ;
+  @G(858) :
+     @L(@C(846).MOVE, @VF(855).i)
+    ;
+  @G(921) :
+     @L(@VF(918).o, @C(919).IN)
+    ;
+  @G(923) :
+     @L(@C(919).MOVE, @VF(922).i)
+    ;
+  @G(807) :
+     @L(@VF(805).o, @C(804).IN)
+    ;
+  @G(808) :
+     @L(@C(804).MOVE, @VF(806).i)
+    ;
+  @G(820) :
+     @L(@VF(817).o, @C(818).IN1)
+    ;
+  @G(822) :
+     @L(@C(818).ADD, @VF(821).i)
+    ;
+  @G(824) :
+     @L(@VF(823).o, @C(818).IN2)
+    ;
+  @G(405) :
+     @L(@VF(403).o, @C(404).CLK)
+    ;
+  @G(409) :
+     @L(@C(404).Q, @C(408).S)
+    ;
+  @G(413) :
+     @L(@C(408).Q1, @VF(412).i)
+    ;
+  @G(423) :
+     @L(@C(422).Q, @C(419).S)
+    ;
+  @G(424) :
+     @L(@VF(421).o, @C(422).CLK)
+    ;
+  @G(426) :
+     @L(@C(419).Q1, @VF(425).i)
+    ;
+  @G(449) :
+     @L(@VF(438).o, @C(252).IN1)
+    ;
+  @G(450) :
+     @L(@VF(440).o, @C(252).IN2)
+    ;
+  @G(452) :
+     @L(@C(451).NOT, @C(209).IN5)
+    ;
+  @G(460) :
+     @L(@C(459).NOT, @C(458).IN2)
+    ;
+  @G(462) :
+     @L(@C(458).AND, @VF(184).i)
+    ;
+  @G(463) :
+     @L(@C(461).NOT, @C(458).IN3)
+    ;
+  @G(467) :
+     @L(@C(464).NOT, @C(193).IN3)
+    ;
+  @G(476) :
+     @L(@C(470).NOT, @C(193).IN4)
+    ;
+  @G(477) :
+     @L(@C(475).NOT, @C(193).IN5)
+    ;
+  @G(478) :
+     @L(@C(455).NOT, @C(196).IN4)
+    ;
+  @G(479) :
+     @L(@C(457).NOT, @C(196).IN5)
+    ;
+  @G(245) :
+     @L(@CP(466), @C(461).IN),
+     @L(@CP(466), @C(464).IN),
+     @L(@CP(466), @CP(480)),
+     @L(@C(298).OR, @CP(480)),
+     @L(@CP(480), @C(196).IN3),
+     @L(@CP(480), @CP(498)),
+     @L(@CP(498), @C(490).IN),
+     @L(@CP(498), @C(247).IN)
+    ;
+  @G(199) :
+     @L(@C(454).NOT, @C(196).IN2)
+    ;
+  @G(484) :
+     @L(@C(468).NOT, @C(458).IN4)
+    ;
+  @G(486) :
+     @L(@C(469).NOT, @C(458).IN5)
+    ;
+  @G(453) :
+     @L(@C(252).OR, @CP(502)),
+     @L(@CP(502), @C(487).IN5),
+     @L(@CP(502), @CP(503)),
+     @L(@CP(503), @C(451).IN),
+     @L(@CP(503), @CP(504)),
+     @L(@CP(504), @C(457).IN),
+     @L(@CP(504), @CP(505)),
+     @L(@CP(505), @C(475).IN),
+     @L(@CP(505), @C(469).IN)
+    ;
+  @G(492) :
+     @L(@C(488).NOT, @C(487).IN1)
+    ;
+  @G(493) :
+     @L(@C(489).NOT, @C(487).IN2)
+    ;
+  @G(494) :
+     @L(@C(490).NOT, @C(487).IN3)
+    ;
+  @G(495) :
+     @L(@C(491).NOT, @C(487).IN4)
+    ;
+  @G(500) :
+     @L(@C(487).AND, @VF(499).i)
+    ;
+  @G(501) :
+     @L(@VF(499).o, @C(212).IN4)
+    ;
+  @G(507) :
+     @L(@VF(506).o, @C(377).IN3)
+    ;
+  @G(367) :
+     @L(@C(313).Q, @C(326).IN1)
+    ;
+  @G(508) :
+     @L(@C(326).OR, @C(325).S)
+    ;
+  @G(510) :
+     @L(@VF(509).o, @C(326).IN2)
+    ;
+  @G(599) :
+     @L(@VF(595).o, @C(513).IN)
+    ;
+  @G(600) :
+     @L(@C(513).NOT, @C(588).IN2)
+    ;
+  @G(601) :
+     @L(@VF(594).o, @CP(619)),
+     @L(@CP(619), @C(588).IN1),
+     @L(@CP(619), @C(609).IN)
+    ;
+  @G(603) :
+     @L(@C(588).AND, @C(593).EN)
+    ;
+  @G(604) :
+     @L(@C(593).MOVE, @VF(597).i)
+    ;
+  @G(596) :
+     @L(@VF(512).o, @C(593).IN)
+    ;
+  @G(610) :
+     @L(@C(605).NOT, @C(602).IN1)
+    ;
+  @G(611) :
+     @L(@C(606).NOT, @C(602).IN2)
+    ;
+  @G(612) :
+     @L(@C(607).NOT, @C(602).IN3)
+    ;
+  @G(613) :
+     @L(@C(608).NOT, @C(602).IN4)
+    ;
+  @G(614) :
+     @L(@C(609).NOT, @C(602).IN5)
+    ;
+  @G(621) :
+     @L(@C(602).AND, @CP(623)),
+     @L(@CP(623), @VF(620).i),
+     @L(@CP(623), @C(622).EN)
+    ;
+  @G(624) :
+     @L(@VF(511).o, @C(622).IN)
+    ;
+  @G(629) :
+     @L(@C(628).SEL, @VF(626).i)
+    ;
+  @G(630) :
+     @L(@C(622).MOVE, @C(628).IN1)
+    ;
+  @G(632) :
+     @L(@VF(631).o, @C(628).G)
+    ;
+  @G(634) :
+     @L(@VF(633).o, @C(628).IN0)
+    ;
+  @G(638) :
+     @L(@VF(635).o, @C(637).IN1)
+    ;
+  @G(639) :
+     @L(@C(636).vox_Out, @C(637).IN2)
+    ;
+  @G(641) :
+     @L(@C(637).AND, @VF(640).i)
+    ;
+  @G(652) :
+     @L(@C(648).MOVE, @VF(645).i)
+    ;
+  @G(655) :
+     @L(@C(647).MOVE, @VF(644).i)
+    ;
+  @G(651) :
+     @L(@VF(654).o, @C(649).IN)
+    ;
+  @G(656) :
+     @L(@VF(653).o, @C(648).IN)
+    ;
+  @G(658) :
+     @L(@VF(657).o, @C(647).IN)
+    ;
+  @G(659) :
+     @L(@C(649).MOVE, @VF(646).i)
+    ;
+  @G(662) :
+     @L(@VF(650).o, @C(661).IN)
+    ;
+  @G(663) :
+     @L(@C(661).MOVE, @VF(660).i)
+    ;
+END_PROGRAM

@@ -1,0 +1,90 @@
+/*
+ * Raspi4-Configuration
+ * RPMControl_Webinar
+ */
+{
+	CHANNEL Raspi4Channel
+		TCP
+			ADDRESS := 192.168.128.76;  // .75;        // Raspi4 IP-Adresse
+			PORT    := 1534;            // 1508;       // Portnummer wie auf der imx8mq 
+		END_TCP
+	END_CHANNEL
+}
+
+CONFIGURATION ConfRaspi4
+
+
+	RESOURCE ResRaspi4 ON LinuxARM64 { ON_CHANNEL := Raspi4Channel }
+
+		{ IO_IMPORT PROVIDER := EtherCatProvider, 
+			        SERVICE  := EtherCAT, 
+			        PARAMS   := "HWIO_Raspi4/eni_Raspi4.xml", 
+			        GLOBALS  := "HWIO_Raspi4/eni_Raspi4"}
+       /*
+        * GV von EtherCAT-Master
+        */
+		{ INCLUDE_GLOBALS eni_Raspi4 }
+       /*
+        * EC-Engineer-IOs auf GVs mappen
+        */ 
+		{ INCLUDE_GLOBALS GV_IO }
+       /*
+        * EC-Engineer-IOs auf GVs mappen
+        */ 
+		{ INCLUDE_GLOBALS GV_IO_EtherCAT }
+       /*
+        * Daten RTS
+        */ 
+		{ INCLUDE_GLOBALS GV_RTS }
+       /*
+        * Daten Resource
+        */ 
+		{ INCLUDE_GLOBALS GV_Raspi4 }
+		{ INCLUDE_GLOBALS GV }
+		{ INCLUDE_GLOBALS GV_MQTT }
+		{ INCLUDE_GLOBALS GV_RPMControl_Visu }
+
+		{ INCLUDE_GLOBALS GV_RPMControl }
+		{ INCLUDE_GLOBALS GV_RPMControl_SetVal }
+		{ INCLUDE_GLOBALS GV_RPMControl_SetVal_Raspi4 }
+       /*
+        * SFC in AppLogic
+        */
+		{ INCLUDE_GLOBALS GV_SFC }
+       /*
+        * SFC in AppLogic/Action
+        */
+		{ INCLUDE_GLOBALS GV_Action }
+	   /*
+	    * Oscilloscope fuer SpiderControl 
+	    */	
+		{INCLUDE_GLOBALS GV_Data_Struc}
+
+		{ IO } TASK TSK_IO ( INTERVAL := TIME#5ms, PRIORITY := 0 );
+
+        TASK TSK_MQTTConnect       (INTERVAL := TIME#500ms, PRIORITY := 38229);
+        TASK TSK_MQTTPublish       (INTERVAL := TIME#800ms,  PRIORITY := 38229);  // Muss schneller als die SubscribeTask sein!
+//        TASK TSK_MQTTSubscribe     (INTERVAL := TIME#1200ms, PRIORITY := 38229);
+		
+		TASK TSK_AppLogic (INTERVAL := TIME#50ms,  PRIORITY := 38229);  // Logic
+		TASK TSK_AppLoop  (INTERVAL := TIME#10ms,  PRIORITY := 38229);  // Loop  - 10ms MUSS gesetzt sein (s. Regler-Einstellungen)!
+		TASK TSK_AppTimer (INTERVAL := TIME#500ms, PRIORITY := 38229);  // Timer
+		
+//		PROGRAM INST_IO_Raspi4 WITH TSK_IO : PRG_IOMapping_Raspi4_ST;
+
+		PROGRAM INST_IO_Raspi4                 WITH TSK_IO          : PRG_Raspi4_IOMapping_FBD;
+
+//		PROGRAM INST_AppLogic_LD               WITH TSK_AppLogic    : PRG_AppLogic_LD;
+
+//		PROGRAM INST_RPMControl_SFC            WITH TSK_AppLogic    : PRG_RPMControl_SFC;
+//		PROGRAM INST_RPMControl_FBD            WITH TSK_AppLoop     : PRG_RPMControl_FBD;
+
+		PROGRAM INST_RTC_FBD                   WITH TSK_AppTimer    : PRG_RTC_FBD;    // Date/Time
+//		PROGRAM INST_RETAIN_FBD                WITH TSK_AppTimer    : PRG_RETAIN_FBD; // RETAIN Handling
+
+//        PROGRAM INST_Raspi4_MQTTConnect        WITH TSK_MQTTConnect        : PRG_Raspi4_MQTTConnect;
+//        PROGRAM INST_Raspi4_MQTTPublish_Header WITH TSK_MQTTPublish        : PRG_Raspi4_MQTTPublish_Header;
+//        PROGRAM INST_Raspi4_MQTTPublish_IO     WITH TSK_MQTTPublish        : PRG_Raspi4_MQTTPublish_IO;
+
+    END_RESOURCE
+ END_CONFIGURATION

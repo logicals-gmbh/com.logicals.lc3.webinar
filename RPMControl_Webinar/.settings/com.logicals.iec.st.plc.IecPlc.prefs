@@ -1,0 +1,7 @@
+eclipse.preferences.version=1
+ptk.properties.additionalSources.path.Raspbian=
+ptk.properties.disabledCodeGenerationServices.id.Raspbian=
+ptk.properties.include.path.Raspbian=${PROJECT_LOC}/src/PiXtendLib/include
+ptk.properties.library.name.Raspbian=pixtend;wiringPi;wiringPiDev
+ptk.properties.library.path.Raspbian=${PROJECT_LOC}/src/PiXtendLib/lib
+ptk.properties.selected.platform=Raspbian

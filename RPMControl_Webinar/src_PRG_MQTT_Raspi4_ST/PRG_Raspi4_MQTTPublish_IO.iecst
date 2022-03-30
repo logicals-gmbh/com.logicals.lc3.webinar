@@ -1,0 +1,307 @@
+   /*
+  * logi.cals GmbH
+  * A-3100 St. Poelten
+  * Europaplatz 7/1
+  * Tel.: 0043-5-77147
+  *
+  * logi.cals automation solutions & services GmbH
+  * D-40738 Langenfeld
+  * Postfach 1306
+  * Tel.: 0049-2173-91910
+  * 
+  * Contact:
+  * dieter.goltz@logicals.com
+  * 
+  * History:
+  * Created: 
+  * DG 2021-05-30
+  * 
+  * Modified:
+  * DG 2021-05-30 IO
+  */
+ 
+ /* 
+  * Description
+  * ===========
+  */ 
+ 
+ /* 
+  * Beschreibung
+  * ============
+  * MQTT Kommunikation
+  * Publish Werte als Topics (IO)
+  * 
+  * Austausch der aktuellen Daten mit dem Broker
+  * 
+  */
+ PROGRAM PRG_Raspi4_MQTTPublish_IO
+ 
+   VAR_EXTERNAL
+	    /* ProcessValue - Analogeingang_1 0..32767 unskaliert */
+		gr_PV : REAL;
+	    /* SetPoint     - Analogeingang_2 0..32767 unskaliert */
+		gr_SP : REAL;
+	    /* OutValue     - Analogausgang_1 0..32767 skaliert von 0..100% */
+		gr_Y : REAL;
+	    /* OutValue     - Ausgang Regler 0..100% wird skaliert auf 0..32767 */
+		gr_PID_OUT : REAL;
+
+	    /* ManualWert 0..100% */
+		gr_Manual : REAL;
+
+	    /* ProcessValue - Analogeingang_1 Skaliert 0..100%*/
+		gr_PV_Scale : REAL;
+	    /* SetPoint     - Analogeingang_2 Skaliert 0..100% */
+		gr_SP_Scale : REAL;
+	    /* OutValue     - Analogausgang_1 Skaliert 0..100% */
+		gr_Y_Scale  : REAL;
+        /*
+         * Anzeige der Betriebsart 1Aus4 
+         */
+        /* An Ausgang Ausgangswert = 0% */
+        gx_ModeRPM0 : BOOL; 
+        /* An Ausgang Ausgangswert = 25% */
+        gx_ModeRPM1 : BOOL; 
+        /* An Ausgang Ausgangswert = 50% */
+        gx_ModeRPM2 : BOOL; 
+        /* An Ausgang SetPoint von Poti */
+        gx_ModeRPM3 : BOOL; 
+        
+        /* Blinkfunktion */
+        gx_Flash : BOOL;
+   END_VAR
+  /*
+   * PRG_Raspi4_MQTTPublish_IO
+   */	
+   VAR_EXTERNAL
+    /*
+     * State und Channel vom Connect
+     */ 
+     MQTT_State   : MQTT_SUBSCRIBER_STATE;
+     MQTT_Channel : DINT;
+   END_VAR
+   
+   VAR_EXTERNAL
+      /*
+       * Globaler TraceLevel
+       */ 
+       gui_TraceLevel : UINT;
+   END_VAR
+
+  /*
+   * Publish Topic / BOOL-Status von Topic
+   */
+   VAR
+       FB_MQTT_Publish_IOBlink             : FB_MQTT_Publish_IO;
+
+       FB_MQTT_Publish_IOValModeRPM0       : FB_MQTT_Publish_IO;
+       FB_MQTT_Publish_IOValModeRPM1       : FB_MQTT_Publish_IO;
+       FB_MQTT_Publish_IOValModeRPM2       : FB_MQTT_Publish_IO;
+       FB_MQTT_Publish_IOValModeRPM3       : FB_MQTT_Publish_IO;
+                                           
+       FB_MQTT_Publish_IOValPV             : FB_MQTT_Publish_IOVal;
+       FB_MQTT_Publish_IOValSP             : FB_MQTT_Publish_IOVal;
+       FB_MQTT_Publish_IOValY              : FB_MQTT_Publish_IOVal;
+       FB_MQTT_Publish_IOValManual         : FB_MQTT_Publish_IOVal;
+       FB_MQTT_Publish_IOValPV_Scale       : FB_MQTT_Publish_IOVal;
+       FB_MQTT_Publish_IOValSP_Scale       : FB_MQTT_Publish_IOVal;
+       FB_MQTT_Publish_IOValY_Scale        : FB_MQTT_Publish_IOVal;
+
+   END_VAR      	 
+ 
+  VAR
+    /*
+     * Der Datentyp enthaelt alle wesentlichen Informationen fuer die Basis-
+     * Einstellungen von MQTT
+     */
+     l_MQTTInitKom    : DT_MQTT;
+  END_VAR
+  
+  VAR
+    l_ConState : MQTT_SUBSCRIBER_STATE;
+    ldi_ConCh  : DINT;
+  END_VAR
+
+
+   VAR
+    lstr_PRGName : STRING[30] := 'PRG_Raspi4_MQTTPublish_IO';
+    lui_TraceLevel : UINT     := 5;
+   END_VAR
+ /*
+  * Initialisierungsmerker
+  */
+  VAR
+     FB_InitR_TRIG       : R_TRIG;
+  END_VAR      
+    
+  VAR
+    /* Lokaler InitPuls im Baustein */
+     lx_CycleInit        : BOOL;
+
+    /* Lokaler Puls im Baustein */
+     lx_CyclePulse       : BOOL;
+    /* Lokaler Zyklustaktzaehler */
+     li_CycleCount       : INT; 
+
+    /* Lokaler InitZyklustaktzaehler */
+     li_CycleCountInitVal : INT;      
+  END_VAR
+
+  /*
+   * InitZyklus setzen wenn MQTT aktiv gesetzt!
+   */ 
+   FB_InitR_TRIG(CLK := TRUE,Q => lx_CycleInit);
+
+   lui_TraceLevel := gui_TraceLevel;
+  
+  /*
+   * CyclePulse
+   */
+   lx_CyclePulse := NOT(lx_CyclePulse);
+
+  /*
+   * LifeTick bzw. ZyklusZaehler
+   */ 
+   li_CycleCount := li_CycleCount + 1;     
+  /*
+   * -------------------------------------------------
+   * Start SPS-Programm PRG_Raspi4_MQTTPublish_IO
+   * -------------------------------------------------
+   */
+
+  /*
+   * Steuerung Publish_IO
+   *
+   * Publish
+   * Welche Einzel-Daten sollen an den Broker geschickt werden
+   */   
+   IF lx_CycleInit = TRUE THEN   
+       li_CycleCountInitVal := li_CycleCountInitVal + 1;
+   END_IF;
+
+   /*
+    * Daten von MQTTConnect
+    */
+    l_ConState := MQTT_State;
+    ldi_ConCh  := MQTT_Channel;
+
+   /*
+    * Kommt von MQTTConnect
+    * Wert MUSS 6 sein!
+    */
+    IF l_ConState = MQTT_SUBSCRIBER_STATE#CONNECTED /* connected */ THEN
+
+   /*
+    * Blinkfunktion an gx_Out8
+    */ 
+    FB_MQTT_Publish_IOBlink(viui_TraceLevel            := lui_TraceLevel,
+                            vix_PubIn                  := gx_Flash,
+                            vistr_BrokerPublishTopicIO := l_MQTTInitKom.Raspi4TopicIOBlink,
+                            vi_State                   := l_ConState,
+                            vidi_Ch                    := ldi_ConCh);
+   
+   /*
+    * Mode RPM 0
+    */ 
+    FB_MQTT_Publish_IOValModeRPM0(viui_TraceLevel            := lui_TraceLevel,
+                                  vix_PubIn                  := gx_ModeRPM0,
+                                  vistr_BrokerPublishTopicIO := l_MQTTInitKom.Raspi4TopicIOModeRPM0,
+                                  vi_State                   := l_ConState,
+                                  vidi_Ch                    := ldi_ConCh);
+
+   /*
+    * Mode RPM 1
+    */ 
+    FB_MQTT_Publish_IOValModeRPM1(viui_TraceLevel            := lui_TraceLevel,
+                                  vix_PubIn                  := gx_ModeRPM1,
+                                  vistr_BrokerPublishTopicIO := l_MQTTInitKom.Raspi4TopicIOModeRPM1,
+                                  vi_State                   := l_ConState,
+                                  vidi_Ch                    := ldi_ConCh);
+
+   /*
+    * Mode RPM 2
+    */ 
+    FB_MQTT_Publish_IOValModeRPM2(viui_TraceLevel            := lui_TraceLevel,
+                                  vix_PubIn                  := gx_ModeRPM2,
+                                  vistr_BrokerPublishTopicIO := l_MQTTInitKom.Raspi4TopicIOModeRPM2,
+                                  vi_State                   := l_ConState,
+                                  vidi_Ch                    := ldi_ConCh);
+
+   /*
+    * Mode RPM 3
+    */ 
+    FB_MQTT_Publish_IOValModeRPM3(viui_TraceLevel            := lui_TraceLevel,
+                                  vix_PubIn                  := gx_ModeRPM3,
+                                  vistr_BrokerPublishTopicIO := l_MQTTInitKom.Raspi4TopicIOModeRPM3,
+                                  vi_State                   := l_ConState,
+                                  vidi_Ch                    := ldi_ConCh);
+   /*
+    * PV
+    */ 
+    FB_MQTT_Publish_IOValPV(viui_TraceLevel            := lui_TraceLevel,
+                            vir_PubIn                  := gr_PV,
+                            vistr_BrokerPublishTopicIO := l_MQTTInitKom.Raspi4TopicIOPV,
+                            vi_State                   := l_ConState,
+                            vidi_Ch                    := ldi_ConCh);
+
+   /*
+    * SP
+    */ 
+    FB_MQTT_Publish_IOValSP(viui_TraceLevel            := lui_TraceLevel,
+                            vir_PubIn                  := gr_SP,
+                            vistr_BrokerPublishTopicIO := l_MQTTInitKom.Raspi4TopicIOSP,
+                            vi_State                   := l_ConState,
+                            vidi_Ch                    := ldi_ConCh);
+
+   /*
+    * Y 
+    */ 
+    FB_MQTT_Publish_IOValY(viui_TraceLevel            := lui_TraceLevel,
+                            vir_PubIn                  := gr_Y,
+                            vistr_BrokerPublishTopicIO := l_MQTTInitKom.Raspi4TopicIOY,
+                            vi_State                   := l_ConState,
+                            vidi_Ch                    := ldi_ConCh);
+
+   /*
+    * PV_Scale
+    */ 
+    FB_MQTT_Publish_IOValPV_Scale(viui_TraceLevel            := lui_TraceLevel,
+                                  vir_PubIn                  := gr_PV_Scale,
+                                  vistr_BrokerPublishTopicIO := l_MQTTInitKom.Raspi4TopicIOPV_Scale,
+                                  vi_State                   := l_ConState,
+                                  vidi_Ch                    := ldi_ConCh);
+
+   /*
+    * SP_Scale
+    */ 
+    FB_MQTT_Publish_IOValSP_Scale(viui_TraceLevel            := lui_TraceLevel,
+                                  vir_PubIn                  := gr_SP_Scale,
+                                  vistr_BrokerPublishTopicIO := l_MQTTInitKom.Raspi4TopicIOSP_Scale,
+                                  vi_State                   := l_ConState,
+                                  vidi_Ch                    := ldi_ConCh);
+
+   /*
+    * Y = PID_OUT = Stellsignale des Reglers OHNE Skalierung 0..100%
+    */ 
+    FB_MQTT_Publish_IOValY_Scale(viui_TraceLevel            := lui_TraceLevel,
+                                 vir_PubIn                  := gr_Y_Scale,
+                                 vistr_BrokerPublishTopicIO := l_MQTTInitKom.Raspi4TopicIOY_Scale,
+                                 vi_State                   := l_ConState,
+                                 vidi_Ch                    := ldi_ConCh);
+//
+//   /*
+//    * Manual
+//    */ 
+//    FB_MQTT_Publish_IOValManual(viui_TraceLevel            := lui_TraceLevel,
+//                                 vir_PubIn                  := gr_Manual,
+//                                 vistr_BrokerPublishTopicIO := l_MQTTInitKom.Raspi4TopicIOManual,
+//                                 vi_State                   := l_ConState,
+//                                 vidi_Ch                    := ldi_ConCh);
+//
+   END_IF;
+         
+  END_PROGRAM
+
+  
+  
+  

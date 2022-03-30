@@ -1,0 +1,530 @@
+ /*
+  * logi.cals GmbH
+  * A-3100 St. Poelten
+  * Europaplatz 7/1
+  * Tel.: 0043-5-77147
+  *
+  * logi.cals automation solutions & services GmbH
+  * D-40738 Langenfeld
+  * Postfach 1306
+  * Tel.: 0043-5-77147
+  * 
+  * Contact:
+  * dieter.goltz@logicals.com
+  * 
+  * History:
+  * Created: 
+  * DG 2021-04-04
+  * 
+  * Modified:
+  * DG 2021-02-28 - Anzahl Topics > 16 klaeren
+  * DG 2021-04-11 - logi.Lib 0.0.4
+  * DG 2021-09-05 - logi.Lib 0.0.17
+  * DG 2021-09-20 - logi.Lib 0.0.20-SNAPSHOT
+  * 
+  */
+ 
+ /*  
+  * Description
+  */ 
+ 
+ /* 
+  * Beschreibung
+  * MQTT-Kommunikation
+  * 
+  */
+USING com.logicals.Basic.Convert;
+USING com.logicals.Basic.Trace; 
+
+/*
+ * Subscribe Daten vom Broker holen
+ */
+PROGRAM PRG_RevPi_MQTTSubscribe
+
+	VAR_EXTERNAL
+      /*
+       * Globaler TraceLevel
+       */ 
+       gui_TraceLevel : UINT;
+	END_VAR
+
+    VAR_EXTERNAL
+         MQTTHeader       : MQTTHeader;
+    END_VAR
+
+	VAR_EXTERNAL
+		/*
+		 * State und Channel vom Connect
+		 */ 
+		 MQTT_State   : MQTT_SUBSCRIBER_STATE;
+		 MQTT_Channel : DINT;
+	END_VAR
+      
+    VAR
+      lui_TaskID      : UINT;
+      lstr_TaskName   : STRING[50];
+
+      lui_TaskSetTime : UINT;
+      lui_TaskActTime : UINT;
+    END_VAR
+    
+    VAR       
+      l_ConState : MQTT_SUBSCRIBER_STATE;
+      ldi_Ch     : DINT;
+    END_VAR
+    
+    VAR       
+    /*
+     * Diese Daten sollen als Array "Published" werden
+     */
+     larr_MQTT   : ARRAY [0..7] OF BYTE;    // Uebergabe des MQTT Array
+     ldi_MQTTLen : DINT := 8;               // Laenge
+    END_VAR
+
+    VAR
+	   /*
+        * Der Datentyp enthaelt alle wesentlichen Initwerte fuer die MQTT-Kommunkation
+        */
+        l_MQTTInitKom  : DT_MQTT;
+    END_VAR
+
+    VAR
+      /*
+       * Raspi2
+       */ 
+       lx_Raspi2TopicOk1  : BOOL;
+       lstr_Raspi2Topic1   : STRING[1024];
+      /*
+       * Raspi4
+       */ 
+       lx_Raspi4TopicOk1  : BOOL;
+       lstr_Raspi4Topic1   : STRING[1024];
+      /*
+       * RevPi
+       */ 
+       lx_RevPiTopicOk1  : BOOL;
+       lstr_RevPiTopic1   : STRING[1024];
+      /*
+       * TauriL
+       */ 
+       lx_TauriLTopicOk1  : BOOL;
+       lstr_TauriLTopic1   : STRING[1024];
+
+    END_VAR
+
+	VAR
+		larr_ioImageRemote    : ARRAY [0..1023] OF BYTE;
+		ldi_ioImageRemoteSize : DINT := 1024;
+		ldi_ioImageRemoteLen  : DINT := -1;
+		
+		lstr_ReceiveTopic      : STRING[255];
+
+		larr_bImageRemote      : ARRAY [0..1023] OF BYTE;
+
+	   /*
+	    * Alle erhaltenen Topics 
+	    */	
+		lstrarr_TopicArray : ARRAY [MQTT_MsgBound#Min..MQTT_MsgBound#Max] OF STRING[255];
+
+	   /*
+	    * Alle erhaltenen RC-Werte 
+	    */	
+		ldiarr_MessageRC : ARRAY [MQTT_MsgBound#Min..MQTT_MsgBound#Max] OF DINT;
+
+	   /*
+	    * Alle erhaltenen MessageLen-Werte 
+	    */	
+		ldiarr_MessageLen : ARRAY [MQTT_MsgBound#Min..MQTT_MsgBound#Max] OF DINT;
+
+       /*
+        * Raspi2
+        */
+		lui_Raspi2MessageLength1    : UINT;
+
+       /*
+        * Raspi4
+        */
+		lui_Raspi4MessageLength1    : UINT;
+
+       /*
+        * RevPi
+        */
+		lui_RevPiMessageLength1   : UINT;
+
+       /*
+        * TauriL
+        */
+		lui_TauriLMessageLength1    : UINT;
+
+       /*
+        * MessageLifeTick
+        */
+       /*
+        * Raspi2
+        */
+		lui_Raspi2MessageLifeTick1  : UINT;
+
+       /*
+        * Raspi4
+        */
+		lui_Raspi4MessageLifeTick1  : UINT;
+
+       /*
+        * RevPi
+        */
+		lui_RevPiMessageLifeTick1  : UINT;
+
+       /*
+        * TauriL
+        */
+		lui_TauriLMessageLifeTick1  : UINT;
+
+       /*
+        * MessageRC
+        */
+       /*
+        * Raspi2
+        */
+		ldi_Raspi2MessageRC1   : DINT;
+       /*
+        * Raspi4
+        */
+		ldi_Raspi4MessageRC1   : DINT;
+
+       /*
+        * RevPi
+        */
+		ldi_RevPiMessageRC1   : DINT;
+
+       /*
+        * TauriL
+        */
+		ldi_TauriLMessageRC1   : DINT;
+       /*
+        * MessagePos
+        */
+       /*
+        * Raspi2
+        */
+		lui_Raspi2MessagePosIdx1   : UINT;
+
+       /*
+        * Raspi4
+        */
+		lui_Raspi4MessagePosIdx1   : UINT;
+
+       /*
+        * RevPi
+        */
+		lui_RevPiMessagePosIdx1    : UINT;
+
+       /*
+        * TauriL
+        */
+		lui_TauriLMessagePosIdx1   : UINT;
+
+	   /*
+	    * Subscribe-Flags von RevPi
+	    */		
+	    lx_CL1_subscribed   : BOOL := FALSE;  //
+	    lx_CL2_subscribed   : BOOL := FALSE;  //
+		lx_CL3_subscribed   : BOOL := FALSE;  //	    
+		lx_CL4_subscribed   : BOOL := FALSE;  //
+		lx_CL5_subscribed   : BOOL := FALSE;  //
+		lx_CL6_subscribed   : BOOL := FALSE;  //
+		lx_CL7_subscribed   : BOOL := FALSE;  //
+		lx_CL8_subscribed   : BOOL := FALSE;  //
+		lx_CL9_subscribed   : BOOL := FALSE;  //
+		lx_CL10_subscribed  : BOOL := FALSE;  //
+
+		message_received : BOOL := FALSE;
+		
+		lrc_ReceiveTopic : MQTT_RC;
+
+       /*
+        * RC fuer Subscribe vom RevPi
+        */
+		rc_CL1  : MQTT_RC;
+		rc_CL2  : MQTT_RC;
+		rc_CL3  : MQTT_RC;
+		rc_CL4  : MQTT_RC;
+		rc_CL5  : MQTT_RC;
+		rc_CL6  : MQTT_RC;
+		rc_CL7  : MQTT_RC;
+		rc_CL8  : MQTT_RC;
+		rc_CL9  : MQTT_RC;
+		rc_CL10 : MQTT_RC;
+
+       /*
+        * Puffer fuer Empfangsdaten
+        */
+		lstrarr_Messages     : ARRAY [MQTT_MsgBound#Min..MQTT_MsgBound#Max] OF STRING[1024];
+		
+		lusi_MessageIndex    : USINT := 0;
+		lusi_MessageIndexMin : USINT := MQTT_MsgBound#Min;
+		lusi_MessageIndexMax : USINT := MQTT_MsgBound#Max;
+		
+	END_VAR
+	
+    VAR
+      FB_HCTrace        : FB_lc_Trace_ST;
+      lstr_PRGName      : STRING[30] := 'PRG_RevPi_MQTTSubscribe_Header';
+      lstr_InstName     : STRING[30];
+      lui_TraceLevel    : UINT       := 5;
+      lstr_POU_InstPath : STRING[128];                               // Lokale POU-ID
+    END_VAR
+
+    VAR
+      FB_InitR_TRIG       : R_TRIG;
+    END_VAR      
+    
+	VAR
+	  li_CycleCount : INT;
+	  lx_CycleInit  : BOOL;
+	  lx_CyclePulse : BOOL;
+      li_CycleCountInitVal : INT;      
+	END_VAR
+	
+	FB_InitR_TRIG(CLK := TRUE, Q => lx_CycleInit);
+	
+   /*
+    * Laesst die Moeglichkeit zu den TraceLevel lokal zu aendern! 
+    */	
+    IF lx_CycleInit = TRUE THEN   
+	   lui_TraceLevel       := gui_TraceLevel;
+       lstr_InstName        := GET_CURRENT_PI_NAME();
+       lstr_POU_InstPath    := lstr_InstName;
+       li_CycleCountInitVal := li_CycleCountInitVal + 1;
+       FB_HCTrace (vistr_TraceText := CONCAT(IN1 := lstr_PRGName, IN2 := ' Init'), viui_TraceLevel := lui_TraceLevel);
+	END_IF;
+	
+	li_CycleCount := li_CycleCount + 1;
+	lx_CyclePulse := NOT lx_CyclePulse;
+   /*
+    * Status abfragen ueber das IOSubSystem MQTT des RTS
+    */
+//	MQTT_State := MQTT_GetState(ch := ldi_Ch, rc => rc, ENO => ENO);
+
+   /*
+    * Interne Werte mit Uebergabe von MQTTConnect!
+    */
+    l_ConState := MQTT_State;
+    ldi_ch     := MQTT_Channel;
+
+   /*
+    * Uebergabe State von MQTTConnect!
+    */
+	IF l_ConState = MQTT_SUBSCRIBER_STATE#CONNECTED THEN
+
+		/* connect to topic in case connection has been established */
+		IF NOT(lx_CL1_subscribed) THEN
+            /* Topics von Raspi2 */
+            MQTT_Subscribe(ch := ldi_Ch, topic := l_MQTTInitKom.Raspi2Topic,                rc => rc_CL1); // '/Server', rc => rc_CL1);
+
+			lx_CL1_subscribed := rc_CL1 = MQTT_RC#OK;
+        END_IF;
+
+		IF NOT(lx_CL2_subscribed) THEN
+//          /* Topics von Raspi4 */ 
+			MQTT_Subscribe(ch := ldi_Ch, topic := l_MQTTInitKom.Raspi4Topic,                 rc => rc_CL2); //
+
+			lx_CL2_subscribed := rc_CL2 = MQTT_RC#OK;
+        END_IF;
+
+		IF NOT(lx_CL3_subscribed) THEN
+//          /* Topics von RevPi */
+ 			MQTT_Subscribe(ch := ldi_Ch, topic := l_MQTTInitKom.RevPiTopic, rc => rc_CL3);
+
+			lx_CL3_subscribed := rc_CL3 = MQTT_RC#OK;
+        END_IF;
+
+		IF NOT(lx_CL4_subscribed) THEN
+//          /* Topics von TauriL */
+           MQTT_Subscribe(ch := ldi_Ch, topic := l_MQTTInitKom.TauriLTopic, rc => rc_CL4);
+
+			lx_CL4_subscribed := rc_CL4 = MQTT_RC#OK;
+        END_IF;
+
+		IF NOT(lx_CL5_subscribed) THEN
+
+			lx_CL5_subscribed := rc_CL5 = MQTT_RC#OK;
+        END_IF;
+         			
+		IF NOT(lx_CL6_subscribed) THEN
+
+			lx_CL6_subscribed := rc_CL6 = MQTT_RC#OK;
+        END_IF;
+         			
+		IF NOT(lx_CL7_subscribed) THEN
+
+			lx_CL7_subscribed := rc_CL7 = MQTT_RC#OK;
+        END_IF;
+         			
+		IF NOT(lx_CL8_subscribed) THEN
+//          /*  */
+
+			lx_CL8_subscribed := rc_CL8 = MQTT_RC#OK;
+        END_IF;
+         			
+		IF NOT(lx_CL9_subscribed) THEN
+//          /*  */
+
+			lx_CL9_subscribed := rc_CL9 = MQTT_RC#OK;
+        END_IF;
+         			
+		IF NOT(lx_CL10_subscribed) THEN
+//          /*  */
+
+			lx_CL10_subscribed := rc_CL10 = MQTT_RC#OK;
+        END_IF;
+ 
+ //    MQTT_RC : DINT(OK := 0,
+ //                  ERROR := 1,
+ //                  ERROR_MEM_ALLOC := 2,
+ //                  ERROR_CONNECT := 3,
+ //                  ERROR_CH_INVALID := 4,
+ //                  ERROR_OUT_OF_CLIENTS := 5,
+ //                  ERROR_OUT_OF_CB := 6,
+ //                  ERROR_INVALID_MUTEX := 7,
+ //                  ERROR_NO_MSG_RECEIVED := 8,
+ //                  ERROR_NO_MSG_PUBLISHED := 9,
+ //                  ERROR_MSG_TRUNCATED := 10,
+ //                  ERROR_CH_INVALID_STATE := 11,
+ //                  ERROR_CANNOT_DISCONNECT := 12,
+ //                  ERROR_AUTHENTICATION_FAILED := 13,
+ //                  ERROR_SSL_NOT_SUPPORTED := 14);     
+                  		
+	   /* 
+		* clear the receive ring buffer
+		*/ 
+		FOR lusi_MessageIndex := MQTT_MsgBound#Min TO MQTT_MsgBound#Max DO // 0 TO 20 DO
+		  lstrarr_Messages[lusi_MessageIndex] := '';
+		END_FOR;
+
+		/* 
+		 * if subscribed, obtain only the latest message
+		 */
+		message_received := FALSE;
+		lusi_MessageIndex    := 0;
+
+		REPEAT
+			lstr_ReceiveTopic := MQTT_Receive(ch          := ldi_Ch, 
+				                              payload     := REF(larr_ioImageRemote[0]), 
+				                              payload_len := ldi_ioImageRemoteSize, 
+				                              len         => ldi_ioImageRemoteLen, 
+				                              rc          => lrc_ReceiveTopic);
+
+			message_received := TRUE;
+
+			// convert the received byte array to a string
+			lstrarr_Messages[lusi_MessageIndex] := FUN_lc_StrFromByteArr_C(larr_ioImageRemote, ldi_ioImageRemoteLen);
+           /*
+            * Das erhaltene Topic im Array hinterlegen
+            */ 
+            lstrarr_TopicArray[lusi_MessageIndex] := lstr_ReceiveTopic;
+            ldiarr_MessageRC[lusi_MessageIndex]   := lrc_ReceiveTopic;
+            ldiarr_MessageLen[lusi_MessageIndex]  := ldi_ioImageRemoteLen;
+            
+			//
+			// Messages-Index anpassen fuer weitere Nachrichten
+			if (lusi_MessageIndex < lusi_MessageIndexMax) THEN
+				lusi_MessageIndex := lusi_MessageIndex + 1;
+			ELSE
+				lusi_MessageIndex := lusi_MessageIndexMin;
+                FB_HCTrace (vistr_TraceText := CONCAT(IN1 := lstr_PRGName, IN2 := 'WARNING: MQTT message buffer overrun!'), viui_TraceLevel := lui_TraceLevel);
+			END_IF;
+
+			IF lrc_ReceiveTopic <> MQTT_RC#OK THEN
+                FB_HCTrace (vistr_TraceText := CONCAT(IN1 := lstr_PRGName, IN2 := ' rc <> MQTT_RC#OK := ', IN3 := TO_STRING(lrc_ReceiveTopic)), viui_TraceLevel := lui_TraceLevel);
+				EXIT;
+			ELSE
+                FB_HCTrace (vistr_TraceText := CONCAT(IN1 := lstr_PRGName, IN2 := ' Message received: Topic := ', IN3 := lstr_ReceiveTopic), viui_TraceLevel := lui_TraceLevel);
+			END_IF;
+
+		UNTIL FALSE
+
+		END_REPEAT;
+	END_IF;
+
+    lx_Raspi2TopicOk1    := FALSE;
+    lx_Raspi4TopicOk1    := FALSE;
+    lx_RevPiTopicOk1     := FALSE;
+    lx_TauriLTopicOk1    := FALSE;
+
+   /*
+    * Das Array der empfangenen Topics fuer Server analysieren 
+    */
+    FOR lusi_MessageIndex := MQTT_MsgBound#Min TO MQTT_MsgBound#Max DO // 0 TO 20 DO
+
+    /*
+     * Header Raspi2
+     */ 
+     IF lstrarr_TopicArray[lusi_MessageIndex] = l_MQTTInitKom.Raspi2Topic AND lx_Raspi2TopicOk1 = FALSE THEN
+       lui_Raspi2MessagePosIdx1   := lusi_MessageIndex;
+       lui_Raspi2MessageLifeTick1 := lui_Raspi2MessageLifeTick1 + 1;
+       lui_Raspi2MessageLength1   := TO_UINT(ldiarr_MessageLen[lusi_MessageIndex]);
+       ldi_Raspi2MessageRC1       := ldiarr_MessageRC[lusi_MessageIndex]; 
+        lx_Raspi2TopicOk1         := TRUE;
+       
+       larr_bImageRemote := FUN_lc_ByteArrFromStr_C(vistr_Arr := lstrarr_Messages[lusi_MessageIndex], vidi_len := ldiarr_MessageLen[lusi_MessageIndex]);
+
+       lstr_Raspi2Topic1 := lstrarr_Messages[lusi_MessageIndex];
+     END_IF;
+
+    /*
+     * Header Raspi4
+     */ 
+     IF lstrarr_TopicArray[lusi_MessageIndex] = l_MQTTInitKom.Raspi4Topic AND lx_Raspi4TopicOk1 = FALSE THEN
+       lui_Raspi4MessagePosIdx1   := lusi_MessageIndex;
+       lui_Raspi4MessageLifeTick1 := lui_Raspi4MessageLifeTick1 + 1;
+       lui_Raspi4MessageLength1   := TO_UINT(ldiarr_MessageLen[lusi_MessageIndex]); // len(lstrarr_Messages[lusi_MessageIndex]); 
+       ldi_Raspi4MessageRC1       := ldiarr_MessageRC[lusi_MessageIndex]; 
+       lx_Raspi4TopicOk1          := TRUE;
+
+       larr_bImageRemote := FUN_lc_ByteArrFromStr_C(vistr_Arr := lstrarr_Messages[lusi_MessageIndex], vidi_len := ldiarr_MessageLen[lusi_MessageIndex]);
+
+       lstr_Raspi4Topic1 := lstrarr_Messages[lusi_MessageIndex];
+
+     END_IF;
+    
+    /*
+     * Header RevPi 
+     */ 
+     IF lstrarr_TopicArray[lusi_MessageIndex] = l_MQTTInitKom.RevPiTopic AND lx_RevPiTopicOk1 = FALSE THEN // '/RevPi_IO/HellMld' THEN
+       lui_RevPiMessagePosIdx1   := lusi_MessageIndex;
+       lui_RevPiMessageLifeTick1 := lui_RevPiMessageLifeTick1 + 1;
+       lui_RevPiMessageLength1   := TO_UINT(ldiarr_MessageLen[lusi_MessageIndex]); // len(lstrarr_Messages[lusi_MessageIndex]); 
+       ldi_RevPiMessageRC1       := ldiarr_MessageRC[lusi_MessageIndex]; 
+       lx_RevPiTopicOk1          := TRUE;
+
+       larr_bImageRemote := FUN_lc_ByteArrFromStr_C(vistr_Arr := lstrarr_Messages[lusi_MessageIndex], vidi_len := ldiarr_MessageLen[lusi_MessageIndex]);
+
+       lstr_RevPiTopic1 := lstrarr_Messages[lusi_MessageIndex];
+
+     END_IF;
+
+    /*
+     * Header TauriL
+     */ 
+     IF lstrarr_TopicArray[lusi_MessageIndex] = l_MQTTInitKom.TauriLTopic AND lx_TauriLTopicOk1 = FALSE THEN // '/TauriL_IO/HellMld' THEN
+       lui_TauriLMessagePosIdx1   := lusi_MessageIndex;
+       lui_TauriLMessageLifeTick1 := lui_TauriLMessageLifeTick1 + 1;
+       lui_TauriLMessageLength1   := TO_UINT(ldiarr_MessageLen[lusi_MessageIndex]); // len(lstrarr_Messages[lusi_MessageIndex]); 
+       ldi_TauriLMessageRC1       := ldiarr_MessageRC[lusi_MessageIndex]; 
+       lx_TauriLTopicOk1          := TRUE;
+
+       lstr_TauriLTopic1 := lstrarr_Messages[lusi_MessageIndex];
+
+     END_IF;
+
+    /*
+     * Alle gefunden! 
+     */ 
+     IF lx_Raspi2TopicOk1 = TRUE AND lx_Raspi4TopicOk1  = TRUE AND lx_RevPiTopicOk1  = TRUE AND lx_TauriLTopicOk1  = TRUE THEN           
+       lusi_MessageIndex := MQTT_MsgBound#Max;
+     END_IF;
+     
+    END_FOR;
+   
+END_PROGRAM
+  

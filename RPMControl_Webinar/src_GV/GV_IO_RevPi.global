@@ -1,0 +1,63 @@
+//SYS_PROJECT_TS:20200408145607
+GLOBALS HardwareConfig
+	VAR_GLOBAL
+
+		RevPiStatus  AT %IB1.0: BYTE := 0; // 
+		RevPiIOCycle AT %IB1.1: BYTE := 0; // 
+		RevPiLED     AT %QB1.6: BYTE := 0; // 
+		
+		I_1  AT %IX1.11.0:  BOOL := 0; // Schaltermodul
+		I_2  AT %IX1.11.1:  BOOL := 0; // Schaltermodul 
+		I_3  AT %IX1.11.2:  BOOL := 0; // Schaltermodul
+		I_4  AT %IX1.11.3:  BOOL := 0; // Schaltermodul 
+		I_5  AT %IX1.11.4:  BOOL := 0; // Schaltermodul 
+		I_6  AT %IX1.11.5:  BOOL := 0; // Schaltermodul 
+		I_7  AT %IX1.11.6:  BOOL := 0; // Schaltermodul 
+		I_8  AT %IX1.11.7:  BOOL := 0; // Schaltermodul 
+		I_9  AT %IX1.11.8:  BOOL := 0; // Motormodul
+		I_10 AT %IX1.11.9:  BOOL := 0; // Motormodul 
+		I_11 AT %IX1.11.10: BOOL := 0; // Motormodul 
+		I_12 AT %IX1.11.11: BOOL := 0; // Motormodul 
+		I_13 AT %IX1.11.12: BOOL := 0; // Motormodul - Lichtschranke (Zaehler)
+		I_14 AT %IX1.11.13: BOOL := 0; // Motormodul - Lichtschranke (Zaehler) 
+		I_15 AT %IX1.11.14: BOOL := 0; // Nicht am DIO-Modul 
+		I_16 AT %IX1.11.15: BOOL := 0; // Nicht am DIO-Modul 
+		
+		O_1 AT  %QX1.81.0:  BOOL := 0; // LED-Modul 
+		O_2 AT  %QX1.81.1:  BOOL := 0; // LED-Modul 
+		O_3 AT  %QX1.81.2:  BOOL := 0; // LED-Modul
+		O_4 AT  %QX1.81.3:  BOOL := 0; // LED-Modul 
+		O_5 AT  %QX1.81.4:  BOOL := 0; // LED-Modul 
+		O_6 AT  %QX1.81.5:  BOOL := 0; // LED-Modul 
+		O_7 AT  %QX1.81.6:  BOOL := 0; // LED-Modul 
+		O_8 AT  %QX1.81.7:  BOOL := 0; // LED-Modul 
+		O_9 AT  %QX1.81.8:  BOOL := 0; // LED-Modul 
+		O_10 AT %QX1.81.9:  BOOL := 0; // Motormodul Motor Links 
+		O_11 AT %QX1.81.10: BOOL := 0; // Motormodul Motor Rechts 
+		O_12 AT %QX1.81.11: BOOL := 0; // Motormodul LED 
+		O_13 AT %QX1.81.12: BOOL := 0; // Motormodul Warnsignal 
+		O_14 AT %QX1.81.13: BOOL := 0; // 
+		O_15 AT %QX1.81.14: BOOL := 0; // Nicht am DIO-Modul
+		O_16 AT %QX1.81.15: BOOL := 0; // Nicht am DIO-Modul 
+
+		InputValue_1 AT %IW1.124: INT := 0; // 
+		InputValue_2 AT %IW1.126: INT := 0; // 
+		InputValue_3 AT %IW1.128: INT := 0; // 
+		InputValue_4 AT %IW1.130: INT := 0; //
+
+		InputStatus_1 AT %IB1.132: BYTE := 0; // 
+		InputStatus_2 AT %IB1.133: BYTE := 0; // 
+		InputStatus_3 AT %IB1.134: BYTE := 0; // 
+		InputStatus_4 AT %IB1.135: BYTE := 0; // 
+
+		OutputStatus_1 AT %IB1.142: BYTE := 0; // 
+		OutputStatus_2 AT %IB1.143: BYTE := 0; // 
+
+		OutputValue_1 AT %QW1.144: INT := 0; // 
+		OutputValue_2 AT %QW1.146: INT := 0; // 
+
+		Output1Range AT %MB1.193: BYTE := 2; // 
+		Output2Range AT %MB1.203: BYTE := 2; // 
+
+	END_VAR
+END_GLOBALS

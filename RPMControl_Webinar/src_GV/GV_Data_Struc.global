@@ -1,0 +1,13 @@
+/*
+ * Array fuer Oscilloscope SpiderControl
+ */
+GLOBALS GV_Data_Struc
+	VAR_GLOBAL
+	 Data : ARRAY[1..1000] OF Data;
+	 
+	 gui_MaxData_Struc : UINT;
+	 gui_MinData_Struc : UINT;
+	 gui_IdxData_Struc : UINT;
+	 
+	END_VAR
+END_GLOBALS

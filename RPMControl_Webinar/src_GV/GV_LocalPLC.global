@@ -1,0 +1,9 @@
+/*
+ * Globale Daten fuer LocalPLC
+ */
+GLOBALS GV_LocalPLC
+	VAR_GLOBAL
+		gstr_IPAddr : STRING[15]  := '127.0.0.1';
+		gstr_ResName : STRING[15] := 'LocalPLC';
+	END_VAR
+END_GLOBALS

@@ -1,0 +1,14 @@
+/*
+ * ST-Programm fuer das Logging von daten zur Laufzeit
+ * Anbindung an das CHART von SpiderControl
+ */
+PROGRAM PRG_AppLog_ST
+ 
+ VAR_EXTERNAL
+    Data : ARRAY[1..1000] OF Data;
+    gui_IdxData_Struc : UINT;
+    gui_MaxData_Struc : UINT;
+    gui_MinData_Struc : UINT;
+ END_VAR
+ 
+END_PROGRAM

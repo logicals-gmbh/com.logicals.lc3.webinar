@@ -1,0 +1,62 @@
+/*
+ * Raspi2-Configuration
+ * RPMControl_Webinar
+ */
+{
+	CHANNEL Raspi2_Channel
+		TCP
+			ADDRESS := 192.168.128.150; //
+			PORT    := 1534;            //
+		END_TCP
+	END_CHANNEL
+}
+
+CONFIGURATION ConfRaspi2
+
+	RESOURCE ResRaspi2 ON Raspbian { ON_CHANNEL := Raspi2_Channel }
+
+       /*
+        * Daten IO
+        * Keine Anbindung im Raspi2
+        */ 
+		{ INCLUDE_GLOBALS GV_IO }
+
+       /*
+        * Daten RTS
+        */ 
+		{ INCLUDE_GLOBALS GV_RTS }
+       /*
+        * Daten Resource
+        */ 
+		{ INCLUDE_GLOBALS GV_Raspi2 }
+		{ INCLUDE_GLOBALS GV }
+		{ INCLUDE_GLOBALS GV_MQTT }
+
+		{ INCLUDE_GLOBALS GV_RPMControl_Visu }
+		{ INCLUDE_GLOBALS GV_RPMControl }
+		{ INCLUDE_GLOBALS GV_RPMControl_SetVal }
+		{ INCLUDE_GLOBALS GV_RPMControl_SetVal_Raspi2 }
+
+        TASK TSK_MQTTConnect       (INTERVAL := TIME#500ms, PRIORITY := 38229);
+        TASK TSK_MQTTPublish       (INTERVAL := TIME#800ms,  PRIORITY := 38229);  // Muss schneller als die SubscribeTask sein!
+        TASK TSK_MQTTSubscribe     (INTERVAL := TIME#1400ms, PRIORITY := 38229);
+		
+		TASK TSK_AppLogic (INTERVAL := TIME#50ms,  PRIORITY := 38229);  // Logic
+		TASK TSK_AppLoop  (INTERVAL := TIME#20ms,  PRIORITY := 38229);  // Loop
+		TASK TSK_AppTimer (INTERVAL := TIME#500ms, PRIORITY := 38229);  // Timer
+		
+//		PROGRAM INST_AppLogic_FBD              WITH TSK_AppLogic    : PRG_AppLogic_FBD;
+
+//		PROGRAM INST_AppLoop_FBD               WITH TSK_AppLoop     : PRG_AppLoop_FBD;
+
+		PROGRAM INST_RTC_FBD                   WITH TSK_AppTimer    : PRG_RTC_FBD;    // Date/Time
+//		PROGRAM INST_RETAIN_FBD                WITH TSK_AppTimer    : PRG_RETAIN_FBD; // RETAIN Handling
+
+        PROGRAM INST_Raspi2_MQTTConnect        WITH TSK_MQTTConnect        : PRG_Raspi2_MQTTConnect;
+        PROGRAM INST_Raspi2_MQTTPublish_Header WITH TSK_MQTTPublish        : PRG_Raspi2_MQTTPublish_Header;
+//        PROGRAM INST_Raspi2_MQTTPublish_IO     WITH TSK_MQTTPublish        : PRG_Raspi2_MQTTPublish_IO;
+
+//        PROGRAM INST_Raspi2_MQTTSubscribe      WITH TSK_MQTTSubscribe      : PRG_Raspi2_MQTTSubscribe;
+
+    END_RESOURCE
+END_CONFIGURATION

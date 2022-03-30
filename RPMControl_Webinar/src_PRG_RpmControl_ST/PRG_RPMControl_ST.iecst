@@ -1,0 +1,332 @@
+ /*
+  * logi.cals GmbH
+  * A-3100 St. Poelten
+  * Europaplatz 7/1
+  * Tel.: 0043-5-77147
+  *
+  * logi.cals automation solutions & services GmbH
+  * D-40738 Langenfeld
+  * Postfach 1306
+  * Tel.: 0043-5-77147
+  * 
+  * Contact:
+  * dieter.goltz@logicals.com
+  * 
+  * History:
+  * Created: 
+  * DG 2021-05-30
+  * 
+  * Modified:
+  * DG 2021-05-30 IO
+  * DG 2022-02-16 GV fuer Visu
+  */
+ 
+ /* 
+  * Description
+  * ===========
+  */ 
+
+ /* 
+  * Beschreibung
+  * ============
+  */ 
+/*
+ * Drezahlregelung mit logi.CAD 3
+ */
+PROGRAM PRG_RPMControl_ST
+
+	VAR_EXTERNAL
+	    /* ProcessValue - Analogeingang_1 */
+		gr_PV : REAL;
+	    /* SetPoint     - Analogeingang_2 */
+		gr_SP : REAL;
+	    /* OutValue     - Analogausgang_1 */
+		gr_Y : REAL;
+	END_VAR
+
+	VAR_EXTERNAL
+       /*
+        * Anzeige RPM-Daten (Visu)
+        */ 
+        gr_RPMSetVal : REAL;
+        gr_RPMActVal : REAL;
+        gr_RPMDevVal : REAL;
+        gr_RPMOutVal : REAL;
+	END_VAR
+   /*
+    * Uebernahme der Einstellwerte von GV
+    * Verwendung in PiXtend_V2L und RevPi
+    * Beide haben unterschiedliche Aufloesungen bei der Analogein- und Ausgangskarten
+    */
+	VAR_EXTERNAL
+      gstruc_PID_In  : DT_PID_In;
+      gstruc_PID_Out : DT_PID_Out;
+     /*
+      * Daempfung einstellen
+      */ 
+      gr_PV_PT1_T1 : REAL;
+     /*
+      * ProcessValue skalieren
+      */ 
+      gr_PV_In : REAL;
+      gr_PV_MaxInVal      : REAL;
+      gr_PV_MinInVal      : REAL;
+      gr_PV_MaxPhysVal    : REAL;
+      gr_PV_MinPhysVal    : REAL;
+      gr_PV_OffsetPhysVal : REAL;
+      gx_PV_InValError    : BOOL;
+      gr_PV_OutPhysVal    : REAL;
+      gx_PV_PhysValError  : BOOL;
+     /*
+      * SetPoint skalieren
+      */ 
+      gr_SP_In : REAL;
+      gr_SP_MaxInVal      : REAL;
+      gr_SP_MinInVal      : REAL;
+      gr_SP_MaxPhysVal    : REAL;
+      gr_SP_MinPhysVal    : REAL;
+      gr_SP_OffsetPhysVal : REAL;
+      gx_SP_InValError    : BOOL;
+      gr_SP_OutPhysVal    : REAL;
+      gx_SP_PhysValError  : BOOL;
+     /*
+      * Stellgroesse skalieren
+      */ 
+      gr_Y_In            : REAL;
+      gr_Y_MaxInVal      : REAL;
+      gr_Y_MinInVal      : REAL;
+      gr_Y_MaxPhysVal    : REAL;
+      gr_Y_MinPhysVal    : REAL;
+      gr_Y_OffsetPhysVal : REAL;
+      gx_Y_InValError    : BOOL;
+      gr_Y_OutPhysVal    : REAL;
+      gx_Y_PhysValError  : BOOL;
+	END_VAR
+	
+	VAR
+     /* PT1 Glaettung PV */
+	 FB_PV_PT1 : FB_MotorControl_PT1_ST;
+
+     /* PIDT1 - Regler - Wird als PI-Regler verwendet */
+	 FB_MotorPID : FB_MotorControl_PID_ST;
+
+     /* PV-Scale von 0..MaxPhys nach 0..100% (InScale) */
+     FB_PV_Scale : FB_MotorAnalogScale_ST;
+     /* SP-Scale von 0..MaxPhys nach 0..100% (InScale) */
+     FB_SP_Scale : FB_MotorAnalogScale_ST;
+
+     /* Y-Scale von 0..100% nach 0..MaxPhys (Out-Scale) */
+     FB_Y_Scale  : FB_MotorAnalogScale_ST;
+	END_VAR
+
+    VAR
+     /* Glaettung PV */
+     lr_PV_PT1_T1 : REAL;
+    END_VAR
+    
+    VAR
+     /* InScale PV */
+     lr_PV_In : REAL;
+     lr_PV_MaxInVal      : REAL;       // von GV
+     lr_PV_MinInVal      : REAL := 0.0;
+     lr_PV_MaxPhysVal    : REAL := 100.0;
+     lr_PV_MinPhysVal    : REAL := 0.0;
+     lr_PV_OffsetPhysVal : REAL := 0.0;
+
+     lx_PV_InValError   : BOOL;
+     lr_PV_OutPhysVal   : REAL;
+     lx_PV_PhysValError : BOOL;
+    END_VAR
+
+    VAR
+     /* InScale SP */
+     lr_SP_In : REAL;
+     lr_SP_MaxInVal      : REAL;         // von GV
+     lr_SP_MinInVal      : REAL := 0.0;    
+     lr_SP_MaxPhysVal    : REAL := 100.0;  
+     lr_SP_MinPhysVal    : REAL := 0.0;    
+     lr_SP_OffsetPhysVal : REAL := 0.0;    
+
+     lx_SP_InValError   : BOOL;
+     lr_SP_OutPhysVal   : REAL;
+     lx_SP_PhysValError : BOOL;
+    END_VAR
+
+    VAR
+     /* OutScale Y */
+     lr_Y_In : REAL;
+     lr_Y_MaxInVal      : REAL := 100.0;
+     lr_Y_MinInVal      : REAL := 0.0;    
+     lr_Y_MaxPhysVal    : REAL;           // von GV  
+     lr_Y_MinPhysVal    : REAL := 0.0;    
+     lr_Y_OffsetPhysVal : REAL := 0.0;    
+
+     lx_Y_InValError   : BOOL;
+     lr_Y_OutPhysVal   : REAL;
+     lx_Y_PhysValError : BOOL;
+    END_VAR
+
+    VAR
+      /* Regler Parameter */
+      lr_Inp     : REAL;            // control difference 
+      lr_TI      : REAL := 4.0;     // Integral action time [s] 
+      lr_Kv      : REAL;            // derivative action amplification
+      lr_T1      : REAL;            // fading time constant [s]     .
+      lx_Auto    : BOOL;            // controller on automatic operation       .
+      lr_YManual : REAL;            // Manual operation preset value     .
+      lr_Lvu     : REAL := 100.0;   // Upper limiting value of the actuating variable        .
+      lr_Lvd     : REAL := -100.0;  // Lower limiting value of the actuating variable        .
+      lr_Kp      : REAL := 0.2;     // Proportional control factor       .
+      lx_Lu      : BOOL;            // Upper Limit
+      lx_Ld      : BOOL;            // Lower Limit
+    
+      lr_Out     : REAL; // Output Variable
+    
+      lr_P       : REAL; // Proportional Part
+      lr_I       : REAL; // Integral Part
+      lr_D       : REAL; // Derivative Part  
+    END_VAR
+
+    VAR
+      lr_Test : REAL;
+    END_VAR
+
+    VAR
+      lstruc_PID_In :  DT_PID_In;
+    END_VAR	
+    
+	VAR
+	 Init_R_TRIG : R_TRIG;
+	END_VAR
+	/*
+	 * SPS-Programm - lokale Variablen
+	 */
+	VAR
+	 lx_CycleInit   : BOOL;
+	 lx_CyclePulse  : BOOL;
+	 lui_CycleCount : UINT;
+	END_VAR
+    
+    lx_CyclePulse  := NOT lx_CyclePulse;
+    lui_CycleCount := lui_CycleCount + 1;
+
+    Init_R_TRIG(CLK := TRUE, Q => lx_CycleInit);
+
+    IF lx_CycleInit = TRUE THEN
+      lstruc_PID_In      := gstruc_PID_In;
+      lr_PV_PT1_T1       := gr_PV_PT1_T1       ;
+      lr_PV_MaxInVal     := gr_PV_MaxInVal     ;
+      lr_PV_MinInVal     := gr_PV_MinInVal     ;
+      lr_PV_MaxPhysVal   := gr_PV_MaxPhysVal   ;
+      lr_PV_MinPhysVal   := gr_PV_MinPhysVal   ;
+      lr_PV_OffsetPhysVal:= gr_PV_OffsetPhysVal;
+      lr_SP_MaxInVal     := gr_SP_MaxInVal     ;
+      lr_SP_MinInVal     := gr_SP_MinInVal     ;
+      lr_SP_MaxPhysVal   := gr_SP_MaxPhysVal   ;
+      lr_SP_MinPhysVal   := gr_SP_MinPhysVal   ;
+      lr_SP_OffsetPhysVal:= gr_SP_OffsetPhysVal;
+      lr_Y_MaxInVal      := gr_Y_MaxInVal      ;
+      lr_Y_MinInVal      := gr_Y_MinInVal      ;
+      lr_Y_MaxPhysVal    := gr_Y_MaxPhysVal    ;
+      lr_Y_MinPhysVal    := gr_Y_MinPhysVal    ;
+      lr_Y_OffsetPhysVal := gr_Y_OffsetPhysVal ;
+    END_IF;
+
+    /* PV von GV_MotorRegelung */
+    lr_PV_In := gr_PV;
+
+    /* Glaettung */
+    FB_PV_PT1(vir_x := lr_PV_In,vir_T1 := lr_PV_PT1_T1,vor_y => lr_PV_In);
+    
+   /* 
+    * InScale PV
+    * Skalieren PV von Tacho INC nach %
+    */    
+    FB_PV_Scale(vir_In            := lr_PV_In,
+                vir_MaxInVal      := lr_PV_MaxInVal,
+                vir_MinInVal      := lr_PV_MinInVal,
+                vir_MaxPhysVal    := lr_PV_MaxPhysVal,
+                vir_MinPhysVal    := lr_PV_MinPhysVal,
+                vir_OffsetPhysVal := lr_PV_OffsetPhysVal,
+                                                            
+                vox_InValError   => lx_PV_InValError,   
+                vor_OutPhysVal   => lr_PV_OutPhysVal,   
+                vox_PhysValError => lx_PV_PhysValError);
+
+   /* 
+    * SP fuer GV_MotorRegelung 
+    * Von AnalogPoti 1
+    */
+    lr_SP_In := gr_SP;
+
+   /* 
+    * InScale SP
+    * Skalieren SetPoint von Poti INC nach %
+    */    
+    FB_SP_Scale(vir_In            := lr_SP_In,
+                vir_MaxInVal      := lr_SP_MaxInVal,
+                vir_MinInVal      := lr_SP_MinInVal,
+                vir_MaxPhysVal    := lr_SP_MaxPhysVal,
+                vir_MinPhysVal    := lr_SP_MinPhysVal,
+                vir_OffsetPhysVal := lr_SP_OffsetPhysVal,
+                                                            
+                vox_InValError   => lx_SP_InValError,   
+                vor_OutPhysVal   => lr_SP_OutPhysVal,   
+                vox_PhysValError => lx_SP_PhysValError);
+    
+    /* 
+     * Regeldifferenz bestimmen
+     * SetPoint minus PV (jeweils skaliert)
+     */ 
+    lr_Inp := lr_SP_OutPhysVal - lr_PV_OutPhysVal;
+
+    /* 
+     * Einstellwerte werden per GV im InitCycle uebernommen!
+     */    
+    /* 
+     * PIDT1 Controller
+     * Mit lx_Auto = FALSE wird lr_YManual als Stellwert uebernommen
+     * Mit lx_Auto = TRUE wird mit der Regeldifferenz gerechnet!
+     * lr_Lvd muss -100.0% sein und lr_Lvu muss 100.0% sein
+     */    
+    FB_MotorPID(vir_Inp     := lr_Inp,      // control difference 
+                vir_TI      := lr_TI,       // Integral action time [s] 
+                vir_Kv      := lr_Kv,       // derivative action amplification
+                vir_T1      := lr_T1,       // fading time constant [s]     .
+                vix_Auto    := lx_Auto,     // controller on automatic operation       .
+                vir_YManual := lr_YManual,  // Manual operation preset value     .
+                vir_Lvu     := lr_Lvu,      // Upper limiting value of the actuating variable        .
+                vir_Lvd     := lr_Lvd,      // Lower limiting value of the actuating variable        .
+                vir_Kp      := lr_Kp,       // Proportional control factor       .
+                
+                vox_Lu      => lx_Lu,  // Upper Limit
+                vox_Ld      => lx_Ld,  // Lower Limit
+                vor_Out     => lr_Out, // Output Variable
+                vor_P       => lr_P,   // Proportional Part
+                vor_I       => lr_I,   // Integral Part
+                vor_D       => lr_D);  // Derivative Part  
+
+    /*
+     * Berechnete Stellgroesse an Ausgangs-DeSkalierer
+     */
+    lr_Y_In := lr_Out;
+
+    /* 
+     * OutScale Y
+     */    
+    FB_SP_Scale(vir_In            := lr_Y_In,
+                vir_MaxInVal      := lr_Y_MaxInVal,
+                vir_MinInVal      := lr_Y_MinInVal,
+                vir_MaxPhysVal    := lr_Y_MaxPhysVal,
+                vir_MinPhysVal    := lr_Y_MinPhysVal,
+                vir_OffsetPhysVal := lr_Y_OffsetPhysVal,
+                                                            
+                vox_InValError   => lx_Y_InValError,   
+                vor_OutPhysVal   => lr_Y_OutPhysVal,   
+                vox_PhysValError => lx_Y_PhysValError);
+    /*
+     * DeSkalierten Wert ausgeben an Analog-Ausgang
+     */           
+     gr_Y := lr_Y_OutPhysVal;
+
+END_PROGRAM

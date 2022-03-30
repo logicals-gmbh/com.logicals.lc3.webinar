@@ -1,0 +1,41 @@
+TYPE
+  /*
+   * Setzwerte von AppLogic
+   */ 
+   DT_Action : STRUCT
+     /*
+      * Betriebsart von AppLogic aus einstellen!
+      */ 
+      xRPM0 : BOOL;   // Reset
+      xRPM1 : BOOL;   // RPM1 = 25% SP
+      xRPM2 : BOOL;   // RPM2 = 50% SP
+      xRPM3 : BOOL;   // Vorgabe per Poti / Rampe
+     /*
+      * SFC von AppLogic Setzwerte
+      */ 
+      xStart : BOOL;  // SFC starten
+      xReset : BOOL;  // SFC Reset
+     /*
+      * AppLogic Setzwerte
+      */
+      xAuto     : BOOL;  // AutoMode fuer Regler - Wird auch per RPM3-Mode gesetzt
+      xRamp     : BOOL;  // Setzwert via Rampe setzen
+      rSpUp     : REAL;  // SpUp in Sekunden
+      rSpDn     : REAL;  // SpDn in Sekunden
+      rSP       : REAL;  // SetPoint fuer Rampe
+      xRampStop : BOOL;  // SFC starten
+   END_STRUCT;
+
+  /*
+   * Feedbackdaten von AppLoop
+   */ 
+   DT_ActionFB : STRUCT
+     xRPM0 : BOOL;   // Reset
+     xRPM1 : BOOL;   // RPM1 = 25% SP
+     xRPM2 : BOOL;   // RPM2 = 50% SP
+     xRPM3 : BOOL;   // Vorgabe per Poti / Rampe /SP
+     rPV   : REAL;
+     rY    : REAL; 
+   END_STRUCT;
+   
+END_TYPE

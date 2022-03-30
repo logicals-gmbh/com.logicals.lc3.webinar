@@ -1,0 +1,35 @@
+GLOBALS GV_RTS
+	VAR_GLOBAL
+     gui_TraceLevel : UINT;
+
+     gusi_sec   : USINT;
+     gusi_min   : USINT;
+     gusi_hour  : USINT;
+     gusi_mday  : USINT;
+     gusi_mon   : USINT;
+     gui_year   : UINT;
+     gusi_wday  : USINT;
+     gusi_yday  : UINT;
+     gusi_isdst : BOOL;
+
+    /*
+     * Uhrzeit und Daten von GetTime abholen
+     * und auf Globale Var in Byte schreiben
+     * Fuer MQTT
+     */
+  	 gb_RTSSeconds : BYTE; 
+ 	 gb_RTSMinutes : BYTE;
+	 gb_RTSHours   : BYTE;
+	
+	 gb_RTSDay         : BYTE;
+	 gb_RTSMonth       : BYTE;
+	 gb_RTSYearHByte   : BYTE;	
+	 gb_RTSYearLByte   : BYTE;
+	 
+	 gui_RTSShutDownCycles : UINT;
+	 gui_RTSInitCycles    : UINT;
+	 gui_RTSTermCycles    : UINT;
+	 gudi_RTSRunCycles    : UDINT;
+		
+	END_VAR
+END_GLOBALS

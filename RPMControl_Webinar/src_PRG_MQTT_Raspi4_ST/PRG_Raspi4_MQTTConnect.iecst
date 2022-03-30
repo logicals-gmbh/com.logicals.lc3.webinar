@@ -1,0 +1,182 @@
+/*
+ * Raspi4
+ * MQTTConnect Task 
+ */
+PROGRAM PRG_Raspi4_MQTTConnect
+   /*
+    * PRG_Raspi4_MQTTConnect
+    */
+	VAR_EXTERNAL
+    /*
+     * Globaler TraceLevel
+     */ 
+     gui_TraceLevel : UINT;
+	END_VAR
+   /*
+    * Status Verbindung zum Broker 
+    */
+	VAR_EXTERNAL
+		/*
+		 * State und Channel vom Connect
+		 */ 
+		 MQTT_State   : MQTT_SUBSCRIBER_STATE;
+		 MQTT_Channel : DINT;
+	END_VAR
+
+    VAR_EXTERNAL
+        /*
+         * Conecting Status an WebCon
+         */ 
+         gui_MQTTConnecting    : UINT; // Anzahl der Zyklen in MQTTConnecting
+        /*
+         * Conect und DisConnect Status an WebCon
+         */ 
+	     gui_MQTTConOkCycle    : UINT; // Anzahl der Zyklen bis MQTT Connect
+	     gui_MQTTConNotOkCycle : UINT; // Anzahl der Zyklen wenn MQTT DisConnect
+        /*
+         * Conect Status an WebCon
+         */ 
+         gx_MQTTConOk      : BOOL;
+    END_VAR	 
+    
+    VAR
+
+    l_ConState : MQTT_SUBSCRIBER_STATE;
+        
+    l_RC       : MQTT_RC;
+    ldi_Ch     : DINT;
+    
+    l_RC_Disconnect : MQTT_RC;
+
+  END_VAR
+
+   VAR
+    /*
+     * DiagnoseBits fuer RTS
+     */
+     lx_RTSInit     : BOOL;
+     lx_RTSRun      : BOOL;
+     lx_RTSShutDown : BOOL;
+     lx_RTSTerm     : BOOL;
+   END_VAR	
+   
+   VAR	     
+	 //
+	 // Aus HCLib
+     // Alle Verbindungen bedienen
+     // Hier werden die Daten konkret verschickt!
+     FB_Raspi4_MQTTConnect        : FB_MQTTConnect;
+  END_VAR
+
+  VAR
+    /*
+     * Der Datentyp enthaelt alle wesentlichen Informationen f�r die Basis-
+     * Einstellungen von MQTT
+     */
+     l_MQTTInitKom    : DT_MQTT;
+  END_VAR
+  
+ /*
+  * Initialisierungsmerker
+  */
+  VAR
+     FB_InitR_TRIG       : R_TRIG;
+  END_VAR      
+    
+  VAR
+    /* Lokaler InitPuls im Baustein */
+     lx_CycleInit : BOOL;
+
+    /* Lokaler Puls im Baustein */
+     lx_CyclePulse : BOOL;
+    /* Lokaler Zyklustaktzaehler */
+     li_CycleCount : INT; 
+
+    /* Lokaler InitZyklustaktzaehler */
+     li_CycleCountInitVal : INT;      
+  END_VAR
+  
+  VAR
+    lstr_PRGName      : STRING[30] := 'PRG_Raspi4_MQTTConnect';
+    lui_TraceLevel    : UINT     := 5;
+
+    lui_POU_UID       : UINT;                                      // Lokale POU-ID
+    lstr_InstName     : STRING[30];
+    lstr_POU_InstPath : STRING[128];                               // Lokale POU-ID
+   END_VAR
+ /*
+  * -------------------------------------------------
+  * Start SPS-Programm PRG_Raspi4_MQTTConnect
+  * -------------------------------------------------
+  */
+ /*
+  * InitZyklus setzen wenn MQTT aktiv gesetzt!
+  */ 
+  FB_InitR_TRIG(CLK := TRUE,Q => lx_CycleInit);  
+
+ /*
+  * CyclePulse
+  */
+  lx_CyclePulse := NOT(lx_CyclePulse);
+
+ /*
+  * LifeTick bzw. ZyklusZaehler
+  */ 
+  li_CycleCount := li_CycleCount + 1;
+  
+   IF lx_CycleInit = TRUE THEN   
+       /*
+        * Globalen TraceLevel uebernehmen 
+        */
+       lui_TraceLevel := gui_TraceLevel;
+      /*
+       * PI-Name fuer GVL-Liste
+       */
+       lstr_InstName        := GET_CURRENT_PI_NAME();
+       lstr_POU_InstPath    := lstr_PRGName;
+       li_CycleCountInitVal := li_CycleCountInitVal + 1;
+   END_IF;
+
+    /*
+     * Es wird ein MQTT_Connect aufgebaut
+     * Wird fuer Publish/Subscribe verwendet!
+     * NUR ein Connect je Resource zum Broker erlaubt!
+     * 
+     * Im RTSTerm bzw. RTSShutdown MUSS der Connect Disconnected werden!
+     */
+     FB_Raspi4_MQTTConnect(vistr_InstPath                := lstr_InstName,
+     	                    vistr_BrokerAddress          := l_MQTTInitKom.BrokerAdress,
+                            vistr_ClientID               := l_MQTTInitKom.Raspi4ClientID,
+                            vo_State                     => l_ConState,              // Status fuer Connect fuer alle zu oeffnenden Verbindungen (Pub/Sub) zum Broker
+                            vo_RC                        => l_RC,                    // Status fuer Connect fuer alle zu oeffnenden Fehler (Pub/Sub) zum Broker
+                            vodi_ch                      => ldi_Ch,                  // Status fuer Connect fuer alle zu oeffnenden Kanaele (Pub/Sub) zum Broker
+                            voui_CycleCount_Connecting   => gui_MQTTConnecting, 
+                            voui_CycleCount_Connected    => gui_MQTTConOkCycle,      // Wert auch in WebCon
+                            voui_CycleCount_NotConnected => gui_MQTTConNotOkCycle,   // Wert auch in WebCon
+                            vox_MQTTConOk                => gx_MQTTConOk);           // Wert auch in WebCon
+   /*
+    * Ausgabe der Daten!
+    */
+    MQTT_State   := l_ConState;
+    MQTT_Channel := ldi_ch;
+    
+   /*
+    * Diagnosebits des RTS
+    */
+    RTSCycleInfo(Init     => lx_RTSInit,
+  	             Run      => lx_RTSRun,
+  	             Shutdown => lx_RTSShutDown,
+  	             Term     => lx_RTSTerm);
+    
+   /*
+    * Disconnect!
+    * In RTS.CFG ShutDown Cycle von 3 Sekunden eintragen! 
+    */ 
+    IF lx_RTSTerm = TRUE OR lx_RTSShutDown = TRUE THEN
+     MQTT_Disconnect(ch := ldi_ch,
+                     rc => l_RC_Disconnect);
+     MQTT_State   := l_ConState;
+     MQTT_Channel := -1;
+    END_IF;
+         
+END_PROGRAM

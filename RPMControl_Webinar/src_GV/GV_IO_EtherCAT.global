@@ -1,0 +1,13 @@
+/*
+ * GV fuer Mapping IO
+ */
+GLOBALS GV_IO_EtherCAT
+
+	VAR_GLOBAL
+
+	 gx_isConnected        : BOOL;
+	 gudi_ConfiguredSlaves : UDINT;
+	 gudi_ConnectedSlaves  : UDINT;
+	END_VAR
+
+END_GLOBALS

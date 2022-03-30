@@ -1,0 +1,468 @@
+ /* 
+  * Lokaler Test
+  * ============
+  * sudo mosquitto_sub -d -t test   - test = Name des Topic -> /GHaus       - Header
+  *                                                            /GHaus/Value - Werte
+  *  
+  * sudo mosquitto_pub -d -t test –m “Hello” - test = Name des Topic -> /GHaus       - Header
+  *                                                                     /GHaus/Value - Werte
+  * 
+  *                               -m "Hello" -> String der verschickt wird!
+  */
+
+ /* 
+  * MQTTDisConnect zum Broker die eingeschaltet sind
+  * Muss in allen Resourcen verwendet werden
+  *
+  * Muss als separate Task aufgerufen und beendet dann die Verbindung!
+  */
+
+ FUNCTION_BLOCK FB_MQTTDisConnect
+ 
+   VAR_INPUT
+    vistr_InstPath              : STRING[128];   // Uebergabe Instanzpfad
+   /* 
+    * Ergebnis des Channels aus Connect
+    */
+    vidi_ch : DINT;
+   END_VAR
+ 
+   VAR_OUTPUT
+   /* Ergebnis des GetState */ 
+    vo_rc              : MQTT_RC; 
+   /* Ergebnis des Connect */
+    vo_state           : MQTT_SUBSCRIBER_STATE := MQTT_SUBSCRIBER_STATE#INVALID;
+
+    vodi_ch            : DINT;
+  END_VAR
+
+  VAR
+    rc_DisConnect      : MQTT_RC;
+  END_VAR
+  
+  VAR
+     lui_TraceLevel : UINT := 5;
+    /* 
+     * Fuer den lokalen Instanzpfad
+     */
+     lstr_FBName    : STRING[20] := 'FB_MQTTDisConnect';
+    /*
+     * Lokaler Instanzpfad
+     */ 
+     lstr_InstPath  : STRING[128];
+    /*
+     * Der Instanzpfad zur Var ..
+     */ 
+     lstr_POUInstPath  : STRING[128];
+  END_VAR
+
+  VAR
+    /* Lokaler InitPuls im Baustein */
+     lx_CycleInit : BOOL;
+    /* Lokaler Zyklustaktgeber */
+     lx_CyclePulse : BOOL;
+    /* Lokaler Zyklustaktzaehler */
+     li_CycleCount : INT; 
+    /* Lokaler InitZyklustaktzaehler */
+     li_CycleCountInitVal : INT;
+  END_VAR
+  
+  VAR   
+    /* Lokaler InitPuls */
+     InitRTrig : R_TRIG;
+  END_VAR
+   /*
+    * Lokaler InitPulse
+    */
+   InitRTrig(CLK:= TRUE, Q => lx_CycleInit);
+   /*
+    * Wird der Baustein bearbeitet
+    */
+   lx_CyclePulse := NOT(lx_CyclePulse);
+   li_CycleCount := li_CycleCount + 1;
+
+   IF lx_CycleInit = TRUE THEN  
+     li_CycleCountInitVal     := li_CycleCountInitVal + 1;
+    /*
+     * Bilden des lokalen Instanzpfades
+     * Trennzeichen MUSS ein Punkt sein!
+     */ 
+     lstr_InstPath := CONCAT(IN1:=vistr_InstPath, IN2 := '.', IN3 := lstr_FBName); 
+   END_IF;
+  
+ /*
+  * Den State auf ERROR zunaechst setzen!
+  */   
+  vo_State   := MQTT_SUBSCRIBER_STATE#CONNECT_ERROR;  
+
+  /*
+   * Status Broker/MQTTLib im RTS abfragen!
+   */
+   vo_state := MQTT_GetState(ch   := vidi_ch, 
+                            rc    => vo_rc, 
+  	                        ENO   => ENO);    
+ /*
+  */  
+   MQTT_Disconnect(ch       := vidi_ch,
+                   rc       => rc_DisConnect, 
+                   ENO      => ENO);
+
+ /*
+  * VAR_OUTPUT auf State/Ch/RC setzen!
+  */   
+  vo_State   := vo_State;
+  vo_RC      := vo_RC;
+  vodi_Ch    := vodi_Ch;
+/*
+ * Gets reference to a named memory area
+ * NAME = name of the memory block (STRING)
+ * RC = result of allocation (USINT)
+ *      16#00 ... allocation succeeded
+ *      16#01 ... out of memory error
+ *      16#02 ... requested data type does not match
+ *      16#FF ... service not available
+ * GET_NAMED_MEMORY = reference to the allocated memory block (ANY). NULL, if memory cannot be allocated.
+ */
+
+//  GET_NAMED_MEMORY(NAME := 'Test');
+
+/*
+ * Gets reference to variable
+ * NAME = instance path of variable (STRING)
+ * LEN = size of the variable in bytes (UINT)
+ * STATUS = result of operation (USINT)
+ *      16#00 ... operation succeeded
+ *      16#80 ... service not available
+ *      16#81 ... variable not found
+ *      16#83 ... invalid variable section, e.g. VAR_OUTPUT
+ *      16#84 ... invalid access to CONSTANT
+ *      16#85 ... data type mismatch
+ *      16#86 ... size mismatch
+ * GET_REF_FROM_VARNAME = reference to the variable (ANY). NULL, in case of an error.
+ */
+ 
+/* 
+ * FUNCTION_BLOCK ExampleGetRefFromVarname
+ * VAR
+ *  requestedVar : INT;
+ *  reference    : REF_TO INT;
+ *  CheckSize    : UINT;
+ *  CheckState   : USINT;
+ *  CheckENO     : BOOL;
+ * END_VAR
+ * 
+ * IF reference = NULL THEN
+ *  reference := GET_REF_FROM_VARNAME(NAME := 'DOCUMENTATIONEXAMPLES.IEXAMPLEGETREFFROMVARNAME.REQUESTEDVAR', LEN => CheckSize, STATUS => CheckState, ENO => CheckENO);
+ * END_IF;
+ * 
+ * IF reference <> NULL THEN
+ * reference^ := 42;
+ * END_IF;
+ * 
+ * ENO := requestedVar = 42;
+ * 
+ * END_FUNCTION_BLOCK
+ */
+
+ lstr_POUInstPath := CONCAT(IN1 := lstr_InstPath, IN2 := '.', IN3 := 'li_CycleCount'); 
+ /*
+  * Geht nur bei WinX86 und LinuxX86!
+  * li_POUCycleCount := GET_REF_FROM_VARNAME(NAME := lstr_POUInstPath, LEN => lui_CheckSize, STATUS => lusi_CheckState, ENO => lx_CheckENO);
+  *
+  */ 
+ END_FUNCTION_BLOCK
+  
+ /* 
+  * MQTTConnect zum Broker die eingeschaltet sind
+  * Muss in allen Resourcen verwendet werden
+  *
+  * Muss als separate Task aufgerufen werden und checkt dann zyklisch den State der Verbindung!
+  * 
+  * Wird im PRG aufgerufen!
+  */
+
+ FUNCTION_BLOCK FB_MQTTConnect
+ 
+  VAR_INPUT
+   vistr_InstPath         : STRING[128];
+   vistr_BrokerAddress    : STRING[64];
+   vistr_ClientID         : STRING[16];
+
+   vix_ReConnect          : BOOL;
+   vix_DisConnect         : BOOL;
+  END_VAR
+  
+  VAR_OUTPUT 
+   vo_rc                  : MQTT_RC; 
+   vo_State               : MQTT_SUBSCRIBER_STATE;
+   vodi_ch                : DINT;
+  /*
+   * Erkennen per CycleCount ob Connected order NotConnected vorhanden ist!
+   */ 
+   voui_CycleCount_Connected    : UINT;
+   voui_CycleCount_Connecting   : UINT;
+   voui_CycleCount_NotConnected : UINT;
+
+   vox_MQTTConOk                : BOOL; 
+  END_VAR
+
+  VAR
+    /* Lokaler Zyklustaktgeber Connecting */
+     lui_CycleCount_Connecting : UINT;
+    /* Lokaler Zyklustaktgeber Connected */
+     lui_CycleCount_Connected    : UINT;
+    /* Lokaler Zyklustaktgeber NotConnected */
+     lui_CycleCount_NotConnected : UINT;
+
+     lx_ReConnect          : BOOL;
+     lx_DisConnect         : BOOL;
+    
+     lx_MQTTConOk  : BOOL;
+  END_VAR
+
+ 
+   VAR 
+    /*
+     * Enumeration von MQTT_RC
+       MQTT_RC : DINT(OK := 0,
+                      ERROR := 1,
+                      ERROR_MEM_ALLOC := 2,
+                      ERROR_CONNECT := 3,
+                      ERROR_CH_INVALID := 4,
+                      ERROR_OUT_OF_CLIENTS := 5,
+                      ERROR_OUT_OF_CB := 6,
+                      ERROR_INVALID_MUTEX := 7,
+                      ERROR_NO_MSG_RECEIVED := 8,
+                      ERROR_NO_MSG_PUBLISHED := 9,
+                      ERROR_MSG_TRUNCATED := 10,
+                      ERROR_CH_INVALID_STATE := 11,
+                      ERROR_CANNOT_DISCONNECT := 12,
+                      ERROR_AUTHENTICATION_FAILED := 13,
+                      ERROR_SSL_NOT_SUPPORTED := 14);
+    */ 
+    l_GetState_rc    : MQTT_RC;
+    l_Connect_rc     : MQTT_RC;
+   /*  
+    * ENumeration of MQTT_SUBSCRIBER_STATE
+    * 
+    * MQTT_SUBSCRIBER_STATE : SINT(UNUSED        := 0,
+                                   INVALID       := 1,
+                                   UNINITIALIZED := 2,
+                                   DISCONNECTING := 3,
+                                   DISCONNECTED  := 4,
+                                   CONNECTING    := 5,
+                                   CONNECTED     := 6,
+                                   CONNECT_ERROR := 7); 
+    */
+   /*
+    * Status der Verbindung wird auf NICHT initialisiert gesetzt
+    */
+    l_Connect_state           : MQTT_SUBSCRIBER_STATE := MQTT_SUBSCRIBER_STATE#INVALID;
+
+    lx_GetStateENO  : BOOL;
+    lx_ConnectENO   : BOOL;
+
+    l_GetState_ch   : DINT;
+    l_Connect_ch    : DINT;
+   END_VAR
+
+  VAR
+     lui_TraceLevel : UINT := 5;
+    /* 
+     * Fuer den lokalen Instanzpfad
+     */
+     lstr_FBName    : STRING[20] := 'FB_MQTTConnect';
+    /*
+     * Lokaler Instanzpfad
+     */ 
+     lstr_InstPath  : STRING[128];
+    /*
+     * Der Instanzpfad zur Var ..
+     */ 
+     lstr_POUInstPath  : STRING[128];
+  END_VAR
+
+  VAR
+    /* Lokaler InitPuls im Baustein */
+     lx_CycleInit : BOOL;
+    /* Lokaler Zyklustaktgeber */
+     lx_CyclePulse : BOOL;
+    /* Lokaler Zyklustaktzaehler */
+     li_CycleCount : INT; 
+    /* Lokaler InitZyklustaktzaehler */
+     li_CycleCountInitVal : INT;
+  END_VAR
+  
+  VAR   
+    /* Lokaler InitPuls */
+     FB_InitRTrig : R_TRIG;
+  END_VAR
+   /*
+    * Lokaler InitPulse
+    */
+   FB_InitRTrig(CLK:= TRUE, Q => lx_CycleInit);
+   /*
+    * Wird der Baustein bearbeitet
+    */
+   lx_CyclePulse := NOT(lx_CyclePulse);
+   li_CycleCount := li_CycleCount + 1;
+
+   IF lx_CycleInit = TRUE THEN  
+     li_CycleCountInitVal     := li_CycleCountInitVal + 1;
+    /*
+     * Bilden des lokalen Instanzpfades
+     * Trennzeichen MUSS ein Punkt sein!
+     */ 
+     lstr_InstPath := CONCAT(IN1 := vistr_InstPath, IN2 := '.', IN3 := lstr_FBName); 
+   END_IF;
+  
+ /*
+  * Den State auf ERROR zunaechst setzen!
+  */   
+  vo_State         := MQTT_SUBSCRIBER_STATE#CONNECT_ERROR;  
+
+ /*
+  * Weiterreichen um MQTT ggfs Reconnecten zu koennen wenn z. B. der Broker
+  * nicht mehr erreichar ist (Kabelbruch, Restart HCServer)
+  */
+  lx_ReConnect     := vix_ReConnect;
+  lx_DisConnect    := vix_DisConnect;
+  
+ /*
+  * Status Broker/MQTTLib im RTS abfragen!
+  */
+  l_Connect_state := MQTT_GetState(ch := l_GetState_ch, 
+  	                               rc => l_GetState_rc, 
+  	                               ENO => lx_GetStateENO);
+    
+  /* 
+   * make sure MQTT connection is established and messages are received 
+   * Sobald die Verbindung aufgebaut IST wird die Funktion NICHT mehr aufgerufen!
+   * 
+   * Wenn dann die Verbindung verloren wird (Broker Reboot), dann wird die Funktion 
+   * zyklisch aufgerufen.
+   * Macht das ein Problem?
+   */
+  IF l_Connect_state <> MQTT_SUBSCRIBER_STATE#CONNECTING AND l_Connect_state <> MQTT_SUBSCRIBER_STATE#CONNECTED THEN
+
+  /*
+   * CycleCounter fuer Connecting!
+   */ 
+   lui_CycleCount_Connecting := lui_CycleCount_Connecting + 1;
+
+  /*
+   * Connects to a MQTT broker at a given address
+   * An arbitrary client ID can be supplied to the connection.
+   * address = address of the MQTT broker (tcp://ipaddr:portno;) (STRING)<br>
+   * clientId = client ID of this connection (STRING)
+   * Each connection needs to have an identifier that is unique for all 
+   * connections to the MQTT broker.
+   * username = username for this connection to the MQTT broker (STRING)
+   * password = password for this connection to the MQTT broker (STRING)
+ 
+   * useSSL  = whether to use (TRUE) or not to use (FALSE) SSL encryption (BOOL)
+   * rc = return code of involved MQTT functions as specified in data type MQTT_RC (see this data type for the named values)
+   * Returns the connection handler of the newly created MQTT connection (DINT)
+   */  
+   l_Connect_ch := MQTT_Connect(address  := vistr_BrokerAddress,
+   	                            clientId := vistr_ClientID,
+   	                            rc       => l_Connect_rc, 
+   	                            ENO      => lx_ConnectENO);
+  
+  END_IF;
+
+ /*
+  * Ist cconnected? 
+  */
+  IF lx_GetStateENO = TRUE AND lx_ConnectENO = TRUE THEN
+
+     IF l_Connect_state = MQTT_SUBSCRIBER_STATE#CONNECTED THEN
+        /* Lokaler Zyklustaktgeber Connected */
+        lui_CycleCount_Connected := lui_CycleCount_Connected + 1;
+        lx_MQTTConOk := TRUE;
+       ELSE
+        /* Lokaler Zyklustaktgeber Not Connected */
+        lui_CycleCount_NotConnected := lui_CycleCount_NotConnected+ 1;
+        lx_MQTTConOk := FALSE;
+     END_IF;
+     
+  ELSE
+     lx_MQTTConOk := FALSE;
+  END_IF;
+
+ /*
+  * ENO dieses Bausteins setzen
+  */ 
+  ENO := lx_ConnectENO OR lx_GetStateENO;
+ /*
+  * Interne Werte nach VAR_OUTPUT
+  */
+  vo_rc    := l_Connect_rc;
+  vo_state := l_Connect_state;
+  vodi_ch  := l_GetState_ch;
+ /*
+  * CycleWerte an VAR_OUTPUT
+  */    
+  voui_CycleCount_Connected    := lui_CycleCount_Connected;
+  voui_CycleCount_Connecting   := lui_CycleCount_Connecting;
+  voui_CycleCount_NotConnected := lui_CycleCount_NotConnected;
+  
+  vox_MQTTConOk                := lx_MQTTConOk;
+
+/*
+ * Gets reference to a named memory area
+ * NAME = name of the memory block (STRING)
+ * RC = result of allocation (USINT)
+ *      16#00 ... allocation succeeded
+ *      16#01 ... out of memory error
+ *      16#02 ... requested data type does not match
+ *      16#FF ... service not available
+ * GET_NAMED_MEMORY = reference to the allocated memory block (ANY). NULL, if memory cannot be allocated.
+ */
+
+//  GET_NAMED_MEMORY(NAME := 'Test');
+
+/*
+ * Gets reference to variable
+ * NAME = instance path of variable (STRING)
+ * LEN = size of the variable in bytes (UINT)
+ * STATUS = result of operation (USINT)
+ *      16#00 ... operation succeeded
+ *      16#80 ... service not available
+ *      16#81 ... variable not found
+ *      16#83 ... invalid variable section, e.g. VAR_OUTPUT
+ *      16#84 ... invalid access to CONSTANT
+ *      16#85 ... data type mismatch
+ *      16#86 ... size mismatch
+ * GET_REF_FROM_VARNAME = reference to the variable (ANY). NULL, in case of an error.
+ */
+ 
+/* 
+ * FUNCTION_BLOCK ExampleGetRefFromVarname
+ * VAR
+ *  requestedVar : INT;
+ *  reference    : REF_TO INT;
+ *  CheckSize    : UINT;
+ *  CheckState   : USINT;
+ *  CheckENO     : BOOL;
+ * END_VAR
+ * 
+ * IF reference = NULL THEN
+ *  reference := GET_REF_FROM_VARNAME(NAME := 'DOCUMENTATIONEXAMPLES.IEXAMPLEGETREFFROMVARNAME.REQUESTEDVAR', LEN => CheckSize, STATUS => CheckState, ENO => CheckENO);
+ * END_IF;
+ * 
+ * IF reference <> NULL THEN
+ * reference^ := 42;
+ * END_IF;
+ * 
+ * ENO := requestedVar = 42;
+ * 
+ * END_FUNCTION_BLOCK
+ */
+  lstr_POUInstPath := CONCAT(IN1 := lstr_InstPath, IN2 := '.', IN3 := ' li_CycleCount'); 
+ /*
+  * Geht nur bei WinX86 und LinuxX86!
+  * li_POUCycleCount := GET_REF_FROM_VARNAME(NAME := lstr_POUInstPath, LEN => lui_CheckSize, STATUS => lusi_CheckState, ENO => lx_CheckENO);
+  *
+  */   
+ END_FUNCTION_BLOCK

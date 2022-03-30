@@ -1,0 +1,481 @@
+
+
+USING com.logicals.Basic.Convert;
+/*
+ * Publish Daten (Header)
+ */
+FUNCTION_BLOCK FB_MQTT_Publish
+   
+   VAR_EXTERNAL
+      gui_TraceLevel : UINT;
+   END_VAR
+         
+   VAR_INPUT
+      /*
+       * Diese Daten sollen "Published" werden
+       */
+       vi_MQTTHeader :  MQTTHeader;
+      /*
+       * Die Sende IPAdresse des Rechners der Publish ausfuehrt
+       * kommt in die MQTT Daten
+       */
+       vistr_IPAddr : STRING[25];
+      /*
+       * Die IPAdresse des Brokers
+       * kommt in die MQTT Daten
+       */
+       vistr_BrokerIPAddr : STRING[25];
+      /*
+       * Die Eingangsdaten
+       */ 
+       vistr_BrokerPublishTopic : STRING[64];
+      /*
+       * Das externe InitSignal
+       */
+       vix_Init : BOOL;
+      /*
+       * Status GetState uebergeben von Connect
+       */ 
+       vi_State : MQTT_SUBSCRIBER_STATE;
+      /*
+       * Ch von Connect uebergeben
+       */ 
+       vdi_Ch   : DINT;
+   END_VAR
+   
+   VAR_OUTPUT
+         voui_PubMQTTLength      : UINT;
+         voui_PubMQTTLengthValue : UINT;
+        /*
+         * LifeTick je Verbindung!
+         */
+         voui_PubTick          : UINT; // 
+
+         vox_PublishOK         : BOOL;
+         vodi_PublishLifeTick  : DINT;
+         vodint_MQTTChannel    : DINT;  // Status der Publish-Verbindung
+         vodint_MQTTCount      : DINT;
+         vodint_MQTTrc         : DINT;
+         vosint_MQTTState      : SINT;
+         vox_MQTTENO           : BOOL;
+         vouint_MQTTLength     : UINT;  // Laenge der Nachricht
+        /* 
+         * Das letze Byte der Publish IP Adresse  - 236, 238, 239, 237, 240, 241, 242, 20
+         * Das ist die gesendete Nachricht diese wird aus der IPAdresse ermittelt!
+         */
+         voui_IPVal1 : USINT;
+         voui_IPVal2 : USINT;
+         voui_IPVal3 : USINT;
+
+         vostr_BrokerTopic      : STRING[64];
+         vostr_BrokerTopicValue : STRING[64];
+
+   END_VAR
+
+   VAR
+       /*
+        * Die Daten welche an den Broker geschickt werden sollen
+        * Werden in dieser Funktion zusammengebaut und dann als ByteArray zurueckgegeben
+        */
+        FB_MQTTCreatePublishData : FB_MQTTCreatePublishDataHeader;
+   END_VAR
+    
+   VAR             
+        ioImageLocal    : ARRAY[0..1023] OF BYTE;
+        ioImageLocalLen : DINT := 1024;
+        
+        ch    : DINT    := -1;
+        cnt   : DINT    := 0;
+    
+        cntPublishconnect     : DINT := 0;
+        
+        lui_cntSndMessage     : UINT := 0;
+       /*
+        * Enumeration von MQTT_RC
+        * MQTT_RC : DINT(OK                          := 0,
+        *                ERROR                       := 1,
+        *                ERROR_MEM_ALLOC             := 2,
+        *                ERROR_CONNECT               := 3,
+        *                ERROR_CH_INVALID            := 4,
+        *                ERROR_OUT_OF_CLIENTS        := 5,
+        *                ERROR_OUT_OF_CB             := 6,
+        *                ERROR_INVALID_MUTEX         := 7,
+        *                ERROR_NO_MSG_RECEIVED       := 8,
+        *                ERROR_NO_MSG_PUBLISHED      := 9,
+        *                ERROR_MSG_TRUNCATED         := 10,
+        *                ERROR_CH_INVALID_STATE      := 11,
+        *                ERROR_CANNOT_DISCONNECT     := 12,
+        *                ERROR_AUTHENTICATION_FAILED := 13,
+        *                ERROR_SSL_NOT_SUPPORTED     := 14);
+        */ 
+        rc   : MQTT_RC;
+
+       /*  
+        * ENumeration of MQTT_SUBSCRIBER_STATE
+        * 
+        * MQTT_SUBSCRIBER_STATE : SINT(UNUSED        := 0,
+        *                              INVALID       := 1,
+        *                              UNINITIALIZED := 2,
+        *                              DISCONNECTING := 3,
+        *                              DISCONNECTED  := 4,
+        *                              CONNECTING    := 5,
+        *                              CONNECTED     := 6,
+        *                              CONNECT_ERROR := 7); 
+        */
+       /*
+        * Status der Verbindung wird auf NICHT initialisiert gesetzt
+        */
+        state : MQTT_SUBSCRIBER_STATE := MQTT_SUBSCRIBER_STATE#INVALID;
+
+        lstr_BrokerTopic       : STRING[24]; // Header
+        lui_MessageLength      : UINT;       // Header    
+
+        lstr_BrokerTopicValue  : STRING[24]; // Value
+        lui_MessageLengthValue : UINT;       // Value
+
+        lstr_PubMessage      : STRING[1024];
+        /*
+         * LifeTick je Verbindung!
+         */
+         lui_PubTick         : UINT; // 
+
+   END_VAR
+   
+   VAR
+     MQTT_PublishOkR_TRIG  : R_TRIG;
+     MQTT_PublishNotOkR_TRIG  : R_TRIG;
+   END_VAR
+   
+   VAR
+     lx_MQTT_PublishOK     : BOOL;
+     lx_MQTT_PublishNotOK  : BOOL;
+   END_VAR
+   
+   VAR
+     lstr_TraceText : STRING[16] := 'FB_MQTT_Publish';
+     lui_TraceLevel : UINT := 5;
+   END_VAR
+    
+   VAR
+     InitPulseR_TRIG : R_TRIG;
+   END_VAR
+
+   VAR          
+     lx_CycleInit  : BOOL;
+     li_CycleCount : INT;      
+   END_VAR
+           
+   InitPulseR_TRIG(CLK := TRUE, Q => lx_CycleInit);
+
+  /*
+   * Interner und/ode externer Init
+   */
+   IF lx_CycleInit = TRUE OR vix_Init = TRUE THEN
+      lui_TraceLevel := gui_TraceLevel;
+
+     /*
+      * Daten NUR einmal umkopieren
+      */
+      voui_PubTick := TO_UINT(li_CycleCount);
+      
+      voui_IPVal1 := TO_USINT(vi_MQTTHeader.IPVal1);
+      voui_IPVal2 := TO_USINT(vi_MQTTHeader.IPVal2);
+      voui_IPVal3 := TO_USINT(vi_MQTTHeader.IPVal3);
+   END_IF;
+
+   li_CycleCount := li_CycleCount + 1;
+
+   /*
+    * Den Status von MQTT_Get_State und MQTT_Connect uebernehmen
+    */
+    state := vi_State;
+    ch    := vdi_Ch;
+    
+    vodint_MQTTChannel := ch;
+    vodint_MQTTCount   := cnt;
+    vodint_MQTTrc      := rc;
+    vosint_MQTTState   := state;
+    vox_MQTTENO        := ENO;
+    
+   /*
+    * state MUSS im Run auf Disconnected gesetzt werden!
+    * s. PRG_MQTTConnect
+    */
+    IF state = MQTT_SUBSCRIBER_STATE#CONNECTED /* connected */ THEN
+        
+        /*
+         * Der Eintrag in der MQTT Struktur ist nur ein Byte
+         * Also Werte > 255 dann ruecksetzen.
+         */ 
+         cntPublishconnect := cntPublishconnect + 1;
+         IF cntPublishconnect > 255 THEN
+          cntPublishconnect := 0;
+         END_IF;
+         
+         lui_cntSndMessage     := lui_cntSndMessage + 1;
+
+        /*
+         * VAR_OUTPUT-Werte uebergeben
+         */
+         vodi_PublishLifeTick := lui_cntSndMessage;
+         vox_PublishOk        := TRUE;
+
+        /*
+         * PubTick bauen!
+         */
+         lui_PubTick          := lui_cntSndMessage;
+        /*
+         * Die MQTT-ByteArray-Var aus den Strukturdaten aufbauen/aktualisieren
+         * Der PubTick wird in die MQTT Struktur als LifeTick geschrieben
+         * Wird im Subscriber dann im Header uebernommen und in Visu/WebCon angezeigt
+         */
+        /*
+         * Die Daten welche an den Broker geschickt werden sollen
+         * Werden in dieser Funktion zusammengebaut und dann als ByteArray zurueckgegeben
+         *
+         * Header bauen!
+         */
+         FB_MQTTCreatePublishData(vi_MQTTHeader          := vi_MQTTHeader,
+         	                      vistr_IpAddr           := vistr_IPAddr,
+         	                      vistr_BrokerIpAddr     := vistr_BrokerIPAddr,
+         	                      vistr_BrokerTopic      := vistr_BrokerPublishTopic, // Basis-Topic-Name
+         	                      viui_PubTick           := lui_PubTick,
+         	                      voarr_ioImageLocal     => ioImageLocal,             // Value Werte
+         	                      vodi_ioImageLocalLen   => ioImageLocalLen,          // Value Lange
+                                  
+         	                      vostr_BrokerTopic      => lstr_BrokerTopic,
+         	                      voui_MQTTLength        => lui_MessageLength, 
+         	                      vostr_PubMessage       => lstr_PubMessage); 
+         
+        /*
+         * An die aufrufende Instanz die Werte zurueckgeben
+         */ 	                   
+         voui_PubMQTTLength      := lui_MessageLength;
+         voui_PubMQTTLengthValue := lui_MessageLengthValue;
+
+         vostr_BrokerTopic      := lstr_BrokerTopic;       // Topic fuer Header
+         vostr_BrokerTopicValue := lstr_BrokerTopicValue;  // Topic fuer Werte
+
+         voui_PubTick           := lui_PubTick;
+         
+    END_IF;
+
+   /* 
+    * Send Header Message 
+    */
+    MQTT_Publish(ch      := ch, 
+                 topic   := lstr_BrokerTopic,
+                 payload := GET_BYTE_REF(IN := lstr_PubMessage),
+                 len     := lui_MessageLength,
+                 rc      => rc);
+      
+    vouint_MQTTLength := TO_UINT(voui_PubMQTTLength); // TO_UINT(ioImageLocalLen);
+        
+END_FUNCTION_BLOCK
+
+/*
+ * Die Initialmessage senden (Header)
+ */
+FUNCTION_BLOCK FB_MQTTCreatePublishDataHeader
+
+    VAR_INPUT
+    
+      vi_MQTTHeader           : MQTTHeader;      // Header
+     /*
+      * Lokale IPAdresse
+      */
+      vistr_IpAddr            : STRING[15];      // Lokale IPAdresse (Sender) (Neu)
+     /*
+      * Broker-IpAdresse fuer Header
+      */ 
+      vistr_BrokerIpAddr      : STRING[15];      // BrokerIpAddr fuer Header (Neu)
+     /*
+      * LifeTick
+      */ 
+      viui_PubTick            : UINT;            // Old Ok
+     /*
+      * Der Name des Topics wird am Ende eingefuegt
+      * Vor der MQTTLaenge
+      */ 
+      vistr_BrokerTopic       : STRING[64];      // Old Ok
+    END_VAR
+
+    VAR_OUTPUT
+      voarr_ioImageLocal      : ARRAY[0..1023] OF BYTE;  // Werte                              - Old Ok
+      vodi_ioImageLocalLen    : DINT;                    // Laenge des ByteArrays fuer Value   - Old Ok
+
+      voui_MQTTLength         : UINT;   // Anzahl der ermittelten Zeichen fuer den Header-Teil - Old OK
+
+      vostr_PubTick           : STRING[20];   // Tick als LifeTick im Header mit max. Genauigkeit (DINT)
+
+      vostr_PubDateTime       : STRING[22];   // Header DT#YYYY-MM-DD-hh:mm:ss[.us]
+
+      vostr_PubMessage        : STRING[1024]; // Header
+
+      vostr_BrokerTopic       : STRING[20];   // Header
+    END_VAR
+
+    VAR
+      ldi_ioImageLocalLen    : DINT;
+
+      lui_MQTTLength         : UINT;   // Anzahl der ermittelten Zeichen fuer den Value-Teil!
+
+      lstr_TopicChar : STRING[1];
+      lb_TopicChar   : BYTE;
+      lstr_TestTopic : STRING[24];
+      
+    END_VAR
+    
+    VAR
+    /*
+     * Wandelt die erfasste Laenge der Struktur in 2Byte um
+     */     
+     ConvMsgLength   : FB_lc_ConvInt2Byte_ST; 
+    END_VAR
+    
+    VAR
+     lui_Idx          : UINT;
+    END_VAR
+
+    VAR
+     lb_CntSndMessage   : BYTE;
+     lusi_CntSndMessage : USINT;
+    END_VAR
+    
+    VAR
+     // DT#YYYY-MM-DD-hh:mm:ss
+     lstr_Year  : STRING[4];
+     lstr_Month : STRING[2];
+     lstr_Day   : STRING[2];
+
+     lstr_Hour   : STRING[2];
+     lstr_Minute : STRING[2];
+     lstr_Second : STRING[2];
+    END_VAR
+    
+    VAR
+      FB_Conv2BYTE2INT : FB_lc_Conv2Byte2Int_ST;
+    END_VAR
+
+    VAR
+     lui_IdxTopic        : UINT;       //Anzahl der Zeichen im vistr_BrokerTopic = 64
+     lui_IdxTopicMin     : UINT := 0;
+     lui_IdxTopicMax     : UINT := 63;
+    END_VAR
+
+    VAR
+     lstr_IpAddr       : STRING[15];
+     lstr_BrokerIpAddr : STRING[15];
+    END_VAR
+
+    VAR
+     li_ConvYear   : INT;
+    END_VAR
+
+   /*
+    * Werte bei Normalbetrieb
+    */ 
+    lstr_IpAddr       := vistr_IpAddr;
+    lstr_BrokerIpAddr := vistr_BrokerIpAddr;
+    
+   /*
+    * Interne Testwerte
+    */ 
+    lusi_CntSndMessage := lusi_CntSndMessage + 1;
+    lb_CntSndMessage   := TO_BYTE(lusi_CntSndMessage);
+    
+    vostr_PubTick := TO_STRING(viui_PubTick);
+
+  /*
+   * Aus dem MQTT-Byte das Year bauen
+   */
+    FB_Conv2BYTE2INT(vib_LByte := vi_MQTTHeader.YearLByte, vib_HByte := vi_MQTTHeader.YearHByte,voi_OUT => li_ConvYear);
+
+   /*
+    * Das muss so umgebaut werden, dass die STRING-Ausgabe von DATE und TIME immer zwei- oder 4-stellig sind!
+    * DT#YYYY-MM-DD-hh:mm:ss
+    */ 
+    lstr_Year  := TO_STRING(li_ConvYear);
+    lstr_Month := TO_STRING(vi_MQTTHeader.Month);
+    lstr_Day   := TO_STRING(vi_MQTTHeader.Day);
+
+    lstr_Hour   := TO_STRING(vi_MQTTHeader.Hour);
+    lstr_Minute := TO_STRING(vi_MQTTHeader.Minute);
+    lstr_Second := TO_STRING(vi_MQTTHeader.Second);
+
+    vostr_PubDateTime := CONCAT('DT#',lstr_Year,'-', lstr_Month, '-', lstr_Day, '-', lstr_Hour, ':', lstr_Minute, ':', lstr_Second);
+
+    vostr_BrokerTopic       := vistr_BrokerTopic;                     // Header
+
+    vostr_PubMessage        := CONCAT(lstr_IpAddr, ';', lstr_BrokerIpAddr, ';', vostr_BrokerTopic, ';', vostr_PubDateTime , ';', vostr_PubTick);   // Header
+    lui_MQTTLength          := len(vostr_PubMessage);   // Anzahl der ermittelten Zeichen fuer den Header-Teil!
+
+    voui_MQTTLength         := TO_UINT(lui_MQTTLength);   //Header
+
+   /*
+    * Value-Stream in Byte (Publish)
+    */  
+    lui_Idx           := 0;
+    voarr_ioImageLocal[lui_Idx]  := vi_MQTTHeader.IPVal1; // 0
+    lui_Idx := lui_Idx+1;
+    voarr_ioImageLocal[lui_Idx]  := vi_MQTTHeader.IPVal2; // 1
+    lui_Idx := lui_Idx+1;
+    voarr_ioImageLocal[lui_Idx]  := vi_MQTTHeader.IPVal3; // 2
+
+    lui_Idx := lui_Idx+1;
+    voarr_ioImageLocal[lui_Idx]  := lb_CntSndMessage; // LifeTick fuer Publish
+
+    lui_Idx := lui_Idx+1;
+    voarr_ioImageLocal[lui_Idx]  := vi_MQTTHeader.Second;  // 4
+    lui_Idx := lui_Idx+1;
+    voarr_ioImageLocal[lui_Idx]  := vi_MQTTHeader.Minute;  // 5
+    lui_Idx := lui_Idx+1;
+    voarr_ioImageLocal[lui_Idx]  := vi_MQTTHeader.Hour;    // 6
+    lui_Idx := lui_Idx+1;
+    voarr_ioImageLocal[lui_Idx]  := vi_MQTTHeader.Day;
+    lui_Idx := lui_Idx+1;
+    voarr_ioImageLocal[lui_Idx]  := vi_MQTTHeader.Month;
+    lui_Idx := lui_Idx+1;
+    voarr_ioImageLocal[lui_Idx]  := vi_MQTTHeader.YearLByte;
+    lui_Idx := lui_Idx+1;
+    voarr_ioImageLocal[lui_Idx]  := vi_MQTTHeader.YearLByte;
+    lui_Idx := lui_Idx+1;
+
+    /*
+     * Das Topic an Emde anfuegen!
+     * Hat je nach TopicName unterschiedliche Laenge.
+     */ 
+     lui_IdxTopicMax := len(vostr_BrokerTopic);
+     lui_IdxTopicMin := 1;
+    /*
+     * Den Topic am Ende anfuegenn
+     */ 
+     FOR lui_IdxTopic := lui_IdxTopicMin TO lui_IdxTopicMax BY 1 DO
+
+       lstr_TopicChar := MID(IN := vostr_BrokerTopic, L:=1, P:= lui_IdxTopic);
+
+       IF lstr_TopicChar = '' THEN
+         EXIT;
+       END_IF;
+
+       lb_TopicChar                 := FUN_lc_ConvStr2BYTE_ST(vistr_IN := lstr_TopicChar, vix_Set2UpperCase := FALSE);
+       voarr_ioImageLocal[lui_Idx]  := lb_TopicChar;
+       //
+       lstr_TestTopic := CONCAT(lstr_TestTopic, TO_STRING(lb_TopicChar));       
+       // 
+       lui_Idx           := lui_Idx + 1;
+     END_FOR;
+
+   /*
+    * Idx in Byte wandeln
+    * Laenge der Werte
+    */
+    ConvMsgLength(vii_IN := TO_INT(lui_Idx+2), vob_LByte => voarr_ioImageLocal[lui_Idx], vob_HByte => voarr_ioImageLocal[lui_Idx+1]);
+
+   /*
+    * An VAR_OUTPUT uebergeben 
+    */  
+    vodi_ioImageLocalLen := TO_DINT(ldi_ioImageLocalLen);  
+
+END_FUNCTION_BLOCK
+

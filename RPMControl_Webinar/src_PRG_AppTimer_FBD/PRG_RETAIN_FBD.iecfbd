@@ -1,0 +1,187 @@
+PROGRAM PRG_RETAIN_FBD
+  VAR
+    lx_CyclePulse : BOOL;
+    lui_CycleCount : UINT;
+    lt_ActCycleTime : TIME;
+    lt_CycleTime : TIME;
+    com_logicals_Basic_Count_FB_lc_CntMsg_ST1 : com.logicals.Basic.Count.FB_lc_CntMsg_ST;
+    com_logicals_Basic_Count_FB_lc_CntMsg_ST2 : com.logicals.Basic.Count.FB_lc_CntMsg_ST;
+    lx_CycleInit : BOOL;
+    R_TRIG1 : R_TRIG;
+    R_TRIG2 : R_TRIG;
+    R_TRIG3 : R_TRIG;
+    R_TRIG4 : R_TRIG;
+  END_VAR
+  VAR_EXTERNAL
+    gui_CycleCountAppLogic : UINT;
+    gui_CycleCountAppLoop : UINT;
+    gui_CycleCountAppTimer : UINT;
+  END_VAR
+  VAR_EXTERNAL
+    gx_SetControlPar : BOOL;
+    gx_SetControlParState : UINT;
+    gx_SaveControlPar : BOOL;
+    gx_SaveControlParState : UINT;
+  END_VAR
+
+  (*
+
+    // Network 1:
+    R_TRIG1(CLK := TRUE, Q => lx_CycleInit);
+
+    // Network 2:
+    NOT(IN := lx_CyclePulse, NOT => lx_CyclePulse);
+
+    // Network 3:
+    ADD(IN1 := lui_CycleCount, IN2 := 1, ADD => lui_CycleCount);
+
+    // Network 4:
+    SysTaskActualCycleTime(SysTaskActualCycleTime => lt_ActCycleTime);
+
+    // Network 5:
+    SysTaskCycleTime(SysTaskCycleTime => lt_CycleTime);
+
+    // Network 6:
+    RTSCycleInfo(Shutdown => @C(48).Shutdown, Term => @C(48).Term);
+    OR(IN1 := @C(48).Shutdown, IN2 := @C(48).Term, OR => );
+    OR(IN1 := gx_SaveControlPar, IN2 := @C(49).OR, OR => @C(26).OR);
+    R_TRIG3(CLK := @C(26).OR);
+    com_logicals_Basic_Count_FB_lc_CntMsg_ST2(vix_Cnt := R_TRIG3.Q, voui_CntVal => gx_SaveControlParState);
+    R_TRIG2(CLK := @C(26).OR);
+    SaveRetainDataFast(EN := R_TRIG2.Q, fileName := 'RETAIN.BIN');
+    LoadRetainDataFast(EN := lx_CycleInit, fileName := 'RETAIN.BIN');
+
+    // Network 7:
+    R_TRIG4(CLK := gx_SetControlPar);
+    com_logicals_Basic_Count_FB_lc_CntMsg_ST1(vix_Cnt := R_TRIG4.Q, voui_CntVal => gx_SetControlParState);
+
+  *)
+
+  @C(2) : @F(NOT), @R(570.0, 200.0, 60.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(NOT), @R(9.5));
+  @C(8) : @F(ADD), @R(580.0, 290.0, 40.0, 38.0), UINT, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(ADD), @R(9.5));
+  @VF(1) : @E(lx_CyclePulse), @R(370.0, 200.0, 140.0, 19.0);
+  @VF(3) : @E(lx_CyclePulse), @R(730.0, 200.0, 140.0, 19.0);
+  @VF(7) : @E(lui_CycleCount), @R(370.0, 290.0, 140.0, 19.0);
+  @VF(12) : @E(lui_CycleCount), @R(730.0, 290.0, 140.0, 19.0);
+  @VF(10) : @E(1), @R(370.0, 310.0, 140.0, 19.0), UINT;
+  @OLT(67) : @R(900.0, 260.0, 80.0, 19.0), @S(12);
+  @CF(6) : @R(370.0, 130.0, 490.0, 39.0), @T("CyclePulse"), @POU;
+  @CF(14) : @R(370.0, 240.0, 490.0, 39.0), @T("CyclePulse"), @POU;
+  @C(89) : @F(SysTaskActualCycleTime), @R(370.0, 580.0, 184.0, 18.0), @O(@N(SysTaskActualCycleTime), @R(9.5));
+  @C(90) : @F(SysTaskCycleTime), @R(370.0, 650.0, 190.0, 18.0), @O(@N(SysTaskCycleTime), @R(9.5));
+  @VF(91) : @E(lt_ActCycleTime), @R(630.0, 580.0, 140.0, 19.0);
+  @VF(93) : @E(lt_CycleTime), @R(630.0, 650.0, 140.0, 19.0);
+  @CF(88) : @R(370.0, 490.0, 490.0, 39.0), @T("Read CycleTime"), @POU;
+  @OLT(20) : @R(780.0, 550.0, 180.0, 19.0), @S(91);
+  @OLT(21) : @R(780.0, 620.0, 180.0, 19.0), @S(93);
+  @CF(23) : @R(370.0, 920.0, 490.0, 39.0), @T("Save Load Retain"), @POU;
+  @VF(15) : @E(gui_CycleCountAppLogic), @R(730.0, 340.0, 250.0, 19.0);
+  @VF(17) : @E(gui_CycleCountAppLoop), @R(730.0, 390.0, 250.0, 19.0);
+  @VF(18) : @E(gui_CycleCountAppTimer), @R(730.0, 440.0, 250.0, 19.0);
+  @OLT(19) : @R(900.0, 420.0, 80.0, 19.0), @S(18);
+  @OLT(70) : @R(900.0, 370.0, 80.0, 19.0), @S(17);
+  @OLT(71) : @R(900.0, 320.0, 80.0, 19.0), @S(15);
+  @VF(22) : @E(gx_SetControlPar), @R(120.0, 1020.0, 240.0, 19.0);
+  @VF(24) : @E(gx_SaveControlPar), @R(120.0, 1110.0, 240.0, 19.0);
+  @C(29) : @FB(com_logicals_Basic_Count_FB_lc_CntMsg_ST1), @R(670.0, 1020.0, 260.0, 58.0), @I(@N(vix_Cnt), @L(9.5)), @O(@N(voui_CntVal), @R(9.5)), @O(@N(voui_ErrNo), @R(29.5)), @O(@N(vox_Err), @R(49.5));
+  @C(27) : @FB(com_logicals_Basic_Count_FB_lc_CntMsg_ST2), @R(670.0, 1110.0, 260.0, 58.0), @I(@N(vix_Cnt), @L(9.5)), @O(@N(voui_CntVal), @R(9.5)), @O(@N(voui_ErrNo), @R(29.5)), @O(@N(vox_Err), @R(49.5));
+  @VF(28) : @E(gx_SetControlParState), @R(990.0, 1020.0, 240.0, 19.0);
+  @VF(31) : @E(gx_SaveControlParState), @R(990.0, 1110.0, 240.0, 19.0);
+  @C(33) : @F(SaveRetainDataFast), @R(670.0, 1190.0, 220.0, 38.0), @I(@N(EN), @L(9.5)), @I(@N(fileName), @L(29.5)), @O(@N(ENO), @R(9.5)), @O(@N(SaveRetainDataFast), @R(29.5));
+  @C(34) : @F(LoadRetainDataFast), @R(670.0, 1260.0, 220.0, 38.0), @I(@N(EN), @L(9.5)), @I(@N(fileName), @L(29.5)), @O(@N(ENO), @R(9.5)), @O(@N(LoadRetainDataFast), @R(29.5));
+  @VF(35) : @E('RETAIN.BIN'), @R(270.0, 1210.0, 140.0, 19.0);
+  @CF(16) : @R(370.0, 10.0, 490.0, 39.0), @T("CyclePulse"), @POU;
+  @VF(38) : @E(lx_CycleInit), @R(730.0, 70.0, 140.0, 19.0);
+  @C(39) : @FB(R_TRIG1), @R(550.0, 70.0, 140.0, 18.0), @I(@N(CLK), @L(9.5)), @O(@N(Q), @R(9.5));
+  @VF(40) : @E(TRUE), @R(370.0, 70.0, 140.0, 19.0);
+  @VF(43) : @E(lx_CycleInit), @R(270.0, 1260.0, 140.0, 19.0);
+  @C(45) : @FB(R_TRIG2), @R(490.0, 1190.0, 140.0, 18.0), @I(@N(CLK), @L(9.5)), @O(@N(Q), @R(9.5));
+  @CF(47) : @R(370.0, 690.0, 490.0, 39.0), @T("Save Load Retain"), @POU;
+  @C(48) : @F(RTSCycleInfo), @R(440.0, 770.0, 120.0, 78.0), @O(@N(Init), @R(9.5)), @O(@N(Run), @R(29.5)), @O(@N(Shutdown), @R(49.5)), @O(@N(Term), @R(69.5));
+  @C(49) : @F(OR), @R(660.0, 810.0, 40.0, 38.0), BOOL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(OR), @R(9.5));
+  @CONN(52) : @IT(C1), @R(800.0, 810.0, 60.0, 19.0), BOOL;
+  @CONT(54) : @IT(C1), @CONN(52), @R(300.0, 1130.0, 60.0, 19.0), BOOL;
+  @C(26) : @F(OR), @R(380.0, 1110.0, 40.0, 38.0), BOOL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(OR), @R(9.5));
+  @OLT(59) : @R(950.0, 1190.0, 80.0, 19.0), @S(33,SaveRetainDataFast);
+  @OLT(60) : @R(950.0, 1260.0, 80.0, 19.0), @S(34,LoadRetainDataFast);
+  @C(25) : @FB(R_TRIG3), @R(490.0, 1110.0, 140.0, 18.0), @I(@N(CLK), @L(9.5)), @O(@N(Q), @R(9.5));
+  @C(61) : @FB(R_TRIG4), @R(490.0, 1020.0, 140.0, 18.0), @I(@N(CLK), @L(9.5)), @O(@N(Q), @R(9.5));
+  @OLT(65) : @R(120.0, 1080.0, 80.0, 19.0), @S(24);
+  @OLT(66) : @R(120.0, 990.0, 80.0, 19.0), @S(22);
+  @CP(37) : 459.5, 1219.5;
+  @CP(58) : 449.5, 1119.5;
+
+  @G(4) :
+     @L(@C(2).NOT, @VF(3).i)
+    ;
+  @G(5) :
+     @L(@VF(1).o, @C(2).IN)
+    ;
+  @G(9) :
+     @L(@VF(7).o, @C(8).IN1)
+    ;
+  @G(13) :
+     @L(@C(8).ADD, @VF(12).i)
+    ;
+  @G(11) :
+     @L(@VF(10).o, @C(8).IN2)
+    ;
+  @G(92) :
+     @L(@C(89).SysTaskActualCycleTime, @VF(91).i)
+    ;
+  @G(94) :
+     @L(@C(90).SysTaskCycleTime, @VF(93).i)
+    ;
+  @G(30) :
+     @L(@C(29).voui_CntVal, @VF(28).i)
+    ;
+  @G(32) :
+     @L(@C(27).voui_CntVal, @VF(31).i)
+    ;
+  @G(36) :
+     @L(@VF(35).o, @CP(37)),
+     @L(@CP(37), @C(33).fileName),
+     @L(@CP(37), @C(34).fileName)
+    ;
+  @G(41) :
+     @L(@VF(40).o, @C(39).CLK)
+    ;
+  @G(42) :
+     @L(@C(39).Q, @VF(38).i)
+    ;
+  @G(44) :
+     @L(@VF(43).o, @C(34).EN)
+    ;
+  @G(46) :
+     @L(@C(45).Q, @C(33).EN)
+    ;
+  @G(50) :
+     @L(@C(48).Shutdown, @C(49).IN1)
+    ;
+  @G(51) :
+     @L(@C(48).Term, @C(49).IN2)
+    ;
+  @G(53) :
+     @L(@C(49).OR, @CONN(52).i)
+    ;
+  @G(55) :
+     @L(@VF(24).o, @C(26).IN1)
+    ;
+  @G(56) :
+     @L(@CONT(54).o, @C(26).IN2)
+    ;
+  @G(57) :
+     @L(@C(26).OR, @CP(58)),
+     @L(@CP(58), @C(45).CLK),
+     @L(@CP(58), @C(25).CLK)
+    ;
+  @G(62) :
+     @L(@VF(22).o, @C(61).CLK)
+    ;
+  @G(63) :
+     @L(@C(61).Q, @C(29).vix_Cnt)
+    ;
+  @G(64) :
+     @L(@C(25).Q, @C(27).vix_Cnt)
+    ;
+END_PROGRAM

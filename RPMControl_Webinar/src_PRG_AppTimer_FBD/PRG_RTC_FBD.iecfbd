@@ -1,0 +1,586 @@
+PROGRAM PRG_RTC_FBD
+  VAR
+    lx_CyclePulse : BOOL;
+    lui_CycleCount : UINT;
+    lt_ActCycleTime : TIME;
+    lt_CycleTime : TIME;
+    com_logicals_Basic_Convert_FB_lc_ConvInt2Byte_ST1 : com.logicals.Basic.Convert.FB_lc_ConvInt2Byte_ST;
+    lx_Init : BOOL;
+    lx_Term : BOOL;
+    lx_ShutDown : BOOL;
+    lx_Run : BOOL;
+    lt_ShutDownTime : TIME;
+    com_logicals_Basic_Flash_FB_lc_Flash_2Hz_FBD1 : com.logicals.Basic.Flash.FB_lc_Flash_2Hz_FBD;
+    FB_OpHourBySecChg1 : FB_OpHourBySecChg;
+    com_logicals_Basic_Auxiliary_FB_lc_OpHour_ST1 : com.logicals.Basic.Auxiliary.FB_lc_OpHour_ST;
+    lx_StartOpHour_ST : BOOL := TRUE;
+    lx_LdStartValOpHour : BOOL;
+    R_TRIG1 : R_TRIG;
+    lui_OpHourActSecCnt : UINT;
+    lui_OpHourActMinCnt : UINT;
+    lui_OpHourActHourCnt : UINT;
+    lui_OpHourActDayCnt : UINT;
+    lui_OpHourActDay : UINT;
+  END_VAR
+  VAR
+    lusi_sec : USINT;
+    lusi_min : USINT;
+    lusi_hour : USINT;
+    lusi_mday : USINT;
+    lusi_mon : USINT;
+    lui_year : UINT;
+    lusi_wday : USINT;
+    lusi_yday : UINT;
+    lusi_isdst : BOOL;
+  END_VAR
+  VAR
+    lstruc_OpHourGetTime : DT_OpHourGetTime;
+    ludi_OpHourActAllSec : UDINT;
+    lui_OpHourActSec : UINT;
+    lui_OpHourActMin : UINT;
+    lui_OpHourActHour : UINT;
+    lt_ActTime : TIME;
+  END_VAR
+  VAR_EXTERNAL
+    gusi_sec : USINT;
+    gusi_min : USINT;
+    gusi_hour : USINT;
+    gusi_mday : USINT;
+    gusi_mon : USINT;
+    gui_year : UINT;
+    gusi_wday : USINT;
+    gusi_yday : UINT;
+    gusi_isdst : BOOL;
+    gui_CycleCountAppLogic : UINT;
+    gui_CycleCountAppLoop : UINT;
+    gui_CycleCountAppTimer : UINT;
+    gx_Flash : BOOL;
+  END_VAR
+  VAR_EXTERNAL
+    gb_RTSSeconds : BYTE;
+    gb_RTSMinutes : BYTE;
+    gb_RTSHours : BYTE;
+    gb_RTSDay : BYTE;
+    gb_RTSMonth : BYTE;
+    gb_RTSYearHByte : BYTE;
+    gb_RTSYearLByte : BYTE;
+  END_VAR
+  VAR_EXTERNAL
+    gui_RTSShutDownCycles : UINT;
+    gui_RTSInitCycles : UINT;
+    gui_RTSTermCycles : UINT;
+    gudi_RTSRunCycles : UDINT;
+  END_VAR
+
+  (*
+
+    // Network 1:
+    NOT(IN := lx_CyclePulse, NOT => lx_CyclePulse);
+
+    // Network 2:
+    ADD(IN1 := lui_CycleCount, IN2 := 1, ADD => (lui_CycleCount, gui_CycleCountAppTimer));
+
+    // Network 3:
+    SysTaskActualCycleTime(SysTaskActualCycleTime => lt_ActCycleTime);
+
+    // Network 4:
+    SysTaskCycleTime(SysTaskCycleTime => lt_CycleTime);
+
+    // Network 5:
+    com.logicals.Basic.GetTime.FUN_lc_GetTime_C(sec => lusi_sec, min => lusi_min, hour => lusi_hour, mday => lusi_mday, mon => lusi_mon, year => lui_year, wday => lusi_wday, yday => lusi_yday, isdst => lusi_isdst);
+    gusi_sec := lusi_sec;
+    gusi_min := lusi_min;
+    gusi_hour := lusi_hour;
+    gusi_mday := lusi_mday;
+    gusi_mon := lusi_mon;
+    gui_year := lui_year;
+    gusi_wday := lusi_wday;
+    gusi_yday := lusi_yday;
+    gusi_isdst := lusi_isdst;
+
+    // Network 6:
+    TO_BYTE(IN := gusi_mday, TO_BYTE => gb_RTSDay);
+
+    // Network 7:
+    TO_BYTE(IN := gusi_mon, TO_BYTE => gb_RTSMonth);
+
+    // Network 8:
+    TO_INT(IN := gui_year, TO_INT => @C(106).TO_INT);
+    com_logicals_Basic_Convert_FB_lc_ConvInt2Byte_ST1(vii_IN := @C(106).TO_INT, vob_LByte => gb_RTSYearLByte, vob_HByte => gb_RTSYearHByte);
+
+    // Network 9:
+    TO_BYTE(IN := gusi_hour, TO_BYTE => gb_RTSHours);
+
+    // Network 10:
+    TO_BYTE(IN := gusi_min, TO_BYTE => gb_RTSMinutes);
+
+    // Network 11:
+    TO_BYTE(IN := gusi_sec, TO_BYTE => gb_RTSSeconds);
+
+    // Network 12:
+    RTSCycleInfo(Init => lx_Init, Run => lx_Run, Shutdown => lx_ShutDown, Term => lx_Term);
+
+    // Network 13:
+    TO_UDINT(IN := 1, TO_UDINT => @C(146).TO_UDINT);
+    ADD(EN := lx_Term, IN1 := gui_RTSTermCycles, IN2 := 1, ADD => gui_RTSTermCycles);
+    ADD(EN := lx_ShutDown, IN1 := gui_RTSShutDownCycles, IN2 := 1, ADD => (@C(140).ADD, gui_RTSShutDownCycles));
+    MUL_TIME(IN1 := lt_CycleTime, IN2 := @C(140).ADD, MUL_TIME => lt_ShutDownTime);
+    ADD(EN := lx_Run, IN1 := gudi_RTSRunCycles, IN2 := @C(146).TO_UDINT, ADD => gudi_RTSRunCycles);
+    ADD(EN := lx_Init, IN1 := gui_RTSInitCycles, IN2 := 1, ADD => gui_RTSInitCycles);
+
+    // Network 14:
+    com_logicals_Basic_Flash_FB_lc_Flash_2Hz_FBD1(vox_Out => gx_Flash);
+
+    // Network 15:
+    MOVE(IN := gusi_sec, MOVE => lstruc_OpHourGetTime.di_sec);
+
+    // Network 16:
+    FB_OpHourBySecChg1(vistruc_OpHourGetTime := lstruc_OpHourGetTime, vix_LoadStartVal := FALSE, vix_OpHourCount := TRUE, voudi_ActAllSec => ludi_OpHourActAllSec, voui_ActSec => lui_OpHourActSec, voui_ActMin => lui_OpHourActMin, voui_ActHour => lui_OpHourActHour, voui_ActDay => lui_OpHourActDay, voui_ActSecCnt => lui_OpHourActSecCnt, voui_ActMinCnt => lui_OpHourActMinCnt, voui_ActHourCnt => lui_OpHourActHourCnt, voui_ActDayCnt => lui_OpHourActDayCnt, vot_ActTime => lt_ActTime);
+
+    // Network 17:
+    R_TRIG1(CLK := lx_LdStartValOpHour);
+    TO_UDINT(IN := lstruc_OpHourGetTime.di_sec, TO_UDINT => @C(213).TO_UDINT);
+    TO_UDINT(IN := lstruc_OpHourGetTime.di_min, TO_UDINT => @C(216).TO_UDINT);
+    TO_UDINT(IN := lstruc_OpHourGetTime.di_hour, TO_UDINT => @C(219).TO_UDINT);
+    com_logicals_Basic_Auxiliary_FB_lc_OpHour_ST1(vix_Start := lx_StartOpHour_ST, vix_LdStartVal := R_TRIG1.Q, viudi_StartSec := @C(213).TO_UDINT, viudi_StartMin := @C(216).TO_UDINT, viudi_StartHour := @C(219).TO_UDINT);
+
+  *)
+
+  @C(2) : @F(NOT), @R(570.0, 140.0, 60.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(NOT), @R(9.5));
+  @C(8) : @F(ADD), @R(580.0, 230.0, 40.0, 38.0), UINT, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(ADD), @R(9.5));
+  @VF(1) : @E(lx_CyclePulse), @R(370.0, 140.0, 140.0, 19.0);
+  @VF(3) : @E(lx_CyclePulse), @R(730.0, 140.0, 140.0, 19.0);
+  @VF(7) : @E(lui_CycleCount), @R(370.0, 230.0, 140.0, 19.0);
+  @VF(12) : @E(lui_CycleCount), @R(730.0, 230.0, 140.0, 19.0);
+  @VF(10) : @E(1), @R(370.0, 250.0, 140.0, 19.0), UINT;
+  @OLT(67) : @R(900.0, 200.0, 80.0, 19.0), @S(12);
+  @CF(6) : @R(370.0, 70.0, 490.0, 39.0), @T("CyclePulse"), @POU;
+  @CF(14) : @R(370.0, 180.0, 490.0, 39.0), @T("CyclePulse"), @POU;
+  @C(89) : @F(SysTaskActualCycleTime), @R(370.0, 520.0, 184.0, 18.0), @O(@N(SysTaskActualCycleTime), @R(9.5));
+  @C(90) : @F(SysTaskCycleTime), @R(370.0, 590.0, 190.0, 18.0), @O(@N(SysTaskCycleTime), @R(9.5));
+  @VF(91) : @E(lt_ActCycleTime), @R(630.0, 520.0, 140.0, 19.0);
+  @VF(93) : @E(lt_CycleTime), @R(630.0, 590.0, 140.0, 19.0);
+  @CF(88) : @R(370.0, 430.0, 490.0, 39.0), @T("Read CycleTime"), @POU;
+  @OLT(20) : @R(780.0, 490.0, 180.0, 19.0), @S(91);
+  @OLT(21) : @R(780.0, 560.0, 180.0, 19.0), @S(93);
+  @CF(23) : @R(370.0, 730.0, 490.0, 39.0), @T("Read RTC"), @POU;
+  @VF(24) : @E(lui_year), @R(550.0, 920.0, 140.0, 19.0);
+  @VF(25) : @E(lusi_hour), @R(550.0, 860.0, 140.0, 19.0);
+  @VF(26) : @E(lusi_isdst), @R(550.0, 980.0, 140.0, 19.0);
+  @VF(27) : @E(lusi_mday), @R(550.0, 880.0, 140.0, 19.0);
+  @VF(28) : @E(lusi_mon), @R(550.0, 900.0, 140.0, 19.0);
+  @VF(29) : @E(lusi_wday), @R(550.0, 940.0, 140.0, 19.0);
+  @VF(30) : @E(lusi_yday), @R(550.0, 960.0, 140.0, 19.0);
+  @VF(31) : @E(lusi_sec), @R(550.0, 820.0, 140.0, 19.0);
+  @VF(32) : @E(lusi_min), @R(550.0, 840.0, 140.0, 19.0);
+  @VF(42) : @E(gusi_isdst), @R(800.0, 980.0, 140.0, 19.0);
+  @VF(43) : @E(gusi_yday), @R(800.0, 960.0, 140.0, 19.0);
+  @VF(44) : @E(gusi_wday), @R(800.0, 940.0, 140.0, 19.0);
+  @VF(45) : @E(gui_year), @R(800.0, 920.0, 140.0, 19.0);
+  @VF(46) : @E(gusi_mon), @R(800.0, 900.0, 140.0, 19.0);
+  @VF(47) : @E(gusi_mday), @R(800.0, 880.0, 140.0, 19.0);
+  @VF(48) : @E(gusi_hour), @R(800.0, 860.0, 140.0, 19.0);
+  @VF(49) : @E(gusi_min), @R(800.0, 840.0, 140.0, 19.0);
+  @VF(50) : @E(gusi_sec), @R(800.0, 820.0, 140.0, 19.0);
+  @OLT(60) : @R(980.0, 820.0, 80.0, 19.0), @S(50);
+  @OLT(61) : @R(980.0, 840.0, 80.0, 19.0), @S(49);
+  @OLT(62) : @R(980.0, 860.0, 80.0, 19.0), @S(48);
+  @OLT(63) : @R(980.0, 880.0, 80.0, 19.0), @S(47);
+  @OLT(64) : @R(980.0, 900.0, 80.0, 19.0), @S(46);
+  @OLT(65) : @R(980.0, 920.0, 80.0, 19.0), @S(45);
+  @OLT(66) : @R(980.0, 940.0, 80.0, 19.0), @S(44);
+  @OLT(68) : @R(980.0, 960.0, 80.0, 19.0), @S(43);
+  @OLT(69) : @R(980.0, 980.0, 80.0, 19.0), @S(42);
+  @CF(443) : @R(1100.0, 820.0, 520.0, 179.0), @T("$T$Tlusi_sec : USINT; /* 0 - 60 */$N$T$Tlusi_min : USINT; /* 0 - 59 */$N$T$Tlusi_hour : USINT; /* 0 - 23 */$N$T$Tlusi_mday : USINT; /* 1 - 31 */$N$T$Tlusi_mon : USINT; /* 0 - 11 */$N$T$Tlui_year : UINT; /* 20xx */$N$T$Tlusi_wday : USINT; /* 0 - 6 (0 = Sunday) */$N$T$Tlusi_yday : UINT; /* 0 - 365 (0 = 1 Jan) */$N$T$Tlx_isdst : BOOL; /* daylight saving time */$N"), @POU;
+  @VF(15) : @E(gui_CycleCountAppLogic), @R(730.0, 280.0, 250.0, 19.0);
+  @VF(17) : @E(gui_CycleCountAppLoop), @R(730.0, 330.0, 250.0, 19.0);
+  @VF(18) : @E(gui_CycleCountAppTimer), @R(730.0, 380.0, 250.0, 19.0);
+  @OLT(19) : @R(900.0, 360.0, 80.0, 19.0), @S(18);
+  @OLT(70) : @R(900.0, 310.0, 80.0, 19.0), @S(17);
+  @OLT(71) : @R(900.0, 260.0, 80.0, 19.0), @S(15);
+  @VF(72) : @E(gb_RTSDay), @R(810.0, 1120.0, 140.0, 19.0);
+  @C(73) : @F(TO_BYTE), @R(570.0, 1120.0, 120.0, 18.0), USINT, @I(@N(IN), @L(9.5)), @O(@N(TO_BYTE), @R(9.5));
+  @VF(75) : @E(gusi_mday), @R(240.0, 1120.0, 140.0, 19.0);
+  @VF(77) : @E(gb_RTSMonth), @R(810.0, 1140.0, 140.0, 19.0);
+  @VF(78) : @E(gb_RTSSeconds), @R(810.0, 1300.0, 140.0, 19.0);
+  @VF(79) : @E(gb_RTSMinutes), @R(810.0, 1280.0, 140.0, 19.0);
+  @VF(80) : @E(gb_RTSHours), @R(810.0, 1260.0, 140.0, 19.0);
+  @VF(81) : @E(gb_RTSYearLByte), @R(810.0, 1160.0, 140.0, 19.0);
+  @VF(82) : @E(gb_RTSYearHByte), @R(810.0, 1180.0, 140.0, 19.0);
+  @C(83) : @F(TO_BYTE), @R(570.0, 1140.0, 120.0, 18.0), USINT, @I(@N(IN), @L(9.5)), @O(@N(TO_BYTE), @R(9.5));
+  @C(84) : @F(TO_BYTE), @R(570.0, 1260.0, 120.0, 18.0), USINT, @I(@N(IN), @L(9.5)), @O(@N(TO_BYTE), @R(9.5));
+  @C(85) : @F(TO_BYTE), @R(570.0, 1280.0, 120.0, 18.0), USINT, @I(@N(IN), @L(9.5)), @O(@N(TO_BYTE), @R(9.5));
+  @C(86) : @F(TO_BYTE), @R(570.0, 1300.0, 120.0, 18.0), USINT, @I(@N(IN), @L(9.5)), @O(@N(TO_BYTE), @R(9.5));
+  @VF(87) : @E(gusi_min), @R(240.0, 1280.0, 140.0, 19.0);
+  @VF(95) : @E(gusi_sec), @R(240.0, 1300.0, 140.0, 19.0);
+  @VF(100) : @E(gusi_hour), @R(240.0, 1260.0, 140.0, 19.0);
+  @C(102) : @FB(com_logicals_Basic_Convert_FB_lc_ConvInt2Byte_ST1), @R(550.0, 1160.0, 140.0, 78.0), @I(@N(vii_IN), @L(9.5)), @O(@N(vob_LByte), @R(9.5)), @O(@N(vob_HByte), @R(29.5));
+  @VF(105) : @E(gui_year), @R(240.0, 1160.0, 140.0, 19.0);
+  @C(106) : @F(TO_INT), @R(400.0, 1160.0, 120.0, 18.0), UINT, @I(@N(IN), @L(9.5)), @O(@N(TO_INT), @R(9.5));
+  @VF(109) : @E(gusi_mon), @R(240.0, 1140.0, 140.0, 19.0);
+  @CF(112) : @R(390.0, 1060.0, 470.0, 29.0), @T("Konvertiere Datum/Uhrzeit in BYTE fuer MQTT"), @POU;
+  @OLT(113) : @R(980.0, 1100.0, 80.0, 19.0), @S(72);
+  @OLT(114) : @R(980.0, 1120.0, 80.0, 19.0), @S(77);
+  @OLT(115) : @R(980.0, 1140.0, 80.0, 19.0), @S(81);
+  @OLT(116) : @R(980.0, 1160.0, 80.0, 19.0), @S(82);
+  @OLT(117) : @R(980.0, 1240.0, 80.0, 19.0), @S(80);
+  @OLT(118) : @R(980.0, 1260.0, 80.0, 19.0), @S(79);
+  @OLT(119) : @R(980.0, 1280.0, 80.0, 19.0), @S(78);
+  @CF(121) : @R(390.0, 1380.0, 470.0, 29.0), @T("RTSInfo"), @POU;
+  @C(122) : @F(RTSCycleInfo), @R(430.0, 1470.0, 120.0, 78.0), @O(@N(Init), @R(9.5)), @O(@N(Run), @R(29.5)), @O(@N(Shutdown), @R(49.5)), @O(@N(Term), @R(69.5));
+  @VF(123) : @E(lx_Init), @R(660.0, 1470.0, 140.0, 19.0);
+  @VF(124) : @E(lx_Run), @R(660.0, 1490.0, 140.0, 19.0);
+  @VF(125) : @E(lx_ShutDown), @R(660.0, 1510.0, 140.0, 19.0);
+  @VF(126) : @E(lx_Term), @R(660.0, 1530.0, 140.0, 19.0);
+  @VF(131) : @E(lx_ShutDown), @R(430.0, 1730.0, 140.0, 19.0);
+  @VF(132) : @E(lx_Run), @R(430.0, 1670.0, 140.0, 19.0);
+  @VF(133) : @E(lx_Init), @R(350.0, 1610.0, 220.0, 19.0);
+  @VF(134) : @E(lx_Term), @R(430.0, 1790.0, 140.0, 19.0);
+  @C(135) : @F(ADD), @R(850.0, 1610.0, 40.0, 58.0), UINT, @I(@N(EN), @L(9.5)), @I(@N(IN1), @L(29.5)), @I(@N(IN2), @L(49.5)), @O(@N(ENO), @R(9.5)), @O(@N(ADD), @R(29.5));
+  @VF(137) : @E(1), @R(430.0, 1650.0, 140.0, 19.0), UINT;
+  @C(139) : @F(ADD), @R(850.0, 1670.0, 40.0, 58.0), UDINT, @I(@N(EN), @L(9.5)), @I(@N(IN1), @L(29.5)), @I(@N(IN2), @L(49.5)), @O(@N(ENO), @R(9.5)), @O(@N(ADD), @R(29.5));
+  @C(140) : @F(ADD), @R(850.0, 1730.0, 40.0, 58.0), UINT, @I(@N(EN), @L(9.5)), @I(@N(IN1), @L(29.5)), @I(@N(IN2), @L(49.5)), @O(@N(ENO), @R(9.5)), @O(@N(ADD), @R(29.5));
+  @C(141) : @F(ADD), @R(850.0, 1790.0, 40.0, 58.0), UINT, @I(@N(EN), @L(9.5)), @I(@N(IN1), @L(29.5)), @I(@N(IN2), @L(49.5)), @O(@N(ENO), @R(9.5)), @O(@N(ADD), @R(29.5));
+  @VF(148) : @E(gui_RTSInitCycles), @R(350.0, 1630.0, 220.0, 19.0);
+  @VF(149) : @E(gui_RTSInitCycles), @R(980.0, 1630.0, 230.0, 19.0);
+  @VF(152) : @E(gui_RTSShutDownCycles), @R(350.0, 1750.0, 220.0, 19.0);
+  @VF(153) : @E(gui_RTSShutDownCycles), @R(980.0, 1750.0, 230.0, 19.0);
+  @VF(156) : @E(gui_RTSTermCycles), @R(350.0, 1810.0, 220.0, 19.0);
+  @VF(158) : @E(gui_RTSTermCycles), @R(980.0, 1810.0, 230.0, 19.0);
+  @VF(160) : @E(gudi_RTSRunCycles), @R(350.0, 1690.0, 220.0, 19.0);
+  @VF(161) : @E(gudi_RTSRunCycles), @R(980.0, 1690.0, 230.0, 19.0);
+  @C(146) : @F(TO_UDINT), @R(710.0, 1710.0, 120.0, 18.0), UINT, @I(@N(IN), @L(9.5)), @O(@N(TO_UDINT), @R(9.5));
+  @VF(166) : @E(lt_CycleTime), @R(590.0, 1880.0, 140.0, 19.0);
+  @VF(167) : @E(lt_ShutDownTime), @R(1210.0, 1880.0, 140.0, 19.0);
+  @OLT(176) : @R(980.0, 1610.0, 80.0, 19.0), @S(149);
+  @OLT(177) : @R(980.0, 1670.0, 80.0, 19.0), @S(161);
+  @OLT(178) : @R(980.0, 1730.0, 80.0, 19.0), @S(153);
+  @OLT(179) : @R(980.0, 1790.0, 80.0, 19.0), @S(158);
+  @OLT(180) : @R(1210.0, 1860.0, 170.0, 19.0), @S(167);
+  @OLT(181) : @R(590.0, 1860.0, 140.0, 19.0), @S(166);
+  @C(182) : @FB(com_logicals_Basic_Flash_FB_lc_Flash_2Hz_FBD1), @R(440.0, 2050.0, 260.0, 58.0), @O(@N(vox_Out), @R(9.5));
+  @VF(183) : @E(gx_Flash), @R(980.0, 2050.0, 140.0, 19.0);
+  @CF(185) : @R(590.0, 1970.0, 530.0, 29.0), @T("Funktionsblinker als GV"), @POU;
+  @C(170) : @F(MUL_TIME), @R(980.0, 1880.0, 40.0, 38.0), UINT, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(MUL_TIME), @R(9.5));
+  @C(22) : @F(com.logicals.Basic.GetTime.FUN_lc_GetTime_C), @R(370.0, 800.0, 120.0, 198.0), @O(@N(FUN_lc_GetTime_C), @R(9.5)), @O(@N(sec), @R(29.5)), @O(@N(min), @R(49.5)), @O(@N(hour), @R(69.5)), @O(@N(mday), @R(89.5)), @O(@N(mon), @R(109.5)), @O(@N(year), @R(129.5)), @O(@N(wday), @R(149.5)), @O(@N(yday), @R(169.5)), @O(@N(isdst), @R(189.5));
+  @OLT(172) : @R(550.0, 780.0, 80.0, 19.0), @S(22,FUN_lc_GetTime_C);
+  @CF(173) : @R(590.0, 2170.0, 530.0, 29.0), @T("Betriebsstunden"), @POU;
+  @VF(175) : @E(FALSE), @R(440.0, 2300.0, 140.0, 19.0);
+  @VF(187) : @E(TRUE), @R(440.0, 2320.0, 140.0, 19.0);
+  @VF(189) : @E(lstruc_OpHourGetTime), @R(260.0, 2280.0, 320.0, 19.0);
+  @VF(191) : @E(gusi_sec), @R(490.0, 2220.0, 140.0, 19.0);
+  @VF(192) : @E(lstruc_OpHourGetTime.di_sec), @R(940.0, 2220.0, 320.0, 19.0);
+  @C(193) : @F(MOVE), @R(750.0, 2220.0, 60.0, 18.0), DINT, @I(@N(IN), @L(9.5)), @O(@N(MOVE), @R(9.5));
+  @VF(196) : @E(lui_OpHourActSec), @R(1120.0, 2300.0, 240.0, 19.0);
+  @VF(197) : @E(lui_OpHourActMin), @R(1120.0, 2320.0, 240.0, 19.0);
+  @VF(198) : @E(lui_OpHourActHour), @R(1120.0, 2340.0, 240.0, 19.0);
+  @VF(199) : @E(lt_ActTime), @R(1120.0, 2460.0, 240.0, 19.0);
+  @VF(200) : @E(ludi_OpHourActAllSec), @R(1120.0, 2280.0, 240.0, 19.0);
+  @OLT(206) : @R(1410.0, 2270.0, 80.0, 19.0), @S(200);
+  @OLT(207) : @R(1410.0, 2290.0, 80.0, 19.0), @S(196);
+  @OLT(208) : @R(1410.0, 2310.0, 80.0, 19.0), @S(197);
+  @OLT(210) : @R(1410.0, 2450.0, 170.0, 19.0), @S(199);
+  @VF(212) : @E(lstruc_OpHourGetTime.di_sec), @R(10.0, 2840.0, 320.0, 19.0);
+  @C(213) : @F(TO_UDINT), @R(440.0, 2840.0, 120.0, 18.0), DINT, @I(@N(IN), @L(9.5)), @O(@N(TO_UDINT), @R(9.5));
+  @C(216) : @F(TO_UDINT), @R(440.0, 2860.0, 120.0, 18.0), DINT, @I(@N(IN), @L(9.5)), @O(@N(TO_UDINT), @R(9.5));
+  @VF(217) : @E(lstruc_OpHourGetTime.di_min), @R(10.0, 2860.0, 320.0, 19.0);
+  @C(219) : @F(TO_UDINT), @R(440.0, 2880.0, 120.0, 18.0), DINT, @I(@N(IN), @L(9.5)), @O(@N(TO_UDINT), @R(9.5));
+  @VF(220) : @E(lstruc_OpHourGetTime.di_hour), @R(10.0, 2880.0, 320.0, 19.0);
+  @VF(222) : @E(lx_StartOpHour_ST), @R(10.0, 2800.0, 320.0, 19.0);
+  @VF(224) : @E(lx_LdStartValOpHour), @R(10.0, 2820.0, 320.0, 19.0);
+  @C(225) : @FB(R_TRIG1), @R(420.0, 2820.0, 140.0, 18.0), @I(@N(CLK), @L(9.5)), @O(@N(Q), @R(9.5));
+  @OLT(228) : @R(1070.0, 2800.0, 80.0, 19.0), @S(211,voudi_ActSecAll);
+  @OLT(229) : @R(1070.0, 2820.0, 80.0, 19.0), @S(211,voudi_ActSec);
+  @OLT(230) : @R(1070.0, 2840.0, 80.0, 19.0), @S(211,voudi_ActMin);
+  @OLT(231) : @R(1070.0, 2860.0, 80.0, 19.0), @S(211,voudi_ActHour);
+  @OLT(232) : @R(1070.0, 2880.0, 80.0, 19.0), @S(211,voudi_ActDay);
+  @OLT(233) : @R(1070.0, 2900.0, 80.0, 19.0), @S(211,voudi_ActMon);
+  @OLT(234) : @R(1070.0, 2920.0, 80.0, 19.0), @S(211,voudi_ActYear);
+  @CF(235) : @R(580.0, 2690.0, 430.0, 99.0), @T("Test Betriebsstundenzaehler"), @POU;
+  @OLT(238) : @R(360.0, 2920.0, 80.0, 19.0), @S(212);
+  @OLT(239) : @R(360.0, 2940.0, 80.0, 19.0), @S(217);
+  @OLT(240) : @R(360.0, 2960.0, 80.0, 19.0), @S(220);
+  @OLT(241) : @R(1070.0, 2960.0, 80.0, 19.0), @S(211,vox_Err);
+  @OLT(242) : @R(1070.0, 2980.0, 80.0, 19.0), @S(211,voi_ErrNo);
+  @C(211) : @FB(com_logicals_Basic_Auxiliary_FB_lc_OpHour_ST1), @R(580.0, 2800.0, 350.0, 198.0), @I(@N(vix_Start), @L(9.5)), @I(@N(vix_LdStartVal), @L(29.5)), @I(@N(viudi_StartSec), @L(49.5)), @I(@N(viudi_StartMin), @L(69.5)), @I(@N(viudi_StartHour), @L(89.5)), @I(@N(viudi_StartDay), @L(109.5)), @I(@N(viudi_StartMon), @L(129.5)), @I(@N(viudi_StartYear), @L(149.5)), @I(@N(vix_ResetActVal), @L(169.5)), @O(@N(voudi_ActSecAll), @R(9.5)), @O(@N(voudi_ActSec), @R(29.5)), @O(@N(voudi_ActMin), @R(49.5)), @O(@N(voudi_ActHour), @R(69.5)), @O(@N(voudi_ActDay), @R(89.5)), @O(@N(voudi_ActMon), @R(109.5)), @O(@N(voudi_ActYear), @R(129.5)), @O(@N(voudi_AllSec), @R(149.5)), @O(@N(vox_Err), @R(169.5)), @O(@N(voi_ErrNo), @R(189.5));
+  @C(174) : @FB(FB_OpHourBySecChg1), @R(680.0, 2280.0, 360.0, 198.0), @I(@N(vistruc_OpHourGetTime), @L(9.5)), @I(@N(vix_LoadStartVal), @L(29.5)), @I(@N(vix_OpHourCount), @L(49.5)), @O(@N(voudi_ActAllSec), @R(9.5)), @O(@N(voui_ActSec), @R(29.5)), @O(@N(voui_ActMin), @R(49.5)), @O(@N(voui_ActHour), @R(69.5)), @O(@N(voui_ActDay), @R(89.5)), @O(@N(voui_ActSecCnt), @R(109.5)), @O(@N(voui_ActMinCnt), @R(129.5)), @O(@N(voui_ActHourCnt), @R(149.5)), @O(@N(voui_ActDayCnt), @R(169.5)), @O(@N(vot_ActTime), @R(189.5));
+  @VF(243) : @E(lui_OpHourActSecCnt), @R(1120.0, 2380.0, 240.0, 19.0);
+  @VF(245) : @E(lui_OpHourActMinCnt), @R(1120.0, 2400.0, 240.0, 19.0);
+  @VF(247) : @E(lui_OpHourActHourCnt), @R(1120.0, 2420.0, 240.0, 19.0);
+  @VF(248) : @E(lui_OpHourActDayCnt), @R(1120.0, 2440.0, 240.0, 19.0);
+  @OLT(251) : @R(1410.0, 2370.0, 80.0, 19.0), @S(243);
+  @OLT(252) : @R(1410.0, 2390.0, 80.0, 19.0), @S(245);
+  @OLT(253) : @R(1410.0, 2410.0, 80.0, 19.0), @S(247);
+  @OLT(254) : @R(1410.0, 2430.0, 80.0, 19.0), @S(248);
+  @VF(255) : @E(lui_OpHourActDay), @R(1120.0, 2360.0, 240.0, 19.0);
+  @OLT(256) : @R(1410.0, 2350.0, 80.0, 19.0), @S(255);
+  @OLT(257) : @R(1410.0, 2330.0, 80.0, 19.0), @S(198);
+  @CP(16) : 669.5, 239.5;
+  @CP(145) : 669.5, 1659.5;
+  @CP(147) : 669.5, 1779.5;
+  @CP(164) : 669.5, 1719.5;
+  @CP(169) : 939.5, 1759.5;
+
+  @G(4) :
+     @L(@C(2).NOT, @VF(3).i)
+    ;
+  @G(5) :
+     @L(@VF(1).o, @C(2).IN)
+    ;
+  @G(9) :
+     @L(@VF(7).o, @C(8).IN1)
+    ;
+  @G(13) :
+     @L(@C(8).ADD, @CP(16)),
+     @L(@CP(16), @VF(12).i),
+     @L(@CP(16), @VF(18).i)
+    ;
+  @G(11) :
+     @L(@VF(10).o, @C(8).IN2)
+    ;
+  @G(92) :
+     @L(@C(89).SysTaskActualCycleTime, @VF(91).i)
+    ;
+  @G(94) :
+     @L(@C(90).SysTaskCycleTime, @VF(93).i)
+    ;
+  @G(51) :
+     @L(@VF(31).o, @VF(50).i)
+    ;
+  @G(52) :
+     @L(@VF(32).o, @VF(49).i)
+    ;
+  @G(53) :
+     @L(@VF(25).o, @VF(48).i)
+    ;
+  @G(54) :
+     @L(@VF(27).o, @VF(47).i)
+    ;
+  @G(55) :
+     @L(@VF(28).o, @VF(46).i)
+    ;
+  @G(56) :
+     @L(@VF(24).o, @VF(45).i)
+    ;
+  @G(57) :
+     @L(@VF(29).o, @VF(44).i)
+    ;
+  @G(58) :
+     @L(@VF(30).o, @VF(43).i)
+    ;
+  @G(59) :
+     @L(@VF(26).o, @VF(42).i)
+    ;
+  @G(74) :
+     @L(@C(73).TO_BYTE, @VF(72).i)
+    ;
+  @G(76) :
+     @L(@VF(75).o, @C(73).IN)
+    ;
+  @G(96) :
+     @L(@VF(87).o, @C(85).IN)
+    ;
+  @G(97) :
+     @L(@C(85).TO_BYTE, @VF(79).i)
+    ;
+  @G(98) :
+     @L(@VF(95).o, @C(86).IN)
+    ;
+  @G(99) :
+     @L(@C(86).TO_BYTE, @VF(78).i)
+    ;
+  @G(101) :
+     @L(@VF(100).o, @C(84).IN)
+    ;
+  @G(103) :
+     @L(@C(102).vob_LByte, @VF(81).i)
+    ;
+  @G(104) :
+     @L(@C(102).vob_HByte, @VF(82).i)
+    ;
+  @G(107) :
+     @L(@VF(105).o, @C(106).IN)
+    ;
+  @G(108) :
+     @L(@C(106).TO_INT, @C(102).vii_IN)
+    ;
+  @G(110) :
+     @L(@VF(109).o, @C(83).IN)
+    ;
+  @G(111) :
+     @L(@C(83).TO_BYTE, @VF(77).i)
+    ;
+  @G(120) :
+     @L(@C(84).TO_BYTE, @VF(80).i)
+    ;
+  @G(127) :
+     @L(@C(122).Init, @VF(123).i)
+    ;
+  @G(128) :
+     @L(@C(122).Run, @VF(124).i)
+    ;
+  @G(129) :
+     @L(@C(122).Shutdown, @VF(125).i)
+    ;
+  @G(130) :
+     @L(@C(122).Term, @VF(126).i)
+    ;
+  @G(136) :
+     @L(@VF(133).o, @C(135).EN)
+    ;
+  @G(138) :
+     @L(@VF(137).o, @CP(145)),
+     @L(@CP(145), @C(135).IN2),
+     @L(@CP(145), @CP(164)),
+     @L(@CP(147), @C(140).IN2),
+     @L(@CP(147), @C(141).IN2),
+     @L(@CP(164), @CP(147)),
+     @L(@CP(164), @C(146).IN)
+    ;
+  @G(142) :
+     @L(@VF(132).o, @C(139).EN)
+    ;
+  @G(143) :
+     @L(@VF(131).o, @C(140).EN)
+    ;
+  @G(144) :
+     @L(@VF(134).o, @C(141).EN)
+    ;
+  @G(150) :
+     @L(@C(135).ADD, @VF(149).i)
+    ;
+  @G(151) :
+     @L(@VF(148).o, @C(135).IN1)
+    ;
+  @G(154) :
+     @L(@C(140).ADD, @CP(169)),
+     @L(@CP(169), @VF(153).i),
+     @L(@CP(169), @C(170).IN2)
+    ;
+  @G(155) :
+     @L(@VF(152).o, @C(140).IN1)
+    ;
+  @G(157) :
+     @L(@VF(156).o, @C(141).IN1)
+    ;
+  @G(159) :
+     @L(@C(141).ADD, @VF(158).i)
+    ;
+  @G(162) :
+     @L(@C(139).ADD, @VF(161).i)
+    ;
+  @G(163) :
+     @L(@VF(160).o, @C(139).IN1)
+    ;
+  @G(165) :
+     @L(@C(146).TO_UDINT, @C(139).IN2)
+    ;
+  @G(184) :
+     @L(@C(182).vox_Out, @VF(183).i)
+    ;
+  @G(171) :
+     @L(@VF(166).o, @C(170).IN1)
+    ;
+  @G(168) :
+     @L(@C(170).MUL_TIME, @VF(167).i)
+    ;
+  @G(33) :
+     @L(@C(22).sec, @VF(31).i)
+    ;
+  @G(34) :
+     @L(@C(22).min, @VF(32).i)
+    ;
+  @G(35) :
+     @L(@C(22).hour, @VF(25).i)
+    ;
+  @G(36) :
+     @L(@C(22).mday, @VF(27).i)
+    ;
+  @G(37) :
+     @L(@C(22).mon, @VF(28).i)
+    ;
+  @G(38) :
+     @L(@C(22).year, @VF(24).i)
+    ;
+  @G(39) :
+     @L(@C(22).wday, @VF(29).i)
+    ;
+  @G(40) :
+     @L(@C(22).yday, @VF(30).i)
+    ;
+  @G(41) :
+     @L(@C(22).isdst, @VF(26).i)
+    ;
+  @G(186) :
+     @L(@VF(175).o, @C(174).vix_LoadStartVal)
+    ;
+  @G(188) :
+     @L(@VF(187).o, @C(174).vix_OpHourCount)
+    ;
+  @G(190) :
+     @L(@VF(189).o, @C(174).vistruc_OpHourGetTime)
+    ;
+  @G(194) :
+     @L(@VF(191).o, @C(193).IN)
+    ;
+  @G(195) :
+     @L(@C(193).MOVE, @VF(192).i)
+    ;
+  @G(201) :
+     @L(@C(174).voudi_ActAllSec, @VF(200).i)
+    ;
+  @G(202) :
+     @L(@C(174).voui_ActSec, @VF(196).i)
+    ;
+  @G(203) :
+     @L(@C(174).voui_ActMin, @VF(197).i)
+    ;
+  @G(204) :
+     @L(@C(174).voui_ActHour, @VF(198).i)
+    ;
+  @G(205) :
+     @L(@C(174).vot_ActTime, @VF(199).i)
+    ;
+  @G(214) :
+     @L(@VF(212).o, @C(213).IN)
+    ;
+  @G(215) :
+     @L(@C(213).TO_UDINT, @C(211).viudi_StartSec)
+    ;
+  @G(218) :
+     @L(@VF(217).o, @C(216).IN)
+    ;
+  @G(221) :
+     @L(@VF(220).o, @C(219).IN)
+    ;
+  @G(223) :
+     @L(@VF(222).o, @C(211).vix_Start)
+    ;
+  @G(226) :
+     @L(@VF(224).o, @C(225).CLK)
+    ;
+  @G(227) :
+     @L(@C(225).Q, @C(211).vix_LdStartVal)
+    ;
+  @G(236) :
+     @L(@C(216).TO_UDINT, @C(211).viudi_StartMin)
+    ;
+  @G(237) :
+     @L(@C(219).TO_UDINT, @C(211).viudi_StartHour)
+    ;
+  @G(244) :
+     @L(@C(174).voui_ActSecCnt, @VF(243).i)
+    ;
+  @G(246) :
+     @L(@C(174).voui_ActMinCnt, @VF(245).i)
+    ;
+  @G(249) :
+     @L(@C(174).voui_ActHourCnt, @VF(247).i)
+    ;
+  @G(250) :
+     @L(@C(174).voui_ActDayCnt, @VF(248).i)
+    ;
+  @G(258) :
+     @L(@C(174).voui_ActDay, @VF(255).i)
+    ;
+END_PROGRAM

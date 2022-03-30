@@ -1,0 +1,215 @@
+ /*
+  * logi.cals GmbH
+  * A-3100 St. Poelten
+  * Europaplatz 7/1
+  * Tel.: 0043-5-77147
+  *
+  * logi.cals automation solutions & services GmbH
+  * D-40738 Langenfeld
+  * Postfach 1306
+  * Tel.: 0049-2173-91910
+  * 
+  * Contact:
+  * dieter.goltz@logicals.com
+  * 
+  * History:
+  * Created: 
+  * DG 2021-05-30 MQTT Header
+  * 
+  * Modified:
+  * DG 2021-05-30 MQTT Header
+  */
+ 
+ /* 
+  * Description
+  * ===========
+  */ 
+ 
+ /* 
+  * Beschreibung
+  * ============
+  * MQTT Kommunikation
+  * Publish Header
+  * 
+  */
+
+/*
+ * Lokaler Test
+ * ============
+ * sudo mosquitto_sub -d -t test   - test = Name des Topic -> /GHaus       - Header
+ *                                                            /GHaus/Value - Werte
+ *  
+ * sudo mosquitto_pub -d -t test –m “Hello” - test = Name des Topic -> /GHaus       - Header
+ *                                                                     /GHaus/Value - Werte
+ * 
+ *                               -m "Hello" -> String der verschickt wird!
+ */
+
+/*
+ * Publish des Header von Raspi4
+ */
+PROGRAM PRG_Raspi4_MQTTPublish_Header 
+    /*
+	 * PRG_Raspi4_MQTTPublish_Header
+	 */	
+    VAR_EXTERNAL
+         MQTTHeader       : MQTTHeader;
+    END_VAR
+    
+	VAR_EXTERNAL
+		/*
+		 * State und Channel vom Connect
+		 */ 
+		 MQTT_State   : MQTT_SUBSCRIBER_STATE;
+		 MQTT_Channel : DINT;
+	END_VAR
+
+	VAR_EXTERNAL
+    /*
+     * Globaler TraceLevel
+     */ 
+     gui_TraceLevel : UINT;
+	END_VAR
+	 
+	VAR_EXTERNAL 
+    /*
+     * Uhrzeit und Daten von TimeBaustein abholen
+     * und auf Globale Var in Byte schreiben
+     * Fuer MQTT
+     */
+  	 gb_RTSSeconds : BYTE; 
+ 	 gb_RTSMinutes : BYTE;
+	 gb_RTSHours   : BYTE;
+	
+	 gb_RTSDay         : BYTE;
+	 gb_RTSMonth       : BYTE;
+	 gb_RTSYearHByte   : BYTE;	
+	 gb_RTSYearLByte   : BYTE;	
+
+    END_VAR 
+    
+   VAR
+      FB_MQTT_PublishRaspi4      : FB_MQTT_Publish;
+   END_VAR    
+        
+  VAR
+    /*
+     * Der Datentyp enthaelt alle wesentlichen Initwerte f�r die MQTT-Kommunkation
+     */
+     l_MQTTInitKom         : DT_MQTT;
+    /*
+     * Status-Informationen
+     */ 
+     ldi_PublishLifeTick : DINT;
+     lx_PublishOK        : BOOL;
+     lui_IPVal1          : UINT;
+     lui_IPVal2          : UINT;
+     lui_IPVal3          : UINT;
+     ldint_MQTTChannel   : DINT;
+     ldint_MQTTCount     : DINT;
+     ldint_MQTTrc        : DINT;
+     lsint_MQTTState     : SINT;
+     lx_MQTTENO          : BOOL;
+     luint_MQTTLength    : UINT;
+     lui_PubTick         : UINT;
+  END_VAR
+    
+  VAR
+    l_ConState : MQTT_SUBSCRIBER_STATE;
+    ldi_ConCh  : DINT;
+  END_VAR
+  
+  VAR
+    lstr_PRGName   : STRING[30] := 'PRG_Raspi4_MQTTPublish_Header';
+    lui_TraceLevel : UINT     := 5;
+  END_VAR
+  
+  VAR
+     FB_InitR_TRIG       : R_TRIG;
+  END_VAR      
+  
+  VAR
+    /* Lokaler InitPuls im Baustein */
+     lx_CycleInit : BOOL;
+
+    /* Lokaler Puls im Baustein */
+     lx_CyclePulse : BOOL;
+    /* Lokaler Zyklustaktzaehler */
+     li_CycleCount : INT; 
+
+    /* Lokaler InitZyklustaktzaehler */
+     li_CycleCountInitVal : INT;      
+  END_VAR
+
+ /*
+  * InitZyklus setzen wenn MQTT aktiv gesetzt!
+  */ 
+  FB_InitR_TRIG(CLK := TRUE,Q => lx_CycleInit);
+ /*
+  * CyclePulse
+  */
+  lx_CyclePulse := NOT(lx_CyclePulse);
+
+ /*
+  * LifeTick bzw. ZyklusZaehler
+  */ 
+  li_CycleCount := li_CycleCount + 1;
+       
+  /*
+   * Steuerung Publish / Subscribe ueber die Visu
+   *
+   * Publish
+   * Welche Daten sollen an den Broker zurueckgeschickt werden
+   * Subscribe
+   * Welche Daten sollen geholt werden?
+   */
+   IF lx_CycleInit = TRUE THEN   
+      /*
+       * Init Messages senden
+       */
+       lui_TraceLevel := gui_TraceLevel;
+       li_CycleCountInitVal := li_CycleCountInitVal + 1;
+   END_IF;
+   /*
+    * Daten von MQTTConnect
+    */
+    l_ConState := MQTT_State;
+    ldi_ConCh  := MQTT_Channel;
+
+    IF l_ConState = MQTT_SUBSCRIBER_STATE#CONNECTED THEN
+
+   	   MQTTHeader.Second    := gb_RTSSeconds; 
+ 	   MQTTHeader.Minute    := gb_RTSMinutes;
+	   MQTTHeader.Hour      := gb_RTSHours;	
+                                   
+	   MQTTHeader.Day       := gb_RTSDay;
+	   MQTTHeader.Month     := gb_RTSMonth;
+	   MQTTHeader.YearHByte := gb_RTSYearHByte;	
+	   MQTTHeader.YearLByte := gb_RTSYearLByte;	 
+
+       MQTTHeader.IPVal3 := TO_BYTE(RIGHT(IN:= l_MQTTInitKom.Raspi4IPAdress, L := 1));        
+       MQTTHeader.IPVal2 := TO_BYTE(LEFT(RIGHT(IN:= l_MQTTInitKom.Raspi4IPAdress, L := 2),1));
+       MQTTHeader.IPVal1 := TO_BYTE(LEFT(RIGHT(IN:= l_MQTTInitKom.Raspi4IPAdress, L := 3),1));
+
+       FB_MQTT_PublishRaspi4(vi_MQTTHeader            := MQTTHeader,
+                             vistr_IPAddr             := l_MQTTInitKom.Raspi4IPAdress,
+                             vistr_BrokerIPAddr       := l_MQTTInitKom.BrokerAdress,                         
+                             vix_Init                 := lx_CycleInit,
+                             vi_State                 := l_ConState,
+                             vdi_ch                   := ldi_ConCh, 
+       	                     vistr_BrokerPublishTopic := l_MQTTInitKom.Raspi4Topic,
+                             
+                             vodi_PublishLifeTick    => ldi_PublishLifeTick, 
+                             vox_PublishOK           => lx_PublishOK,        
+                             voui_IPVal1             => lui_IPVal1,          
+                             voui_IPVal2             => lui_IPVal2,          
+                             voui_IPVal3             => lui_IPVal3,          
+                             vodint_MQTTChannel      => ldint_MQTTChannel,   
+                             vodint_MQTTCount        => ldint_MQTTCount,     
+                             vodint_MQTTrc           => ldint_MQTTrc,        
+                             vosint_MQTTState        => lsint_MQTTState,     
+                             vox_MQTTENO             => lx_MQTTENO,          
+                             vouint_MQTTLength       => luint_MQTTLength,    
+                             voui_PubTick            => lui_PubTick);         
+     END_IF;
+END_PROGRAM

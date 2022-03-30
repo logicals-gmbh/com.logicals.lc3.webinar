@@ -1,0 +1,43 @@
+/*
+ * GV fuer Mapping IO
+ */
+GLOBALS GV_IO
+
+	VAR_GLOBAL
+	 gx_In1 : BOOL;
+	 gx_In2 : BOOL;
+	 gx_In3 : BOOL;
+	 gx_In4 : BOOL;
+		
+	 gx_In5 : BOOL;
+	 gx_In6 : BOOL;
+	 gx_In7 : BOOL;
+	 gx_In8 : BOOL;
+
+	 gx_Out1 : BOOL;
+	 gx_Out2 : BOOL;
+	 gx_Out3 : BOOL;
+	 gx_Out4 : BOOL;
+		
+	 gx_Out5 : BOOL;
+	 gx_Out6 : BOOL;
+	 gx_Out7 : BOOL;
+	 gx_Out8 : BOOL;
+
+     gusi_Status_AI1 : USINT;
+     gi_Value_AI1    : INT;
+     gusi_Status_AI2 : USINT;
+     gi_Value_AI2    : INT;
+     gusi_Status_AI3 : USINT;
+     gi_Value_AI3    : INT;
+     gusi_Status_AI4 : USINT;
+     gi_Value_AI4    : INT;
+       
+     gi_Value_AO1    : INT;
+     gusi_Status_AO1 : USINT;
+     gi_Value_AO2    : INT;
+     gusi_Status_AO2 : USINT;
+
+	END_VAR
+
+END_GLOBALS

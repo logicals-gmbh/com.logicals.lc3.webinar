@@ -1,0 +1,1652 @@
+/*
+ * Publish Wert eines IO-Point per MQTT Message an den Broker (Senden)
+ * 
+ * Zur Analyse von MQTT-Anwendungen stehen verschiedene Tools bereit. logi.cals verwendet 
+ * "MQTT RCP Application" der MQTT Client Werkzeuge des Paho-Frameworks 
+ * (https://eclipse.org/paho/clients/tool/).
+ * 
+ * Mit Hilfe dieses Programms koennen Sie ueberpruefen, ob Nachrichten korrekt in einem Kanal auf einem Broker veroeffentlicht wurden. 
+ * Au�erdem besteht die M�glichkeit, die Nachrichten zu beliebigen Themen zu abonnieren. 
+
+ * Beispiel fuer einen MQTT-Broker, den logi.cals einsetzt: die Open-Source-Software Mosquitto 
+ * (http://mosquitto.org/). 
+ * Auf Debian-basierten Linux-Systemen, wie z.B. Raspbian, kann die Installation mit Root-Rechten durch Eingabe der folgenden Befehle erfolgen:
+ * apt-get update
+ * apt-get install mosquitto 
+ *
+ * Der MQTT-Broker kommuniziert ueber den Standard-TCP-Port 1883. 
+ * Lassen Sie diese Verbindung in der Windows-Firewall zu, da sie von logi.CAD 3 ben�tigt wird
+ * 
+ * Lokaler Test
+ * ============
+ * sudo mosquitto_sub -d -t test   - test = Name des Topic -> /GHaus       - Header
+ *                                                            /GHaus/Value - Werte
+ *  
+ * sudo mosquitto_pub -d -t test –m “Hello” - test = Name des Topic -> /GHaus       - Header
+ *                                                                     /GHaus/Value - Werte
+ * 
+ *                               -m "Hello" -> String der verschickt wird!
+ */
+
+/*
+ * FB_MQTT_Publish_IO
+ * Publish eines BOOL an Broker
+ */
+FUNCTION_BLOCK FB_MQTT_Publish_IO
+         
+   VAR_INPUT
+      /*
+       * TraceLevel fuer HCTrace 
+       */ 
+       viui_TraceLevel : UINT := 5;
+      /*
+       * Dieser Wert sollen "Published" werden
+       */
+       vix_PubIn :  BOOL;
+      /*
+       * Die Eingangsdaten
+       */ 
+       vistr_BrokerPublishTopicIO : STRING[64];
+      /*
+       * Status GetState uebergeben von Connect
+       */ 
+       vi_State : MQTT_SUBSCRIBER_STATE;
+      /*
+       * Ch von Connect uebergeben
+       */ 
+       vidi_Ch : DINT;
+   END_VAR
+   
+   VAR_OUTPUT
+         voui_PubMQTTLength    : UINT;
+         voudi_PubLifeTick     : UDINT; // 
+         vox_PublishOK         : BOOL;
+         vodint_MQTTChannel    : DINT;  // Status der Publish-Verbindung
+         vodint_MQTTCount      : DINT;
+         vodint_MQTTrc         : DINT;
+         vosint_MQTTState      : SINT;
+         vox_MQTTENO           : BOOL;
+
+         vostr_BrokerPublishTopicIO   : STRING[64];
+   END_VAR
+    
+   VAR   
+        
+        l_Publish_Ch    : DINT    := -1;
+        l_Publish_Cnt   : DINT    := 0;
+    
+        ludi_cntPubConnect   : UDINT := 0;
+       /*
+        * Enumeration von MQTT_RC
+        * MQTT_RC : DINT(OK                          := 0,
+        *                ERROR                       := 1,
+        *                ERROR_MEM_ALLOC             := 2,
+        *                ERROR_CONNECT               := 3,
+        *                ERROR_CH_INVALID            := 4,
+        *                ERROR_OUT_OF_CLIENTS        := 5,
+        *                ERROR_OUT_OF_CB             := 6,
+        *                ERROR_INVALID_MUTEX         := 7,
+        *                ERROR_NO_MSG_RECEIVED       := 8,
+        *                ERROR_NO_MSG_PUBLISHED      := 9,
+        *                ERROR_MSG_TRUNCATED         := 10,
+        *                ERROR_CH_INVALID_STATE      := 11,
+        *                ERROR_CANNOT_DISCONNECT     := 12,
+        *                ERROR_AUTHENTICATION_FAILED := 13,
+        *                ERROR_SSL_NOT_SUPPORTED     := 14);
+        */ 
+        l_Publish_rc   : MQTT_RC;
+
+       /*  
+        * ENumeration of MQTT_SUBSCRIBER_STATE
+        * 
+        * MQTT_SUBSCRIBER_STATE : SINT(UNUSED        := 0,
+        *                              INVALID       := 1,
+        *                              UNINITIALIZED := 2,
+        *                              DISCONNECTING := 3,
+        *                              DISCONNECTED  := 4,
+        *                              CONNECTING    := 5,
+        *                              CONNECTED     := 6,
+        *                              CONNECT_ERROR := 7); 
+        */
+       /*
+        * Status der Verbindung wird auf NICHT initialisiert gesetzt
+        */
+        l_Publish_State : MQTT_SUBSCRIBER_STATE := MQTT_SUBSCRIBER_STATE#INVALID;
+
+        lstr_BrokerTopicIO     : STRING[24]; // Header
+        lui_MessageLength      : UINT;       // Header    
+
+        lstr_PubMessage        : STRING[1024];
+
+   END_VAR
+   
+   VAR          
+        lx_CycleInit  : BOOL;
+        li_CycleCount : INT;      
+   END_VAR
+    
+   VAR
+     FB_InitPulseR_TRIG : R_TRIG;
+   END_VAR
+   
+   VAR
+     lstr_PrgName : STRING[18]  := 'FB_MQTT_Publish_IO';
+     lstr_TraceText : STRING[128];
+     lui_TraceLevel : UINT := 5;
+   END_VAR
+   
+   VAR
+     MQTT_PublishOkR_TRIG  : R_TRIG;
+     MQTT_PublishNotOkR_TRIG  : R_TRIG;
+   END_VAR
+   
+   VAR
+     lx_MQTT_PublishOK     : BOOL;
+     lx_MQTT_PublishNotOK  : BOOL;
+     lx_MQTT_PublishENO    : BOOL;
+   END_VAR
+        
+   FB_InitPulseR_TRIG(CLK := TRUE, Q => lx_CycleInit);
+   li_CycleCount := li_CycleCount + 1;
+   
+   voudi_PubLifeTick := TO_UINT(li_CycleCount);
+
+   lui_TraceLevel := viui_TraceLevel;
+   
+   /*
+    * Den Status von MQTT_Get_State und MQTT_Connect uebernehmen
+    * Per Interface
+    */
+    l_Publish_State := vi_State;
+    l_Publish_Ch    := vidi_Ch;
+    
+    vodint_MQTTChannel := l_Publish_Ch;
+    vodint_MQTTCount   := l_Publish_Cnt;
+    vodint_MQTTrc      := l_Publish_rc;
+    vosint_MQTTState   := l_Publish_State;
+    vox_MQTTENO        := ENO;
+  /*
+   * Wenn KEIN Connect, dann darf Publish NICHT ausgefuehrt werden!
+   */
+    IF l_Publish_State = MQTT_SUBSCRIBER_STATE#CONNECTED /* connected */ THEN
+        
+   /*
+    * Der Eintrag in der MQTT Struktur ist nur ein Byte
+    * Also Werte > 255 dann ruecksetzen.
+    */ 
+    ludi_cntPubConnect := ludi_cntPubConnect + 1;
+   /*
+    * VAR_OUTPUT-Werte uebergeben
+    */
+    voudi_PubLifeTick     := ludi_cntPubConnect;
+    vox_PublishOk         := TRUE;
+
+   /*
+    * An die aufrufende Instanz die Werte zurueckgeben
+    */ 	                   
+    lstr_BrokerTopicIO            := vistr_BrokerPublishTopicIO;
+    voui_PubMQTTLength            := lui_MessageLength;
+    vostr_BrokerPublishTopicIO    := lstr_BrokerTopicIO;       // Topic
+         
+    lstr_PubMessage := '';
+
+    IF vix_PubIn = FALSE THEN
+      lstr_PubMessage := 'FALSE';
+      ELSE
+      lstr_PubMessage := 'TRUE';
+    END_IF;
+    
+    lui_MessageLength := len(lstr_PubMessage);
+   /* 
+    * Send MQTT-Message fuer IO-Punkt (BOOL)
+    */
+
+      lx_MQTT_PublishENO := TRUE;
+
+      MQTT_Publish(ch      := l_Publish_Ch, 
+                   topic   := lstr_BrokerTopicIO,
+                   payload := GET_BYTE_REF(IN := lstr_PubMessage),
+                   len     := lui_MessageLength,
+                   rc      => l_Publish_rc, 
+                   ENO     => lx_MQTT_PublishENO);
+      
+    voui_PubMQTTLength  := lui_MessageLength; 
+
+    END_IF;
+   /*
+    * ENO = ENO von MQTT_Publish!
+    */
+    MQTT_PublishOkR_TRIG(CLK := lx_MQTT_PublishENO, Q => lx_MQTT_PublishOK);
+    MQTT_PublishNotOkR_TRIG(CLK := NOT(lx_MQTT_PublishENO), Q => lx_MQTT_PublishNotOK);
+   
+    IF lx_MQTT_PublishOK = TRUE THEN
+     lstr_TraceText := Concat(IN1 := lstr_PrgName, IN2 := ' - ', IN3 := 'Publish Ok! -> Topic: ', IN4 := vistr_BrokerPublishTopicIO);
+    END_IF;
+   
+    IF lx_MQTT_PublishNotOK = TRUE THEN
+     lstr_TraceText := Concat(IN1 := lstr_PrgName, IN2 := ' - ', IN3 := 'Publish NOT Ok! -> Topic: ', IN4 := vistr_BrokerPublishTopicIO);
+    END_IF;
+END_FUNCTION_BLOCK
+
+/*
+ * REAL-Wert per Topic
+ * Publish eines REAL an Broker
+ */
+FUNCTION_BLOCK FB_MQTT_Publish_IOVal
+         
+   VAR_INPUT
+      /*
+       * TraceLevel fuer HCTrace 
+       */ 
+       viui_TraceLevel : UINT := 5;
+
+      /*
+       * Welcher Wert soll "ge-Published" werden?
+       */
+       vix_PubInSel :  BOOL := FALSE;   // FALSE = REAL TRUE = INT
+      /*
+       * Dieser Wert soll "ge-Published" werden
+       */
+       vir_PubIn :  REAL;
+      /*
+       * Dieser Wert soll "ge-Published" werden
+       */
+       vii_PubIn :  INT;
+      /*
+       * Die Eingangsdaten
+       */ 
+       vistr_BrokerPublishTopicIO : STRING[64];
+      /*
+       * Status GetState uebergeben von Connect
+       */ 
+       vi_State : MQTT_SUBSCRIBER_STATE;
+      /*
+       * Ch von Connect uebergeben
+       */ 
+       vidi_Ch   : DINT;
+   END_VAR
+   
+   VAR_OUTPUT
+         voui_PubMQTTLength    : UINT;
+         voudi_PubLifeTick     : UDINT; // 
+         vox_PublishOK         : BOOL;
+         vodint_MQTTChannel    : DINT;  // Status der Publish-Verbindung
+         vodint_MQTTCount      : DINT;
+         vodint_MQTTrc         : DINT;
+         vosint_MQTTState      : SINT;
+         vox_MQTTENO           : BOOL;
+
+         vostr_BrokerPublishTopicIO   : STRING[64];
+   END_VAR
+    
+   VAR   
+        
+        l_Publish_Ch    : DINT    := -1;
+        l_Publish_Cnt   : DINT    := 0;
+    
+        ludi_cntPubConnect   : UDINT := 0;
+       /*
+        * Enumeration von MQTT_RC
+        * MQTT_RC : DINT(OK                          := 0,
+        *                ERROR                       := 1,
+        *                ERROR_MEM_ALLOC             := 2,
+        *                ERROR_CONNECT               := 3,
+        *                ERROR_CH_INVALID            := 4,
+        *                ERROR_OUT_OF_CLIENTS        := 5,
+        *                ERROR_OUT_OF_CB             := 6,
+        *                ERROR_INVALID_MUTEX         := 7,
+        *                ERROR_NO_MSG_RECEIVED       := 8,
+        *                ERROR_NO_MSG_PUBLISHED      := 9,
+        *                ERROR_MSG_TRUNCATED         := 10,
+        *                ERROR_CH_INVALID_STATE      := 11,
+        *                ERROR_CANNOT_DISCONNECT     := 12,
+        *                ERROR_AUTHENTICATION_FAILED := 13,
+        *                ERROR_SSL_NOT_SUPPORTED     := 14);
+        */ 
+        l_Publish_rc   : MQTT_RC;
+
+       /*  
+        * ENumeration of MQTT_SUBSCRIBER_STATE
+        * 
+        * MQTT_SUBSCRIBER_STATE : SINT(UNUSED        := 0,
+        *                              INVALID       := 1,
+        *                              UNINITIALIZED := 2,
+        *                              DISCONNECTING := 3,
+        *                              DISCONNECTED  := 4,
+        *                              CONNECTING    := 5,
+        *                              CONNECTED     := 6,
+        *                              CONNECT_ERROR := 7); 
+        */
+       /*
+        * Status der Verbindung wird auf NICHT initialisiert gesetzt
+        */
+        l_Publish_State : MQTT_SUBSCRIBER_STATE := MQTT_SUBSCRIBER_STATE#INVALID;
+
+        lstr_BrokerTopicIO     : STRING[24]; // Header
+        lui_MessageLength      : UINT;       // Header    
+
+        lstr_PubMessage        : STRING[1024];
+
+   END_VAR
+   
+   VAR          
+        lx_CycleInit  : BOOL;
+        li_CycleCount : INT;      
+   END_VAR
+    
+   VAR
+     FB_InitR_TRIG : R_TRIG;
+   END_VAR
+   
+   VAR
+     lstr_PrgName   : STRING[25] := 'FB_MQTT_Publish_IOVal';
+     lstr_TraceText : STRING[128];
+     lui_TraceLevel : UINT := 5;
+   END_VAR
+   
+   VAR
+     FB_MQTT_PublishOkR_TRIG  : R_TRIG;
+     FB_MQTT_PublishNotOkR_TRIG  : R_TRIG;
+   END_VAR
+   
+   VAR
+     lx_MQTT_PublishOK     : BOOL;
+     lx_MQTT_PublishNotOK  : BOOL;
+     lx_MQTT_PublishENO    : BOOL;
+   END_VAR
+        
+   FB_InitR_TRIG(CLK := TRUE, Q => lx_CycleInit);
+   li_CycleCount := li_CycleCount + 1;
+   
+   voudi_PubLifeTick := TO_UINT(li_CycleCount);
+
+   lui_TraceLevel := viui_TraceLevel;
+   
+   /*
+    * Den Status von MQTT_Get_State und MQTT_Connect uebernehmen
+    */
+    l_Publish_State := vi_State;
+    l_Publish_Ch    := vidi_Ch;
+    
+    vodint_MQTTChannel := l_Publish_Ch;
+    vodint_MQTTCount   := l_Publish_Cnt;
+    vodint_MQTTrc      := l_Publish_rc;
+    vosint_MQTTState   := l_Publish_State;
+    vox_MQTTENO        := ENO;
+
+    IF l_Publish_State = MQTT_SUBSCRIBER_STATE#CONNECTED /* connected */ THEN
+        
+   /*
+    * Der Eintrag in der MQTT Struktur ist nur ein Byte
+    * Also Werte > 255 dann ruecksetzen.
+    */ 
+    ludi_cntPubConnect := ludi_cntPubConnect + 1;
+   /*
+    * VAR_OUTPUT-Werte uebergeben
+    */
+    voudi_PubLifeTick     := ludi_cntPubConnect;
+    vox_PublishOk         := TRUE;
+
+   /*
+    * An die aufrufende Instanz die Werte zurueckgeben
+    */ 	                   
+    lstr_BrokerTopicIO            := vistr_BrokerPublishTopicIO;
+    voui_PubMQTTLength            := lui_MessageLength;
+    vostr_BrokerPublishTopicIO    := lstr_BrokerTopicIO;       // Topic
+         
+    lstr_PubMessage := '';
+    IF vix_PubInSel = FALSE THEN
+     lstr_PubMessage := TO_STRING(IN := vir_PubIn);    
+     lui_MessageLength := len(lstr_PubMessage);
+    END_IF;
+    
+    IF vix_PubInSel = TRUE THEN
+     lstr_PubMessage := TO_STRING(IN := vii_PubIn);    
+     lui_MessageLength := len(lstr_PubMessage);
+    END_IF;
+    
+   /* 
+    * Send MQTT-Message fuer IO-Punkt (BOOL)
+    */
+
+    lx_MQTT_PublishENO := TRUE;
+
+    MQTT_Publish(ch      := l_Publish_Ch, 
+                 topic   := lstr_BrokerTopicIO,
+                 payload := GET_BYTE_REF(IN := lstr_PubMessage),
+                 len     := lui_MessageLength,
+                 rc      => l_Publish_rc, 
+                 ENO     => lx_MQTT_PublishENO);
+      
+    voui_PubMQTTLength  := lui_MessageLength; 
+
+    END_IF;
+   /*
+    * ENO = ENO von MQTT_Publish!
+    */
+    FB_MQTT_PublishOkR_TRIG(CLK := lx_MQTT_PublishENO, Q => lx_MQTT_PublishOK);
+    FB_MQTT_PublishNotOkR_TRIG(CLK := NOT(lx_MQTT_PublishENO), Q => lx_MQTT_PublishNotOK);
+   
+    IF lx_MQTT_PublishOK = TRUE THEN
+     lstr_TraceText := Concat(IN1 := lstr_PrgName, IN2 := ' - ', IN3 := 'Publish Ok! -> Topic: ', IN4 := vistr_BrokerPublishTopicIO);
+    END_IF;
+   
+    IF lx_MQTT_PublishNotOK = TRUE THEN
+     lstr_TraceText := Concat(IN1 := lstr_PrgName, IN2 := ' - ', IN3 := 'Publish NOT Ok! -> Topic: ', IN4 := vistr_BrokerPublishTopicIO);
+    END_IF;
+
+END_FUNCTION_BLOCK
+
+ /*
+  * Subscribe eines einzelnen IO mit MQTT
+  * Als Topic!
+  */
+  FUNCTION_BLOCK FB_MQTT_Subscribe_IO
+
+    VAR_INPUT
+        vdi_MQTTCHannel     : DINT; 
+		vistr_ReqTopicSet   : ARRAY [0..29] OF STRING[255];  // MUSS im Interface gesetzt sein! - Request
+    END_VAR
+
+    VAR_OUTPUT
+        vox_Err         : BOOL; 
+		voui_ErrNo      : UINT;  // MUSS im Interface gesetzt sein!
+
+		vo_rcOkCnt      : UDINT;
+		vo_rcNotOkCnt   : UDINT;
+		
+		vox_GetTopic    : ARRAY [0..29] OF BOOL;       // TopicWert als BOOL sofern BOOL angefordert wurde
+		vostr_GetTopic  : ARRAY [0..29] OF STRING[20];  // TopicWert als STRING, als Wert fuer Numerics
+
+		vox_GetTopicChk : ARRAY [0..29] OF BOOL;      // In Array eintragen, dass Topic gefunden wurde
+		
+		vui_MsgCount    : ARRAY [0..29] OF UINT;      // In Array eintragen, dass je Topic Daten empfangen wurden
+		vui_MsgTick     : ARRAY [0..29] OF USINT;     // In Array eintragen, dass je Topic Daten empfangen wurden
+
+    END_VAR
+
+    VAR
+	   /*
+	    * Message-Status Count
+	    */	
+		larrusint_MsgCnt0    : USINT;
+		larrusint_MsgCnt1    : USINT;
+		larrusint_MsgCnt2    : USINT;
+		larrusint_MsgCnt3    : USINT;
+		larrusint_MsgCnt4    : USINT;
+		larrusint_MsgCnt5    : USINT;
+		larrusint_MsgCnt6    : USINT;
+		larrusint_MsgCnt7    : USINT;
+		larrusint_MsgCnt8    : USINT;
+		larrusint_MsgCnt9    : USINT;
+
+		larrusint_MsgCnt10    : USINT;
+		larrusint_MsgCnt11    : USINT;
+		larrusint_MsgCnt12    : USINT;
+		larrusint_MsgCnt13    : USINT;
+		larrusint_MsgCnt14    : USINT;
+		larrusint_MsgCnt15    : USINT;
+		larrusint_MsgCnt16    : USINT;
+		larrusint_MsgCnt17    : USINT;
+		larrusint_MsgCnt18    : USINT;
+		larrusint_MsgCnt19    : USINT;
+
+		larrusint_MsgCnt20    : USINT;
+		larrusint_MsgCnt21    : USINT;
+		larrusint_MsgCnt22    : USINT;
+		larrusint_MsgCnt23    : USINT;
+		larrusint_MsgCnt24    : USINT;
+		larrusint_MsgCnt25    : USINT;
+		larrusint_MsgCnt26    : USINT;
+		larrusint_MsgCnt27    : USINT;
+		larrusint_MsgCnt28    : USINT;
+		larrusint_MsgCnt29    : USINT;
+
+    END_VAR
+
+    VAR
+	   /*
+	    * Message-Topic Lokal
+	    */	
+		larrstr_MsgTopic0    : STRING[20];
+		larrstr_MsgTopic1    : STRING[20];
+		larrstr_MsgTopic2    : STRING[20];
+		larrstr_MsgTopic3    : STRING[20];
+		larrstr_MsgTopic4    : STRING[20];
+		larrstr_MsgTopic5    : STRING[20];
+		larrstr_MsgTopic6    : STRING[20];
+		larrstr_MsgTopic7    : STRING[20];
+		larrstr_MsgTopic8    : STRING[20];
+		larrstr_MsgTopic9    : STRING[20];
+
+		larrstr_MsgTopic10    : STRING[20];
+		larrstr_MsgTopic11    : STRING[20];
+		larrstr_MsgTopic12    : STRING[20];
+		larrstr_MsgTopic13    : STRING[20];
+		larrstr_MsgTopic14    : STRING[20];
+		larrstr_MsgTopic15    : STRING[20];
+		larrstr_MsgTopic16    : STRING[20];
+		larrstr_MsgTopic17    : STRING[20];
+		larrstr_MsgTopic18    : STRING[20];
+		larrstr_MsgTopic19    : STRING[20];
+
+		larrstr_MsgTopic20    : STRING[20];
+		larrstr_MsgTopic21    : STRING[20];
+		larrstr_MsgTopic22    : STRING[20];
+		larrstr_MsgTopic23    : STRING[20];
+		larrstr_MsgTopic24    : STRING[20];
+		larrstr_MsgTopic25    : STRING[20];
+		larrstr_MsgTopic26    : STRING[20];
+		larrstr_MsgTopic27    : STRING[20];
+		larrstr_MsgTopic28    : STRING[20];
+		larrstr_MsgTopic29    : STRING[20];
+
+    END_VAR
+
+    VAR
+	   /*
+	    * Message-Topic Lokal
+	    */	
+		larrstr_NameTopic0    : STRING[20];
+		larrstr_NameTopic1    : STRING[20];
+		larrstr_NameTopic2    : STRING[20];
+		larrstr_NameTopic3    : STRING[20];
+		larrstr_NameTopic4    : STRING[20];
+		larrstr_NameTopic5    : STRING[20];
+		larrstr_NameTopic6    : STRING[20];
+		larrstr_NameTopic7    : STRING[20];
+		larrstr_NameTopic8    : STRING[20];
+		larrstr_NameTopic9    : STRING[20];
+
+		larrstr_NameTopic10    : STRING[20];
+		larrstr_NameTopic11    : STRING[20];
+		larrstr_NameTopic12    : STRING[20];
+		larrstr_NameTopic13    : STRING[20];
+		larrstr_NameTopic14    : STRING[20];
+		larrstr_NameTopic15    : STRING[20];
+		larrstr_NameTopic16    : STRING[20];
+		larrstr_NameTopic17    : STRING[20];
+		larrstr_NameTopic18    : STRING[20];
+		larrstr_NameTopic19    : STRING[20];
+
+		larrstr_NameTopic20    : STRING[20];
+		larrstr_NameTopic21    : STRING[20];
+		larrstr_NameTopic22    : STRING[20];
+		larrstr_NameTopic23    : STRING[20];
+		larrstr_NameTopic24    : STRING[20];
+		larrstr_NameTopic25    : STRING[20];
+		larrstr_NameTopic26    : STRING[20];
+		larrstr_NameTopic27    : STRING[20];
+		larrstr_NameTopic28    : STRING[20];
+		larrstr_NameTopic29    : STRING[20];
+
+    END_VAR
+
+	VAR
+		larr_ioImageRemote    : ARRAY [0..1023] OF BYTE;
+		ldi_ioImageRemoteSize : DINT := 1024;
+		ldi_ioImageRemoteLen  : DINT := -1;
+		
+		lstr_GetTopic         : STRING[255];
+	   /*
+	    * Alle erhaltenen Topics 
+	    */	
+		larr_GetTopics : ARRAY [0..29] OF STRING[255];
+
+		lx_message_received   : BOOL := FALSE;
+		l_rc                  : MQTT_RC;
+
+		larrstr_Messages      : ARRAY [0..29] OF STRING[1024];
+		larrui_MessagesLen    : ARRAY [0..29] OF UINT;
+		
+		lusi_MessageIndex     : USINT := 0;
+		lusi_MessageIndexMin  : USINT := 0;
+		lusi_MessageIndexMax  : USINT := 29;
+
+		lusi_MessageIndexOk   : USINT := 0;
+		lx_MessageIndexOk     : BOOL := FALSE;
+
+	   /*
+	    * Zur LifeTick-Anzeige 
+	    */	
+		larrusint_MessagesTick    : ARRAY [0..29] OF USINT;
+
+       /*
+        * The payloads from the client as STING[1024]
+        */ 
+		lstr_MessageClient   : ARRAY [0..29] OF STRING[1024];
+		lstr_MessagePayLoad  : STRING[1024];
+	END_VAR
+
+    VAR
+		lstr_GetTopic0          : STRING[255];
+		lstr_GetTopic1          : STRING[255];
+		lstr_GetTopic2          : STRING[255];
+		lstr_GetTopic3          : STRING[255];
+		lstr_GetTopic4          : STRING[255];
+		lstr_GetTopic5          : STRING[255];
+		lstr_GetTopic6          : STRING[255];
+		lstr_GetTopic7          : STRING[255];
+		lstr_GetTopic8          : STRING[255];
+		lstr_GetTopic9          : STRING[255];
+		lstr_GetTopic10         : STRING[255];
+		lstr_GetTopic11         : STRING[255];
+		lstr_GetTopic12         : STRING[255];
+		lstr_GetTopic13         : STRING[255];
+		lstr_GetTopic14         : STRING[255];
+		lstr_GetTopic15         : STRING[255];
+		lstr_GetTopic16         : STRING[255];
+		lstr_GetTopic17         : STRING[255];
+		lstr_GetTopic18         : STRING[255];
+		lstr_GetTopic19         : STRING[255];
+		lstr_GetTopic20         : STRING[255];
+		lstr_GetTopic21         : STRING[255];
+		lstr_GetTopic22         : STRING[255];
+		lstr_GetTopic23         : STRING[255];
+		lstr_GetTopic24         : STRING[255];
+		lstr_GetTopic25         : STRING[255];
+		lstr_GetTopic26         : STRING[255];
+		lstr_GetTopic27         : STRING[255];
+		lstr_GetTopic28         : STRING[255];
+		lstr_GetTopic29         : STRING[255];
+    END_VAR
+    
+    VAR
+       /*  
+        * ENumeration of MQTT_SUBSCRIBER_STATE
+        * 
+        * MQTT_SUBSCRIBER_STATE : SINT(UNUSED        := 0,
+        *                              INVALID       := 1,
+        *                              UNINITIALIZED := 2,
+        *                              DISCONNECTING := 3,
+        *                              DISCONNECTED  := 4,
+        *                              CONNECTING    := 5,
+        *                              CONNECTED     := 6,
+        *                              CONNECT_ERROR := 7); 
+        */
+        lsui_MQTTState : MQTT_SUBSCRIBER_STATE;
+    END_VAR
+
+    VAR
+        lui_Idx     : UINT;
+        lui_Idx_Min : UINT := 0;
+        lui_Idx_Max : UINT := 29;
+	END_VAR
+        
+    VAR
+     lstr_FBName : STRING[30] := 'FB_Subscribe_IO';
+     lui_TraceLevel : UINT     := 5;
+    END_VAR
+   
+   /*
+    * Initialisierungsmerker
+    */
+    VAR
+       FB_InitR_TRIG       : R_TRIG;
+    END_VAR      
+	    
+	VAR
+	 lx_CycleInit : BOOL;
+
+	 li_CycleCount        : INT;
+	 lx_CyclePulse        : BOOL;
+	 li_CycleCountInitVal : INT;
+	END_VAR
+
+   /*
+    * InitZyklus setzen
+    */ 
+    FB_InitR_TRIG(CLK := TRUE,Q => lx_CycleInit);
+	
+	li_CycleCount := li_CycleCount + 1;
+	lx_CyclePulse := NOT lx_CyclePulse;
+
+    IF lx_CycleInit = TRUE THEN   
+
+       FOR lui_Idx := lui_Idx_Min TO lui_Idx_Max DO
+          vox_GetTopicChk[lui_Idx] := FALSE;
+          vostr_GetTopic[lui_Idx]  := '';
+          vox_GetTopic[lui_Idx]    := FALSE;
+	   END_FOR;
+      
+       li_CycleCountInitVal := li_CycleCountInitVal + 1;
+
+    END_IF;
+
+   /*
+    * Status abfragen 
+    */
+	lsui_MQTTState := MQTT_GetState(ch := vdi_MQTTCHannel, rc => l_rc, ENO => ENO);
+
+	IF lsui_MQTTState = MQTT_SUBSCRIBER_STATE#CONNECTED THEN
+  		
+	   /*
+		* Clear the receive ring buffer in STRING[1024]
+		* Je Resource wird 1 Message erwartet
+		* IO = By Topics
+		* Header und GV (Per ByteStream) werden an anderer Stelle abgefragt
+		*/
+       /*
+        * Derzeit 29 Messagen = Ok! 
+        */
+		FOR lusi_MessageIndex := lusi_MessageIndexMin TO lusi_MessageIndexMax DO
+		  larrstr_Messages[lusi_MessageIndex]   := '';
+		  larrui_MessagesLen[lusi_MessageIndex] := 0;
+		END_FOR;
+          
+		/* if subscribed, obtain only the latest message */
+		lx_message_received  := FALSE;
+
+		vo_rcOkCnt    := 0;
+		vo_rcNotOkCnt := 0;
+
+		REPEAT
+		   /*
+		    * Daten vom Broker holen
+		    * Speichern der Daten in einem STRING
+		    */ 
+			lstr_GetTopic := MQTT_Receive(ch          := vdi_MQTTCHannel, 
+				                          payload     := REF(larr_ioImageRemote[0]), 
+				                          payload_len := ldi_ioImageRemoteSize, 
+				                          len         => ldi_ioImageRemoteLen, 
+				                          rc          => l_rc);
+           /*
+            * Die erhaltenen Topic im Array hinterlegen
+            * Wird im FB angezeigt!
+            */
+            larr_GetTopics[lusi_MessageIndex] := lstr_GetTopic;
+
+ //!!!!!!!!!!!!           lstr_MessagePayload               := StringFromByteArray(byteArray := larr_ioImageRemote,len := ldi_ioImageRemoteLen);
+
+           /*
+            * Enumeration von MQTT_RC
+            * MQTT_RC : DINT(OK                          := 0,
+            *                ERROR                       := 1,
+            *                ERROR_MEM_ALLOC             := 2,
+            *                ERROR_CONNECT               := 3,
+            *                ERROR_CH_INVALID            := 4,
+            *                ERROR_OUT_OF_CLIENTS        := 5,
+            *                ERROR_OUT_OF_CB             := 6,
+            *                ERROR_INVALID_MUTEX         := 7,
+            *                ERROR_NO_MSG_RECEIVED       := 8,
+            *                ERROR_NO_MSG_PUBLISHED      := 9,
+            *                ERROR_MSG_TRUNCATED         := 10,
+            *                ERROR_CH_INVALID_STATE      := 11,
+            *                ERROR_CANNOT_DISCONNECT     := 12,
+            *                ERROR_AUTHENTICATION_FAILED := 13,
+            *                ERROR_SSL_NOT_SUPPORTED     := 14);
+            */ 
+                
+ 			IF l_rc <> MQTT_RC#OK THEN
+ 		        vo_rcNotOkCnt := vo_rcNotOkCnt + 1;
+ 				EXIT;
+ 			ELSE
+          		vo_rcOkCnt    := vo_rcOkCnt + 1;
+ 			END_IF;
+
+			lx_message_received := TRUE;
+           /*
+            * Topic aus Liste, Elemnet 0 
+            * Server
+            * 
+            */
+            lui_Idx := 0;
+ 			IF lstr_GetTopic = vistr_ReqTopicSet [lui_Idx] THEN
+ 			  larrusint_MessagesTick[lui_Idx] := larrusint_MessagesTick[lui_Idx] + 1;
+              vui_MsgCount [lui_Idx]          := vui_MsgCount [lui_Idx]+1;
+              vui_MsgTick [lui_Idx]           := larrusint_MessagesTick[lui_Idx];
+              
+              lstr_MessageClient[lui_Idx]     := lstr_MessagePayLoad;
+              
+ 			  larrusint_MsgCnt0               := larrusint_MessagesTick[lui_Idx];
+              larrstr_MsgTopic0               := lstr_MessageClient[lui_Idx];
+              larrstr_NameTopic0              := lstr_GetTopic;
+ 
+              vostr_GetTopic[lui_Idx] := lstr_MessageClient[lui_Idx];  // TopicWert als STRING, als Wert fuer Numerics                           
+
+              IF lstr_MessageClient[lui_Idx] = 'TRUE' THEN
+               vox_GetTopic[lui_Idx]   := TRUE;        // TopicWert als BOOL sofern BOOL angefordert wurde
+               vostr_GetTopic[lui_Idx] := '1';         // TopicWert als STRING, als Wert fuer Numerics                           
+              END_IF; 
+
+              IF lstr_MessageClient[lui_Idx] = 'FALSE' THEN
+               vox_GetTopic[lui_Idx]   := FALSE;       // TopicWert als BOOL sofern BOOL angefordert wurde
+               vostr_GetTopic[lui_Idx] := '0';         // TopicWert als STRING, als Wert fuer Numerics                           
+              END_IF;
+
+              vox_GetTopicChk[lui_Idx] := TRUE;  // TopicWert als STRING, als Wert fuer Numerics                           
+ 			END_IF;
+
+           /*
+            * Topic aus Liste, Elemnet 1 
+            * HRaum
+            */
+            lui_Idx := 1;
+ 			IF lstr_GetTopic = vistr_ReqTopicSet [lui_Idx] THEN
+ 			  larrusint_MessagesTick[lui_Idx] := larrusint_MessagesTick[lui_Idx] + 1;
+              vui_MsgCount [lui_Idx]          := vui_MsgCount [lui_Idx]+1;
+              vui_MsgTick [lui_Idx]           := larrusint_MessagesTick[lui_Idx];
+
+              lstr_MessageClient[lui_Idx]     := lstr_MessagePayLoad;
+              
+ 			  larrusint_MsgCnt1            := larrusint_MessagesTick[lui_Idx];
+              larrstr_MsgTopic1            := lstr_MessageClient[lui_Idx];
+              larrstr_NameTopic1           := lstr_GetTopic;
+ 
+              vostr_GetTopic[lui_Idx] := lstr_MessageClient[lui_Idx];  // TopicWert als STRING, als Wert fuer Numerics                           
+
+              IF lstr_MessageClient[lui_Idx] = 'TRUE' THEN
+               vox_GetTopic[lui_Idx]   := TRUE;        // TopicWert als BOOL sofern BOOL angefordert wurde
+               vostr_GetTopic[lui_Idx] := '1';         // TopicWert als STRING, als Wert fuer Numerics                           
+              END_IF; 
+
+              IF lstr_MessageClient[lui_Idx] = 'FALSE' THEN
+               vox_GetTopic[lui_Idx]   := FALSE;       // TopicWert als BOOL sofern BOOL angefordert wurde
+               vostr_GetTopic[lui_Idx] := '0';         // TopicWert als STRING, als Wert fuer Numerics                           
+              END_IF;
+
+              vox_GetTopicChk[lui_Idx] := TRUE;  // TopicWert als STRING, als Wert fuer Numerics                           
+ 			END_IF;
+
+           /*
+            * Topic aus Liste, Elemnet 2 
+            * GHaus
+            */
+            lui_Idx := 2;
+ 			IF lstr_GetTopic = vistr_ReqTopicSet [lui_Idx] THEN
+ 			  larrusint_MessagesTick[lui_Idx] := larrusint_MessagesTick[lui_Idx] + 1;
+              vui_MsgCount [lui_Idx]          := vui_MsgCount [lui_Idx]+1;
+              vui_MsgTick [lui_Idx]           := larrusint_MessagesTick[lui_Idx];
+
+              lstr_MessageClient[lui_Idx]     := lstr_MessagePayLoad;
+              
+ 			  larrusint_MsgCnt2            := larrusint_MessagesTick[lui_Idx];
+              larrstr_MsgTopic2            := lstr_MessageClient[lui_Idx];
+              larrstr_NameTopic2           := lstr_GetTopic;
+ 
+              vostr_GetTopic[lui_Idx] := lstr_MessageClient[lui_Idx];  // TopicWert als STRING, als Wert fuer Numerics                           
+
+              IF lstr_MessageClient[lui_Idx] = 'TRUE' THEN
+               vox_GetTopic[lui_Idx]   := TRUE;        // TopicWert als BOOL sofern BOOL angefordert wurde
+               vostr_GetTopic[lui_Idx] := '1';         // TopicWert als STRING, als Wert fuer Numerics                           
+              END_IF; 
+
+              IF lstr_MessageClient[lui_Idx] = 'FALSE' THEN
+               vox_GetTopic[lui_Idx]   := FALSE;       // TopicWert als BOOL sofern BOOL angefordert wurde
+               vostr_GetTopic[lui_Idx] := '0';         // TopicWert als STRING, als Wert fuer Numerics                           
+              END_IF;
+
+              vox_GetTopicChk[lui_Idx] := TRUE;  // TopicWert als STRING, als Wert fuer Numerics                           
+ 			END_IF;
+
+           /*
+            * Topic aus Liste, Elemnet 3 
+            * Keller
+            */
+            lui_Idx := 3;
+ 			IF lstr_GetTopic = vistr_ReqTopicSet [lui_Idx] THEN
+ 			  larrusint_MessagesTick[lui_Idx] := larrusint_MessagesTick[lui_Idx] + 1;
+              vui_MsgCount [lui_Idx]          := vui_MsgCount [lui_Idx]+1;
+              vui_MsgTick [lui_Idx]           := larrusint_MessagesTick[lui_Idx];
+
+              lstr_MessageClient[lui_Idx]     := lstr_MessagePayLoad;
+              
+ 			  larrusint_MsgCnt3            := larrusint_MessagesTick[lui_Idx];
+              larrstr_MsgTopic3            := lstr_MessageClient[lui_Idx];
+              larrstr_NameTopic3           := lstr_GetTopic;
+ 
+              vostr_GetTopic[lui_Idx] := lstr_MessageClient[lui_Idx];  // TopicWert als STRING, als Wert fuer Numerics                           
+
+              IF lstr_MessageClient[lui_Idx] = 'TRUE' THEN
+               vox_GetTopic[lui_Idx]   := TRUE;        // TopicWert als BOOL sofern BOOL angefordert wurde
+               vostr_GetTopic[lui_Idx] := '1';         // TopicWert als STRING, als Wert fuer Numerics                           
+              END_IF; 
+
+              IF lstr_MessageClient[lui_Idx] = 'FALSE' THEN
+               vox_GetTopic[lui_Idx]   := FALSE;       // TopicWert als BOOL sofern BOOL angefordert wurde
+               vostr_GetTopic[lui_Idx] := '0';         // TopicWert als STRING, als Wert fuer Numerics                           
+              END_IF;
+             /*
+              * Topic gefunden 
+              */ 
+              vox_GetTopicChk[lui_Idx] := TRUE;
+ 			END_IF;
+
+           /*
+            * Topic aus Liste, Elemnet 4 
+            * PrWzWiGa
+            */
+            lui_Idx := 4;
+ 			IF lstr_GetTopic = vistr_ReqTopicSet [lui_Idx] THEN
+ 			  larrusint_MessagesTick[lui_Idx] := larrusint_MessagesTick[lui_Idx] + 1;
+              vui_MsgCount [lui_Idx]          := vui_MsgCount [lui_Idx]+1;
+              vui_MsgTick [lui_Idx]           := larrusint_MessagesTick[lui_Idx];
+
+              lstr_MessageClient[lui_Idx]     := lstr_MessagePayLoad;
+              
+ 			  larrusint_MsgCnt4            := larrusint_MessagesTick[lui_Idx];
+              larrstr_MsgTopic4            := lstr_MessageClient[lui_Idx];
+              larrstr_NameTopic4           := lstr_GetTopic;
+ 
+              vostr_GetTopic[lui_Idx] := lstr_MessageClient[lui_Idx];  // TopicWert als STRING, als Wert fuer Numerics                           
+
+              IF lstr_MessageClient[lui_Idx] = 'TRUE' THEN
+               vox_GetTopic[lui_Idx]   := TRUE;        // TopicWert als BOOL sofern BOOL angefordert wurde
+               vostr_GetTopic[lui_Idx] := '1';         // TopicWert als STRING, als Wert fuer Numerics                           
+              END_IF; 
+
+              IF lstr_MessageClient[lui_Idx] = 'FALSE' THEN
+               vox_GetTopic[lui_Idx]   := FALSE;       // TopicWert als BOOL sofern BOOL angefordert wurde
+               vostr_GetTopic[lui_Idx] := '0';         // TopicWert als STRING, als Wert fuer Numerics                           
+              END_IF;
+
+              vox_GetTopicChk[lui_Idx] := TRUE;  // TopicWert als STRING, als Wert fuer Numerics                           
+ 			END_IF;
+
+           /*
+            * Topic aus Liste, Elemnet 5 
+            * WiGa
+            */
+            lui_Idx := 5;
+ 			IF lstr_GetTopic = vistr_ReqTopicSet [lui_Idx] THEN
+ 			  larrusint_MessagesTick[lui_Idx] := larrusint_MessagesTick[lui_Idx] + 1;
+              vui_MsgCount [lui_Idx]          := vui_MsgCount [lui_Idx]+1;
+              vui_MsgTick [lui_Idx]           := larrusint_MessagesTick[lui_Idx];
+ 
+              lstr_MessageClient[lui_Idx]     := lstr_MessagePayLoad;
+              
+  			  larrusint_MsgCnt5            := larrusint_MessagesTick[lui_Idx];
+              larrstr_MsgTopic5            := lstr_MessageClient[lui_Idx];
+              larrstr_NameTopic5           := lstr_GetTopic;
+ 
+              vostr_GetTopic[lui_Idx] := lstr_MessageClient[lui_Idx];  // TopicWert als STRING, als Wert fuer Numerics                           
+
+              IF lstr_MessageClient[lui_Idx] = 'TRUE' THEN
+               vox_GetTopic[lui_Idx]   := TRUE;        // TopicWert als BOOL sofern BOOL angefordert wurde
+               vostr_GetTopic[lui_Idx] := '1';         // TopicWert als STRING, als Wert fuer Numerics                           
+              END_IF; 
+
+              IF lstr_MessageClient[lui_Idx] = 'FALSE' THEN
+               vox_GetTopic[lui_Idx]   := FALSE;       // TopicWert als BOOL sofern BOOL angefordert wurde
+               vostr_GetTopic[lui_Idx] := '0';         // TopicWert als STRING, als Wert fuer Numerics                           
+              END_IF;
+             /*
+              * Topic gefunden 
+              */ 
+              vox_GetTopicChk[lui_Idx] := TRUE;  // TopicWert als STRING, als Wert fuer Numerics                           
+
+ 			END_IF;
+
+           /*
+            * Topic aus Liste, Elemnet 6 
+            * Sauna
+            */
+            lui_Idx := 6;
+ 			IF lstr_GetTopic = vistr_ReqTopicSet [lui_Idx] THEN
+ 			  larrusint_MessagesTick[lui_Idx] := larrusint_MessagesTick[lui_Idx] + 1;
+              vui_MsgCount [lui_Idx]          := vui_MsgCount [lui_Idx]+1;
+              vui_MsgTick [lui_Idx]           := larrusint_MessagesTick[lui_Idx];
+
+              lstr_MessageClient[lui_Idx]     := lstr_MessagePayLoad;
+              
+ 			  larrusint_MsgCnt6            := larrusint_MessagesTick[lui_Idx];
+              larrstr_MsgTopic6            := lstr_MessageClient[lui_Idx];
+              larrstr_NameTopic6           := lstr_GetTopic;
+ 
+              vostr_GetTopic[lui_Idx] := lstr_MessageClient[lui_Idx];  // TopicWert als STRING, als Wert fuer Numerics                           
+
+              IF lstr_MessageClient[lui_Idx] = 'TRUE' THEN
+               vox_GetTopic[lui_Idx]   := TRUE;        // TopicWert als BOOL sofern BOOL angefordert wurde
+               vostr_GetTopic[lui_Idx] := '1';         // TopicWert als STRING, als Wert fuer Numerics                           
+              END_IF; 
+
+              IF lstr_MessageClient[lui_Idx] = 'FALSE' THEN
+               vox_GetTopic[lui_Idx]   := FALSE;       // TopicWert als BOOL sofern BOOL angefordert wurde
+               vostr_GetTopic[lui_Idx] := '0';         // TopicWert als STRING, als Wert fuer Numerics                           
+              END_IF;
+             /*
+              * Topic gefunden 
+              */ 
+              vox_GetTopicChk[lui_Idx] := TRUE;  // TopicWert als STRING, als Wert fuer Numerics                           
+
+ 			END_IF;
+
+           /*
+            * Topic aus Liste, Elemnet 7 
+            * Bew
+            */
+            lui_Idx := 7;
+ 			IF lstr_GetTopic = vistr_ReqTopicSet [lui_Idx] THEN
+ 			  larrusint_MessagesTick[lui_Idx] := larrusint_MessagesTick[lui_Idx] + 1;
+              vui_MsgCount [lui_Idx]          := vui_MsgCount [lui_Idx]+1;
+              vui_MsgTick [lui_Idx]           := larrusint_MessagesTick[lui_Idx];
+
+              lstr_MessageClient[lui_Idx]     := lstr_MessagePayLoad;
+              
+ 			  larrusint_MsgCnt7            := larrusint_MessagesTick[lui_Idx];
+              larrstr_MsgTopic7            := lstr_MessageClient[lui_Idx];
+              larrstr_NameTopic7           := lstr_GetTopic;
+ 
+              vostr_GetTopic[lui_Idx] := lstr_MessageClient[lui_Idx];  // TopicWert als STRING, als Wert fuer Numerics                           
+
+              IF lstr_MessageClient[lui_Idx] = 'TRUE' THEN
+               vox_GetTopic[lui_Idx]   := TRUE;        // TopicWert als BOOL sofern BOOL angefordert wurde
+               vostr_GetTopic[lui_Idx] := '1';         // TopicWert als STRING, als Wert fuer Numerics                           
+              END_IF; 
+
+              IF lstr_MessageClient[lui_Idx] = 'FALSE' THEN
+               vox_GetTopic[lui_Idx]   := FALSE;       // TopicWert als BOOL sofern BOOL angefordert wurde
+               vostr_GetTopic[lui_Idx] := '0';         // TopicWert als STRING, als Wert fuer Numerics                           
+              END_IF;
+             /*
+              * Topic gefunden 
+              */ 
+              vox_GetTopicChk[lui_Idx] := TRUE;  // TopicWert als STRING, als Wert fuer Numerics                           
+
+ 			END_IF;
+
+           /*
+            * Topic aus Liste, Elemnet 8
+            * Cloud
+            */
+            lui_Idx := 8;
+ 			IF lstr_GetTopic = vistr_ReqTopicSet [lui_Idx] THEN
+ 			  larrusint_MessagesTick[lui_Idx] := larrusint_MessagesTick[lui_Idx] + 1;
+              vui_MsgCount [lui_Idx]          := vui_MsgCount [lui_Idx]+1;
+              vui_MsgTick [lui_Idx]           := larrusint_MessagesTick[lui_Idx];
+
+              lstr_MessageClient[lui_Idx]     := lstr_MessagePayLoad;
+              
+ 			  larrusint_MsgCnt8            := larrusint_MessagesTick[lui_Idx];
+              larrstr_MsgTopic8            := lstr_MessageClient[lui_Idx];
+              larrstr_NameTopic8           := lstr_GetTopic;
+ 
+              vostr_GetTopic[lui_Idx] := lstr_MessageClient[lui_Idx];  // TopicWert als STRING, als Wert fuer Numerics                           
+
+              IF lstr_MessageClient[lui_Idx] = 'TRUE' THEN
+               vox_GetTopic[lui_Idx]   := TRUE;        // TopicWert als BOOL sofern BOOL angefordert wurde
+               vostr_GetTopic[lui_Idx] := '1';         // TopicWert als STRING, als Wert fuer Numerics                           
+              END_IF; 
+
+              IF lstr_MessageClient[lui_Idx] = 'FALSE' THEN
+               vox_GetTopic[lui_Idx]   := FALSE;       // TopicWert als BOOL sofern BOOL angefordert wurde
+               vostr_GetTopic[lui_Idx] := '0';         // TopicWert als STRING, als Wert fuer Numerics                           
+              END_IF;
+             /*
+              * Topic gefunden 
+              */ 
+              vox_GetTopicChk[lui_Idx] := TRUE;  // TopicWert als STRING, als Wert fuer Numerics                           
+
+ 			END_IF;
+           /*
+            * Topic aus Liste, Element 9 
+            * PC
+            */
+            lui_Idx := 9;
+ 			IF lstr_GetTopic = vistr_ReqTopicSet [lui_Idx] THEN
+ 			  larrusint_MessagesTick[lui_Idx] := larrusint_MessagesTick[lui_Idx] + 1;
+              vui_MsgCount [lui_Idx]          := vui_MsgCount [lui_Idx]+1;
+              vui_MsgTick [lui_Idx]           := larrusint_MessagesTick[lui_Idx];
+
+              lstr_MessageClient[lui_Idx]     := lstr_MessagePayLoad;
+              
+ 			  larrusint_MsgCnt9            := larrusint_MessagesTick[lui_Idx];
+              larrstr_MsgTopic9            := lstr_MessageClient[lui_Idx];
+              larrstr_NameTopic9           := lstr_GetTopic;
+ 
+              vostr_GetTopic[lui_Idx] := lstr_MessageClient[lui_Idx];  // TopicWert als STRING, als Wert fuer Numerics                           
+
+              IF lstr_MessageClient[lui_Idx] = 'TRUE' THEN
+               vox_GetTopic[lui_Idx]   := TRUE;        // TopicWert als BOOL sofern BOOL angefordert wurde
+               vostr_GetTopic[lui_Idx] := '1';         // TopicWert als STRING, als Wert fuer Numerics                           
+              END_IF; 
+
+              IF lstr_MessageClient[lui_Idx] = 'FALSE' THEN
+               vox_GetTopic[lui_Idx]   := FALSE;       // TopicWert als BOOL sofern BOOL angefordert wurde
+               vostr_GetTopic[lui_Idx] := '0';         // TopicWert als STRING, als Wert fuer Numerics                           
+              END_IF;
+             /*
+              * Topic gefunden 
+              */ 
+              vox_GetTopicChk[lui_Idx] := TRUE;  // TopicWert als STRING, als Wert fuer Numerics                           
+
+ 			END_IF;
+
+            lui_Idx := 10;
+ 			IF lstr_GetTopic = vistr_ReqTopicSet [lui_Idx] THEN
+ 			  larrusint_MessagesTick[lui_Idx] := larrusint_MessagesTick[lui_Idx] + 1;
+              vui_MsgCount [lui_Idx]          := vui_MsgCount [lui_Idx]+1;
+              vui_MsgTick [lui_Idx]           := larrusint_MessagesTick[lui_Idx];
+              
+              lstr_MessageClient[lui_Idx]     := lstr_MessagePayLoad;
+              
+ 			  larrusint_MsgCnt10              := larrusint_MessagesTick[lui_Idx];
+              larrstr_MsgTopic10              := lstr_MessageClient[lui_Idx];
+              larrstr_NameTopic10             := lstr_GetTopic;
+ 
+              vostr_GetTopic[lui_Idx] := lstr_MessageClient[lui_Idx];  // TopicWert als STRING, als Wert fuer Numerics                           
+
+              IF lstr_MessageClient[lui_Idx] = 'TRUE' THEN
+               vox_GetTopic[lui_Idx]   := TRUE;        // TopicWert als BOOL sofern BOOL angefordert wurde
+               vostr_GetTopic[lui_Idx] := '1';         // TopicWert als STRING, als Wert fuer Numerics                           
+              END_IF; 
+
+              IF lstr_MessageClient[lui_Idx] = 'FALSE' THEN
+               vox_GetTopic[lui_Idx]   := FALSE;       // TopicWert als BOOL sofern BOOL angefordert wurde
+               vostr_GetTopic[lui_Idx] := '0';         // TopicWert als STRING, als Wert fuer Numerics                           
+              END_IF;
+             /*
+              * Topic gefunden 
+              */ 
+              vox_GetTopicChk[lui_Idx] := TRUE;  // TopicWert als STRING, als Wert fuer Numerics                           
+
+ 			END_IF;
+
+            lui_Idx := 11;
+ 			IF lstr_GetTopic = vistr_ReqTopicSet [lui_Idx] THEN
+ 			  larrusint_MessagesTick[lui_Idx] := larrusint_MessagesTick[lui_Idx] + 1;
+              vui_MsgCount [lui_Idx]          := vui_MsgCount [lui_Idx]+1;
+              vui_MsgTick [lui_Idx]           := larrusint_MessagesTick[lui_Idx];
+              
+              lstr_MessageClient[lui_Idx]     := lstr_MessagePayLoad;
+              
+ 			  larrusint_MsgCnt11              := larrusint_MessagesTick[lui_Idx];
+              larrstr_MsgTopic11              := lstr_MessageClient[lui_Idx];
+              larrstr_NameTopic11             := lstr_GetTopic;
+ 
+              vostr_GetTopic[lui_Idx] := lstr_MessageClient[lui_Idx];  // TopicWert als STRING, als Wert fuer Numerics                           
+
+              IF lstr_MessageClient[lui_Idx] = 'TRUE' THEN
+               vox_GetTopic[lui_Idx]   := TRUE;        // TopicWert als BOOL sofern BOOL angefordert wurde
+               vostr_GetTopic[lui_Idx] := '1';         // TopicWert als STRING, als Wert fuer Numerics                           
+              END_IF; 
+
+              IF lstr_MessageClient[lui_Idx] = 'FALSE' THEN
+               vox_GetTopic[lui_Idx]   := FALSE;       // TopicWert als BOOL sofern BOOL angefordert wurde
+               vostr_GetTopic[lui_Idx] := '0';         // TopicWert als STRING, als Wert fuer Numerics                           
+              END_IF;
+             /*
+              * Topic gefunden 
+              */ 
+              vox_GetTopicChk[lui_Idx] := TRUE;  // TopicWert als STRING, als Wert fuer Numerics                           
+
+ 			END_IF;
+
+            lui_Idx := 12;
+ 			IF lstr_GetTopic = vistr_ReqTopicSet [lui_Idx] THEN
+ 			  larrusint_MessagesTick[lui_Idx] := larrusint_MessagesTick[lui_Idx] + 1;
+              vui_MsgCount [lui_Idx]          := vui_MsgCount [lui_Idx]+1;
+              vui_MsgTick [lui_Idx]           := larrusint_MessagesTick[lui_Idx];
+              
+              lstr_MessageClient[lui_Idx]     := lstr_MessagePayLoad;
+              
+ 			  larrusint_MsgCnt12              := larrusint_MessagesTick[lui_Idx];
+              larrstr_MsgTopic12              := lstr_MessageClient[lui_Idx];
+              larrstr_NameTopic12             := lstr_GetTopic;
+ 
+              vostr_GetTopic[lui_Idx] := lstr_MessageClient[lui_Idx];  // TopicWert als STRING, als Wert fuer Numerics                           
+
+              IF lstr_MessageClient[lui_Idx] = 'TRUE' THEN
+               vox_GetTopic[lui_Idx]   := TRUE;        // TopicWert als BOOL sofern BOOL angefordert wurde
+               vostr_GetTopic[lui_Idx] := '1';         // TopicWert als STRING, als Wert fuer Numerics                           
+              END_IF; 
+
+              IF lstr_MessageClient[lui_Idx] = 'FALSE' THEN
+               vox_GetTopic[lui_Idx]   := FALSE;       // TopicWert als BOOL sofern BOOL angefordert wurde
+               vostr_GetTopic[lui_Idx] := '0';         // TopicWert als STRING, als Wert fuer Numerics                           
+              END_IF;
+             /*
+              * Topic gefunden 
+              */ 
+              vox_GetTopicChk[lui_Idx] := TRUE;  // TopicWert als STRING, als Wert fuer Numerics                           
+
+ 			END_IF;
+
+            lui_Idx := 13;
+ 			IF lstr_GetTopic = vistr_ReqTopicSet [lui_Idx] THEN
+ 			  larrusint_MessagesTick[lui_Idx] := larrusint_MessagesTick[lui_Idx] + 1;
+              vui_MsgCount [lui_Idx]          := vui_MsgCount [lui_Idx]+1;
+              vui_MsgTick [lui_Idx]           := larrusint_MessagesTick[lui_Idx];
+              
+              lstr_MessageClient[lui_Idx]     := lstr_MessagePayLoad;
+              
+ 			  larrusint_MsgCnt13              := larrusint_MessagesTick[lui_Idx];
+              larrstr_MsgTopic13              := lstr_MessageClient[lui_Idx];
+              larrstr_NameTopic13             := lstr_GetTopic;
+ 
+              vostr_GetTopic[lui_Idx] := lstr_MessageClient[lui_Idx];  // TopicWert als STRING, als Wert fuer Numerics                           
+
+              IF lstr_MessageClient[lui_Idx] = 'TRUE' THEN
+               vox_GetTopic[lui_Idx]   := TRUE;        // TopicWert als BOOL sofern BOOL angefordert wurde
+               vostr_GetTopic[lui_Idx] := '1';         // TopicWert als STRING, als Wert fuer Numerics                           
+              END_IF; 
+
+              IF lstr_MessageClient[lui_Idx] = 'FALSE' THEN
+               vox_GetTopic[lui_Idx]   := FALSE;       // TopicWert als BOOL sofern BOOL angefordert wurde
+               vostr_GetTopic[lui_Idx] := '0';         // TopicWert als STRING, als Wert fuer Numerics                           
+              END_IF;
+             /*
+              * Topic gefunden 
+              */ 
+              vox_GetTopicChk[lui_Idx] := TRUE;  // TopicWert als STRING, als Wert fuer Numerics                           
+
+ 			END_IF;
+
+            lui_Idx := 14;
+ 			IF lstr_GetTopic = vistr_ReqTopicSet [lui_Idx] THEN
+ 			  larrusint_MessagesTick[lui_Idx] := larrusint_MessagesTick[lui_Idx] + 1;
+              vui_MsgCount [lui_Idx]          := vui_MsgCount [lui_Idx]+1;
+              vui_MsgTick [lui_Idx]           := larrusint_MessagesTick[lui_Idx];
+              
+              lstr_MessageClient[lui_Idx]     := lstr_MessagePayLoad;
+              
+ 			  larrusint_MsgCnt14              := larrusint_MessagesTick[lui_Idx];
+              larrstr_MsgTopic14              := lstr_MessageClient[lui_Idx];
+              larrstr_NameTopic14             := lstr_GetTopic;
+ 
+              vostr_GetTopic[lui_Idx] := lstr_MessageClient[lui_Idx];  // TopicWert als STRING, als Wert fuer Numerics                           
+
+              IF lstr_MessageClient[lui_Idx] = 'TRUE' THEN
+               vox_GetTopic[lui_Idx]   := TRUE;        // TopicWert als BOOL sofern BOOL angefordert wurde
+               vostr_GetTopic[lui_Idx] := '1';         // TopicWert als STRING, als Wert fuer Numerics                           
+              END_IF; 
+
+              IF lstr_MessageClient[lui_Idx] = 'FALSE' THEN
+               vox_GetTopic[lui_Idx]   := FALSE;       // TopicWert als BOOL sofern BOOL angefordert wurde
+               vostr_GetTopic[lui_Idx] := '0';         // TopicWert als STRING, als Wert fuer Numerics                           
+              END_IF;
+             /*
+              * Topic gefunden 
+              */ 
+              vox_GetTopicChk[lui_Idx] := TRUE;  // TopicWert als STRING, als Wert fuer Numerics                           
+
+ 			END_IF;
+
+            lui_Idx := 15;
+ 			IF lstr_GetTopic = vistr_ReqTopicSet [lui_Idx] THEN
+ 			  larrusint_MessagesTick[lui_Idx] := larrusint_MessagesTick[lui_Idx] + 1;
+              vui_MsgCount [lui_Idx]          := vui_MsgCount [lui_Idx]+1;
+              vui_MsgTick [lui_Idx]           := larrusint_MessagesTick[lui_Idx];
+              
+              lstr_MessageClient[lui_Idx]     := lstr_MessagePayLoad;
+              
+ 			  larrusint_MsgCnt15              := larrusint_MessagesTick[lui_Idx];
+              larrstr_MsgTopic15              := lstr_MessageClient[lui_Idx];
+              larrstr_NameTopic15             := lstr_GetTopic;
+ 
+              vostr_GetTopic[lui_Idx] := lstr_MessageClient[lui_Idx];  // TopicWert als STRING, als Wert fuer Numerics                           
+
+              IF lstr_MessageClient[lui_Idx] = 'TRUE' THEN
+               vox_GetTopic[lui_Idx]   := TRUE;        // TopicWert als BOOL sofern BOOL angefordert wurde
+               vostr_GetTopic[lui_Idx] := '1';         // TopicWert als STRING, als Wert fuer Numerics                           
+              END_IF; 
+
+              IF lstr_MessageClient[lui_Idx] = 'FALSE' THEN
+               vox_GetTopic[lui_Idx]   := FALSE;       // TopicWert als BOOL sofern BOOL angefordert wurde
+               vostr_GetTopic[lui_Idx] := '0';         // TopicWert als STRING, als Wert fuer Numerics                           
+              END_IF;
+             /*
+              * Topic gefunden 
+              */ 
+              vox_GetTopicChk[lui_Idx] := TRUE;  // TopicWert als STRING, als Wert fuer Numerics                           
+
+ 			END_IF;
+
+            lui_Idx := 16;
+ 			IF lstr_GetTopic = vistr_ReqTopicSet [lui_Idx] THEN
+ 			  larrusint_MessagesTick[lui_Idx] := larrusint_MessagesTick[lui_Idx] + 1;
+              vui_MsgCount [lui_Idx]          := vui_MsgCount [lui_Idx]+1;
+              vui_MsgTick [lui_Idx]           := larrusint_MessagesTick[lui_Idx];
+              
+              lstr_MessageClient[lui_Idx]     := lstr_MessagePayLoad;
+              
+ 			  larrusint_MsgCnt16               := larrusint_MessagesTick[lui_Idx];
+              larrstr_MsgTopic16               := lstr_MessageClient[lui_Idx];
+              larrstr_NameTopic16              := lstr_GetTopic;
+ 
+              vostr_GetTopic[lui_Idx] := lstr_MessageClient[lui_Idx];  // TopicWert als STRING, als Wert fuer Numerics                           
+
+              IF lstr_MessageClient[lui_Idx] = 'TRUE' THEN
+               vox_GetTopic[lui_Idx]   := TRUE;        // TopicWert als BOOL sofern BOOL angefordert wurde
+               vostr_GetTopic[lui_Idx] := '1';         // TopicWert als STRING, als Wert fuer Numerics                           
+              END_IF; 
+
+              IF lstr_MessageClient[lui_Idx] = 'FALSE' THEN
+               vox_GetTopic[lui_Idx]   := FALSE;       // TopicWert als BOOL sofern BOOL angefordert wurde
+               vostr_GetTopic[lui_Idx] := '0';         // TopicWert als STRING, als Wert fuer Numerics                           
+              END_IF;
+             /*
+              * Topic gefunden 
+              */ 
+              vox_GetTopicChk[lui_Idx] := TRUE;  // TopicWert als STRING, als Wert fuer Numerics                           
+
+ 			END_IF;
+
+            lui_Idx := 17;
+ 			IF lstr_GetTopic = vistr_ReqTopicSet [lui_Idx] THEN
+ 			  larrusint_MessagesTick[lui_Idx] := larrusint_MessagesTick[lui_Idx] + 1;
+              vui_MsgCount [lui_Idx]          := vui_MsgCount [lui_Idx]+1;
+              vui_MsgTick [lui_Idx]           := larrusint_MessagesTick[lui_Idx];
+              
+              lstr_MessageClient[lui_Idx]     := lstr_MessagePayLoad;
+              
+ 			  larrusint_MsgCnt17               := larrusint_MessagesTick[lui_Idx];
+              larrstr_MsgTopic17               := lstr_MessageClient[lui_Idx];
+              larrstr_NameTopic17              := lstr_GetTopic;
+ 
+              vostr_GetTopic[lui_Idx] := lstr_MessageClient[lui_Idx];  // TopicWert als STRING, als Wert fuer Numerics                           
+
+              IF lstr_MessageClient[lui_Idx] = 'TRUE' THEN
+               vox_GetTopic[lui_Idx]   := TRUE;        // TopicWert als BOOL sofern BOOL angefordert wurde
+               vostr_GetTopic[lui_Idx] := '1';         // TopicWert als STRING, als Wert fuer Numerics                           
+              END_IF; 
+
+              IF lstr_MessageClient[lui_Idx] = 'FALSE' THEN
+               vox_GetTopic[lui_Idx]   := FALSE;       // TopicWert als BOOL sofern BOOL angefordert wurde
+               vostr_GetTopic[lui_Idx] := '0';         // TopicWert als STRING, als Wert fuer Numerics                           
+              END_IF;
+             /*
+              * Topic gefunden 
+              */ 
+              vox_GetTopicChk[lui_Idx] := TRUE;  // TopicWert als STRING, als Wert fuer Numerics                           
+
+ 			END_IF;
+
+            lui_Idx := 18;
+ 			IF lstr_GetTopic = vistr_ReqTopicSet [lui_Idx] THEN
+ 			  larrusint_MessagesTick[lui_Idx] := larrusint_MessagesTick[lui_Idx] + 1;
+              vui_MsgCount [lui_Idx]          := vui_MsgCount [lui_Idx]+1;
+              vui_MsgTick [lui_Idx]           := larrusint_MessagesTick[lui_Idx];
+              
+              lstr_MessageClient[lui_Idx]     := lstr_MessagePayLoad;
+              
+ 			  larrusint_MsgCnt18               := larrusint_MessagesTick[lui_Idx];
+              larrstr_MsgTopic18               := lstr_MessageClient[lui_Idx];
+              larrstr_NameTopic18              := lstr_GetTopic;
+ 
+              vostr_GetTopic[lui_Idx] := lstr_MessageClient[lui_Idx];  // TopicWert als STRING, als Wert fuer Numerics                           
+
+              IF lstr_MessageClient[lui_Idx] = 'TRUE' THEN
+               vox_GetTopic[lui_Idx]   := TRUE;        // TopicWert als BOOL sofern BOOL angefordert wurde
+               vostr_GetTopic[lui_Idx] := '1';         // TopicWert als STRING, als Wert fuer Numerics                           
+              END_IF; 
+
+              IF lstr_MessageClient[lui_Idx] = 'FALSE' THEN
+               vox_GetTopic[lui_Idx]   := FALSE;       // TopicWert als BOOL sofern BOOL angefordert wurde
+               vostr_GetTopic[lui_Idx] := '0';         // TopicWert als STRING, als Wert fuer Numerics                           
+              END_IF;
+             /*
+              * Topic gefunden 
+              */ 
+              vox_GetTopicChk[lui_Idx] := TRUE;  // TopicWert als STRING, als Wert fuer Numerics                           
+
+ 			END_IF;
+
+            lui_Idx := 19;
+ 			IF lstr_GetTopic = vistr_ReqTopicSet [lui_Idx] THEN
+ 			  larrusint_MessagesTick[lui_Idx] := larrusint_MessagesTick[lui_Idx] + 1;
+              vui_MsgCount [lui_Idx]          := vui_MsgCount [lui_Idx]+1;
+              vui_MsgTick [lui_Idx]           := larrusint_MessagesTick[lui_Idx];
+              
+              lstr_MessageClient[lui_Idx]     := lstr_MessagePayLoad;
+              
+ 			  larrusint_MsgCnt19               := larrusint_MessagesTick[lui_Idx];
+              larrstr_MsgTopic19               := lstr_MessageClient[lui_Idx];
+              larrstr_NameTopic19              := lstr_GetTopic;
+ 
+              vostr_GetTopic[lui_Idx] := lstr_MessageClient[lui_Idx];  // TopicWert als STRING, als Wert fuer Numerics                           
+
+              IF lstr_MessageClient[lui_Idx] = 'TRUE' THEN
+               vox_GetTopic[lui_Idx]   := TRUE;        // TopicWert als BOOL sofern BOOL angefordert wurde
+               vostr_GetTopic[lui_Idx] := '1';         // TopicWert als STRING, als Wert fuer Numerics                           
+              END_IF; 
+
+              IF lstr_MessageClient[lui_Idx] = 'FALSE' THEN
+               vox_GetTopic[lui_Idx]   := FALSE;       // TopicWert als BOOL sofern BOOL angefordert wurde
+               vostr_GetTopic[lui_Idx] := '0';         // TopicWert als STRING, als Wert fuer Numerics                           
+              END_IF;
+             /*
+              * Topic gefunden 
+              */ 
+              vox_GetTopicChk[lui_Idx] := TRUE;  // TopicWert als STRING, als Wert fuer Numerics                           
+
+ 			END_IF;
+
+            lui_Idx := 20;
+ 			IF lstr_GetTopic = vistr_ReqTopicSet [lui_Idx] THEN
+ 			  larrusint_MessagesTick[lui_Idx] := larrusint_MessagesTick[lui_Idx] + 1;
+              vui_MsgCount [lui_Idx]          := vui_MsgCount [lui_Idx]+1;
+              vui_MsgTick [lui_Idx]           := larrusint_MessagesTick[lui_Idx];
+              
+              lstr_MessageClient[lui_Idx]     := lstr_MessagePayLoad;
+              
+ 			  larrusint_MsgCnt20               := larrusint_MessagesTick[lui_Idx];
+              larrstr_MsgTopic20               := lstr_MessageClient[lui_Idx];
+              larrstr_NameTopic20              := lstr_GetTopic;
+ 
+              vostr_GetTopic[lui_Idx] := lstr_MessageClient[lui_Idx];  // TopicWert als STRING, als Wert fuer Numerics                           
+
+              IF lstr_MessageClient[lui_Idx] = 'TRUE' THEN
+               vox_GetTopic[lui_Idx]   := TRUE;        // TopicWert als BOOL sofern BOOL angefordert wurde
+               vostr_GetTopic[lui_Idx] := '1';         // TopicWert als STRING, als Wert fuer Numerics                           
+              END_IF; 
+
+              IF lstr_MessageClient[lui_Idx] = 'FALSE' THEN
+               vox_GetTopic[lui_Idx]   := FALSE;       // TopicWert als BOOL sofern BOOL angefordert wurde
+               vostr_GetTopic[lui_Idx] := '0';         // TopicWert als STRING, als Wert fuer Numerics                           
+              END_IF;
+             /*
+              * Topic gefunden 
+              */ 
+              vox_GetTopicChk[lui_Idx] := TRUE;  // TopicWert als STRING, als Wert fuer Numerics                           
+
+ 			END_IF;
+
+           /*
+            * Ueberpruefen ob bereits alle gesetzten Topics gefunden wurden
+            */
+		    FOR lui_Idx := lui_Idx_Min TO lui_Idx_Max DO
+		     IF vostr_GetTopic[lui_Idx] <> '' AND vox_GetTopicChk[lui_Idx] = TRUE THEN
+               lusi_MessageIndexOk   := lusi_MessageIndexOk + 1;
+               // lx_MessageIndexOk     : BOOL := FALSE;
+		     END_IF;
+            END_FOR;
+			//
+			// Messages-Index anpassen fuer weitere Nachrichten
+			if (lusi_MessageIndex < lusi_MessageIndexMax) THEN
+				lusi_MessageIndex := lusi_MessageIndex + 1;
+			ELSE
+				lusi_MessageIndex := lusi_MessageIndexMin;
+				// EXIT;
+			END_IF;
+
+		UNTIL FALSE
+
+		END_REPEAT;
+	END_IF;
+   /*
+    * Lokale Anzeige der empfangenen Topics 
+    */	
+    lstr_GetTopic0          := larr_GetTopics[0];
+    lstr_GetTopic1          := larr_GetTopics[1];
+    lstr_GetTopic2          := larr_GetTopics[2];
+    lstr_GetTopic3          := larr_GetTopics[3];
+    lstr_GetTopic4          := larr_GetTopics[4];
+    lstr_GetTopic5          := larr_GetTopics[5];
+    lstr_GetTopic6          := larr_GetTopics[6];
+    lstr_GetTopic7          := larr_GetTopics[7];
+    lstr_GetTopic8          := larr_GetTopics[8];
+    lstr_GetTopic9          := larr_GetTopics[9];
+    lstr_GetTopic10         := larr_GetTopics[10];
+    lstr_GetTopic11         := larr_GetTopics[11];
+    lstr_GetTopic12         := larr_GetTopics[12];
+    lstr_GetTopic13         := larr_GetTopics[13];
+    lstr_GetTopic14         := larr_GetTopics[14];
+    lstr_GetTopic15         := larr_GetTopics[15];
+    lstr_GetTopic16         := larr_GetTopics[16];
+    lstr_GetTopic17         := larr_GetTopics[17];
+    lstr_GetTopic18         := larr_GetTopics[18];
+    lstr_GetTopic19         := larr_GetTopics[19];
+    lstr_GetTopic20         := larr_GetTopics[20];
+    lstr_GetTopic21         := larr_GetTopics[21];
+    lstr_GetTopic22         := larr_GetTopics[22];
+    lstr_GetTopic23         := larr_GetTopics[23];
+    lstr_GetTopic24         := larr_GetTopics[24];
+    lstr_GetTopic25         := larr_GetTopics[25];
+    lstr_GetTopic26         := larr_GetTopics[26];
+    lstr_GetTopic27         := larr_GetTopics[27];
+    lstr_GetTopic28         := larr_GetTopics[28];
+    lstr_GetTopic29         := larr_GetTopics[29];
+	
+//   /*
+//    * Die empfangenen Topics zuordnen 
+//    */	
+//    FOR lui_Idx := lui_Idx_Min TO lui_Idx_Max DO
+//
+//	   FOR lui_IdxSet := lui_IdxSet_Min TO lui_IdxSet_Max DO
+//           /*
+//            * PayLoad aus Published
+//            * Von Topic
+//            */
+//			IF vistr_ReqTopicSet[lui_Idx] = larr_GetTopics [lui_IdxSet] THEN
+//			 larrusint_MessagesTick := larrusint_MessagesTick + 1;
+//             lstr_MessageClient[lui_Idx]  := StringFromByteArray(byteArray := larr_ioImageRemote,len := ldi_ioImageRemoteLen);
+//
+//             IF lstr_MessageClient[lui_Idx] = 'TRUE' THEN
+//              vox_GetTopic[lui_Idx]   := TRUE;        // TopicWert als BOOL sofern BOOL angefordert wurde
+//             ELSE
+//              vox_GetTopic[lui_Idx]   := FALSE;       // TopicWert als BOOL sofern BOOL angefordert wurde
+//             END_IF;
+// 
+//             vostr_GetTopic[lui_Idx] := lstr_MessageClient[lui_Idx];  // TopicWert als STRING, als Wert fuer Numerics
+//            /*
+//             * Topic gefunden - Naechste Suche 
+//             */ 
+//             lui_IdxSet := lui_IdxSet_Max;
+//                          
+//			END_IF;
+//	  
+//	    END_FOR;
+//	END_FOR;
+	
+  END_FUNCTION_BLOCK
+
+ /*
+  *
+  * Subscribe eines einzelnen IO mit MQTT
+  *
+  */
+  FUNCTION_BLOCK FB_MQTT_Subscribe_SetIO
+
+    VAR_INPUT
+        vdi_MQTTCHannel     : DINT; 
+		vistr_ReqTopicSet   : ARRAY [0..29] OF STRING[255];  // MUSS im Interface gesetzt sein! - Request
+    END_VAR
+
+    VAR_OUTPUT
+        vox_Err    : BOOL; 
+		voui_ErrNo : UINT;  // MUSS im Interface gesetzt sein!
+
+        vox_CL_subscribed : ARRAY [0..29] OF BOOL;
+    END_VAR
+
+	VAR
+		l_rc                : MQTT_RC;
+	END_VAR
+
+    VAR
+        lui_Idx     : UINT;
+        lui_Idx_Min : UINT := 0;
+        lui_Idx_Max : UINT := 29;
+	END_VAR
+
+    VAR
+       /*  
+        * ENumeration of MQTT_SUBSCRIBER_STATE
+        * 
+        * MQTT_SUBSCRIBER_STATE : SINT(UNUSED        := 0,
+        *                              INVALID       := 1,
+        *                              UNINITIALIZED := 2,
+        *                              DISCONNECTING := 3,
+        *                              DISCONNECTED  := 4,
+        *                              CONNECTING    := 5,
+        *                              CONNECTED     := 6,
+        *                              CONNECT_ERROR := 7); 
+        */
+        lsui_MQTTState : MQTT_SUBSCRIBER_STATE;
+    END_VAR
+        
+    VAR
+     lstr_FBName : STRING[30] := 'FB_Subscribe_SetIO';
+     lui_TraceLevel : UINT     := 5;
+    END_VAR
+   
+   /*
+    * Initialisierungsmerker
+    */
+    VAR
+       InitR_TRIG       : R_TRIG;
+    END_VAR      
+	    
+	VAR
+	 lx_CycleInit : BOOL;
+
+	 li_CycleCount        : INT;
+	 lx_CyclePulse        : BOOL;
+	 li_CycleCountInitVal : INT;
+	END_VAR
+
+   /*
+    * InitZyklus setzen
+    */ 
+    InitR_TRIG(CLK := TRUE,Q => lx_CycleInit);
+	
+	li_CycleCount := li_CycleCount + 1;
+	lx_CyclePulse := NOT lx_CyclePulse;
+
+    IF lx_CycleInit = TRUE THEN         
+       li_CycleCountInitVal := li_CycleCountInitVal + 1;
+    END_IF;
+
+   /*
+    * Status abfragen 
+    */
+	lsui_MQTTState := MQTT_GetState(ch := vdi_MQTTCHannel, rc => l_rc, ENO => ENO);
+
+	IF lsui_MQTTState = MQTT_SUBSCRIBER_STATE#CONNECTED THEN
+
+     /* 
+      * Verbinden zum Topic, wenn die Verbindung zum Broker gesetzt ist (MQTTConnect)
+      * Es werden drei Nachrichten verschickt
+      * Header, GV (ByteStream) und IO (Per Topic)
+      * Die Header-Nachricht MUSS funktionieren
+      */
+      IF lui_Idx >= lui_Idx_Min AND lui_Idx <= lui_Idx_Max THEN
+       
+        vox_Err    := FALSE;
+        voui_ErrNo := 0;
+
+        FOR lui_Idx := lui_Idx_Min TO lui_Idx_Max DO	 
+        /*
+         * Nur solche Subscribe, die gesetzt sind! 
+         */
+         IF vistr_ReqTopicSet[lui_Idx] <> '' THEN
+     	  
+     	  IF NOT(vox_CL_subscribed[lui_Idx]) THEN
+     		MQTT_Subscribe(ch := vdi_MQTTCHannel, topic := vistr_ReqTopicSet[lui_Idx], rc => l_rc);
+     		vox_CL_subscribed[lui_Idx] := l_rc = MQTT_RC#OK;
+     	  END_IF;
+     	 
+     	 END_IF; 
+        END_FOR;
+       END_IF;
+       
+       ELSE
+     
+       vox_Err := TRUE;
+       voui_ErrNo := 1;     
+
+     END_IF;
+  END_FUNCTION_BLOCK
+
+

@@ -1,0 +1,80 @@
+
+/*
+ * Skalieren einses Analogwertes
+ */
+FUNCTION_BLOCK FB_MotorAnalogScale_ST  {
+    width := 400;
+    minWidth := 400;
+    maxWidth := 400;
+    height := 118;
+    minHeight := 118;
+    maxHeight := 118;
+  }
+  /*
+   * MaxInVal: MaxVal from AnalogInput (digits)
+   * MinInVal: MinVal from AnalogInput (digits)
+   * MaxPhysVal: MaxPhysVal from AnalogInput (PhysUnits)
+   * MinPhysVal: MinPhysVal from AnalogInput (PhysUnits)
+   */
+  VAR_INPUT
+    vir_In : REAL;
+    vir_MaxInVal      : REAL;
+    vir_MinInVal      : REAL;
+    vir_MaxPhysVal    : REAL;
+    vir_MinPhysVal    : REAL;
+    vir_OffsetPhysVal : REAL;
+  END_VAR
+
+  VAR_OUTPUT
+    vox_InValError   : BOOL;
+    vor_OutPhysVal   : REAL;
+    vox_PhysValError : BOOL;
+  END_VAR
+
+  VAR
+   /*
+    * Local Var
+    */ 
+    lr_DiffInVal         : REAL;
+    lr_DiffInVal_NotZero : BOOL;
+    lr_DiffPhysVal       : REAL;
+    lr_A                 : REAL;
+    lr_A_Mul_X           : REAL;
+    lr_A_Mul_X_Plus_B    : REAL;
+    lx_InValError        : BOOL;
+  END_VAR
+  /*
+   * Bereichgrenzen ueberwachen
+   */
+  lr_DiffInVal        :=SUB(vir_MaxInVal,vir_MinInVal);
+  lr_DiffInVal_NotZero:=NE(SUB(vir_MaxInVal,vir_MinInVal),0.0);
+  
+  lr_DiffPhysVal:=SUB(vir_MaxPhysVal,vir_MinPhysVal);
+  
+  IF lr_DiffInVal_NotZero THEN 
+   lr_A:=DIV(EN:=lr_DiffInVal_NotZero,IN1:=lr_DiffPhysVal,IN2:=lr_DiffInVal);
+   lx_InValError := FALSE;
+  ELSE
+   lr_A:= 0;
+   lx_InValError := TRUE;
+  END_IF;
+  
+  lr_A_Mul_X:=MUL(vir_In,lr_A);
+ /*
+  * Output Values for Function Block
+  */
+  vox_InValError:=OR(GT(vir_In,vir_MaxInVal),LT(vir_In,vir_MinInVal), lx_InValError);
+ /*
+  * Physical Value Error
+  */
+  vox_PhysValError:=NOT(lr_DiffInVal_NotZero);
+ /*
+  * lr_A_Mul_X_Plus_B calculated
+  */
+  lr_A_Mul_X_Plus_B := ADD(lr_A_Mul_X,vir_OffsetPhysVal);
+ /*
+  * To Output
+  */ 
+  vor_OutPhysVal:=lr_A_Mul_X_Plus_B;
+  
+END_FUNCTION_BLOCK

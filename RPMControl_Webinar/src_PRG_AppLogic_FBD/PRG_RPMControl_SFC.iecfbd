@@ -1,0 +1,1481 @@
+PROGRAM PRG_RPMControl_SFC
+  VAR
+    lx_CyclePulse : BOOL;
+    lui_CycleCount : UINT;
+    lt_ActCycleTime : TIME;
+    lt_CycleTime : TIME;
+    Action_Init : BOOL;
+    lx_SFC_Start : BOOL;
+    R_TRIG1 : R_TRIG;
+    Action_State : BOOL;
+    TON1 : TON;
+    ltarr_SFCTime : ARRAY[1..8] OF TIME := [T#3s,T#1s,t#10s,T#5s,T#1s,T#0s,T#0s,T#0s];
+    TON2 : TON;
+    Action_State_1 : BOOL;
+    Action_State_2 : BOOL;
+    ltarr_SFCTime_Act : ARRAY[1..8] OF TIME;
+    TON3 : TON;
+    Action_State_3 : BOOL;
+    TON4 : TON;
+    Action_State_4 : BOOL;
+    TON5 : TON;
+    Action_State_5 : BOOL;
+    R_TRIG2 : R_TRIG;
+    lx_SFC_Reset : BOOL;
+    R_TRIG3 : R_TRIG;
+    lx_CycleInit : BOOL;
+    RS1 : RS;
+    R_TRIG4 : R_TRIG;
+    RS2 : RS;
+    R_TRIG5 : R_TRIG;
+    R_TRIG6 : R_TRIG;
+    RS3 : RS;
+    R_TRIG7 : R_TRIG;
+    F_TRIG1 : F_TRIG;
+    lstruc_ActionSFCInit : DT_Action := (rSpUp := 0.0,rSpDn := 0.0,rSp := 0.0, xAuto:= FALSE,xStart := FALSE,xRamp:=FALSE,xRampStop:=FALSE);
+    lstruc_ActionSFC1 : DT_Action := (rSpUp := 3.0,rSpDn := 3.0,rSp := 25.0, xAuto:= TRUE,xStart := TRUE,xRamp:=TRUE,xRampStop:=FALSE);
+    lstruc_ActionSFC2 : DT_Action := (rSpUp := 1.0,rSpDn := 1.0,rSp := 50.0, xAuto:= TRUE,xStart := TRUE,xRamp:=TRUE,xRampStop:=FALSE);
+    lstruc_ActionSFC3 : DT_Action := (rSpUp := 1.0,rSpDn := 1.0,rSp := 50.0, xAuto:= TRUE,xStart := TRUE,xRamp:=TRUE,xRampStop:=FALSE);
+    lstruc_ActionSFC4 : DT_Action := (rSpUp := 5.0,rSpDn := 5.0,rSp := 0.0,  xAuto:= TRUE,xStart := TRUE,xRamp:=TRUE,xRampStop:=FALSE);
+    lstruc_ActionSFC5 : DT_Action := (rSpUp := 5.0,rSpDn := 5.0,rSp := 0.0,  xAuto:= TRUE,xStart := TRUE,xRamp:=TRUE,xRampStop:=FALSE);
+    lstruc_ActionSFC6 : DT_Action := (rSpUp := 0.0,rSpDn := 0.0,rSp := 0.0,  xAuto:= FALSE,xStart := FALSE,xRamp:=FALSE,xRampStop:=FALSE);
+    lstruc_ActionSFC7 : DT_Action := (rSpUp := 0.0,rSpDn := 0.0,rSp := 0.0,  xAuto:= FALSE,xStart := FALSE,xRamp:=FALSE,xRampStop:=FALSE);
+    lstruc_ActionSFC8 : DT_Action := (rSpUp := 0.0,rSpDn := 0.0,rSp := 0.0,  xAuto:= FALSE,xStart := FALSE,xRamp:=FALSE,xRampStop:=FALSE);
+    lrarr_SFCTime_Act : ARRAY[1..8] OF REAL;
+    lrarr_SFCTime : ARRAY[1..8] OF REAL;
+    R_TRIG8 : R_TRIG;
+    lx_Test : BOOL;
+    R_TRIG9 : R_TRIG;
+    lx_SFC_Loop : BOOL;
+    R_TRIG10 : R_TRIG;
+    R_TRIG11 : R_TRIG;
+    R_TRIG12 : R_TRIG;
+    R_TRIG13 : R_TRIG;
+    R_TRIG14 : R_TRIG;
+    R_TRIG15 : R_TRIG;
+    R_TRIG16 : R_TRIG;
+    R_TRIG17 : R_TRIG;
+    R_TRIG18 : R_TRIG;
+    R_TRIG19 : R_TRIG;
+  END_VAR
+  VAR_EXTERNAL
+    gui_CycleCountAppLogic : UINT;
+    gui_CycleCountAppLoop : UINT;
+    gui_CycleCountAppTimer : UINT;
+    gxarr_SFC_Action_State : ARRAY[1..8] OF BOOL;
+    gtarr_SFCTime_Act : ARRAY[1..8] OF TIME;
+    gtarr_SFCTime : ARRAY[1..8] OF TIME;
+    gx_SFC_Start : BOOL;
+    gx_SFC_Reset : BOOL;
+    gx_SFC_Action_State : BOOL;
+    gx_SFC_Stop : BOOL;
+    gx_SFC_StopState : BOOL;
+    gx_SFC_StartState : BOOL;
+    gx_SFC_Loop : BOOL;
+    gx_SFC_LoopState : BOOL;
+    gx_ModeRPM4 : BOOL;
+    gx_ModeRPM4_V : BOOL;
+    grarr_SFCTime_Act : ARRAY[1..8] OF REAL;
+    gstruc_Action : DT_Action;
+    grarr_SFCTime : ARRAY[1..8] OF REAL;
+    gx_SetControlPar : BOOL;
+    gx_SFC_Action_Init : BOOL;
+    gstr_SFC_Statetext : STRING[40];
+  END_VAR
+
+  (*
+
+    // Network 1:
+    R_TRIG19(CLK := TRUE, Q => lx_CycleInit);
+    Trace(EN := lx_CycleInit, Msg := 'RPMControl_SFC Init');
+
+    // Network 2:
+    NOT(IN := lx_CyclePulse, NOT => lx_CyclePulse);
+
+    // Network 3:
+    ADD(IN1 := lui_CycleCount, IN2 := 1, ADD => (lui_CycleCount, gui_CycleCountAppLogic));
+
+    // Network 4:
+    SysTaskActualCycleTime(SysTaskActualCycleTime => lt_ActCycleTime);
+
+    // Network 5:
+    SysTaskCycleTime(SysTaskCycleTime => lt_CycleTime);
+
+    // Network 6:
+    R_TRIG3(CLK := TRUE, Q => lx_CycleInit);
+
+    // Network 7:
+    MOVE(EN := lx_CycleInit, IN := gtarr_SFCTime, MOVE => ltarr_SFCTime);
+
+    // Network 8:
+    R_TRIG6(CLK := gx_SFC_Loop);
+    R_TRIG7(CLK := gx_SFC_Reset);
+    OR(IN1 := lx_CycleInit, IN2 := R_TRIG7.Q, OR => @C(254).OR);
+    RS3(S := R_TRIG6.Q, R1 := @C(254).OR, Q1 => gx_SFC_LoopState);
+
+    // Network 9:
+    R_TRIG8(CLK := lx_Test);
+    R_TRIG9(CLK := gx_SetControlPar);
+    OR(IN1 := lx_CycleInit, IN2 := R_TRIG8.Q, IN3 := R_TRIG9.Q, OR => @C(441).OR);
+    MOVE(EN := @C(441).OR, IN := grarr_SFCTime, MOVE => lrarr_SFCTime);
+    TO_TIME(EN := @C(441).OR, IN := lrarr_SFCTime[1], TO_TIME => ltarr_SFCTime[1]);
+    TO_TIME(EN := @C(441).OR, IN := lrarr_SFCTime[2], TO_TIME => ltarr_SFCTime[2]);
+    TO_TIME(EN := @C(441).OR, IN := lrarr_SFCTime[3], TO_TIME => ltarr_SFCTime[3]);
+    TO_TIME(EN := @C(441).OR, IN := lrarr_SFCTime[4], TO_TIME => ltarr_SFCTime[4]);
+    TO_TIME(EN := @C(441).OR, IN := lrarr_SFCTime[5], TO_TIME => ltarr_SFCTime[5]);
+    TO_TIME(EN := @C(441).OR, IN := lrarr_SFCTime[6], TO_TIME => ltarr_SFCTime[6]);
+    TO_TIME(EN := @C(441).OR, IN := lrarr_SFCTime[7], TO_TIME => ltarr_SFCTime[7]);
+    TO_TIME(EN := @C(441).OR, IN := lrarr_SFCTime[8], TO_TIME => ltarr_SFCTime[8]);
+
+    // Network 10:
+    OR(IN1 := gx_ModeRPM4_V, IN2 := gx_ModeRPM4, OR => @C(314).OR);
+    AND(IN1 := gx_SFC_Start, IN2 := @C(314).OR, AND => @C(230).AND);
+    R_TRIG4(CLK := @C(230).AND);
+    F_TRIG1(CLK := gx_SFC_Action_State);
+    OR(IN1 := gx_SFC_Stop, IN2 := lx_CycleInit, IN3 := gx_SFC_Reset, IN4 := F_TRIG1.Q, OR => @C(238).OR);
+    R_TRIG5(CLK := @C(238).OR);
+    OR(IN1 := lx_CycleInit, IN2 := R_TRIG5.Q, IN3 := F_TRIG1.Q, OR => @C(234).OR);
+    RS1(S := R_TRIG4.Q, R1 := @C(234).OR, Q1 => gx_SFC_StartState);
+    RS2(S := R_TRIG5.Q, R1 := R_TRIG4.Q, Q1 => gx_SFC_StopState);
+
+    // Network 11:
+    STEP S0:
+      Action_Init(N);
+      Action_State(R);
+    END_STEP
+
+    TRANSITION T0 FROM S0 TO S1
+      := R_TRIG1.Q;
+      END_TRANSITION
+
+    STEP S1:
+      Action_State(S);
+      Action_State_1(N);
+    END_STEP
+
+    TRANSITION T6 FROM S1 TO S0
+      := R_TRIG2.Q;
+      END_TRANSITION
+
+    TRANSITION T1 FROM S1 TO S2
+      := TON1.Q;
+      END_TRANSITION
+
+    STEP S2:
+      Action_State_2(N);
+    END_STEP
+
+    TRANSITION T7 FROM S2 TO S0
+      := R_TRIG2.Q;
+      END_TRANSITION
+
+    TRANSITION T2 FROM S2 TO S3
+      := TON2.Q;
+      END_TRANSITION
+
+    STEP S3:
+      Action_State_3(N);
+    END_STEP
+
+    TRANSITION T8 FROM S3 TO S0
+      := R_TRIG2.Q;
+      END_TRANSITION
+
+    TRANSITION T3 FROM S3 TO S4
+      := TON3.Q;
+      END_TRANSITION
+
+    STEP S4:
+      Action_State_4(N);
+    END_STEP
+
+    TRANSITION T9 FROM S4 TO S0
+      := R_TRIG2.Q;
+      END_TRANSITION
+
+    TRANSITION T4 FROM S4 TO S5
+      := TON4.Q;
+      END_TRANSITION
+
+    STEP S5:
+      Action_State_5(N);
+    END_STEP
+
+    TRANSITION T10 FROM S5 TO S1
+      := @C(486).OR;
+      END_TRANSITION
+
+    TRANSITION T5 FROM S5 TO S0
+      := TON5.Q;
+      END_TRANSITION
+
+    TRANSITION T11 FROM S5 TO S0
+      := R_TRIG2.Q;
+      END_TRANSITION
+
+    gx_SFC_Action_State := Action_State;
+    gx_SFC_Action_Init := Action_Init;
+    gxarr_SFC_Action_State[1] := Action_State_1;
+    gxarr_SFC_Action_State[2] := Action_State_2;
+    gxarr_SFC_Action_State[3] := Action_State_3;
+    gxarr_SFC_Action_State[4] := Action_State_4;
+    gxarr_SFC_Action_State[5] := Action_State_5;
+    OR(IN1 := gx_ModeRPM4, IN2 := gx_ModeRPM4_V, OR => @C(275).OR);
+    AND(IN1 := gx_SFC_StartState, IN2 := @C(275).OR, AND => @C(269).AND);
+    OR(IN1 := lx_SFC_Start, IN2 := @C(269).AND, OR => @C(34).OR);
+    R_TRIG1(CLK := @C(34).OR);
+    TON1(IN := S1, PT := ltarr_SFCTime[1], ET => ltarr_SFCTime_Act[1]);
+    gtarr_SFCTime_Act[1] := ltarr_SFCTime_Act[1];
+    OR(IN1 := lx_SFC_Reset, IN2 := gx_SFC_Reset, OR => @C(135).OR);
+    R_TRIG2(CLK := @C(135).OR);
+    TON2(IN := S2, PT := ltarr_SFCTime[2], ET => ltarr_SFCTime_Act[2]);
+    gtarr_SFCTime_Act[2] := ltarr_SFCTime_Act[2];
+    TON3(IN := S3, PT := ltarr_SFCTime[3], ET => ltarr_SFCTime_Act[3]);
+    gtarr_SFCTime_Act[3] := ltarr_SFCTime_Act[3];
+    TON4(IN := S4, PT := ltarr_SFCTime[4], ET => ltarr_SFCTime_Act[4]);
+    gtarr_SFCTime_Act[4] := ltarr_SFCTime_Act[4];
+    TON5(IN := S5, PT := ltarr_SFCTime[5], ET => ltarr_SFCTime_Act[5]);
+    gtarr_SFCTime_Act[5] := ltarr_SFCTime_Act[5];
+    OR(IN1 := lx_SFC_Loop, IN2 := gx_SFC_Loop, OR => );
+
+    // Network 12:
+    TO_REAL(IN := gtarr_SFCTime_Act[1], TO_REAL => grarr_SFCTime_Act[1]);
+
+    // Network 13:
+    TO_REAL(IN := gtarr_SFCTime_Act[2], TO_REAL => grarr_SFCTime_Act[2]);
+
+    // Network 14:
+    TO_REAL(IN := gtarr_SFCTime_Act[3], TO_REAL => grarr_SFCTime_Act[3]);
+
+    // Network 15:
+    TO_REAL(IN := gtarr_SFCTime_Act[4], TO_REAL => grarr_SFCTime_Act[4]);
+
+    // Network 16:
+    TO_REAL(IN := gtarr_SFCTime_Act[5], TO_REAL => grarr_SFCTime_Act[5]);
+
+    // Network 17:
+    MOVE(EN := gx_SFC_Action_Init, IN := lstruc_ActionSFCInit, ENO => @C(476).ENO, MOVE => gstruc_Action);
+    R_TRIG18(CLK := @C(476).ENO);
+    Trace(EN := R_TRIG18.Q, Msg := 'SFC Init');
+    MOVE(EN := R_TRIG18.Q, IN := 'SFC Init', MOVE => gstr_SFC_Statetext);
+
+    // Network 18:
+    MOVE(EN := gxarr_SFC_Action_State[1], IN := lstruc_ActionSFC1, ENO => @C(325).ENO, MOVE => gstruc_Action);
+    R_TRIG10(CLK := @C(325).ENO);
+    Trace(EN := R_TRIG10.Q, Msg := 'SFC Step 1');
+    MOVE(EN := R_TRIG10.Q, IN := 'SFC Step 1', MOVE => gstr_SFC_Statetext);
+
+    // Network 19:
+    MOVE(EN := gxarr_SFC_Action_State[2], IN := lstruc_ActionSFC2, ENO => @C(326).ENO, MOVE => gstruc_Action);
+    R_TRIG11(CLK := @C(326).ENO);
+    Trace(EN := R_TRIG11.Q, Msg := 'SFC Step 2');
+    MOVE(EN := R_TRIG11.Q, IN := 'SFC Step 2', MOVE => gstr_SFC_Statetext);
+
+    // Network 20:
+    MOVE(EN := gxarr_SFC_Action_State[3], IN := lstruc_ActionSFC3, ENO => @C(327).ENO, MOVE => gstruc_Action);
+    R_TRIG12(CLK := @C(327).ENO);
+    Trace(EN := R_TRIG12.Q, Msg := 'SFC Step 3');
+    MOVE(EN := R_TRIG12.Q, IN := 'SFC Step 3', MOVE => gstr_SFC_Statetext);
+
+    // Network 21:
+    MOVE(EN := gxarr_SFC_Action_State[4], IN := lstruc_ActionSFC4, ENO => @C(328).ENO, MOVE => gstruc_Action);
+    R_TRIG13(CLK := @C(328).ENO);
+    Trace(EN := R_TRIG13.Q, Msg := 'SFC Step 4');
+    MOVE(EN := R_TRIG13.Q, IN := 'SFC Step 4', MOVE => gstr_SFC_Statetext);
+
+    // Network 22:
+    MOVE(EN := gxarr_SFC_Action_State[5], IN := lstruc_ActionSFC5, ENO => @C(329).ENO, MOVE => gstruc_Action);
+    R_TRIG14(CLK := @C(329).ENO);
+    Trace(EN := R_TRIG14.Q, Msg := 'SFC Step 5');
+    MOVE(EN := R_TRIG14.Q, IN := 'SFC Step 5', MOVE => gstr_SFC_Statetext);
+
+    // Network 23:
+    MOVE(EN := gxarr_SFC_Action_State[6], IN := lstruc_ActionSFC6, ENO => @C(343).ENO, MOVE => gstruc_Action);
+    R_TRIG15(CLK := @C(343).ENO);
+    Trace(EN := R_TRIG15.Q, Msg := 'SFC Step 6');
+    MOVE(EN := R_TRIG15.Q, IN := 'SFC Step 6', MOVE => gstr_SFC_Statetext);
+
+    // Network 24:
+    MOVE(EN := gxarr_SFC_Action_State[7], IN := lstruc_ActionSFC7, ENO => @C(347).ENO, MOVE => gstruc_Action);
+    R_TRIG16(CLK := @C(347).ENO);
+    Trace(EN := R_TRIG16.Q, Msg := 'SFC Step 7');
+    MOVE(EN := R_TRIG16.Q, IN := 'SFC Step 7', MOVE => gstr_SFC_Statetext);
+
+    // Network 25:
+    MOVE(EN := gxarr_SFC_Action_State[8], IN := lstruc_ActionSFC8, ENO => @C(351).ENO, MOVE => gstruc_Action);
+    R_TRIG17(CLK := @C(351).ENO);
+    Trace(EN := R_TRIG17.Q, Msg := 'SFC Step 8');
+    MOVE(EN := R_TRIG17.Q, IN := 'SFC Step 8', MOVE => gstr_SFC_Statetext);
+
+
+    ACTION ACTION_STATE: END_ACTION
+
+    ACTION ACTION_INIT: END_ACTION
+
+    ACTION ACTION_STATE_1: END_ACTION
+
+    ACTION ACTION_STATE_2: END_ACTION
+
+    ACTION ACTION_STATE_3: END_ACTION
+
+    ACTION ACTION_STATE_4: END_ACTION
+
+    ACTION ACTION_STATE_5: END_ACTION
+  *)
+
+  @C(2) : @F(NOT), @R(940.0, -1070.0, 60.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(NOT), @R(9.5));
+  @C(8) : @F(ADD), @R(950.0, -980.0, 40.0, 38.0), UINT, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(ADD), @R(9.5));
+  @C(89) : @F(SysTaskActualCycleTime), @R(740.0, -690.0, 184.0, 18.0), @O(@N(SysTaskActualCycleTime), @R(9.5));
+  @C(90) : @F(SysTaskCycleTime), @R(740.0, -620.0, 190.0, 18.0), @O(@N(SysTaskCycleTime), @R(9.5));
+  @VF(1) : @E(lx_CyclePulse), @R(740.0, -1070.0, 140.0, 19.0);
+  @VF(7) : @E(lui_CycleCount), @R(740.0, -980.0, 140.0, 19.0);
+  @VF(10) : @E(1), @R(740.0, -960.0, 140.0, 19.0), UINT;
+  @VF(3) : @E(lx_CyclePulse), @R(1100.0, -1070.0, 140.0, 19.0);
+  @VF(12) : @E(lui_CycleCount), @R(1100.0, -980.0, 140.0, 19.0);
+  @VF(15) : @E(gui_CycleCountAppLogic), @R(1100.0, -920.0, 250.0, 19.0);
+  @VF(17) : @E(gui_CycleCountAppLoop), @R(1100.0, -870.0, 250.0, 19.0);
+  @VF(22) : @E(gui_CycleCountAppTimer), @R(1100.0, -820.0, 250.0, 19.0);
+  @VF(91) : @E(lt_ActCycleTime), @R(1000.0, -690.0, 140.0, 19.0);
+  @VF(93) : @E(lt_CycleTime), @R(1000.0, -620.0, 140.0, 19.0);
+  @OLT(67) : @R(1270.0, -1010.0, 80.0, 19.0), @S(12);
+  @OLT(19) : @R(1270.0, -890.0, 80.0, 19.0), @S(17);
+  @OLT(18) : @R(1270.0, -940.0, 80.0, 19.0), @S(15);
+  @OLT(23) : @R(1270.0, -840.0, 80.0, 19.0), @S(22);
+  @OLT(20) : @R(1150.0, -720.0, 180.0, 19.0), @S(91);
+  @OLT(21) : @R(1150.0, -650.0, 180.0, 19.0), @S(93);
+  @CF(6) : @R(740.0, -1140.0, 490.0, 39.0), @T("CyclePulse"), @POU;
+  @CF(14) : @R(740.0, -1030.0, 490.0, 39.0), @T("CyclePulse"), @POU;
+  @CF(88) : @R(740.0, -780.0, 490.0, 39.0), @T("Read CycleTime"), @POU;
+  @CF(24) : @R(660.0, 1200.0, 490.0, 119.0), @T("SFC$NShift-F;A - Actionblock$NShift-F;T - Transition$NShift-F;S - Step"), @POU;
+  @STEP(25) : @STINITSTEP(S0), @R(850.0, 1510.0, 40.0, 39.0);
+  @ACTION(26) : @IT(Action_Init), @AQ(N), @ASEP(70.0), @R(1170.0, 1520.0, 220.0, 29.0);
+  @TRANSITION(28) : @IT(T0), @R(850.0, 1570.0, 40.0, 39.0);
+  @STEP(29) : @STSTEP(S1), @R(850.0, 1720.0, 40.0, 39.0);
+  @VF(32) : @E(lx_SFC_Start), @R(50.0, 1580.0, 180.0, 19.0);
+  @C(33) : @FB(R_TRIG1), @R(620.0, 1580.0, 140.0, 18.0), @I(@N(CLK), @L(9.5)), @O(@N(Q), @R(9.5));
+  @ACTION(36) : @IT(Action_State), @AQ(S), @ASEP(70.0), @R(1180.0, 1730.0, 210.0, 29.0);
+  @TRANSITION(38) : @IT(T1), @R(850.0, 1840.0, 40.0, 39.0);
+  @C(40) : @FB(TON1), @R(1180.0, 1830.0, 100.0, 38.0), @I(@N(IN), @L(9.5)), @I(@N(PT), @L(29.5)), @O(@N(Q), @R(9.5)), @O(@N(ET), @R(29.5));
+  @VF(42) : @E(ltarr_SFCTime[1]), @R(930.0, 1850.0, 190.0, 19.0);
+  @CONN(44) : @IT(C1), @R(1390.0, 1830.0, 60.0, 19.0), BOOL;
+  @CONT(45) : @IT(C1), @CONN(44), @R(730.0, 1850.0, 60.0, 19.0), BOOL;
+  @C(48) : @FB(TON2), @R(1180.0, 2000.0, 100.0, 38.0), @I(@N(IN), @L(9.5)), @I(@N(PT), @L(29.5)), @O(@N(Q), @R(9.5)), @O(@N(ET), @R(29.5));
+  @VF(49) : @E(ltarr_SFCTime[2]), @R(930.0, 2020.0, 190.0, 19.0);
+  @CONN(50) : @IT(C2), @R(1390.0, 2000.0, 60.0, 19.0), BOOL;
+  @CONT(51) : @IT(C2), @CONN(50), @R(730.0, 2060.0, 60.0, 19.0), BOOL;
+  @STEP(52) : @STSTEP(S2), @R(850.0, 1930.0, 40.0, 39.0);
+  @TRANSITION(53) : @IT(T2), @R(850.0, 2050.0, 40.0, 39.0);
+  @ACTION(54) : @IT(Action_State_2), @AQ(N), @ASEP(70.0), @R(1180.0, 1940.0, 210.0, 29.0);
+  @ACTION(62) : @IT(Action_State_1), @AQ(N), @ASEP(70.0), @R(1180.0, 1760.0, 210.0, 29.0);
+  @VF(64) : @E(ltarr_SFCTime_Act[1]), @R(1390.0, 1850.0, 210.0, 19.0);
+  @VF(66) : @E(ltarr_SFCTime_Act[2]), @R(1390.0, 2020.0, 200.0, 19.0);
+  @C(69) : @FB(TON3), @R(1180.0, 2210.0, 100.0, 38.0), @I(@N(IN), @L(9.5)), @I(@N(PT), @L(29.5)), @O(@N(Q), @R(9.5)), @O(@N(ET), @R(29.5));
+  @VF(70) : @E(ltarr_SFCTime[3]), @R(930.0, 2230.0, 190.0, 19.0);
+  @VF(71) : @E(ltarr_SFCTime_Act[3]), @R(1390.0, 2230.0, 200.0, 19.0);
+  @CONN(72) : @IT(C3), @R(1390.0, 2210.0, 60.0, 19.0), BOOL;
+  @CONT(73) : @IT(C3), @CONN(72), @R(730.0, 2270.0, 60.0, 19.0), BOOL;
+  @STEP(74) : @STSTEP(S3), @R(850.0, 2140.0, 40.0, 39.0);
+  @TRANSITION(75) : @IT(T3), @R(850.0, 2260.0, 40.0, 39.0);
+  @ACTION(76) : @IT(Action_State_3), @AQ(N), @ASEP(70.0), @R(1180.0, 2150.0, 210.0, 29.0);
+  @C(85) : @FB(TON4), @R(1180.0, 2410.0, 100.0, 38.0), @I(@N(IN), @L(9.5)), @I(@N(PT), @L(29.5)), @O(@N(Q), @R(9.5)), @O(@N(ET), @R(29.5));
+  @VF(86) : @E(ltarr_SFCTime[4]), @R(930.0, 2430.0, 190.0, 19.0);
+  @VF(87) : @E(ltarr_SFCTime_Act[4]), @R(1390.0, 2430.0, 200.0, 19.0);
+  @CONN(95) : @IT(C4), @R(1390.0, 2410.0, 60.0, 19.0), BOOL;
+  @CONT(96) : @IT(C4), @CONN(95), @R(730.0, 2470.0, 60.0, 19.0), BOOL;
+  @STEP(97) : @STSTEP(S4), @R(850.0, 2340.0, 40.0, 39.0);
+  @TRANSITION(98) : @IT(T4), @R(850.0, 2460.0, 40.0, 39.0);
+  @ACTION(99) : @IT(Action_State_4), @AQ(N), @ASEP(70.0), @R(1180.0, 2350.0, 210.0, 29.0);
+  @CONN(108) : @IT(C5), @R(960.0, 2590.0, 60.0, 19.0), SFC_T2S;
+  @CONT(110) : @IT(C5), @CONN(108), @R(770.0, 2700.0, 60.0, 19.0), SFC_T2S;
+  @C(111) : @FB(TON5), @R(1180.0, 2850.0, 100.0, 38.0), @I(@N(IN), @L(9.5)), @I(@N(PT), @L(29.5)), @O(@N(Q), @R(9.5)), @O(@N(ET), @R(29.5));
+  @VF(112) : @E(ltarr_SFCTime[5]), @R(930.0, 2870.0, 190.0, 19.0);
+  @VF(113) : @E(ltarr_SFCTime_Act[5]), @R(1390.0, 2870.0, 200.0, 19.0);
+  @CONN(114) : @IT(C6), @R(1390.0, 2850.0, 60.0, 19.0), BOOL;
+  @CONT(115) : @IT(C6), @CONN(114), @R(730.0, 2910.0, 60.0, 19.0), BOOL;
+  @STEP(116) : @STSTEP(S5), @R(850.0, 2780.0, 40.0, 39.0);
+  @TRANSITION(117) : @IT(T5), @R(850.0, 2900.0, 40.0, 39.0);
+  @ACTION(118) : @IT(Action_State_5), @AQ(N), @ASEP(70.0), @R(1180.0, 2790.0, 210.0, 29.0);
+  @CONN(127) : @IT(Init_0), @R(1030.0, 2990.0, 110.0, 19.0), SFC_T2S;
+  @CONT(129) : @IT(Init_0), @CONN(127), @R(540.0, 1350.0, 110.0, 19.0), SFC_T2S;
+  @TRANSITION(131) : @IT(T6), @R(540.0, 1840.0, 40.0, 39.0);
+  @C(133) : @FB(R_TRIG2), @R(290.0, 1850.0, 140.0, 18.0), @I(@N(CLK), @L(9.5)), @O(@N(Q), @R(9.5));
+  @VF(134) : @E(lx_SFC_Reset), @R(50.0, 1850.0, 140.0, 19.0);
+  @CONN(137) : @IT(Init_1), @R(600.0, 1920.0, 100.0, 19.0), SFC_T2S;
+  @CONT(139) : @IT(Init_1), @CONN(137), @R(540.0, 1370.0, 110.0, 19.0), SFC_T2S;
+  @CONN(142) : @IT(Reset), @R(480.0, 1920.0, 70.0, 19.0), BOOL;
+  @CONN(144) : @IT(Init_2), @R(600.0, 2110.0, 100.0, 19.0), SFC_T2S;
+  @CONT(145) : @IT(Reset), @CONN(142), @R(390.0, 2040.0, 70.0, 19.0), BOOL;
+  @TRANSITION(146) : @IT(T7), @R(540.0, 2030.0, 40.0, 39.0);
+  @CONT(149) : @IT(Init_2), @CONN(144), @R(540.0, 1390.0, 110.0, 19.0), SFC_T2S;
+  @ACTION(151) : @IT(Action_State), @AQ(R), @ASEP(70.0), @R(1170.0, 1490.0, 220.0, 29.0);
+  @CONN(153) : @IT(Init_3), @R(600.0, 2330.0, 100.0, 19.0), SFC_T2S;
+  @CONT(154) : @IT(Reset), @CONN(142), @R(390.0, 2260.0, 70.0, 19.0), BOOL;
+  @TRANSITION(155) : @IT(T8), @R(540.0, 2250.0, 40.0, 39.0);
+  @CONT(159) : @IT(Init_3), @CONN(153), @R(540.0, 1410.0, 110.0, 19.0), SFC_T2S;
+  @CONN(161) : @IT(Init_4), @R(600.0, 2530.0, 100.0, 19.0), SFC_T2S;
+  @CONT(162) : @IT(Reset), @CONN(142), @R(390.0, 2460.0, 70.0, 19.0), BOOL;
+  @TRANSITION(163) : @IT(T9), @R(540.0, 2450.0, 40.0, 39.0);
+  @CONT(167) : @IT(Init_4), @CONN(161), @R(540.0, 1430.0, 110.0, 19.0), SFC_T2S;
+  @CONN(169) : @IT(Loop), @R(760.0, 3040.0, 100.0, 19.0), SFC_T2S;
+  @TRANSITION(171) : @IT(T10), @R(660.0, 2900.0, 40.0, 39.0);
+  @VF(177) : @E(gxarr_SFC_Action_State[1]), @R(1610.0, 1760.0, 270.0, 19.0);
+  @VF(179) : @E(gxarr_SFC_Action_State[2]), @R(1610.0, 1940.0, 270.0, 19.0);
+  @VF(181) : @E(gxarr_SFC_Action_State[3]), @R(1610.0, 2150.0, 270.0, 19.0);
+  @VF(183) : @E(gxarr_SFC_Action_State[4]), @R(1610.0, 2350.0, 270.0, 19.0);
+  @VF(185) : @E(gxarr_SFC_Action_State[5]), @R(1620.0, 2790.0, 270.0, 19.0);
+  @VF(187) : @E(gtarr_SFCTime_Act[5]), @R(1620.0, 2870.0, 270.0, 19.0);
+  @VF(189) : @E(gtarr_SFCTime_Act[4]), @R(1610.0, 2430.0, 270.0, 19.0);
+  @VF(191) : @E(gtarr_SFCTime_Act[3]), @R(1610.0, 2230.0, 270.0, 19.0);
+  @VF(193) : @E(gtarr_SFCTime_Act[2]), @R(1610.0, 2020.0, 270.0, 19.0);
+  @VF(195) : @E(gtarr_SFCTime_Act[1]), @R(1610.0, 1850.0, 270.0, 19.0);
+  @CF(197) : @R(740.0, -570.0, 490.0, 39.0), @T("Read CycleTime"), @POU;
+  @VF(198) : @E(TRUE), @R(740.0, -500.0, 140.0, 19.0);
+  @C(199) : @FB(R_TRIG3), @R(930.0, -500.0, 140.0, 18.0), @I(@N(CLK), @L(9.5)), @O(@N(Q), @R(9.5));
+  @VF(201) : @E(lx_CycleInit), @R(1120.0, -500.0, 140.0, 19.0);
+  @VF(203) : @E(lx_CycleInit), @R(740.0, -370.0, 140.0, 19.0);
+  @CF(204) : @R(740.0, -440.0, 490.0, 39.0), @T("InitWerte von GV"), @POU;
+  @C(205) : @F(MOVE), @R(970.0, -370.0, 60.0, 38.0), ARRAY[1..8] OF TIME, @I(@N(EN), @L(9.5)), @I(@N(IN), @L(29.5)), @O(@N(ENO), @R(9.5)), @O(@N(MOVE), @R(29.5));
+  @VF(207) : @E(gtarr_SFCTime), @R(740.0, -350.0, 210.0, 19.0);
+  @VF(209) : @E(ltarr_SFCTime), @R(1120.0, -350.0, 140.0, 19.0);
+  @C(34) : @F(OR), @R(390.0, 1580.0, 40.0, 38.0), BOOL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(OR), @R(9.5));
+  @C(135) : @F(OR), @R(220.0, 1850.0, 40.0, 38.0), BOOL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(OR), @R(9.5));
+  @VF(217) : @E(gx_SFC_Reset), @R(50.0, 1870.0, 140.0, 19.0);
+  @CF(219) : @R(50.0, 1790.0, 370.0, 29.0), @T("Lokaler Reset / GV-Reset (Visu)"), @POU;
+  @CF(220) : @R(60.0, 1520.0, 290.0, 29.0), @T("Lokaler Start / GV-Start (Visu)"), @POU;
+  @OLT(221) : @R(110.0, 1560.0, 80.0, 19.0), @S(32);
+  @OLT(222) : @R(1470.0, 1830.0, 120.0, 19.0), @S(64);
+  @OLT(223) : @R(1470.0, 2000.0, 110.0, 19.0), @S(66);
+  @OLT(224) : @R(1470.0, 2210.0, 110.0, 19.0), @S(71);
+  @OLT(225) : @R(1470.0, 2410.0, 110.0, 19.0), @S(87);
+  @VF(226) : @E(gx_SFC_Action_State), @R(1610.0, 1490.0, 270.0, 19.0);
+  @C(228) : @FB(RS1), @R(1110.0, -310.0, 80.0, 38.0), @I(@N(S), @L(9.5)), @I(@N(R1), @L(29.5)), @O(@N(Q1), @R(9.5));
+  @VF(229) : @E(gx_SFC_Start), @R(280.0, -310.0, 160.0, 19.0);
+  @C(232) : @FB(R_TRIG4), @R(820.0, -310.0, 140.0, 18.0), @I(@N(CLK), @L(9.5)), @O(@N(Q), @R(9.5));
+  @VF(233) : @E(lx_CycleInit), @R(600.0, -290.0, 140.0, 19.0);
+  @C(235) : @FB(RS2), @R(1110.0, -200.0, 80.0, 38.0), @I(@N(S), @L(9.5)), @I(@N(R1), @L(29.5)), @O(@N(Q1), @R(9.5));
+  @C(237) : @FB(R_TRIG5), @R(820.0, -200.0, 140.0, 18.0), @I(@N(CLK), @L(9.5)), @O(@N(Q), @R(9.5));
+  @VF(236) : @E(gx_SFC_Stop), @R(600.0, -200.0, 140.0, 19.0);
+  @VF(240) : @E(lx_CycleInit), @R(600.0, -180.0, 140.0, 19.0);
+  @C(238) : @F(OR), @R(760.0, -200.0, 40.0, 78.0), BOOL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @I(@N(IN3), @L(49.5)), @I(@N(IN4), @L(69.5)), @O(@N(OR), @R(9.5));
+  @VF(243) : @E(gx_SFC_StopState), @R(1260.0, -200.0, 190.0, 19.0);
+  @VF(245) : @E(gx_SFC_StartState), @R(1260.0, -310.0, 190.0, 19.0);
+  @C(247) : @FB(R_TRIG6), @R(830.0, -110.0, 140.0, 18.0), @I(@N(CLK), @L(9.5)), @O(@N(Q), @R(9.5));
+  @C(248) : @FB(RS3), @R(1110.0, -110.0, 80.0, 38.0), @I(@N(S), @L(9.5)), @I(@N(R1), @L(29.5)), @O(@N(Q1), @R(9.5));
+  @VF(251) : @E(lx_CycleInit), @R(600.0, -90.0, 140.0, 19.0);
+  @VF(252) : @E(gx_SFC_Loop), @R(600.0, -110.0, 140.0, 19.0);
+  @VF(249) : @E(gx_SFC_LoopState), @R(1260.0, -110.0, 190.0, 19.0);
+  @C(257) : @FB(R_TRIG7), @R(830.0, -70.0, 140.0, 18.0), @I(@N(CLK), @L(9.5)), @O(@N(Q), @R(9.5));
+  @VF(258) : @E(gx_SFC_Reset), @R(600.0, -70.0, 140.0, 19.0);
+  @C(254) : @F(OR), @R(1030.0, -90.0, 40.0, 38.0), BOOL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(OR), @R(9.5));
+  @C(234) : @F(OR), @R(1020.0, -290.0, 40.0, 58.0), BOOL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @I(@N(IN3), @L(49.5)), @O(@N(OR), @R(9.5));
+  @VF(267) : @E(gx_SFC_Reset), @R(600.0, -160.0, 140.0, 19.0);
+  @C(269) : @F(AND), @R(320.0, 1600.0, 40.0, 48.0), BOOL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(AND), @R(9.5));
+  @VF(271) : @E(gx_SFC_StartState), @R(50.0, 1600.0, 180.0, 19.0);
+  @VF(273) : @E(gx_ModeRPM4), @R(50.0, 1670.0, 180.0, 19.0);
+  @VF(274) : @E(gx_ModeRPM4_V), @R(50.0, 1690.0, 180.0, 19.0);
+  @C(275) : @F(OR), @R(250.0, 1670.0, 40.0, 38.0), BOOL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(OR), @R(9.5));
+  @VF(272) : @E(gtarr_SFCTime_Act[2]), @R(1960.0, 2020.0, 270.0, 19.0);
+  @VF(278) : @E(gtarr_SFCTime_Act[1]), @R(1960.0, 1850.0, 270.0, 19.0);
+  @VF(279) : @E(grarr_SFCTime_Act[2]), @R(2430.0, 2020.0, 240.0, 19.0);
+  @C(280) : @F(TO_REAL), @R(2270.0, 2020.0, 120.0, 18.0), TIME, @I(@N(IN), @L(9.5)), @O(@N(TO_REAL), @R(9.5));
+  @C(283) : @F(TO_REAL), @R(2260.0, 1850.0, 120.0, 18.0), TIME, @I(@N(IN), @L(9.5)), @O(@N(TO_REAL), @R(9.5));
+  @VF(284) : @E(grarr_SFCTime_Act[1]), @R(2430.0, 1850.0, 240.0, 19.0);
+  @C(287) : @F(TO_REAL), @R(2260.0, 2230.0, 120.0, 18.0), TIME, @I(@N(IN), @L(9.5)), @O(@N(TO_REAL), @R(9.5));
+  @VF(288) : @E(gtarr_SFCTime_Act[3]), @R(1960.0, 2230.0, 270.0, 19.0);
+  @VF(289) : @E(grarr_SFCTime_Act[3]), @R(2430.0, 2230.0, 240.0, 19.0);
+  @C(292) : @F(TO_REAL), @R(2260.0, 2430.0, 120.0, 18.0), TIME, @I(@N(IN), @L(9.5)), @O(@N(TO_REAL), @R(9.5));
+  @VF(293) : @E(gtarr_SFCTime_Act[4]), @R(1960.0, 2430.0, 270.0, 19.0);
+  @VF(294) : @E(grarr_SFCTime_Act[4]), @R(2430.0, 2430.0, 240.0, 19.0);
+  @C(297) : @F(TO_REAL), @R(2290.0, 2870.0, 120.0, 18.0), TIME, @I(@N(IN), @L(9.5)), @O(@N(TO_REAL), @R(9.5));
+  @VF(298) : @E(gtarr_SFCTime_Act[5]), @R(1990.0, 2870.0, 270.0, 19.0);
+  @VF(299) : @E(grarr_SFCTime_Act[5]), @R(2460.0, 2870.0, 240.0, 19.0);
+  @VF(302) : @E(gx_SFC_Action_State), @R(470.0, -250.0, 270.0, 19.0);
+  @C(303) : @FB(F_TRIG1), @R(820.0, -250.0, 140.0, 18.0), @I(@N(CLK), @L(9.5)), @O(@N(Q), @R(9.5));
+  @CF(306) : @R(140.0, -250.0, 310.0, 39.0), @T("Nach einem Start und einem Durchlauf Start ruecksetzen!"), @POU;
+  @CONN(307) : @IT(C7), @R(1260.0, -230.0, 60.0, 19.0), BOOL;
+  @CONT(309) : @IT(C7), @CONN(307), @R(670.0, -140.0, 60.0, 19.0), BOOL;
+  @CF(311) : @R(140.0, -160.0, 310.0, 39.0), @T("Nach einem Start und einem Durchlauf Start ruecksetzen = Stop setzen!"), @POU;
+  @C(230) : @F(AND), @R(520.0, -310.0, 40.0, 38.0), BOOL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(AND), @R(9.5));
+  @VF(313) : @E(gx_ModeRPM4_V), @R(280.0, -290.0, 160.0, 19.0);
+  @C(314) : @F(OR), @R(460.0, -290.0, 40.0, 38.0), BOOL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(OR), @R(9.5));
+  @VF(317) : @E(gx_ModeRPM4), @R(280.0, -270.0, 160.0, 19.0);
+  @VF(320) : @E(gxarr_SFC_Action_State[5]), @R(590.0, 4940.0, 270.0, 19.0);
+  @VF(321) : @E(gxarr_SFC_Action_State[4]), @R(590.0, 4830.0, 270.0, 19.0);
+  @VF(322) : @E(gxarr_SFC_Action_State[3]), @R(590.0, 4720.0, 270.0, 19.0);
+  @VF(323) : @E(gxarr_SFC_Action_State[2]), @R(590.0, 4610.0, 270.0, 19.0);
+  @VF(324) : @E(gxarr_SFC_Action_State[1]), @R(590.0, 4500.0, 270.0, 19.0);
+  @C(325) : @F(MOVE), @R(950.0, 4500.0, 60.0, 38.0), DT_Action, @I(@N(EN), @L(9.5)), @I(@N(IN), @L(29.5)), @O(@N(ENO), @R(9.5)), @O(@N(MOVE), @R(29.5));
+  @C(326) : @F(MOVE), @R(950.0, 4610.0, 60.0, 38.0), DT_Action, @I(@N(EN), @L(9.5)), @I(@N(IN), @L(29.5)), @O(@N(ENO), @R(9.5)), @O(@N(MOVE), @R(29.5));
+  @C(327) : @F(MOVE), @R(950.0, 4720.0, 60.0, 38.0), DT_Action, @I(@N(EN), @L(9.5)), @I(@N(IN), @L(29.5)), @O(@N(ENO), @R(9.5)), @O(@N(MOVE), @R(29.5));
+  @C(328) : @F(MOVE), @R(950.0, 4830.0, 60.0, 38.0), DT_Action, @I(@N(EN), @L(9.5)), @I(@N(IN), @L(29.5)), @O(@N(ENO), @R(9.5)), @O(@N(MOVE), @R(29.5));
+  @C(329) : @F(MOVE), @R(950.0, 4940.0, 60.0, 38.0), DT_Action, @I(@N(EN), @L(9.5)), @I(@N(IN), @L(29.5)), @O(@N(ENO), @R(9.5)), @O(@N(MOVE), @R(29.5));
+  @VF(335) : @E(gstruc_Action), @R(1080.0, 4520.0, 200.0, 19.0);
+  @VF(337) : @E(lstruc_ActionSFC1), @R(590.0, 4520.0, 270.0, 19.0);
+  @VF(339) : @E(lstruc_ActionSFC2), @R(590.0, 4630.0, 270.0, 19.0);
+  @VF(340) : @E(lstruc_ActionSFC3), @R(590.0, 4740.0, 270.0, 19.0);
+  @VF(341) : @E(lstruc_ActionSFC4), @R(590.0, 4850.0, 270.0, 19.0);
+  @VF(342) : @E(lstruc_ActionSFC5), @R(590.0, 4960.0, 270.0, 19.0);
+  @C(343) : @F(MOVE), @R(950.0, 5050.0, 60.0, 38.0), DT_Action, @I(@N(EN), @L(9.5)), @I(@N(IN), @L(29.5)), @O(@N(ENO), @R(9.5)), @O(@N(MOVE), @R(29.5));
+  @VF(344) : @E(gxarr_SFC_Action_State[6]), @R(590.0, 5050.0, 270.0, 19.0);
+  @VF(345) : @E(lstruc_ActionSFC6), @R(590.0, 5070.0, 270.0, 19.0);
+  @C(347) : @F(MOVE), @R(950.0, 5160.0, 60.0, 38.0), DT_Action, @I(@N(EN), @L(9.5)), @I(@N(IN), @L(29.5)), @O(@N(ENO), @R(9.5)), @O(@N(MOVE), @R(29.5));
+  @VF(348) : @E(gxarr_SFC_Action_State[7]), @R(590.0, 5160.0, 270.0, 19.0);
+  @VF(349) : @E(lstruc_ActionSFC7), @R(590.0, 5180.0, 270.0, 19.0);
+  @C(351) : @F(MOVE), @R(950.0, 5250.0, 60.0, 38.0), DT_Action, @I(@N(EN), @L(9.5)), @I(@N(IN), @L(29.5)), @O(@N(ENO), @R(9.5)), @O(@N(MOVE), @R(29.5));
+  @VF(352) : @E(gxarr_SFC_Action_State[8]), @R(590.0, 5250.0, 270.0, 19.0);
+  @VF(353) : @E(lstruc_ActionSFC8), @R(590.0, 5270.0, 270.0, 19.0);
+  @VF(362) : @E(gstruc_Action), @R(1080.0, 4630.0, 200.0, 19.0);
+  @VF(364) : @E(gstruc_Action), @R(1080.0, 4740.0, 200.0, 19.0);
+  @VF(366) : @E(gstruc_Action), @R(1080.0, 4850.0, 200.0, 19.0);
+  @VF(368) : @E(gstruc_Action), @R(1080.0, 4960.0, 200.0, 19.0);
+  @VF(370) : @E(gstruc_Action), @R(1080.0, 5070.0, 200.0, 19.0);
+  @VF(372) : @E(gstruc_Action), @R(1080.0, 5180.0, 200.0, 19.0);
+  @VF(374) : @E(gstruc_Action), @R(1080.0, 5270.0, 200.0, 19.0);
+  @VF(382) : @E(grarr_SFCTime), @R(590.0, 270.0, 170.0, 19.0);
+  @VF(383) : @E(lrarr_SFCTime), @R(1000.0, 270.0, 190.0, 19.0);
+  @CF(384) : @R(660.0, 40.0, 490.0, 119.0), @T("SFC$NEinstellwerte von Visu!"), @POU;
+  @C(385) : @F(MOVE), @R(870.0, 250.0, 60.0, 38.0), ARRAY[1..8] OF REAL, @I(@N(EN), @L(9.5)), @I(@N(IN), @L(29.5)), @O(@N(ENO), @R(9.5)), @O(@N(MOVE), @R(29.5));
+  @VF(388) : @E(ltarr_SFCTime[1]), @R(1000.0, 330.0, 190.0, 19.0);
+  @C(389) : @F(TO_TIME), @R(840.0, 310.0, 120.0, 38.0), REAL, @I(@N(EN), @L(9.5)), @I(@N(IN), @L(29.5)), @O(@N(ENO), @R(9.5)), @O(@N(TO_TIME), @R(29.5));
+  @VF(391) : @E(lrarr_SFCTime[1]), @R(590.0, 330.0, 170.0, 19.0);
+  @VF(393) : @E(lx_CycleInit), @R(310.0, 180.0, 170.0, 19.0);
+  @C(396) : @F(TO_TIME), @R(840.0, 360.0, 120.0, 38.0), REAL, @I(@N(EN), @L(9.5)), @I(@N(IN), @L(29.5)), @O(@N(ENO), @R(9.5)), @O(@N(TO_TIME), @R(29.5));
+  @VF(397) : @E(ltarr_SFCTime[2]), @R(1000.0, 380.0, 190.0, 19.0);
+  @VF(398) : @E(lrarr_SFCTime[2]), @R(590.0, 380.0, 170.0, 19.0);
+  @C(402) : @F(TO_TIME), @R(840.0, 410.0, 120.0, 38.0), REAL, @I(@N(EN), @L(9.5)), @I(@N(IN), @L(29.5)), @O(@N(ENO), @R(9.5)), @O(@N(TO_TIME), @R(29.5));
+  @VF(403) : @E(ltarr_SFCTime[3]), @R(1000.0, 430.0, 190.0, 19.0);
+  @VF(404) : @E(lrarr_SFCTime[3]), @R(590.0, 430.0, 170.0, 19.0);
+  @C(407) : @F(TO_TIME), @R(840.0, 460.0, 120.0, 38.0), REAL, @I(@N(EN), @L(9.5)), @I(@N(IN), @L(29.5)), @O(@N(ENO), @R(9.5)), @O(@N(TO_TIME), @R(29.5));
+  @VF(408) : @E(ltarr_SFCTime[4]), @R(1000.0, 480.0, 190.0, 19.0);
+  @VF(409) : @E(lrarr_SFCTime[4]), @R(590.0, 480.0, 170.0, 19.0);
+  @C(414) : @F(TO_TIME), @R(840.0, 510.0, 120.0, 38.0), REAL, @I(@N(EN), @L(9.5)), @I(@N(IN), @L(29.5)), @O(@N(ENO), @R(9.5)), @O(@N(TO_TIME), @R(29.5));
+  @VF(415) : @E(ltarr_SFCTime[5]), @R(1000.0, 530.0, 190.0, 19.0);
+  @VF(416) : @E(lrarr_SFCTime[5]), @R(590.0, 530.0, 170.0, 19.0);
+  @C(420) : @F(TO_TIME), @R(840.0, 560.0, 120.0, 38.0), REAL, @I(@N(EN), @L(9.5)), @I(@N(IN), @L(29.5)), @O(@N(ENO), @R(9.5)), @O(@N(TO_TIME), @R(29.5));
+  @VF(421) : @E(ltarr_SFCTime[6]), @R(1000.0, 580.0, 190.0, 19.0);
+  @VF(422) : @E(lrarr_SFCTime[6]), @R(590.0, 580.0, 170.0, 19.0);
+  @C(426) : @F(TO_TIME), @R(840.0, 610.0, 120.0, 38.0), REAL, @I(@N(EN), @L(9.5)), @I(@N(IN), @L(29.5)), @O(@N(ENO), @R(9.5)), @O(@N(TO_TIME), @R(29.5));
+  @VF(427) : @E(ltarr_SFCTime[7]), @R(1000.0, 630.0, 190.0, 19.0);
+  @VF(428) : @E(lrarr_SFCTime[7]), @R(590.0, 630.0, 170.0, 19.0);
+  @C(431) : @F(TO_TIME), @R(840.0, 660.0, 120.0, 38.0), REAL, @I(@N(EN), @L(9.5)), @I(@N(IN), @L(29.5)), @O(@N(ENO), @R(9.5)), @O(@N(TO_TIME), @R(29.5));
+  @VF(432) : @E(ltarr_SFCTime[8]), @R(1000.0, 680.0, 190.0, 19.0);
+  @VF(433) : @E(lrarr_SFCTime[8]), @R(590.0, 680.0, 170.0, 19.0);
+  @C(438) : @FB(R_TRIG8), @R(500.0, 200.0, 140.0, 18.0), @I(@N(CLK), @L(9.5)), @O(@N(Q), @R(9.5));
+  @VF(439) : @E(lx_Test), @R(310.0, 200.0, 170.0, 19.0);
+  @C(441) : @F(OR), @R(670.0, 180.0, 40.0, 58.0), BOOL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @I(@N(IN3), @L(49.5)), @O(@N(OR), @R(9.5));
+  @C(575) : @FB(R_TRIG9), @R(500.0, 220.0, 140.0, 18.0), @I(@N(CLK), @L(9.5)), @O(@N(Q), @R(9.5));
+  @VF(574) : @E(gx_SetControlPar), @R(310.0, 220.0, 170.0, 19.0);
+  @OLT(445) : @R(440.0, -380.0, 80.0, 19.0), @S(229);
+  @OLT(446) : @R(1040.0, 1870.0, 80.0, 19.0), @S(42);
+  @OLT(447) : @R(1390.0, 1870.0, 210.0, 19.0), @S(64);
+  @OLT(448) : @R(1040.0, 2040.0, 80.0, 19.0), @S(49);
+  @OLT(449) : @R(1390.0, 2040.0, 200.0, 19.0), @S(66);
+  @OLT(450) : @R(1040.0, 2250.0, 80.0, 19.0), @S(70);
+  @OLT(451) : @R(1390.0, 2250.0, 200.0, 19.0), @S(71);
+  @OLT(452) : @R(1040.0, 2450.0, 80.0, 19.0), @S(86);
+  @OLT(453) : @R(1390.0, 2450.0, 200.0, 19.0), @S(87);
+  @OLT(454) : @R(1040.0, 2890.0, 80.0, 19.0), @S(112);
+  @OLT(455) : @R(1390.0, 2890.0, 200.0, 19.0), @S(113);
+  @OLT(376) : subElement := "rSpDn", @R(330.0, 4440.0, 150.0, 19.0), @S(337);
+  @OLT(456) : subElement := "rSpUp", @R(330.0, 4460.0, 150.0, 19.0), @S(337);
+  @OLT(457) : subElement := "xAuto", @R(330.0, 4480.0, 150.0, 19.0), @S(337);
+  @OLT(458) : subElement := "xRamp", @R(330.0, 4500.0, 150.0, 19.0), @S(337);
+  @OLT(459) : subElement := "xReset", @R(330.0, 4520.0, 150.0, 19.0), @S(337);
+  @OLT(460) : subElement := "rSpDn", @R(330.0, 4590.0, 150.0, 19.0), @S(339);
+  @OLT(461) : subElement := "rSpUp", @R(330.0, 4610.0, 150.0, 19.0), @S(339);
+  @OLT(462) : subElement := "xAuto", @R(330.0, 4630.0, 150.0, 19.0), @S(339);
+  @OLT(463) : subElement := "xRamp", @R(330.0, 4650.0, 150.0, 19.0), @S(339);
+  @OLT(464) : subElement := "xReset", @R(330.0, 4670.0, 150.0, 19.0), @S(339);
+  @OLT(465) : subElement := "rSP", @R(330.0, 4740.0, 150.0, 19.0), @S(340);
+  @OLT(466) : subElement := "rSP", @R(330.0, 4880.0, 150.0, 19.0), @S(341);
+  @OLT(467) : subElement := "rSP", @R(330.0, 4970.0, 150.0, 19.0), @S(342);
+  @OLT(468) : subElement := "rSpUp", @R(330.0, 4900.0, 150.0, 19.0), @S(341);
+  @OLT(469) : subElement := "rSpDn", @R(330.0, 4920.0, 150.0, 19.0), @S(341);
+  @OLT(470) : subElement := "rSpDn", @R(330.0, 4780.0, 150.0, 19.0), @S(340);
+  @OLT(471) : subElement := "rSpDn", @R(330.0, 4760.0, 150.0, 19.0), @S(340);
+  @VF(475) : @E(gx_SFC_Action_Init), @R(1610.0, 1520.0, 270.0, 19.0);
+  @C(476) : @F(MOVE), @R(950.0, 4310.0, 60.0, 38.0), DT_Action, @I(@N(EN), @L(9.5)), @I(@N(IN), @L(29.5)), @O(@N(ENO), @R(9.5)), @O(@N(MOVE), @R(29.5));
+  @VF(477) : @E(lstruc_ActionSFCInit), @R(590.0, 4330.0, 270.0, 19.0);
+  @VF(478) : @E(gx_SFC_Action_Init), @R(590.0, 4310.0, 270.0, 19.0);
+  @VF(479) : @E(gstruc_Action), @R(1080.0, 4330.0, 200.0, 19.0);
+  @OLT(481) : subElement := "rSpDn", @R(330.0, 4250.0, 150.0, 19.0), @S(477);
+  @OLT(482) : subElement := "rSpUp", @R(330.0, 4270.0, 150.0, 19.0), @S(477);
+  @OLT(483) : subElement := "xAuto", @R(330.0, 4290.0, 150.0, 19.0), @S(477);
+  @OLT(484) : subElement := "xRamp", @R(330.0, 4310.0, 150.0, 19.0), @S(477);
+  @OLT(485) : subElement := "xReset", @R(330.0, 4330.0, 150.0, 19.0), @S(477);
+  @OLT(487) : subElement := "rSpDn", @R(1410.0, 4160.0, 150.0, 19.0), @S(479);
+  @OLT(488) : subElement := "xAuto", @R(1410.0, 4200.0, 150.0, 19.0), @S(479);
+  @OLT(489) : subElement := "rSpUp", @R(1410.0, 4180.0, 150.0, 19.0), @S(479);
+  @OLT(490) : subElement := "rSP", @R(1410.0, 4140.0, 150.0, 19.0), @S(479);
+  @OLT(491) : subElement := "xRamp", @R(1410.0, 4220.0, 150.0, 19.0), @S(479);
+  @OLT(493) : subElement := "xReset", @R(1410.0, 4240.0, 150.0, 19.0), @S(479);
+  @C(486) : @F(OR), @R(190.0, 2910.0, 40.0, 38.0), BOOL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(OR), @R(9.5));
+  @VF(492) : @E(lx_SFC_Loop), @R(20.0, 2910.0, 140.0, 19.0);
+  @VF(494) : @E(gx_SFC_Loop), @R(20.0, 2930.0, 140.0, 19.0);
+  @CF(495) : @R(20.0, 2850.0, 370.0, 29.0), @T("Lokaler Reset / GV-Reset (Visu)"), @POU;
+  @TRANSITION(502) : @IT(T11), @R(490.0, 2990.0, 40.0, 39.0);
+  @CONN(504) : @IT(Init_5), @R(600.0, 3110.0, 90.0, 19.0), SFC_T2S;
+  @CONT(506) : @IT(Reset), @CONN(142), @R(330.0, 3000.0, 70.0, 19.0), BOOL;
+  @CONT(172) : @IT(Init_5), @CONN(504), @R(540.0, 1450.0, 110.0, 19.0), SFC_T2S;
+  @CONT(175) : @IT(Loop), @CONN(169), @R(540.0, 1640.0, 110.0, 19.0), SFC_T2S;
+  @OLT(509) : @R(70.0, 2890.0, 80.0, 19.0), @S(492);
+  @C(377) : @FB(R_TRIG10), @R(1080.0, 4500.0, 140.0, 18.0), @I(@N(CLK), @L(9.5)), @O(@N(Q), @R(9.5));
+  @C(379) : @F(Trace), @R(1620.0, 4500.0, 120.0, 38.0), @I(@N(EN), @L(9.5)), @I(@N(Msg), @L(29.5)), @O(@N(ENO), @R(9.5));
+  @VF(381) : @E('SFC Step 1'), @R(1310.0, 4520.0, 140.0, 19.0), STRING;
+  @C(473) : @FB(R_TRIG11), @R(1080.0, 4610.0, 140.0, 18.0), @I(@N(CLK), @L(9.5)), @O(@N(Q), @R(9.5));
+  @C(480) : @F(Trace), @R(1620.0, 4610.0, 120.0, 38.0), @I(@N(EN), @L(9.5)), @I(@N(Msg), @L(29.5)), @O(@N(ENO), @R(9.5));
+  @VF(497) : @E('SFC Step 2'), @R(1310.0, 4630.0, 140.0, 19.0), STRING;
+  @C(513) : @FB(R_TRIG12), @R(1080.0, 4720.0, 140.0, 18.0), @I(@N(CLK), @L(9.5)), @O(@N(Q), @R(9.5));
+  @C(514) : @F(Trace), @R(1620.0, 4720.0, 120.0, 38.0), @I(@N(EN), @L(9.5)), @I(@N(Msg), @L(29.5)), @O(@N(ENO), @R(9.5));
+  @VF(515) : @E('SFC Step 3'), @R(1310.0, 4740.0, 140.0, 19.0), STRING;
+  @C(519) : @FB(R_TRIG13), @R(1080.0, 4830.0, 140.0, 18.0), @I(@N(CLK), @L(9.5)), @O(@N(Q), @R(9.5));
+  @C(520) : @F(Trace), @R(1620.0, 4830.0, 120.0, 38.0), @I(@N(EN), @L(9.5)), @I(@N(Msg), @L(29.5)), @O(@N(ENO), @R(9.5));
+  @VF(521) : @E('SFC Step 4'), @R(1310.0, 4850.0, 140.0, 19.0), STRING;
+  @C(525) : @FB(R_TRIG14), @R(1080.0, 4940.0, 140.0, 18.0), @I(@N(CLK), @L(9.5)), @O(@N(Q), @R(9.5));
+  @C(526) : @F(Trace), @R(1620.0, 4940.0, 120.0, 38.0), @I(@N(EN), @L(9.5)), @I(@N(Msg), @L(29.5)), @O(@N(ENO), @R(9.5));
+  @VF(527) : @E('SFC Step 5'), @R(1310.0, 4960.0, 140.0, 19.0), STRING;
+  @C(531) : @FB(R_TRIG15), @R(1080.0, 5050.0, 140.0, 18.0), @I(@N(CLK), @L(9.5)), @O(@N(Q), @R(9.5));
+  @C(532) : @F(Trace), @R(1620.0, 5050.0, 120.0, 38.0), @I(@N(EN), @L(9.5)), @I(@N(Msg), @L(29.5)), @O(@N(ENO), @R(9.5));
+  @VF(533) : @E('SFC Step 6'), @R(1310.0, 5070.0, 140.0, 19.0), STRING;
+  @C(537) : @FB(R_TRIG16), @R(1080.0, 5160.0, 140.0, 18.0), @I(@N(CLK), @L(9.5)), @O(@N(Q), @R(9.5));
+  @C(538) : @F(Trace), @R(1620.0, 5160.0, 120.0, 38.0), @I(@N(EN), @L(9.5)), @I(@N(Msg), @L(29.5)), @O(@N(ENO), @R(9.5));
+  @VF(539) : @E('SFC Step 7'), @R(1310.0, 5180.0, 140.0, 19.0), STRING;
+  @C(543) : @FB(R_TRIG17), @R(1080.0, 5250.0, 140.0, 18.0), @I(@N(CLK), @L(9.5)), @O(@N(Q), @R(9.5));
+  @C(544) : @F(Trace), @R(1620.0, 5250.0, 120.0, 38.0), @I(@N(EN), @L(9.5)), @I(@N(Msg), @L(29.5)), @O(@N(ENO), @R(9.5));
+  @VF(545) : @E('SFC Step 8'), @R(1310.0, 5270.0, 140.0, 19.0), STRING;
+  @C(549) : @FB(R_TRIG18), @R(1080.0, 4310.0, 140.0, 18.0), @I(@N(CLK), @L(9.5)), @O(@N(Q), @R(9.5));
+  @C(550) : @F(Trace), @R(1620.0, 4310.0, 120.0, 38.0), @I(@N(EN), @L(9.5)), @I(@N(Msg), @L(29.5)), @O(@N(ENO), @R(9.5));
+  @VF(551) : @E('SFC Init'), @R(1310.0, 4330.0, 140.0, 19.0), STRING;
+  @CF(555) : @R(740.0, -1260.0, 490.0, 39.0), @T("CycleInit"), @POU;
+  @C(556) : @FB(R_TRIG19), @R(930.0, -1200.0, 140.0, 18.0), @I(@N(CLK), @L(9.5)), @O(@N(Q), @R(9.5));
+  @VF(557) : @E(TRUE), @R(740.0, -1200.0, 140.0, 19.0);
+  @VF(559) : @E(lx_CycleInit), @R(1100.0, -1200.0, 140.0, 19.0);
+  @C(562) : @F(Trace), @R(1470.0, -1200.0, 120.0, 38.0), @I(@N(EN), @L(9.5)), @I(@N(Msg), @L(29.5)), @O(@N(ENO), @R(9.5));
+  @VF(563) : @E('RPMControl_SFC Init'), @R(1270.0, -1180.0, 190.0, 19.0);
+  @VF(564) : @E(grarr_SFCTime[4]), @R(590.0, 900.0, 170.0, 19.0);
+  @VF(566) : @E(grarr_SFCTime[3]), @R(590.0, 850.0, 170.0, 19.0);
+  @VF(567) : @E(grarr_SFCTime[2]), @R(590.0, 800.0, 170.0, 19.0);
+  @VF(568) : @E(grarr_SFCTime[1]), @R(590.0, 750.0, 170.0, 19.0);
+  @VF(569) : @E(grarr_SFCTime[5]), @R(590.0, 950.0, 170.0, 19.0);
+  @VF(570) : @E(grarr_SFCTime[6]), @R(590.0, 1000.0, 170.0, 19.0);
+  @VF(571) : @E(grarr_SFCTime[7]), @R(590.0, 1050.0, 170.0, 19.0);
+  @VF(572) : @E(grarr_SFCTime[8]), @R(590.0, 1100.0, 170.0, 19.0);
+  @OLT(573) : @R(420.0, 330.0, 80.0, 19.0), @S(391);
+  @OLT(576) : @R(420.0, 380.0, 80.0, 19.0), @S(398);
+  @OLT(577) : @R(440.0, 750.0, 80.0, 19.0), @S(568);
+  @OLT(578) : @R(440.0, 800.0, 80.0, 19.0), @S(567);
+  @VF(579) : @E(gstr_SFC_Statetext), @R(1620.0, 4560.0, 260.0, 19.0);
+  @C(580) : @F(MOVE), @R(1530.0, 4540.0, 60.0, 38.0), STRING, @I(@N(EN), @L(9.5)), @I(@N(IN), @L(29.5)), @O(@N(ENO), @R(9.5)), @O(@N(MOVE), @R(29.5));
+  @C(584) : @F(MOVE), @R(1530.0, 4650.0, 60.0, 38.0), STRING, @I(@N(EN), @L(9.5)), @I(@N(IN), @L(29.5)), @O(@N(ENO), @R(9.5)), @O(@N(MOVE), @R(29.5));
+  @VF(585) : @E(gstr_SFC_Statetext), @R(1620.0, 4670.0, 260.0, 19.0);
+  @C(589) : @F(MOVE), @R(1530.0, 4770.0, 60.0, 38.0), STRING, @I(@N(EN), @L(9.5)), @I(@N(IN), @L(29.5)), @O(@N(ENO), @R(9.5)), @O(@N(MOVE), @R(29.5));
+  @VF(590) : @E(gstr_SFC_Statetext), @R(1620.0, 4790.0, 260.0, 19.0);
+  @C(594) : @F(MOVE), @R(1530.0, 4870.0, 60.0, 38.0), STRING, @I(@N(EN), @L(9.5)), @I(@N(IN), @L(29.5)), @O(@N(ENO), @R(9.5)), @O(@N(MOVE), @R(29.5));
+  @VF(595) : @E(gstr_SFC_Statetext), @R(1620.0, 4890.0, 260.0, 19.0);
+  @C(599) : @F(MOVE), @R(1530.0, 4980.0, 60.0, 38.0), STRING, @I(@N(EN), @L(9.5)), @I(@N(IN), @L(29.5)), @O(@N(ENO), @R(9.5)), @O(@N(MOVE), @R(29.5));
+  @VF(600) : @E(gstr_SFC_Statetext), @R(1620.0, 5000.0, 260.0, 19.0);
+  @C(604) : @F(MOVE), @R(1530.0, 5090.0, 60.0, 38.0), STRING, @I(@N(EN), @L(9.5)), @I(@N(IN), @L(29.5)), @O(@N(ENO), @R(9.5)), @O(@N(MOVE), @R(29.5));
+  @VF(605) : @E(gstr_SFC_Statetext), @R(1620.0, 5110.0, 260.0, 19.0);
+  @C(609) : @F(MOVE), @R(1530.0, 5200.0, 60.0, 38.0), STRING, @I(@N(EN), @L(9.5)), @I(@N(IN), @L(29.5)), @O(@N(ENO), @R(9.5)), @O(@N(MOVE), @R(29.5));
+  @VF(610) : @E(gstr_SFC_Statetext), @R(1620.0, 5220.0, 260.0, 19.0);
+  @C(614) : @F(MOVE), @R(1530.0, 5290.0, 60.0, 38.0), STRING, @I(@N(EN), @L(9.5)), @I(@N(IN), @L(29.5)), @O(@N(ENO), @R(9.5)), @O(@N(MOVE), @R(29.5));
+  @VF(615) : @E(gstr_SFC_Statetext), @R(1620.0, 5310.0, 260.0, 19.0);
+  @C(619) : @F(MOVE), @R(1530.0, 4350.0, 60.0, 38.0), STRING, @I(@N(EN), @L(9.5)), @I(@N(IN), @L(29.5)), @O(@N(ENO), @R(9.5)), @O(@N(MOVE), @R(29.5));
+  @VF(620) : @E(gstr_SFC_Statetext), @R(1620.0, 4370.0, 260.0, 19.0);
+  @CP(16) : 1039.5, -970.5;
+  @CP(41) : 1019.5, 1739.5;
+  @CP(55) : 1019.5, 1949.5;
+  @CP(63) : 1149.5, 1739.5;
+  @CP(77) : 1019.5, 2159.5;
+  @CP(100) : 1019.5, 2359.5;
+  @CP(119) : 1019.5, 2799.5;
+  @CP(132) : 869.5, 1789.5;
+  @CP(140) : 869.5, 1379.5;
+  @CP(143) : 469.5, 1859.5;
+  @CP(148) : 869.5, 1999.5;
+  @CP(150) : 869.5, 1399.5;
+  @CP(152) : 1139.5, 1529.5;
+  @CP(158) : 869.5, 2199.5;
+  @CP(160) : 869.5, 1419.5;
+  @CP(166) : 869.5, 2409.5;
+  @CP(168) : 869.5, 1439.5;
+  @CP(174) : 869.5, 2839.5;
+  @CP(176) : 869.5, 1459.5;
+  @CP(263) : 1079.5, -300.5;
+  @CP(265) : 1009.5, -190.5;
+  @CP(308) : 979.5, -240.5;
+  @CP(395) : 799.5, 259.5;
+  @CP(401) : 799.5, 319.5;
+  @CP(412) : 799.5, 369.5;
+  @CP(413) : 799.5, 419.5;
+  @CP(419) : 799.5, 469.5;
+  @CP(425) : 799.5, 519.5;
+  @CP(436) : 799.5, 569.5;
+  @CP(437) : 799.5, 619.5;
+  @CP(503) : 679.5, 2839.5;
+  @CP(508) : 869.5, 1649.5;
+  @CP(582) : 1469.5, 4529.5;
+  @CP(583) : 1489.5, 4509.5;
+  @CP(587) : 1509.5, 4619.5;
+  @CP(588) : 1479.5, 4639.5;
+  @CP(592) : 1469.5, 4749.5;
+  @CP(593) : 1489.5, 4729.5;
+  @CP(597) : 1499.5, 4839.5;
+  @CP(598) : 1479.5, 4859.5;
+  @CP(602) : 1499.5, 4949.5;
+  @CP(603) : 1469.5, 4969.5;
+  @CP(607) : 1509.5, 5059.5;
+  @CP(608) : 1479.5, 5079.5;
+  @CP(612) : 1509.5, 5169.5;
+  @CP(613) : 1479.5, 5189.5;
+  @CP(617) : 1479.5, 5279.5;
+  @CP(618) : 1509.5, 5259.5;
+  @CP(622) : 1469.5, 4339.5;
+  @CP(623) : 1499.5, 4319.5;
+
+  @G(5) :
+     @L(@VF(1).o, @C(2).IN)
+    ;
+  @G(4) :
+     @L(@C(2).NOT, @VF(3).i)
+    ;
+  @G(9) :
+     @L(@VF(7).o, @C(8).IN1)
+    ;
+  @G(13) :
+     @L(@C(8).ADD, @CP(16)),
+     @L(@CP(16), @VF(12).i),
+     @L(@CP(16), @VF(15).i)
+    ;
+  @G(11) :
+     @L(@VF(10).o, @C(8).IN2)
+    ;
+  @G(92) :
+     @L(@C(89).SysTaskActualCycleTime, @VF(91).i)
+    ;
+  @G(94) :
+     @L(@C(90).SysTaskCycleTime, @VF(93).i)
+    ;
+  @G(27) :
+     @L(@STEP(25).X, @CP(152)),
+     @L(@CP(152), @ACTION(26).in),
+     @L(@CP(152), @ACTION(151).in)
+    ;
+  @G(30) :
+     @L(@STEP(25).out, @TRANSITION(28).in)
+    ;
+  @G(31) :
+     @L(@TRANSITION(28).out, @CP(508)),
+     @L(@CP(508), @STEP(29).in),
+     @L(@CONT(175).o, @CP(508))
+    ;
+  @G(35) :
+     @L(@C(33).Q, @TRANSITION(28).T)
+    ;
+  @G(37) :
+     @L(@STEP(29).X, @CP(41)),
+     @L(@CP(41), @CP(63)),
+     @L(@CP(41), @C(40).IN),
+     @L(@CP(63), @ACTION(36).in),
+     @L(@CP(63), @ACTION(62).in)
+    ;
+  @G(39) :
+     @L(@STEP(29).out, @CP(132)),
+     @L(@CP(132), @TRANSITION(38).in),
+     @L(@CP(132), @TRANSITION(131).in)
+    ;
+  @G(43) :
+     @L(@VF(42).o, @C(40).PT)
+    ;
+  @G(46) :
+     @L(@CONT(45).o, @TRANSITION(38).T)
+    ;
+  @G(47) :
+     @L(@C(40).Q, @CONN(44).i)
+    ;
+  @G(56) :
+     @L(@STEP(52).out, @CP(148)),
+     @L(@CP(148), @TRANSITION(53).in),
+     @L(@CP(148), @TRANSITION(146).in)
+    ;
+  @G(57) :
+     @L(@CONT(51).o, @TRANSITION(53).T)
+    ;
+  @G(58) :
+     @L(@STEP(52).X, @CP(55)),
+     @L(@CP(55), @ACTION(54).in),
+     @L(@CP(55), @C(48).IN)
+    ;
+  @G(59) :
+     @L(@VF(49).o, @C(48).PT)
+    ;
+  @G(60) :
+     @L(@C(48).Q, @CONN(50).i)
+    ;
+  @G(61) :
+     @L(@TRANSITION(38).out, @STEP(52).in)
+    ;
+  @G(65) :
+     @L(@C(40).ET, @VF(64).i)
+    ;
+  @G(68) :
+     @L(@C(48).ET, @VF(66).i)
+    ;
+  @G(78) :
+     @L(@STEP(74).out, @CP(158)),
+     @L(@CP(158), @TRANSITION(75).in),
+     @L(@CP(158), @TRANSITION(155).in)
+    ;
+  @G(79) :
+     @L(@STEP(74).X, @CP(77)),
+     @L(@CP(77), @ACTION(76).in),
+     @L(@CP(77), @C(69).IN)
+    ;
+  @G(80) :
+     @L(@CONT(73).o, @TRANSITION(75).T)
+    ;
+  @G(81) :
+     @L(@VF(70).o, @C(69).PT)
+    ;
+  @G(82) :
+     @L(@C(69).Q, @CONN(72).i)
+    ;
+  @G(83) :
+     @L(@C(69).ET, @VF(71).i)
+    ;
+  @G(84) :
+     @L(@TRANSITION(53).out, @STEP(74).in)
+    ;
+  @G(101) :
+     @L(@STEP(97).out, @CP(166)),
+     @L(@CP(166), @TRANSITION(98).in),
+     @L(@CP(166), @TRANSITION(163).in)
+    ;
+  @G(102) :
+     @L(@STEP(97).X, @CP(100)),
+     @L(@CP(100), @ACTION(99).in),
+     @L(@CP(100), @C(85).IN)
+    ;
+  @G(103) :
+     @L(@CONT(96).o, @TRANSITION(98).T)
+    ;
+  @G(104) :
+     @L(@VF(86).o, @C(85).PT)
+    ;
+  @G(105) :
+     @L(@C(85).Q, @CONN(95).i)
+    ;
+  @G(106) :
+     @L(@C(85).ET, @VF(87).i)
+    ;
+  @G(107) :
+     @L(@TRANSITION(75).out, @STEP(97).in)
+    ;
+  @G(109) :
+     @L(@TRANSITION(98).out, @CONN(108).i)
+    ;
+  @G(120) :
+     @L(@STEP(116).out, @CP(174)),
+     @L(@CP(174), @TRANSITION(117).in),
+     @L(@CP(174), @CP(503)),
+     @L(@CP(503), @TRANSITION(171).in),
+     @L(@CP(503), @TRANSITION(502).in)
+    ;
+  @G(121) :
+     @L(@STEP(116).X, @CP(119)),
+     @L(@CP(119), @ACTION(118).in),
+     @L(@CP(119), @C(111).IN)
+    ;
+  @G(122) :
+     @L(@CONT(115).o, @TRANSITION(117).T)
+    ;
+  @G(123) :
+     @L(@VF(112).o, @C(111).PT)
+    ;
+  @G(124) :
+     @L(@C(111).Q, @CONN(114).i)
+    ;
+  @G(125) :
+     @L(@C(111).ET, @VF(113).i)
+    ;
+  @G(126) :
+     @L(@CONT(110).o, @STEP(116).in)
+    ;
+  @G(128) :
+     @L(@TRANSITION(117).out, @CONN(127).i)
+    ;
+  @G(130) :
+     @L(@CONT(129).o, @CP(140)),
+     @L(@CP(140), @CP(150)),
+     @L(@CONT(139).o, @CP(140)),
+     @L(@CP(150), @CP(160)),
+     @L(@CONT(149).o, @CP(150)),
+     @L(@CP(160), @CP(168)),
+     @L(@CONT(159).o, @CP(160)),
+     @L(@CP(168), @CP(176)),
+     @L(@CONT(167).o, @CP(168)),
+     @L(@CP(176), @STEP(25).in),
+     @L(@CONT(172).o, @CP(176))
+    ;
+  @G(136) :
+     @L(@C(133).Q, @CP(143)),
+     @L(@CP(143), @TRANSITION(131).T),
+     @L(@CP(143), @CONN(142).i)
+    ;
+  @G(138) :
+     @L(@TRANSITION(131).out, @CONN(137).i)
+    ;
+  @G(147) :
+     @L(@TRANSITION(146).out, @CONN(144).i)
+    ;
+  @G(141) :
+     @L(@CONT(145).o, @TRANSITION(146).T)
+    ;
+  @G(156) :
+     @L(@CONT(154).o, @TRANSITION(155).T)
+    ;
+  @G(157) :
+     @L(@TRANSITION(155).out, @CONN(153).i)
+    ;
+  @G(164) :
+     @L(@CONT(162).o, @TRANSITION(163).T)
+    ;
+  @G(165) :
+     @L(@TRANSITION(163).out, @CONN(161).i)
+    ;
+  @G(173) :
+     @L(@TRANSITION(171).out, @CONN(169).i)
+    ;
+  @G(178) :
+     @L(@ACTION(62).out, @VF(177).i)
+    ;
+  @G(180) :
+     @L(@ACTION(54).out, @VF(179).i)
+    ;
+  @G(182) :
+     @L(@ACTION(76).out, @VF(181).i)
+    ;
+  @G(184) :
+     @L(@ACTION(99).out, @VF(183).i)
+    ;
+  @G(186) :
+     @L(@ACTION(118).out, @VF(185).i)
+    ;
+  @G(188) :
+     @L(@VF(113).o, @VF(187).i)
+    ;
+  @G(190) :
+     @L(@VF(87).o, @VF(189).i)
+    ;
+  @G(192) :
+     @L(@VF(71).o, @VF(191).i)
+    ;
+  @G(194) :
+     @L(@VF(66).o, @VF(193).i)
+    ;
+  @G(196) :
+     @L(@VF(64).o, @VF(195).i)
+    ;
+  @G(200) :
+     @L(@VF(198).o, @C(199).CLK)
+    ;
+  @G(202) :
+     @L(@C(199).Q, @VF(201).i)
+    ;
+  @G(206) :
+     @L(@VF(203).o, @C(205).EN)
+    ;
+  @G(208) :
+     @L(@VF(207).o, @C(205).IN)
+    ;
+  @G(210) :
+     @L(@C(205).MOVE, @VF(209).i)
+    ;
+  @G(211) :
+     @L(@VF(32).o, @C(34).IN1)
+    ;
+  @G(212) :
+     @L(@C(34).OR, @C(33).CLK)
+    ;
+  @G(215) :
+     @L(@VF(134).o, @C(135).IN1)
+    ;
+  @G(216) :
+     @L(@C(135).OR, @C(133).CLK)
+    ;
+  @G(218) :
+     @L(@VF(217).o, @C(135).IN2)
+    ;
+  @G(227) :
+     @L(@ACTION(151).out, @VF(226).i)
+    ;
+  @G(231) :
+     @L(@C(232).Q, @CP(263)),
+     @L(@CP(263), @C(228).S),
+     @L(@CP(263), @C(235).R1)
+    ;
+  @G(239) :
+     @L(@C(237).Q, @CP(265)),
+     @L(@CP(265), @C(235).S),
+     @L(@CP(265), @C(234).IN2)
+    ;
+  @G(241) :
+     @L(@VF(236).o, @C(238).IN1)
+    ;
+  @G(242) :
+     @L(@VF(240).o, @C(238).IN2)
+    ;
+  @G(244) :
+     @L(@C(235).Q1, @VF(243).i)
+    ;
+  @G(246) :
+     @L(@C(228).Q1, @VF(245).i)
+    ;
+  @G(253) :
+     @L(@C(247).Q, @C(248).S)
+    ;
+  @G(255) :
+     @L(@VF(252).o, @C(247).CLK)
+    ;
+  @G(250) :
+     @L(@C(248).Q1, @VF(249).i)
+    ;
+  @G(256) :
+     @L(@C(238).OR, @C(237).CLK)
+    ;
+  @G(259) :
+     @L(@VF(258).o, @C(257).CLK)
+    ;
+  @G(260) :
+     @L(@C(254).OR, @C(248).R1)
+    ;
+  @G(261) :
+     @L(@C(257).Q, @C(254).IN2)
+    ;
+  @G(262) :
+     @L(@VF(251).o, @C(254).IN1)
+    ;
+  @G(264) :
+     @L(@VF(233).o, @C(234).IN1)
+    ;
+  @G(266) :
+     @L(@C(234).OR, @C(228).R1)
+    ;
+  @G(268) :
+     @L(@VF(267).o, @C(238).IN3)
+    ;
+  @G(270) :
+     @L(@C(269).AND, @C(34).IN2)
+    ;
+  @G(276) :
+     @L(@VF(273).o, @C(275).IN1)
+    ;
+  @G(277) :
+     @L(@VF(274).o, @C(275).IN2)
+    ;
+  @G(213) :
+     @L(@VF(271).o, @C(269).IN1)
+    ;
+  @G(214) :
+     @L(@C(275).OR, @C(269).IN2)
+    ;
+  @G(281) :
+     @L(@VF(272).o, @C(280).IN)
+    ;
+  @G(282) :
+     @L(@C(280).TO_REAL, @VF(279).i)
+    ;
+  @G(285) :
+     @L(@VF(278).o, @C(283).IN)
+    ;
+  @G(286) :
+     @L(@C(283).TO_REAL, @VF(284).i)
+    ;
+  @G(290) :
+     @L(@VF(288).o, @C(287).IN)
+    ;
+  @G(291) :
+     @L(@C(287).TO_REAL, @VF(289).i)
+    ;
+  @G(295) :
+     @L(@VF(293).o, @C(292).IN)
+    ;
+  @G(296) :
+     @L(@C(292).TO_REAL, @VF(294).i)
+    ;
+  @G(300) :
+     @L(@VF(298).o, @C(297).IN)
+    ;
+  @G(301) :
+     @L(@C(297).TO_REAL, @VF(299).i)
+    ;
+  @G(304) :
+     @L(@VF(302).o, @C(303).CLK)
+    ;
+  @G(305) :
+     @L(@C(303).Q, @CP(308)),
+     @L(@CP(308), @C(234).IN3),
+     @L(@CP(308), @CONN(307).i)
+    ;
+  @G(310) :
+     @L(@CONT(309).o, @C(238).IN4)
+    ;
+  @G(312) :
+     @L(@VF(229).o, @C(230).IN1)
+    ;
+  @G(315) :
+     @L(@VF(313).o, @C(314).IN1)
+    ;
+  @G(316) :
+     @L(@C(314).OR, @C(230).IN2)
+    ;
+  @G(318) :
+     @L(@VF(317).o, @C(314).IN2)
+    ;
+  @G(319) :
+     @L(@C(230).AND, @C(232).CLK)
+    ;
+  @G(330) :
+     @L(@VF(324).o, @C(325).EN)
+    ;
+  @G(331) :
+     @L(@VF(323).o, @C(326).EN)
+    ;
+  @G(332) :
+     @L(@VF(322).o, @C(327).EN)
+    ;
+  @G(333) :
+     @L(@VF(321).o, @C(328).EN)
+    ;
+  @G(334) :
+     @L(@VF(320).o, @C(329).EN)
+    ;
+  @G(336) :
+     @L(@C(325).MOVE, @VF(335).i)
+    ;
+  @G(338) :
+     @L(@VF(337).o, @C(325).IN)
+    ;
+  @G(346) :
+     @L(@VF(344).o, @C(343).EN)
+    ;
+  @G(350) :
+     @L(@VF(348).o, @C(347).EN)
+    ;
+  @G(354) :
+     @L(@VF(352).o, @C(351).EN)
+    ;
+  @G(355) :
+     @L(@VF(349).o, @C(347).IN)
+    ;
+  @G(356) :
+     @L(@VF(353).o, @C(351).IN)
+    ;
+  @G(357) :
+     @L(@VF(345).o, @C(343).IN)
+    ;
+  @G(358) :
+     @L(@VF(342).o, @C(329).IN)
+    ;
+  @G(359) :
+     @L(@VF(341).o, @C(328).IN)
+    ;
+  @G(360) :
+     @L(@VF(340).o, @C(327).IN)
+    ;
+  @G(361) :
+     @L(@VF(339).o, @C(326).IN)
+    ;
+  @G(363) :
+     @L(@C(326).MOVE, @VF(362).i)
+    ;
+  @G(365) :
+     @L(@C(327).MOVE, @VF(364).i)
+    ;
+  @G(367) :
+     @L(@C(328).MOVE, @VF(366).i)
+    ;
+  @G(369) :
+     @L(@C(329).MOVE, @VF(368).i)
+    ;
+  @G(371) :
+     @L(@C(343).MOVE, @VF(370).i)
+    ;
+  @G(373) :
+     @L(@C(347).MOVE, @VF(372).i)
+    ;
+  @G(375) :
+     @L(@C(351).MOVE, @VF(374).i)
+    ;
+  @G(386) :
+     @L(@VF(382).o, @C(385).IN)
+    ;
+  @G(387) :
+     @L(@C(385).MOVE, @VF(383).i)
+    ;
+  @G(390) :
+     @L(@C(389).TO_TIME, @VF(388).i)
+    ;
+  @G(392) :
+     @L(@VF(391).o, @C(389).IN)
+    ;
+  @G(394) :
+     @L(@CP(395), @C(385).EN),
+     @L(@CP(395), @CP(401)),
+     @L(@CP(401), @C(389).EN),
+     @L(@CP(401), @CP(412)),
+     @L(@CP(412), @C(396).EN),
+     @L(@CP(412), @CP(413)),
+     @L(@CP(413), @C(402).EN),
+     @L(@CP(413), @CP(419)),
+     @L(@CP(419), @C(407).EN),
+     @L(@CP(419), @CP(425)),
+     @L(@CP(425), @C(414).EN),
+     @L(@CP(425), @CP(436)),
+     @L(@CP(436), @C(420).EN),
+     @L(@CP(436), @CP(437)),
+     @L(@CP(437), @C(426).EN),
+     @L(@CP(437), @C(431).EN),
+     @L(@C(441).OR, @CP(395))
+    ;
+  @G(399) :
+     @L(@C(396).TO_TIME, @VF(397).i)
+    ;
+  @G(400) :
+     @L(@VF(398).o, @C(396).IN)
+    ;
+  @G(405) :
+     @L(@C(402).TO_TIME, @VF(403).i)
+    ;
+  @G(406) :
+     @L(@VF(404).o, @C(402).IN)
+    ;
+  @G(410) :
+     @L(@C(407).TO_TIME, @VF(408).i)
+    ;
+  @G(411) :
+     @L(@VF(409).o, @C(407).IN)
+    ;
+  @G(417) :
+     @L(@C(414).TO_TIME, @VF(415).i)
+    ;
+  @G(418) :
+     @L(@VF(416).o, @C(414).IN)
+    ;
+  @G(423) :
+     @L(@C(420).TO_TIME, @VF(421).i)
+    ;
+  @G(424) :
+     @L(@VF(422).o, @C(420).IN)
+    ;
+  @G(429) :
+     @L(@C(426).TO_TIME, @VF(427).i)
+    ;
+  @G(430) :
+     @L(@VF(428).o, @C(426).IN)
+    ;
+  @G(434) :
+     @L(@C(431).TO_TIME, @VF(432).i)
+    ;
+  @G(435) :
+     @L(@VF(433).o, @C(431).IN)
+    ;
+  @G(440) :
+     @L(@VF(439).o, @C(438).CLK)
+    ;
+  @G(442) :
+     @L(@VF(393).o, @C(441).IN1)
+    ;
+  @G(443) :
+     @L(@C(438).Q, @C(441).IN2)
+    ;
+  @G(772) :
+     @L(@VF(574).o, @C(575).CLK)
+    ;
+  @G(444) :
+     @L(@C(575).Q, @C(441).IN3)
+    ;
+  @G(474) :
+     @L(@ACTION(26).out, @VF(475).i)
+    ;
+  @G(499) :
+     @L(@VF(478).o, @C(476).EN)
+    ;
+  @G(500) :
+     @L(@VF(477).o, @C(476).IN)
+    ;
+  @G(501) :
+     @L(@C(476).MOVE, @VF(479).i)
+    ;
+  @G(496) :
+     @L(@VF(492).o, @C(486).IN1)
+    ;
+  @G(498) :
+     @L(@VF(494).o, @C(486).IN2)
+    ;
+  @G(505) :
+     @L(@TRANSITION(502).out, @CONN(504).i)
+    ;
+  @G(507) :
+     @L(@CONT(506).o, @TRANSITION(502).T)
+    ;
+  @G(170) :
+     @L(@C(486).OR, @TRANSITION(171).T)
+    ;
+  @G(378) :
+     @L(@C(325).ENO, @C(377).CLK)
+    ;
+  @G(380) :
+     @L(@C(377).Q, @CP(583)),
+     @L(@CP(583), @C(379).EN),
+     @L(@CP(583), @C(580).EN)
+    ;
+  @G(472) :
+     @L(@VF(381).o, @CP(582)),
+     @L(@CP(582), @C(379).Msg),
+     @L(@CP(582), @C(580).IN)
+    ;
+  @G(510) :
+     @L(@C(473).Q, @CP(587)),
+     @L(@CP(587), @C(480).EN),
+     @L(@CP(587), @C(584).EN)
+    ;
+  @G(511) :
+     @L(@VF(497).o, @CP(588)),
+     @L(@CP(588), @C(480).Msg),
+     @L(@CP(588), @C(584).IN)
+    ;
+  @G(512) :
+     @L(@C(326).ENO, @C(473).CLK)
+    ;
+  @G(516) :
+     @L(@C(513).Q, @CP(593)),
+     @L(@CP(593), @C(514).EN),
+     @L(@CP(593), @C(589).EN)
+    ;
+  @G(517) :
+     @L(@VF(515).o, @CP(592)),
+     @L(@CP(592), @C(514).Msg),
+     @L(@CP(592), @C(589).IN)
+    ;
+  @G(518) :
+     @L(@C(327).ENO, @C(513).CLK)
+    ;
+  @G(522) :
+     @L(@C(519).Q, @CP(597)),
+     @L(@CP(597), @C(520).EN),
+     @L(@CP(597), @C(594).EN)
+    ;
+  @G(523) :
+     @L(@VF(521).o, @CP(598)),
+     @L(@CP(598), @C(520).Msg),
+     @L(@CP(598), @C(594).IN)
+    ;
+  @G(524) :
+     @L(@C(328).ENO, @C(519).CLK)
+    ;
+  @G(528) :
+     @L(@C(525).Q, @CP(602)),
+     @L(@CP(602), @C(526).EN),
+     @L(@CP(602), @C(599).EN)
+    ;
+  @G(529) :
+     @L(@VF(527).o, @CP(603)),
+     @L(@CP(603), @C(526).Msg),
+     @L(@CP(603), @C(599).IN)
+    ;
+  @G(530) :
+     @L(@C(329).ENO, @C(525).CLK)
+    ;
+  @G(534) :
+     @L(@C(531).Q, @CP(607)),
+     @L(@CP(607), @C(532).EN),
+     @L(@CP(607), @C(604).EN)
+    ;
+  @G(535) :
+     @L(@VF(533).o, @CP(608)),
+     @L(@CP(608), @C(532).Msg),
+     @L(@CP(608), @C(604).IN)
+    ;
+  @G(536) :
+     @L(@C(343).ENO, @C(531).CLK)
+    ;
+  @G(540) :
+     @L(@C(537).Q, @CP(612)),
+     @L(@CP(612), @C(538).EN),
+     @L(@CP(612), @C(609).EN)
+    ;
+  @G(541) :
+     @L(@VF(539).o, @CP(613)),
+     @L(@CP(613), @C(538).Msg),
+     @L(@CP(613), @C(609).IN)
+    ;
+  @G(542) :
+     @L(@C(347).ENO, @C(537).CLK)
+    ;
+  @G(546) :
+     @L(@C(543).Q, @CP(618)),
+     @L(@CP(618), @C(544).EN),
+     @L(@CP(618), @C(614).EN)
+    ;
+  @G(547) :
+     @L(@VF(545).o, @CP(617)),
+     @L(@CP(617), @C(544).Msg),
+     @L(@CP(617), @C(614).IN)
+    ;
+  @G(548) :
+     @L(@C(351).ENO, @C(543).CLK)
+    ;
+  @G(552) :
+     @L(@C(549).Q, @CP(623)),
+     @L(@CP(623), @C(550).EN),
+     @L(@CP(623), @C(619).EN)
+    ;
+  @G(553) :
+     @L(@VF(551).o, @CP(622)),
+     @L(@CP(622), @C(550).Msg),
+     @L(@CP(622), @C(619).IN)
+    ;
+  @G(554) :
+     @L(@C(476).ENO, @C(549).CLK)
+    ;
+  @G(558) :
+     @L(@VF(557).o, @C(556).CLK)
+    ;
+  @G(560) :
+     @L(@C(556).Q, @VF(559).i)
+    ;
+  @G(565) :
+     @L(@VF(563).o, @C(562).Msg)
+    ;
+  @G(561) :
+     @L(@VF(559).o, @C(562).EN)
+    ;
+  @G(581) :
+     @L(@C(580).MOVE, @VF(579).i)
+    ;
+  @G(586) :
+     @L(@C(584).MOVE, @VF(585).i)
+    ;
+  @G(591) :
+     @L(@C(589).MOVE, @VF(590).i)
+    ;
+  @G(596) :
+     @L(@C(594).MOVE, @VF(595).i)
+    ;
+  @G(601) :
+     @L(@C(599).MOVE, @VF(600).i)
+    ;
+  @G(606) :
+     @L(@C(604).MOVE, @VF(605).i)
+    ;
+  @G(611) :
+     @L(@C(609).MOVE, @VF(610).i)
+    ;
+  @G(616) :
+     @L(@C(614).MOVE, @VF(615).i)
+    ;
+  @G(621) :
+     @L(@C(619).MOVE, @VF(620).i)
+    ;
+END_PROGRAM

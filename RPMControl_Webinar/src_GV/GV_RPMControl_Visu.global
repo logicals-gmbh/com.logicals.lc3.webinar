@@ -1,0 +1,60 @@
+/*
+ * Daten von Visu
+ */
+GLOBALS GV_RPMControl_Visu
+	VAR_GLOBAL
+        /*
+         * Setzen der Betriebsart 1Aus5 
+         */
+        /* Von Visu oder Schalter Ausgangswert = 0% */
+        gx_RPM0_V : BOOL; 
+        /* Von Visu oder Schalter Ausgangswert = 25% */
+        gx_RPM1_V : BOOL; 
+        /* Von Visu oder Schalter Ausgangswert = 50% */
+        gx_RPM2_V : BOOL;         
+        /* Von Visu oder Schalter SetPoint von Poti */
+        gx_RPM3_V : BOOL; 
+        /* Von Visu oder Schalter SetPoint von SFC */
+        gx_RPM4_V : BOOL; 
+
+        /* Von Visu Reset Mode */
+        gx_ResetRPM_V : BOOL; 
+
+        /*
+         * Anzeige der Betriebsart 1Aus5 
+         */
+        /* An Ausgang Ausgangswert = 0% */
+        gx_ModeRPM0_V : BOOL; 
+        /* An Ausgang Ausgangswert = 35% */
+        gx_ModeRPM1_V : BOOL; 
+        /* An Ausgang Ausgangswert = 70% */
+        gx_ModeRPM2_V : BOOL; 
+        /* An Ausgang SetPoint von Poti */
+        gx_ModeRPM3_V : BOOL; 
+        /* SetPoint von SFC */
+        gx_ModeRPM4_V : BOOL; 
+
+        /* Betriebsart Setzwert per Rampe */
+        gx_ModeRamp_V : BOOL; 
+        /* Betriebsart Handbetrieb */
+        gx_ModeManual_V : BOOL; 
+
+       /*
+        * Regelparameter von Visu anpassen 
+        */
+        gx_SetControlPar       : BOOL;
+        gx_SetControlParState  : UINT;
+
+        gx_SaveControlPar      : BOOL;
+        gx_SaveControlParState : UINT;
+        
+       /*
+        * Anzeige RPM-Daten
+        */ 
+        gr_RPMSetVal : REAL;  // Skalierte Stellgroesse (Vorgabe von Poti oder Visu)
+        gr_RPMActVal : REAL;  // Skalierte Istgroesse
+        gr_RPMDevVal : REAL;  // Berechnete Regelabweichung in %
+        gr_RPMOutVal : REAL;  // Berechnetes Ausgangssignal in %
+
+	END_VAR
+END_GLOBALS

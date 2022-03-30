@@ -1,0 +1,13 @@
+/*
+ * Datentyp fuer Oscilloscope SpiderControl
+ */
+TYPE
+   Data_Struct : STRUCT
+      Value : REAL;
+   END_STRUCT;
+
+   Data : STRUCT
+      Data_Struct : Data_Struct;
+   END_STRUCT;
+
+END_TYPE

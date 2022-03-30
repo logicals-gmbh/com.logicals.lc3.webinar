@@ -1,0 +1,78 @@
+PROGRAM PRG_AppLogic_FBD
+  VAR
+    lx_CyclePulse : BOOL;
+    lui_CycleCount : UINT;
+    lt_ActCycleTime : TIME;
+    lt_CycleTime : TIME;
+  END_VAR
+  VAR_EXTERNAL
+    gui_CycleCountAppTimer : UINT;
+    gui_CycleCountAppLogic : UINT;
+    gui_CycleCountAppLoop : UINT;
+  END_VAR
+
+  (*
+
+    // Network 1:
+    NOT(IN := lx_CyclePulse, NOT => lx_CyclePulse);
+
+    // Network 2:
+    ADD(IN1 := lui_CycleCount, IN2 := 1, ADD => (lui_CycleCount, gui_CycleCountAppLogic));
+
+    // Network 3:
+    SysTaskActualCycleTime(SysTaskActualCycleTime => lt_ActCycleTime);
+
+    // Network 4:
+    SysTaskCycleTime(SysTaskCycleTime => lt_CycleTime);
+
+  *)
+
+  @C(2) : @F(NOT), @R(570.0, 140.0, 60.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(NOT), @R(9.5));
+  @C(8) : @F(ADD), @R(580.0, 230.0, 40.0, 38.0), UINT, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(ADD), @R(9.5));
+  @VF(1) : @E(lx_CyclePulse), @R(370.0, 140.0, 140.0, 19.0);
+  @VF(3) : @E(lx_CyclePulse), @R(730.0, 140.0, 140.0, 19.0);
+  @VF(7) : @E(lui_CycleCount), @R(370.0, 230.0, 140.0, 19.0);
+  @VF(12) : @E(lui_CycleCount), @R(730.0, 230.0, 140.0, 19.0);
+  @VF(10) : @E(1), @R(370.0, 250.0, 140.0, 19.0), UINT;
+  @OLT(67) : @R(900.0, 200.0, 80.0, 19.0), @S(12);
+  @CF(6) : @R(370.0, 70.0, 490.0, 39.0), @T("CyclePulse"), @POU;
+  @CF(14) : @R(370.0, 180.0, 490.0, 39.0), @T("CyclePulse"), @POU;
+  @VF(15) : @E(gui_CycleCountAppLogic), @R(730.0, 290.0, 250.0, 19.0);
+  @VF(17) : @E(gui_CycleCountAppLoop), @R(730.0, 340.0, 250.0, 19.0);
+  @OLT(18) : @R(900.0, 270.0, 80.0, 19.0), @S(15);
+  @OLT(19) : @R(900.0, 320.0, 80.0, 19.0), @S(17);
+  @C(89) : @F(SysTaskActualCycleTime), @R(370.0, 520.0, 184.0, 18.0), @O(@N(SysTaskActualCycleTime), @R(9.5));
+  @C(90) : @F(SysTaskCycleTime), @R(370.0, 590.0, 190.0, 18.0), @O(@N(SysTaskCycleTime), @R(9.5));
+  @VF(91) : @E(lt_ActCycleTime), @R(630.0, 520.0, 140.0, 19.0);
+  @VF(93) : @E(lt_CycleTime), @R(630.0, 590.0, 140.0, 19.0);
+  @CF(88) : @R(370.0, 430.0, 490.0, 39.0), @T("Read CycleTime"), @POU;
+  @OLT(20) : @R(780.0, 490.0, 180.0, 19.0), @S(91);
+  @OLT(21) : @R(780.0, 560.0, 180.0, 19.0), @S(93);
+  @VF(22) : @E(gui_CycleCountAppTimer), @R(730.0, 390.0, 250.0, 19.0);
+  @OLT(23) : @R(900.0, 370.0, 80.0, 19.0), @S(22);
+  @CP(16) : 669.5, 239.5;
+
+  @G(4) :
+     @L(@C(2).NOT, @VF(3).i)
+    ;
+  @G(5) :
+     @L(@VF(1).o, @C(2).IN)
+    ;
+  @G(9) :
+     @L(@VF(7).o, @C(8).IN1)
+    ;
+  @G(13) :
+     @L(@C(8).ADD, @CP(16)),
+     @L(@CP(16), @VF(12).i),
+     @L(@CP(16), @VF(15).i)
+    ;
+  @G(11) :
+     @L(@VF(10).o, @C(8).IN2)
+    ;
+  @G(92) :
+     @L(@C(89).SysTaskActualCycleTime, @VF(91).i)
+    ;
+  @G(94) :
+     @L(@C(90).SysTaskCycleTime, @VF(93).i)
+    ;
+END_PROGRAM

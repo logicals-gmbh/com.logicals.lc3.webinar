@@ -1,0 +1,641 @@
+PROGRAM PRG_Raspi4_IOMapping_FBD
+  USING com.logicals.Basic.Flash;
+  VAR
+    lx_isConnected : BOOL;
+    ludi_ConfiguredSlaves : UDINT;
+    ludi_ConnectedSlaves : UDINT;
+    R_TRIG1 : R_TRIG;
+    lx_CycleInit : BOOL;
+    lx_CyclePulse : BOOL;
+    lui_CycleCount : UINT;
+    FORCEMRK2 : FORCEMRK;
+    FORCEMRK3 : FORCEMRK;
+    FORCEMRK4 : FORCEMRK;
+    FORCEMRK5 : FORCEMRK;
+    FORCEMRK6 : FORCEMRK;
+    FORCEMRK7 : FORCEMRK;
+    FORCEMRK8 : FORCEMRK;
+    FORCEMRK1 : FORCEMRK;
+    FORCEMRK9 : FORCEMRK;
+    FORCEMRK10 : FORCEMRK;
+    FORCEMRK11 : FORCEMRK;
+    com_logicals_Basic_Flash_FB_lc_Flash_2Hz_FBD1 : com.logicals.Basic.Flash.FB_lc_Flash_2Hz_FBD;
+  END_VAR
+  VAR_EXTERNAL
+    gr_PV : REAL;
+    gr_SP : REAL;
+    gr_Y : REAL;
+    gr_PV_Scale : REAL;
+    gr_SP_Scale : REAL;
+    gr_Y_Scale : REAL;
+    gx_RPM0 : BOOL;
+    gx_RPM1 : BOOL;
+    gx_RPM2 : BOOL;
+    gx_RPM3 : BOOL;
+    gx_ResetRPM : BOOL;
+    gx_ModeRPM0 : BOOL;
+    gx_ModeRPM1 : BOOL;
+    gx_ModeRPM2 : BOOL;
+    gx_ModeRPM3 : BOOL;
+  END_VAR
+  VAR_EXTERNAL
+    gusi_Status_AI1 : USINT;
+    gi_Value_AI1 : INT;
+    gusi_Status_AI2 : USINT;
+    gi_Value_AI2 : INT;
+    gi_Value_AO1 : INT;
+    gi_Value_AO2 : INT;
+  END_VAR
+  VAR_EXTERNAL
+    gx_In1 : BOOL;
+    gx_In2 : BOOL;
+    gx_In3 : BOOL;
+    gx_In4 : BOOL;
+    gx_In5 : BOOL;
+    gx_In6 : BOOL;
+    gx_In7 : BOOL;
+    gx_In8 : BOOL;
+  END_VAR
+  VAR_EXTERNAL
+    gx_Out1 : BOOL;
+    gx_Out2 : BOOL;
+    gx_Out3 : BOOL;
+    gx_Out4 : BOOL;
+    gx_Out5 : BOOL;
+    gx_Out6 : BOOL;
+    gx_Out7 : BOOL;
+    gx_Out8 : BOOL;
+  END_VAR
+  VAR_EXTERNAL
+    Slave_1002EL3162Channel1Status : USINT;
+    Slave_1002EL3162Channel1Value : INT;
+    Slave_1002EL3162Channel2Status : USINT;
+    Slave_1002EL3162Channel2Value : INT;
+  END_VAR
+  VAR_EXTERNAL
+    Slave_1004EL1008Channel1Input : BOOL;
+    Slave_1004EL1008Channel2Input : BOOL;
+    Slave_1004EL1008Channel3Input : BOOL;
+    Slave_1004EL1008Channel4Input : BOOL;
+    Slave_1004EL1008Channel5Input : BOOL;
+    Slave_1004EL1008Channel6Input : BOOL;
+    Slave_1004EL1008Channel7Input : BOOL;
+    Slave_1004EL1008Channel8Input : BOOL;
+  END_VAR
+  VAR_EXTERNAL
+    Slave_1003EL4102Channel1Output : INT;
+    Slave_1003EL4102Channel2Output : INT;
+  END_VAR
+  VAR_EXTERNAL
+    Slave_1005EL2008Channel1Output : BOOL;
+    Slave_1005EL2008Channel2Output : BOOL;
+    Slave_1005EL2008Channel3Output : BOOL;
+    Slave_1005EL2008Channel4Output : BOOL;
+    Slave_1005EL2008Channel5Output : BOOL;
+    Slave_1005EL2008Channel6Output : BOOL;
+    Slave_1005EL2008Channel7Output : BOOL;
+    Slave_1005EL2008Channel8Output : BOOL;
+  END_VAR
+  VAR_EXTERNAL
+    gx_isConnected : BOOL;
+    gudi_ConfiguredSlaves : UDINT;
+    gudi_ConnectedSlaves : UDINT;
+  END_VAR
+
+  (*
+
+    // Network 1:
+    R_TRIG1(CLK := TRUE, Q => lx_CycleInit);
+
+    // Network 2:
+    NOT(IN := lx_CyclePulse, NOT => lx_CyclePulse);
+
+    // Network 3:
+    ADD(IN1 := lui_CycleCount, IN2 := 1, ADD => lui_CycleCount);
+
+    // Network 4:
+    com_logicals_Basic_Flash_FB_lc_Flash_2Hz_FBD1(vox_Out => gx_Out8);
+
+    // Network 5:
+    ECM_ACONTIS_ISCONNECTED(ECM_ACONTIS_ISCONNECTED => lx_isConnected);
+    gx_isConnected := lx_isConnected;
+
+    // Network 6:
+    ECM_ACONTIS_CONFIGURED_SLAVES(ECM_ACONTIS_CONFIGURED_SLAVES => ludi_ConfiguredSlaves);
+    gudi_ConfiguredSlaves := ludi_ConfiguredSlaves;
+
+    // Network 7:
+    ECM_ACONTIS_CONNECTED_SLAVES(ECM_ACONTIS_CONNECTED_SLAVES => ludi_ConnectedSlaves);
+    gudi_ConnectedSlaves := ludi_ConnectedSlaves;
+
+    // Network 8:
+    MOVE(IN := Slave_1002EL3162Channel1Value, MOVE => gi_Value_AI1);
+    FORCEMRK7(IN := gi_Value_AI1);
+    TO_REAL(IN := FORCEMRK7.OUT, TO_REAL => gr_PV);
+
+    // Network 9:
+    MOVE(IN := Slave_1002EL3162Channel2Value, MOVE => gi_Value_AI2);
+
+    // Network 10:
+    MOVE(IN := Slave_1002EL3162Channel1Status, MOVE => gusi_Status_AI1);
+
+    // Network 11:
+    MOVE(IN := Slave_1002EL3162Channel2Status, MOVE => gusi_Status_AI2);
+
+    // Network 12:
+    MOVE(IN := Slave_1004EL1008Channel1Input, MOVE => gx_In1);
+    FORCEMRK2(IN := gx_In1, OUT => gx_RPM0);
+
+    // Network 13:
+    MOVE(IN := Slave_1004EL1008Channel2Input, MOVE => gx_In2);
+    FORCEMRK3(IN := gx_In2, OUT => gx_RPM1);
+
+    // Network 14:
+    MOVE(IN := Slave_1004EL1008Channel3Input, MOVE => gx_In3);
+    FORCEMRK4(IN := gx_In3, OUT => gx_RPM2);
+
+    // Network 15:
+    MOVE(IN := Slave_1004EL1008Channel4Input, MOVE => gx_In4);
+    FORCEMRK5(IN := gx_In4, OUT => gx_RPM3);
+
+    // Network 16:
+    MOVE(IN := Slave_1004EL1008Channel5Input, MOVE => gx_In5);
+
+    // Network 17:
+    MOVE(IN := Slave_1004EL1008Channel6Input, MOVE => gx_In6);
+
+    // Network 18:
+    MOVE(IN := Slave_1004EL1008Channel7Input, MOVE => gx_In7);
+
+    // Network 19:
+    MOVE(IN := Slave_1004EL1008Channel8Input, MOVE => gx_In8);
+    FORCEMRK6(IN := gx_In8, OUT => gx_ResetRPM);
+
+    // Network 20:
+    MOVE(IN := gr_Y, MOVE => @C(43).MOVE);
+    TO_INT(IN := @C(43).MOVE, TO_INT => @C(128).TO_INT);
+    FORCEMRK8(IN := @C(128).TO_INT, OUT => gi_Value_AO1);
+
+    // Network 21:
+    FORCEMRK1(IN := gx_ModeRPM0);
+    MOVE(IN := FORCEMRK1.OUT, MOVE => gx_Out1);
+    Slave_1005EL2008Channel1Output := gx_Out1;
+
+    // Network 22:
+    FORCEMRK9(IN := gx_ModeRPM1);
+    MOVE(IN := FORCEMRK9.OUT, MOVE => gx_Out2);
+    Slave_1005EL2008Channel2Output := gx_Out2;
+
+    // Network 23:
+    FORCEMRK10(IN := gx_ModeRPM2);
+    MOVE(IN := FORCEMRK10.OUT, MOVE => gx_Out3);
+    Slave_1005EL2008Channel3Output := gx_Out3;
+
+    // Network 24:
+    FORCEMRK11(IN := gx_ModeRPM3);
+    MOVE(IN := FORCEMRK11.OUT, MOVE => gx_Out4);
+    Slave_1005EL2008Channel4Output := gx_Out4;
+
+    // Network 25:
+    RTSCycleInfo(Shutdown => @C(192).Shutdown, Term => @C(192).Term);
+    OR(IN1 := @C(192).Shutdown, IN2 := @C(192).Term, OR => @C(196).OR);
+    MOVE(EN := @C(196).OR, IN := FALSE, MOVE => (gx_Out1, gx_Out2));
+    MOVE(EN := @C(196).OR, IN := 0, MOVE => gi_Value_AO1);
+
+    // Network 26:
+    MOVE(IN := gi_Value_AO1, MOVE => Slave_1003EL4102Channel1Output);
+
+    // Network 27:
+    Slave_1005EL2008Channel5Output := gx_Out5;
+
+    // Network 28:
+    Slave_1005EL2008Channel6Output := gx_Out6;
+
+    // Network 29:
+    Slave_1005EL2008Channel7Output := gx_Out7;
+
+    // Network 30:
+    Slave_1005EL2008Channel8Output := gx_Out8;
+
+  *)
+
+  @C(432) : @FB(R_TRIG1), @R(860.0, 140.0, 140.0, 18.0), @I(@N(CLK), @L(9.5)), @O(@N(Q), @R(9.5));
+  @C(13) : @F(NOT), @R(900.0, 250.0, 60.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(NOT), @R(9.5));
+  @C(18) : @F(ADD), @R(920.0, 280.0, 40.0, 38.0), UINT, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(ADD), @R(9.5));
+  @VF(433) : @E(TRUE), @R(670.0, 140.0, 140.0, 19.0);
+  @VF(435) : @E(lx_CycleInit), @R(1060.0, 140.0, 140.0, 19.0);
+  @VF(12) : @E(lx_CyclePulse), @R(740.0, 250.0, 140.0, 19.0);
+  @VF(14) : @E(lx_CyclePulse), @R(990.0, 250.0, 140.0, 19.0);
+  @VF(17) : @E(lui_CycleCount), @R(740.0, 280.0, 140.0, 19.0);
+  @VF(19) : @E(lui_CycleCount), @R(990.0, 280.0, 140.0, 19.0);
+  @VF(22) : @E(1), @R(740.0, 300.0, 140.0, 19.0), UINT;
+  @OLT(67) : @R(1230.0, 260.0, 80.0, 19.0), @S(19);
+  @OLT(71) : @R(610.0, 270.0, 80.0, 19.0), @S(17);
+  @CF(10) : @R(740.0, 70.0, 390.0, 39.0), @T("Initialisierungsmerker"), @POU;
+  @CF(437) : @R(740.0, 190.0, 390.0, 39.0), @T("Life-Tick"), @POU;
+  @CF(1) : @R(740.0, 520.0, 390.0, 39.0), @T("EtherCAT Status"), @POU;
+  @C(2) : @F(ECM_ACONTIS_ISCONNECTED), @R(740.0, 600.0, 180.0, 18.0), @O(@N(ECM_ACONTIS_ISCONNECTED), @R(9.5));
+  @VF(3) : @E(lx_isConnected), @R(990.0, 600.0, 140.0, 19.0);
+  @C(5) : @F(ECM_ACONTIS_CONFIGURED_SLAVES), @R(740.0, 660.0, 180.0, 18.0), @O(@N(ECM_ACONTIS_CONFIGURED_SLAVES), @R(9.5));
+  @C(6) : @F(ECM_ACONTIS_CONNECTED_SLAVES), @R(740.0, 720.0, 180.0, 18.0), @O(@N(ECM_ACONTIS_CONNECTED_SLAVES), @R(9.5));
+  @VF(7) : @E(ludi_ConfiguredSlaves), @R(990.0, 660.0, 140.0, 19.0);
+  @VF(9) : @E(gudi_ConfiguredSlaves), @R(1200.0, 660.0, 230.0, 19.0);
+  @VF(24) : @E(gx_isConnected), @R(1200.0, 600.0, 230.0, 19.0);
+  @VF(26) : @E(ludi_ConnectedSlaves), @R(990.0, 720.0, 140.0, 19.0);
+  @VF(28) : @E(gudi_ConnectedSlaves), @R(1200.0, 720.0, 230.0, 19.0);
+  @CF(30) : @R(740.0, 780.0, 390.0, 39.0), @T("EtherCAT Analog-Eingaenge (Werte)"), @POU;
+  @VF(31) : @E(gi_Value_AI1), @R(1120.0, 870.0, 140.0, 19.0);
+  @VF(32) : @E(gi_Value_AI2), @R(1120.0, 920.0, 140.0, 19.0);
+  @C(33) : @F(MOVE), @R(940.0, 870.0, 60.0, 18.0), INT, @I(@N(IN), @L(9.5)), @O(@N(MOVE), @R(9.5));
+  @C(34) : @F(MOVE), @R(940.0, 920.0, 60.0, 18.0), INT, @I(@N(IN), @L(9.5)), @O(@N(MOVE), @R(9.5));
+  @VF(37) : @E(Slave_1002EL3162Channel1Value), @R(580.0, 870.0, 270.0, 19.0);
+  @VF(39) : @E(Slave_1002EL3162Channel2Value), @R(580.0, 920.0, 270.0, 19.0);
+  @CF(48) : @R(750.0, 1360.0, 390.0, 39.0), @T("EtherCAT Binaer-Eingaenge"), @POU;
+  @CF(49) : @R(750.0, 1060.0, 390.0, 39.0), @T("EtherCAT Analog-Eingaenge (Status)"), @POU;
+  @C(50) : @F(MOVE), @R(940.0, 1180.0, 60.0, 18.0), USINT, @I(@N(IN), @L(9.5)), @O(@N(MOVE), @R(9.5));
+  @C(51) : @F(MOVE), @R(940.0, 1230.0, 60.0, 18.0), USINT, @I(@N(IN), @L(9.5)), @O(@N(MOVE), @R(9.5));
+  @VF(52) : @E(Slave_1002EL3162Channel1Status), @R(580.0, 1180.0, 270.0, 19.0);
+  @VF(53) : @E(Slave_1002EL3162Channel2Status), @R(580.0, 1230.0, 270.0, 19.0);
+  @VF(56) : @E(gusi_Status_AI1), @R(1070.0, 1180.0, 140.0, 19.0);
+  @VF(57) : @E(gusi_Status_AI2), @R(1070.0, 1230.0, 140.0, 19.0);
+  @VF(60) : @E(Slave_1004EL1008Channel1Input), @R(600.0, 1440.0, 260.0, 19.0);
+  @VF(61) : @E(Slave_1004EL1008Channel2Input), @R(600.0, 1460.0, 260.0, 19.0);
+  @VF(62) : @E(Slave_1004EL1008Channel3Input), @R(600.0, 1480.0, 260.0, 19.0);
+  @VF(63) : @E(Slave_1004EL1008Channel4Input), @R(600.0, 1500.0, 260.0, 19.0);
+  @VF(64) : @E(Slave_1004EL1008Channel5Input), @R(600.0, 1520.0, 260.0, 19.0);
+  @VF(65) : @E(Slave_1004EL1008Channel6Input), @R(600.0, 1540.0, 260.0, 19.0);
+  @VF(66) : @E(Slave_1004EL1008Channel7Input), @R(600.0, 1560.0, 260.0, 19.0);
+  @VF(68) : @E(Slave_1004EL1008Channel8Input), @R(600.0, 1580.0, 260.0, 19.0);
+  @VF(69) : @E(gx_In1), @R(1060.0, 1440.0, 140.0, 19.0);
+  @VF(70) : @E(gx_In2), @R(1060.0, 1460.0, 140.0, 19.0);
+  @VF(72) : @E(gx_In3), @R(1060.0, 1480.0, 140.0, 19.0);
+  @VF(73) : @E(gx_In4), @R(1060.0, 1500.0, 140.0, 19.0);
+  @VF(74) : @E(gx_In5), @R(1060.0, 1520.0, 140.0, 19.0);
+  @VF(75) : @E(gx_In6), @R(1060.0, 1540.0, 140.0, 19.0);
+  @VF(76) : @E(gx_In7), @R(1060.0, 1560.0, 140.0, 19.0);
+  @VF(77) : @E(gx_In8), @R(1060.0, 1580.0, 140.0, 19.0);
+  @C(78) : @F(MOVE), @R(940.0, 1440.0, 60.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(MOVE), @R(9.5));
+  @C(80) : @F(MOVE), @R(940.0, 1460.0, 60.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(MOVE), @R(9.5));
+  @C(81) : @F(MOVE), @R(940.0, 1480.0, 60.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(MOVE), @R(9.5));
+  @C(82) : @F(MOVE), @R(940.0, 1500.0, 60.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(MOVE), @R(9.5));
+  @C(83) : @F(MOVE), @R(940.0, 1520.0, 60.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(MOVE), @R(9.5));
+  @C(84) : @F(MOVE), @R(940.0, 1540.0, 60.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(MOVE), @R(9.5));
+  @C(85) : @F(MOVE), @R(940.0, 1560.0, 60.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(MOVE), @R(9.5));
+  @C(86) : @F(MOVE), @R(940.0, 1580.0, 60.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(MOVE), @R(9.5));
+  @C(102) : @FB(FORCEMRK2), @R(1260.0, 1440.0, 120.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(OUT), @R(9.5));
+  @C(103) : @FB(FORCEMRK3), @R(1260.0, 1460.0, 120.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(OUT), @R(9.5));
+  @C(104) : @FB(FORCEMRK4), @R(1260.0, 1480.0, 120.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(OUT), @R(9.5));
+  @C(105) : @FB(FORCEMRK5), @R(1260.0, 1500.0, 120.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(OUT), @R(9.5));
+  @C(106) : @FB(FORCEMRK6), @R(1260.0, 1580.0, 120.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(OUT), @R(9.5));
+  @VF(112) : @E(gx_RPM0), @R(1430.0, 1440.0, 140.0, 19.0);
+  @VF(114) : @E(gx_RPM1), @R(1430.0, 1460.0, 140.0, 19.0);
+  @VF(115) : @E(gx_RPM2), @R(1430.0, 1480.0, 140.0, 19.0);
+  @VF(116) : @E(gx_RPM3), @R(1430.0, 1500.0, 140.0, 19.0);
+  @VF(117) : @E(gx_ResetRPM), @R(1430.0, 1580.0, 140.0, 19.0);
+  @C(122) : @FB(FORCEMRK7), @R(1320.0, 870.0, 120.0, 18.0), INT, @I(@N(IN), @L(9.5)), @O(@N(OUT), @R(9.5));
+  @C(123) : @F(TO_REAL), @R(1510.0, 870.0, 120.0, 18.0), INT, @I(@N(IN), @L(9.5)), @O(@N(TO_REAL), @R(9.5));
+  @VF(124) : @E(gr_PV), @R(1660.0, 870.0, 140.0, 19.0);
+  @CF(41) : @R(750.0, 1680.0, 390.0, 39.0), @T("EtherCAT Analog-Ausgaenge (Wert)"), @POU;
+  @VF(42) : @E(gr_Y), @R(720.0, 1750.0, 140.0, 19.0);
+  @C(43) : @F(MOVE), @R(940.0, 1750.0, 60.0, 18.0), REAL, @I(@N(IN), @L(9.5)), @O(@N(MOVE), @R(9.5));
+  @C(45) : @FB(FORCEMRK8), @R(1210.0, 1750.0, 120.0, 18.0), INT, @I(@N(IN), @L(9.5)), @O(@N(OUT), @R(9.5));
+  @VF(47) : @E(gi_Value_AO1), @R(1390.0, 1750.0, 140.0, 19.0);
+  @C(128) : @F(TO_INT), @R(1050.0, 1750.0, 120.0, 18.0), REAL, @I(@N(IN), @L(9.5)), @O(@N(TO_INT), @R(9.5));
+  @VF(131) : @E(gi_Value_AO1), @R(720.0, 1810.0, 140.0, 19.0);
+  @C(132) : @F(MOVE), @R(940.0, 1810.0, 60.0, 18.0), INT, @I(@N(IN), @L(9.5)), @O(@N(MOVE), @R(9.5));
+  @VF(134) : @E(Slave_1003EL4102Channel1Output), @R(1050.0, 1810.0, 280.0, 19.0);
+  @CF(136) : @R(750.0, 1920.0, 390.0, 39.0), @T("EtherCAT Analog-Ausgaenge (Wert)"), @POU;
+  @VF(137) : @E(gx_ModeRPM0), @R(620.0, 2010.0, 140.0, 19.0);
+  @C(138) : @F(MOVE), @R(1020.0, 2010.0, 60.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(MOVE), @R(9.5));
+  @C(141) : @FB(FORCEMRK1), @R(830.0, 2010.0, 120.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(OUT), @R(9.5));
+  @VF(142) : @E(gx_Out1), @R(1130.0, 2010.0, 130.0, 19.0);
+  @VF(144) : @E(Slave_1005EL2008Channel1Output), @R(1310.0, 2010.0, 350.0, 19.0);
+  @C(146) : @FB(FORCEMRK9), @R(830.0, 2030.0, 120.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(OUT), @R(9.5));
+  @C(147) : @F(MOVE), @R(1020.0, 2030.0, 60.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(MOVE), @R(9.5));
+  @VF(148) : @E(gx_ModeRPM1), @R(620.0, 2030.0, 140.0, 19.0);
+  @VF(149) : @E(gx_Out2), @R(1130.0, 2030.0, 130.0, 19.0);
+  @VF(150) : @E(Slave_1005EL2008Channel2Output), @R(1310.0, 2030.0, 350.0, 19.0);
+  @C(155) : @FB(FORCEMRK10), @R(830.0, 2050.0, 120.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(OUT), @R(9.5));
+  @C(156) : @F(MOVE), @R(1020.0, 2050.0, 60.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(MOVE), @R(9.5));
+  @VF(157) : @E(gx_ModeRPM2), @R(620.0, 2050.0, 140.0, 19.0);
+  @VF(158) : @E(gx_Out3), @R(1130.0, 2050.0, 130.0, 19.0);
+  @VF(159) : @E(Slave_1005EL2008Channel3Output), @R(1310.0, 2050.0, 350.0, 19.0);
+  @C(164) : @FB(FORCEMRK11), @R(830.0, 2070.0, 120.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(OUT), @R(9.5));
+  @C(165) : @F(MOVE), @R(1020.0, 2070.0, 60.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(MOVE), @R(9.5));
+  @VF(166) : @E(gx_ModeRPM3), @R(620.0, 2070.0, 140.0, 19.0);
+  @VF(167) : @E(gx_Out4), @R(1130.0, 2070.0, 130.0, 19.0);
+  @VF(168) : @E(Slave_1005EL2008Channel4Output), @R(1310.0, 2070.0, 350.0, 19.0);
+  @VF(176) : @E(gx_Out5), @R(1130.0, 2090.0, 130.0, 19.0);
+  @VF(177) : @E(Slave_1005EL2008Channel5Output), @R(1310.0, 2090.0, 350.0, 19.0);
+  @VF(185) : @E(gx_Out6), @R(1130.0, 2110.0, 130.0, 19.0);
+  @VF(186) : @E(Slave_1005EL2008Channel6Output), @R(1310.0, 2110.0, 350.0, 19.0);
+  @VF(194) : @E(gx_Out7), @R(1130.0, 2130.0, 130.0, 19.0);
+  @VF(195) : @E(Slave_1005EL2008Channel7Output), @R(1310.0, 2130.0, 350.0, 19.0);
+  @VF(203) : @E(gx_Out8), @R(1130.0, 2150.0, 130.0, 19.0);
+  @VF(204) : @E(Slave_1005EL2008Channel8Output), @R(1310.0, 2150.0, 350.0, 19.0);
+  @CF(173) : @R(740.0, 360.0, 390.0, 39.0), @T("Life-Tick"), @POU;
+  @C(174) : @FB(com_logicals_Basic_Flash_FB_lc_Flash_2Hz_FBD1), @R(740.0, 440.0, 260.0, 58.0), @O(@N(vox_Out), @R(9.5));
+  @VF(175) : @E(gx_Out8), @R(1130.0, 440.0, 140.0, 19.0);
+  @OLT(179) : @R(720.0, 1730.0, 80.0, 19.0), @S(42);
+  @OLT(180) : @R(1450.0, 1710.0, 80.0, 19.0), @S(47);
+  @OLT(182) : @R(720.0, 1790.0, 80.0, 19.0), @S(131);
+  @OLT(183) : @R(1050.0, 1790.0, 80.0, 19.0), @S(134);
+  @OLT(184) : @R(1210.0, 1710.0, 120.0, 39.0), @S(45);
+  @OLT(187) : @R(1180.0, 850.0, 80.0, 19.0), @S(31);
+  @OLT(188) : @R(1720.0, 850.0, 80.0, 19.0), @S(124);
+  @OLT(189) : @R(770.0, 850.0, 80.0, 19.0), @S(37);
+  @OLT(191) : @R(1340.0, 830.0, 100.0, 39.0), @S(122);
+  @C(196) : @F(OR), @R(930.0, 2220.0, 40.0, 38.0), BOOL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(OR), @R(9.5));
+  @C(192) : @F(RTSCycleInfo), @R(760.0, 2180.0, 120.0, 78.0), @O(@N(Init), @R(9.5)), @O(@N(Run), @R(29.5)), @O(@N(Shutdown), @R(49.5)), @O(@N(Term), @R(69.5));
+  @C(193) : @F(MOVE), @R(1010.0, 2260.0, 60.0, 38.0), BOOL, @I(@N(EN), @L(9.5)), @I(@N(IN), @L(29.5)), @O(@N(ENO), @R(9.5)), @O(@N(MOVE), @R(29.5));
+  @C(214) : @F(MOVE), @R(1010.0, 2440.0, 60.0, 38.0), INT, @I(@N(EN), @L(9.5)), @I(@N(IN), @L(29.5)), @O(@N(ENO), @R(9.5)), @O(@N(MOVE), @R(29.5));
+  @VF(212) : @E(FALSE), @R(740.0, 2280.0, 140.0, 19.0), BOOL;
+  @VF(205) : @E(gx_Out2), @R(1130.0, 2300.0, 130.0, 19.0);
+  @VF(207) : @E(gx_Out6), @R(1130.0, 2380.0, 130.0, 19.0);
+  @VF(206) : @E(gx_Out4), @R(1130.0, 2340.0, 130.0, 19.0);
+  @VF(201) : @E(gx_Out1), @R(1130.0, 2280.0, 130.0, 19.0);
+  @VF(202) : @E(gx_Out3), @R(1130.0, 2320.0, 130.0, 19.0);
+  @VF(209) : @E(gx_Out5), @R(1130.0, 2360.0, 130.0, 19.0);
+  @VF(211) : @E(gx_Out7), @R(1130.0, 2400.0, 130.0, 19.0);
+  @VF(210) : @E(gx_Out8), @R(1130.0, 2420.0, 130.0, 19.0);
+  @VF(216) : @E(0), @R(750.0, 2460.0, 140.0, 19.0), INT;
+  @VF(215) : @E(gi_Value_AO1), @R(1120.0, 2460.0, 140.0, 19.0);
+  @VF(220) : @E(gi_Value_AO1), @R(1120.0, 2480.0, 140.0, 19.0);
+  @CP(218) : 989.5, 2269.5;
+  @CP(222) : 1089.5, 2289.5;
+  @CP(223) : 1089.5, 2309.5;
+  @CP(224) : 1089.5, 2329.5;
+  @CP(225) : 1089.5, 2349.5;
+  @CP(226) : 1089.5, 2369.5;
+  @CP(227) : 1089.5, 2389.5;
+  @CP(228) : 1089.5, 2409.5;
+
+  @G(434) :
+     @L(@VF(433).o, @C(432).CLK)
+    ;
+  @G(436) :
+     @L(@C(432).Q, @VF(435).i)
+    ;
+  @G(15) :
+     @L(@VF(12).o, @C(13).IN)
+    ;
+  @G(16) :
+     @L(@C(13).NOT, @VF(14).i)
+    ;
+  @G(20) :
+     @L(@C(18).ADD, @VF(19).i)
+    ;
+  @G(21) :
+     @L(@VF(17).o, @C(18).IN1)
+    ;
+  @G(23) :
+     @L(@VF(22).o, @C(18).IN2)
+    ;
+  @G(4) :
+     @L(@C(2).ECM_ACONTIS_ISCONNECTED, @VF(3).i)
+    ;
+  @G(8) :
+     @L(@C(5).ECM_ACONTIS_CONFIGURED_SLAVES, @VF(7).i)
+    ;
+  @G(11) :
+     @L(@VF(7).o, @VF(9).i)
+    ;
+  @G(25) :
+     @L(@VF(3).o, @VF(24).i)
+    ;
+  @G(27) :
+     @L(@C(6).ECM_ACONTIS_CONNECTED_SLAVES, @VF(26).i)
+    ;
+  @G(29) :
+     @L(@VF(26).o, @VF(28).i)
+    ;
+  @G(35) :
+     @L(@VF(37).o, @C(33).IN)
+    ;
+  @G(36) :
+     @L(@VF(39).o, @C(34).IN)
+    ;
+  @G(38) :
+     @L(@C(33).MOVE, @VF(31).i)
+    ;
+  @G(40) :
+     @L(@C(34).MOVE, @VF(32).i)
+    ;
+  @G(54) :
+     @L(@VF(52).o, @C(50).IN)
+    ;
+  @G(55) :
+     @L(@VF(53).o, @C(51).IN)
+    ;
+  @G(58) :
+     @L(@C(51).MOVE, @VF(57).i)
+    ;
+  @G(59) :
+     @L(@C(50).MOVE, @VF(56).i)
+    ;
+  @G(79) :
+     @L(@VF(60).o, @C(78).IN)
+    ;
+  @G(87) :
+     @L(@VF(61).o, @C(80).IN)
+    ;
+  @G(88) :
+     @L(@VF(62).o, @C(81).IN)
+    ;
+  @G(89) :
+     @L(@VF(63).o, @C(82).IN)
+    ;
+  @G(90) :
+     @L(@VF(64).o, @C(83).IN)
+    ;
+  @G(91) :
+     @L(@VF(65).o, @C(84).IN)
+    ;
+  @G(92) :
+     @L(@VF(66).o, @C(85).IN)
+    ;
+  @G(93) :
+     @L(@VF(68).o, @C(86).IN)
+    ;
+  @G(94) :
+     @L(@C(78).MOVE, @VF(69).i)
+    ;
+  @G(95) :
+     @L(@C(80).MOVE, @VF(70).i)
+    ;
+  @G(96) :
+     @L(@C(81).MOVE, @VF(72).i)
+    ;
+  @G(97) :
+     @L(@C(82).MOVE, @VF(73).i)
+    ;
+  @G(98) :
+     @L(@C(83).MOVE, @VF(74).i)
+    ;
+  @G(99) :
+     @L(@C(84).MOVE, @VF(75).i)
+    ;
+  @G(100) :
+     @L(@C(85).MOVE, @VF(76).i)
+    ;
+  @G(101) :
+     @L(@C(86).MOVE, @VF(77).i)
+    ;
+  @G(107) :
+     @L(@VF(69).o, @C(102).IN)
+    ;
+  @G(108) :
+     @L(@VF(70).o, @C(103).IN)
+    ;
+  @G(109) :
+     @L(@VF(72).o, @C(104).IN)
+    ;
+  @G(110) :
+     @L(@VF(73).o, @C(105).IN)
+    ;
+  @G(111) :
+     @L(@VF(77).o, @C(106).IN)
+    ;
+  @G(113) :
+     @L(@C(102).OUT, @VF(112).i)
+    ;
+  @G(118) :
+     @L(@C(103).OUT, @VF(114).i)
+    ;
+  @G(119) :
+     @L(@C(104).OUT, @VF(115).i)
+    ;
+  @G(120) :
+     @L(@C(105).OUT, @VF(116).i)
+    ;
+  @G(121) :
+     @L(@C(106).OUT, @VF(117).i)
+    ;
+  @G(125) :
+     @L(@C(122).OUT, @C(123).IN)
+    ;
+  @G(126) :
+     @L(@C(123).TO_REAL, @VF(124).i)
+    ;
+  @G(127) :
+     @L(@VF(31).o, @C(122).IN)
+    ;
+  @G(44) :
+     @L(@VF(42).o, @C(43).IN)
+    ;
+  @G(46) :
+     @L(@C(43).MOVE, @C(128).IN)
+    ;
+  @G(129) :
+     @L(@C(128).TO_INT, @C(45).IN)
+    ;
+  @G(130) :
+     @L(@C(45).OUT, @VF(47).i)
+    ;
+  @G(133) :
+     @L(@VF(131).o, @C(132).IN)
+    ;
+  @G(135) :
+     @L(@C(132).MOVE, @VF(134).i)
+    ;
+  @G(139) :
+     @L(@VF(137).o, @C(141).IN)
+    ;
+  @G(140) :
+     @L(@C(141).OUT, @C(138).IN)
+    ;
+  @G(143) :
+     @L(@C(138).MOVE, @VF(142).i)
+    ;
+  @G(145) :
+     @L(@VF(142).o, @VF(144).i)
+    ;
+  @G(151) :
+     @L(@VF(148).o, @C(146).IN)
+    ;
+  @G(152) :
+     @L(@C(146).OUT, @C(147).IN)
+    ;
+  @G(153) :
+     @L(@C(147).MOVE, @VF(149).i)
+    ;
+  @G(154) :
+     @L(@VF(149).o, @VF(150).i)
+    ;
+  @G(160) :
+     @L(@VF(157).o, @C(155).IN)
+    ;
+  @G(161) :
+     @L(@C(155).OUT, @C(156).IN)
+    ;
+  @G(162) :
+     @L(@C(156).MOVE, @VF(158).i)
+    ;
+  @G(163) :
+     @L(@VF(158).o, @VF(159).i)
+    ;
+  @G(169) :
+     @L(@VF(166).o, @C(164).IN)
+    ;
+  @G(170) :
+     @L(@C(164).OUT, @C(165).IN)
+    ;
+  @G(171) :
+     @L(@C(165).MOVE, @VF(167).i)
+    ;
+  @G(172) :
+     @L(@VF(167).o, @VF(168).i)
+    ;
+  @G(181) :
+     @L(@VF(176).o, @VF(177).i)
+    ;
+  @G(190) :
+     @L(@VF(185).o, @VF(186).i)
+    ;
+  @G(199) :
+     @L(@VF(194).o, @VF(195).i)
+    ;
+  @G(208) :
+     @L(@VF(203).o, @VF(204).i)
+    ;
+  @G(178) :
+     @L(@C(174).vox_Out, @VF(175).i)
+    ;
+  @G(197) :
+     @L(@C(192).Shutdown, @C(196).IN1)
+    ;
+  @G(198) :
+     @L(@C(192).Term, @C(196).IN2)
+    ;
+  @G(200) :
+     @L(@C(196).OR, @CP(218)),
+     @L(@CP(218), @C(193).EN),
+     @L(@CP(218), @C(214).EN)
+    ;
+  @G(213) :
+     @L(@VF(212).o, @C(193).IN)
+    ;
+  @G(221) :
+     @L(@C(193).MOVE, @CP(222)),
+     @L(@CP(222), @VF(201).i),
+     @L(@CP(222), @CP(223)),
+     @L(@CP(223), @VF(205).i),
+     @L(@CP(223), @CP(224)),
+     @L(@CP(224), @VF(202).i),
+     @L(@CP(224), @CP(225)),
+     @L(@CP(225), @VF(206).i),
+     @L(@CP(225), @CP(226)),
+     @L(@CP(226), @VF(209).i),
+     @L(@CP(226), @CP(227)),
+     @L(@CP(227), @VF(207).i),
+     @L(@CP(227), @CP(228)),
+     @L(@CP(228), @VF(211).i),
+     @L(@CP(228), @VF(210).i)
+    ;
+  @G(217) :
+     @L(@VF(216).o, @C(214).IN)
+    ;
+  @G(219) :
+     @L(@C(214).MOVE, @VF(215).i)
+    ;
+END_PROGRAM

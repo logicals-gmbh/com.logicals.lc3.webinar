@@ -1,0 +1,245 @@
+TYPE
+   DT_MQTTClient : STRUCT
+     BrokerAdress         : STRING[16];
+     ClientOk             : BOOL;
+     ClientID             : STRING[20];
+     KomID                : UINT      ;
+     Topic                : STRING[20];
+     TopicGV              : STRING[20];
+     TopicIO              : STRING[20];
+     TopicIOBlink         : STRING[20];                      
+	 TopicIOPV            : STRING[20];
+	 TopicIOSP            : STRING[20];
+	 TopicIOY             : STRING[20];
+	 TopicIOManual        : STRING[20];
+	 TopicIOPV_Scale      : STRING[20];
+	 TopicIOSP_Scale      : STRING[20];
+	 TopicIOY_Scale       : STRING[20];
+     TopicIOModeRPM0      : STRING[20]; 
+     TopicIOModeRPM1      : STRING[20]; 
+     TopicIOModeRPM2      : STRING[20]; 
+     TopicIOModeRPM3      : STRING[20]; 
+     TopicIOModeRPM4      : STRING[20]; 
+     TopicIOSFCStart      : STRING[20]; 
+     TopicIOSFCLoop       : STRING[20];                                      
+     IPAdress             : STRING[20];
+
+     ui_MQTTConnecting    : UINT;   
+     ui_MQTTConOkCycle    : UINT;    
+     ui_MQTTConNotOkCycle : UINT;
+     x_MQTTConOk          : BOOL;        
+   END_STRUCT;
+   
+   DT_MQTT : STRUCT
+    /*
+     * Grundinitialisierung
+     */ 
+     BrokerAdress                : STRING[16] := '192.168.128.150';
+
+    /*
+     * PiXtend MQTT Topics
+     */
+     PiXtendClientOk             : BOOL;
+     PiXtendClientID             : STRING[20] := 'PiXtend';
+     PiXtendKomID                : UINT       := MQTTConnIdx#PiXtend;
+     PiXtendTopic                : STRING[20] := '/PiXtend';
+     PiXtendTopicGV              : STRING[20] := '/PiXtend_GV';
+ 
+     PiXtendTopicWDT             : STRING[20] := '/PiXtend_WDT';
+
+     PiXtendTopicIO              : STRING[20] := '/PiXtend_IO';
+     PiXtendTopicIOBlink         : STRING[20] := '/PiXtend_IO/Blink';
+                                
+	 PiXtendTopicIOPV            : STRING[20] := '/PiXtend_IO/PV';
+	 PiXtendTopicIOSP            : STRING[20] := '/PiXtend_IO/SP';
+	 PiXtendTopicIOY             : STRING[20] := '/PiXtend_IO/Y';
+	 PiXtendTopicIOManual        : STRING[20] := '/PiXtend_IO/Manual';
+	 PiXtendTopicIOPV_Scale      : STRING[20] := '/PiXtend_IO/PV_Scale';
+	 PiXtendTopicIOSP_Scale      : STRING[20] := '/PiXtend_IO/SP_Scale';
+	 PiXtendTopicIOY_Scale       : STRING[20] := '/PiXtend_IO/Y_Scale';
+     PiXtendTopicIOModeRPM0      : STRING[20] := '/PiXtend_IO/ModeRPM0'; 
+     PiXtendTopicIOModeRPM1      : STRING[20] := '/PiXtend_IO/ModeRPM1'; 
+     PiXtendTopicIOModeRPM2      : STRING[20] := '/PiXtend_IO/ModeRPM2'; 
+     PiXtendTopicIOModeRPM3      : STRING[20] := '/PiXtend_IO/ModeRPM3'; 
+     PiXtendTopicIOModeRPM4      : STRING[20] := '/PiXtend_IO/ModeRPM4'; 
+     PiXtendTopicIOSFCStart      : STRING[20] := '/PiXtend_IO/SFCStart'; 
+     PiXtendTopicIOSFCLoop       : STRING[20] := '/PiXtend_IO/SFCLoop'; 
+     
+     PiXtendIPAdress             : STRING[20] := '192.168.128.102';
+
+    /*
+     * Raspi4 MQTT
+     */
+     Raspi4ClientOk        : BOOL;
+     Raspi4ClientID        : STRING[20] := 'Raspi4';
+     Raspi4Kom             : UINT       := MQTTConnIdx#Raspi4;
+     Raspi4Topic           : STRING[20] := '/Raspi4';
+     Raspi4TopicGV         : STRING[20] := '/Raspi4_GV';
+
+     Raspi4TopicWDT        : STRING[20] := '/Raspi4_WDT';
+
+     Raspi4TopicIO         : STRING[20] := '/Raspi4_IO';
+     Raspi4TopicIOBlink    : STRING[20] := '/Raspi4_IO/Blink';
+
+	 Raspi4TopicIOPV       : STRING[20] := '/Raspi4_IO/PV';
+	 Raspi4TopicIOSP       : STRING[20] := '/Raspi4_IO/SP';
+	 Raspi4TopicIOY        : STRING[20] := '/Raspi4_IO/Y';
+	 Raspi4TopicIOManual   : STRING[20] := '/Raspi4_IO/Manual';
+	 Raspi4TopicIOPV_Scale : STRING[20] := '/Raspi4_IO/PV_Scale';
+	 Raspi4TopicIOSP_Scale : STRING[20] := '/Raspi4_IO/SP_Scale';
+	 Raspi4TopicIOY_Scale  : STRING[20] := '/Raspi4_IO/Y_Scale';
+     Raspi4TopicIOModeRPM0 : STRING[20] := '/Raspi4_IO/ModeRPM0'; 
+     Raspi4TopicIOModeRPM1 : STRING[20] := '/Raspi4_IO/ModeRPM1'; 
+     Raspi4TopicIOModeRPM2 : STRING[20] := '/Raspi4_IO/ModeRPM2'; 
+     Raspi4TopicIOModeRPM3 : STRING[20] := '/Raspi4_IO/ModeRPM3'; 
+     Raspi4TopicIOModeRPM4 : STRING[20] := '/Raspi4_IO/ModeRPM4'; 
+
+     Raspi4IPAdress        : STRING[20] := '192.168.128.76';
+
+    /*
+     * Raspi2 MQTT
+     */
+     Raspi2ClientOk        : BOOL;
+     Raspi2ClientID        : STRING[20] := 'Raspi2';
+     Raspi2Kom             : UINT       := MQTTConnIdx#Raspi2;
+     Raspi2Topic           : STRING[20] := '/Raspi2';
+     Raspi2TopicGV         : STRING[20] := '/Raspi2_GV';
+
+     Raspi2TopicWDT        : STRING[20] := '/Raspi2_WDT';
+
+     Raspi2TopicIO         : STRING[20] := '/Raspi2_IO';
+     Raspi2TopicIOBlink    : STRING[20] := '/Raspi2_IO/Blink';
+
+	/*
+	 * Raspi2 MQTT Topics
+	 */ 
+	 Raspi2TopicIOPV       : STRING[20] := '/Raspi2_IO/PV';
+	 Raspi2TopicIOSP       : STRING[20] := '/Raspi2_IO/SP';
+	 Raspi2TopicIOY        : STRING[20] := '/Raspi2_IO/Y';
+	 Raspi2TopicIOPID_KP   : STRING[20] := '/Raspi2_IO/PID_KP';
+	 Raspi2TopicIOPID_KV   : STRING[20] := '/Raspi2_IO/PID_KD';
+	 Raspi2TopicIOPID_TI   : STRING[20] := '/Raspi2_IO/PID_TI';
+	 Raspi2TopicIOPID_T1   : STRING[20] := '/Raspi2_IO/PID_T1';
+
+	 Raspi2TopicIOPID_YMAN : STRING[20] := '/Raspi2_IO/PID_YMAN';
+	 Raspi2TopicIOPID_AUTO : STRING[20] := '/Raspi2_IO/PID_AUTO';
+	 Raspi2TopicIORMP_SpUp : STRING[20] := '/Raspi2_IO/RMP_SpUp';
+	 Raspi2TopicIORMP_SpDn : STRING[20] := '/Raspi2_IO/RMP_SpDn';
+	 Raspi2TopicIORMP_In   : STRING[20] := '/Raspi2_IO/RMP_In';
+
+     Raspi2TopicIOModeRPM0 : STRING[20] := '/Raspi2_IO/ModeRPM0'; 
+     Raspi2TopicIOModeRPM1 : STRING[20] := '/Raspi2_IO/ModeRPM1'; 
+     Raspi2TopicIOModeRPM2 : STRING[20] := '/Raspi2_IO/ModeRPM2'; 
+     Raspi2TopicIOModeRPM3 : STRING[20] := '/Raspi2_IO/ModeRPM3'; 
+
+     Raspi2IPAdress        : STRING[20] := '192.168.128.150';
+
+    /*
+     * Tauri MQTT
+     */
+     TauriLClientOk              : BOOL;
+     TauriLClientID              : STRING[20] := 'TauriL';
+     TauriLKomID                 : UINT       := MQTTConnIdx#TauriL;
+     TauriLTopic                 : STRING[20] := '/TauriL';
+     TauriLTopicGV               : STRING[20] := '/TauriL_GV';
+
+     TauriLTopicWDT             : STRING[20] := '/TauriL_WDT';
+
+     TauriLTopicIO              : STRING[20] := '/TauriL_IO';
+     TauriLTopicIOBlink         : STRING[20] := '/TauriL_IO/Blink';
+                                
+	 TauriLTopicIOPV            : STRING[20] := '/TauriL_IO/PV';
+	 TauriLTopicIOSP            : STRING[20] := '/TauriL_IO/SP';
+	 TauriLTopicIOY             : STRING[20] := '/TauriL_IO/Y';
+	 TauriLTopicIOManual        : STRING[20] := '/TauriL_IO/Manual';
+	 TauriLTopicIOPV_Scale      : STRING[20] := '/TauriL_IO/PV_Scale';
+	 TauriLTopicIOSP_Scale      : STRING[20] := '/TauriL_IO/SP_Scale';
+	 TauriLTopicIOY_Scale       : STRING[20] := '/TauriL_IO/Y_Scale';
+     TauriLTopicIOModeRPM0      : STRING[20] := '/TauriL_IO/ModeRPM0'; 
+     TauriLTopicIOModeRPM1      : STRING[20] := '/TauriL_IO/ModeRPM1'; 
+     TauriLTopicIOModeRPM2      : STRING[20] := '/TauriL_IO/ModeRPM2'; 
+     TauriLTopicIOModeRPM3      : STRING[20] := '/TauriL_IO/ModeRPM3'; 
+     TauriLTopicIOModeRPM4      : STRING[20] := '/TauriL_IO/ModeRPM4'; 
+     
+     TauriLIPAdress              : STRING[20] := '192.168.128.153';
+
+    /*
+     * RevPi MQTT Topics
+     */
+     RevPiClientOk              : BOOL;
+     RevPiClientID              : STRING[20] := 'RevPi';
+     RevPiKomID                 : UINT       := MQTTConnIdx#RevPi;
+     RevPiTopic                 : STRING[20] := '/RevPi';
+     RevPiTopicGV               : STRING[20] := '/RevPi_GV';
+
+     RevPiTopicWDT              : STRING[20] := '/RevPi_WDT';
+
+     RevPiTopicIO              : STRING[20] := '/RevPi_IO';
+     RevPiTopicIOBlink         : STRING[20] := '/RevPi_IO/Blink';
+                                
+	 RevPiTopicIOPV            : STRING[20] := '/RevPi_IO/PV';
+	 RevPiTopicIOSP            : STRING[20] := '/RevPi_IO/SP';
+	 RevPiTopicIOY             : STRING[20] := '/RevPi_IO/Y';
+	 RevPiTopicIOManual        : STRING[20] := '/RevPi_IO/Manual';
+	 RevPiTopicIOPV_Scale      : STRING[20] := '/RevPi_IO/PV_Scale';
+	 RevPiTopicIOSP_Scale      : STRING[20] := '/RevPi_IO/SP_Scale';
+	 RevPiTopicIOY_Scale       : STRING[20] := '/RevPi_IO/Y_Scale';
+     RevPiTopicIOModeRPM0      : STRING[20] := '/RevPi_IO/ModeRPM0'; 
+     RevPiTopicIOModeRPM1      : STRING[20] := '/RevPi_IO/ModeRPM1'; 
+     RevPiTopicIOModeRPM2      : STRING[20] := '/RevPi_IO/ModeRPM2'; 
+     RevPiTopicIOModeRPM3      : STRING[20] := '/RevPi_IO/ModeRPM3'; 
+     RevPiTopicIOModeRPM4      : STRING[20] := '/RevPi_IO/ModeRPM4'; 
+     
+     RevPiIPAdress              : STRING[20] := '192.168.128.83';
+
+     END_STRUCT;
+
+    /*
+     * ENumeration der Verbindungen!
+     */
+     MQTTConnIdx : UINT(Raspi4   := 0,
+                        TauriL   := 1,
+                        Raspi2   := 2,
+                        PiXtend  := 3, 
+                        RevPi    := 4);
+    /*
+     * Anzahl der Topics vom Broker
+     */                    
+     MQTT_MsgBound : USINT(Min := 0, 
+     	                   Max := 15);
+
+  /*
+   * Datenset fuer MQTT in BYTE (max. 1024 Byte)
+   */
+  MQTTHeader : STRUCT
+    /*     
+     * Fuer Subsribe - Holen von Broker
+     * Fuer Publish - Senden an den Broker
+     *
+     * Der "letzte" AdressTeil der IP-SendeAdresse
+     * der Resource welche die Daten zum Broker schickt
+     * 
+     * Hier keine Erweiterungen/Anpassungen vornehemn!
+     * Der Header wird in einem FB zusammengebaut!
+     */ 
+     IPVal1 : BYTE;
+     IPVal2 : BYTE;
+     IPVal3 : BYTE;
+     //
+     // Datum und Uhrzeit
+     // zur Zeit- und Datumssynchronisation zwischen den Stationen
+     //
+     Second    : BYTE;
+     Minute    : BYTE;
+     Hour      : BYTE;
+     Day       : BYTE;
+     Month     : BYTE;
+     YearLByte : BYTE;
+     YearHByte : BYTE;
+     //
+     // LifeTick SendeMessage
+     //
+     CntSndMessage : BYTE;
+  END_STRUCT;
+
+END_TYPE

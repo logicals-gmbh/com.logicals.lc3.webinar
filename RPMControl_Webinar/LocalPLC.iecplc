@@ -1,0 +1,53 @@
+/*
+ * This is a template for a new PLC object
+ */
+
+{
+	CHANNEL LocalPLC
+		TCP
+			ADDRESS := 127.0.0.1;
+			PORT    := 1534;
+		END_TCP
+	END_CHANNEL
+}
+
+CONFIGURATION ConfLocalPLC
+	RESOURCE LocalPLC ON BuiltInPlc { ON_CHANNEL := LocalPLC }
+       /*
+        * Daten RTS
+        */ 
+		{ INCLUDE_GLOBALS GV_RTS }
+       /*
+        * Daten Resource
+        */ 
+		{ INCLUDE_GLOBALS GV_LocalPLC }
+		{ INCLUDE_GLOBALS GV }
+		{ INCLUDE_GLOBALS GV_MQTT }
+
+		{ INCLUDE_GLOBALS GV_RPMControl_Visu }
+		{ INCLUDE_GLOBALS GV_RPMControl }
+		{ INCLUDE_GLOBALS GV_RPMControl_SetVal }
+		{ INCLUDE_GLOBALS GV_RPMControl_SetVal_LocalPLC }
+
+		{ INCLUDE_GLOBALS GV_SFC}
+		{ INCLUDE_GLOBALS GV_Action}
+		{ INCLUDE_GLOBALS GV_Data_Struc}
+
+		TASK TSK_AppLogic (INTERVAL := TIME#50ms,  PRIORITY := 38229);  // Logic
+		TASK TSK_AppLoop  (INTERVAL := TIME#20ms,  PRIORITY := 38229);  // Loop
+		TASK TSK_AppTimer (INTERVAL := TIME#500ms, PRIORITY := 38229);  // Timer
+		
+		PROGRAM INST_AppLogic_FBD              WITH TSK_AppLogic    : PRG_RPMControl_SFC;
+		PROGRAM INST_AppLoop_FBD               WITH TSK_AppLoop     : PRG_RPMControl_FBD;
+		PROGRAM INST_AppTimer_FBD              WITH TSK_AppTimer    : PRG_RTC_FBD;               // Date/Time
+
+//		PROGRAM INST_AppTimer_FBD              WITH TSK_AppTimer    : PRG_ExampleUdpBlocks_ST;   // UDP Echo
+
+//		PROGRAM INST_AppTimer_TCPServer_ST     WITH TSK_AppTimer    : PRG_TCPServer_LocalPLC_ST;   // TCP Echo
+//		PROGRAM INST_AppTimer_TCPClient_ST     WITH TSK_AppTimer    : PRG_TCPClient_LocalPLC_ST;   // TCP Echo
+
+//		PROGRAM INST_AppTimer_UdpSendBlocks_LocalPLC_ST              WITH TSK_AppTimer    : PRG_UdpSendBlocks_LocalPLC_ST;   // UDP Echo
+//		PROGRAM INST_AppTimer_TCPClient_LocalPLC2RevPi_ST            WITH TSK_AppTimer    : PRG_TCPClient_LocalPLC2RevPi_ST;   // TCP connect LocalPLC2RevPi
+	
+	END_RESOURCE
+END_CONFIGURATION

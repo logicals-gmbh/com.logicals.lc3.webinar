@@ -1,0 +1,15 @@
+GLOBALS GV
+	VAR_GLOBAL
+
+	 gui_CycleCountAppLoop  : UINT;
+	 gui_CycleCountAppLogic : UINT;
+	 gui_CycleCountAppTimer : UINT;
+
+	/*
+	 * Globaler Flash als Funktionsanzeige!
+	 * Wird in PRG_RTC_FBD erzeugt!
+	 */ 
+	 gx_Flash : BOOL;
+		
+	END_VAR
+END_GLOBALS

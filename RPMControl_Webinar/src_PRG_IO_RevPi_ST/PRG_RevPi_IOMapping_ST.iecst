@@ -1,0 +1,351 @@
+/*
+ * logi.CAD 3 IOMapping RevPi
+ * 
+ * IOMapping
+ * Forcing Ein- und Ausgaenge
+ */
+PROGRAM PRG_RevPi_IOMapping_ST
+
+	 VAR_EXTERNAL
+	    /* ProcessValue - Analogeingang_1 */
+		gr_PV : REAL;
+	    /* SetPoint     - Analogeingang_2 */
+		gr_SP : REAL;
+	    /* OutValue     - Analogausgang_1 */
+		gr_Y : REAL;
+	 END_VAR
+
+	 VAR_EXTERNAL
+        /* Vom Schalter Ausgangswert = 0% */
+        gx_RPM0 : BOOL; 
+        /* Vom Schalter Ausgangswert = 25% */
+        gx_RPM1 : BOOL; 
+        /* Vom Schalter Ausgangswert = 50% */
+        gx_RPM2 : BOOL; 
+        /* Vom Schalter Setzwert von Poti */
+        gx_RPM3 : BOOL; 
+        /* Vom Schalter Reset All inkl. Visu */
+        gx_ResetRPM : BOOL; 
+	 END_VAR
+	
+	 VAR_EXTERNAL
+        /* An Ausgang Ausgangswert = 0% */
+        gx_ModeRPM0 : BOOL; 
+        /* An Ausgang Ausgangswert = 25% */
+        gx_ModeRPM1 : BOOL; 
+        /* An Ausgang Ausgangswert = 50% */
+        gx_ModeRPM2 : BOOL; 
+        /* An Ausgang Setzwert von Poti */
+        gx_ModeRPM3 : BOOL; 
+	 END_VAR
+
+     VAR_EXTERNAL
+      RevPiLED : BYTE;      
+     END_VAR
+
+     VAR_EXTERNAL
+        /* Schaltermodul */
+		I_1   : BOOL; // 
+        /* Schaltermodul */
+		I_2   : BOOL; // 
+        /* Schaltermodul */
+		I_3   : BOOL; // 
+        /* Schaltermodul */
+		I_4   : BOOL; // 
+        /* Schaltermodul */
+		I_5   : BOOL; // 
+        /* Schaltermodul */
+		I_6   : BOOL; // 
+        /* Schaltermodul */
+		I_7   : BOOL; // 
+        /* Schaltermodul */
+		I_8   : BOOL; // 
+        /* Motormodul Schalter 1 */
+		I_9   : BOOL; // 
+        /* Motormodul Schalter 2 */
+		I_10  : BOOL; // 
+        /* Motormodul Schalter 3 */
+		I_11  : BOOL; // 
+        /* Motormodul Schalter 4 */
+		I_12  : BOOL; // 
+        /* Motormodul Schalter 5 - Lichtschranke */
+		I_13  : BOOL; // 
+        /* Motormodul Schalter 6 - Lichtschranke */
+		I_14  : BOOL; // 
+        /* Nicht benutzt */
+		I_15  : BOOL; // 
+        /* Nicht benutzt */
+		I_16  : BOOL; // 
+		
+        /* Anzeigemodul */
+		O_1  : BOOL; // 
+        /* Anzeigemodul */
+		O_2  : BOOL; // 
+        /* Anzeigemodul */
+		O_3  : BOOL; // 
+        /* Anzeigemodul */
+		O_4  : BOOL; // 
+        /* Anzeigemodul */
+		O_5  : BOOL; // 
+        /* Anzeigemodul */
+		O_6  : BOOL; // 
+        /* Anzeigemodul */
+		O_7  : BOOL; // 
+        /* Anzeigemodul */
+		O_8  : BOOL; // 
+        /* Motormodul Motor Links */
+		O_9  : BOOL; // 
+        /* Motormodul Motor Rechts */
+		O_10 : BOOL; // 
+        /* Motormodul LED */
+		O_11 : BOOL; // 
+        /* Motormodul Signal */
+		O_12 : BOOL; // 
+        /* Frei */
+		O_13 : BOOL; // 
+        /* Frei */
+		O_14 : BOOL; // 
+        /* Nicht benutzt */
+		O_15 : BOOL; // 
+        /* Nicht benutzt */
+		O_16 : BOOL; //
+     END_VAR 
+
+     VAR_EXTERNAL
+        /* Analogeingang 1 */
+		InputValue_1   : INT;  // 
+        /* Analogeingang 2 */
+		InputValue_2   : INT;  // 
+        /* Analogeingang 3 */
+		InputValue_3   : INT;  // 
+        /* Analogeingang 4 */
+		InputValue_4   : INT;  // 
+        /* Status Analogeingang 1 */
+		InputStatus_1  : BYTE; // 
+        /* Status Analogeingang 2 */
+		InputStatus_2  : BYTE; // 
+        /* Status Analogeingang 3 */
+		InputStatus_3  : BYTE; // 
+        /* Status Analogeingang 4 */
+		InputStatus_4  : BYTE; // 
+     END_VAR 
+
+     VAR_EXTERNAL
+        /* Analogausgang 1 */
+		OutputValue_1  : INT;  // 
+        /* Analogausgang 2 */
+		OutputValue_2  : INT;  // 
+        /* Bereich Analogausgang 1 */
+		Output1Range   : BYTE; // 
+        /* Bereich Analogausgang 2 */
+		Output2Range   : BYTE; // 
+        /* Status Analogausgang 1 */
+		OutputStatus_1 : BYTE; // 
+        /* Status Analogausgang 2 */
+		OutputStatus_2 : BYTE; // 
+     END_VAR 
+
+     VAR
+		lx_I_01   : BOOL; // 
+		lx_I_02   : BOOL; // 
+		lx_I_03   : BOOL; // 
+		lx_I_04   : BOOL; // 
+		lx_I_05   : BOOL; // 
+		lx_I_06   : BOOL; // 
+		lx_I_07   : BOOL; // 
+		lx_I_08   : BOOL; // 
+		lx_I_09   : BOOL; // 
+		lx_I_10  : BOOL; // 
+		lx_I_11  : BOOL; // 
+		lx_I_12  : BOOL; // 
+		lx_I_13  : BOOL; // 
+		lx_I_14  : BOOL; // 
+		
+		lx_O_01  : BOOL; // 
+		lx_O_02  : BOOL; // 
+		lx_O_03  : BOOL; // 
+		lx_O_04  : BOOL; // 
+		lx_O_05  : BOOL; // 
+		lx_O_06  : BOOL; // 
+		lx_O_07  : BOOL; // 
+		lx_O_08  : BOOL; // 
+		lx_O_09  : BOOL; // 
+		lx_O_10 : BOOL; // 
+		lx_O_11 : BOOL; // 
+		lx_O_12 : BOOL; // 
+		lx_O_13 : BOOL; // 
+		lx_O_14 : BOOL; // 
+     END_VAR 
+
+     VAR
+		li_InputValue_1   : INT;  // 
+		li_InputValue_2   : INT;  // 
+		li_InputValue_3   : INT;  // 
+		li_InputValue_4   : INT;  // 
+		lb_InputStatus_1  : BYTE; // 
+		lb_InputStatus_2  : BYTE; // 
+		lb_InputStatus_3  : BYTE; // 
+		lb_InputStatus_4  : BYTE; // 
+     END_VAR 
+
+     VAR
+		lb_OutputStatus_1 : BYTE; // 
+		lb_OutputStatus_2 : BYTE; // 
+		li_OutputValue_1  : INT;  // 
+		li_OutputValue_2  : INT;  // 
+		lb_Output1Range   : BYTE; // 
+		lb_Output2Range   : BYTE; // 
+     END_VAR 
+
+	/*
+	 * SPS-Programm
+	 */
+
+	/*  
+	 * Bausteindeklaration Forcemarker fuer Digital Eingaenge
+	 */
+	VAR
+	 FB_ForceMrk_I_01 : FORCEMRK;
+	 FB_ForceMrk_I_02 : FORCEMRK;
+	 FB_ForceMrk_I_03 : FORCEMRK;
+	 FB_ForceMrk_I_04 : FORCEMRK;
+	 FB_ForceMrk_I_05 : FORCEMRK;
+	 FB_ForceMrk_I_06 : FORCEMRK;
+	 FB_ForceMrk_I_07 : FORCEMRK;
+	 FB_ForceMrk_I_08 : FORCEMRK;
+	 FB_ForceMrk_I_09 : FORCEMRK;
+	 FB_ForceMrk_I_10 : FORCEMRK;
+	 FB_ForceMrk_I_11 : FORCEMRK;
+	 FB_ForceMrk_I_12 : FORCEMRK;
+	 FB_ForceMrk_I_13 : FORCEMRK;
+	 FB_ForceMrk_I_14 : FORCEMRK;
+	END_VAR
+	/*  
+	 * Bausteindeklaration Forcemarker fuer Digital Ausgaenge
+	 */
+	VAR 
+	 FB_ForceMrk_O_01 : FORCEMRK;
+	 FB_ForceMrk_O_02 : FORCEMRK;
+	 FB_ForceMrk_O_03 : FORCEMRK;
+	 FB_ForceMrk_O_04 : FORCEMRK;
+	 FB_ForceMrk_O_05 : FORCEMRK;
+	 FB_ForceMrk_O_06 : FORCEMRK;
+	 FB_ForceMrk_O_07 : FORCEMRK;
+	 FB_ForceMrk_O_08 : FORCEMRK;
+	 FB_ForceMrk_O_09 : FORCEMRK;
+	 FB_ForceMrk_O_10 : FORCEMRK;
+	 FB_ForceMrk_O_11 : FORCEMRK;
+	 FB_ForceMrk_O_12 : FORCEMRK;
+	 FB_ForceMrk_O_13 : FORCEMRK;
+	 FB_ForceMrk_O_14 : FORCEMRK;
+	END_VAR
+
+	/*  
+	 * Bausteindeklaration Forcemarker fuer Analog Eingaenge
+	 */
+	VAR
+	 FB_ForceMrk_Input_01 : FORCEMRK;
+	 FB_ForceMrk_Input_02 : FORCEMRK;
+	 FB_ForceMrk_Input_03 : FORCEMRK;
+	 FB_ForceMrk_Input_04 : FORCEMRK;
+	END_VAR
+
+	/*  
+	 * Bausteindeklaration Forcemarker fuer Analog Ausgaenge
+	 */
+	VAR
+	 FB_ForceMrk_Output_01 : FORCEMRK;
+	 FB_ForceMrk_Output_02 : FORCEMRK;
+	END_VAR
+
+	/*
+	 * SPS-Programm - lokale Variablen
+	 */
+	VAR
+	 lx_CyclePulse  : BOOL;
+	 lui_CycleCount : UINT;
+	END_VAR
+    
+    lx_CyclePulse  := NOT lx_CyclePulse;
+    lui_CycleCount := lui_CycleCount + 1;
+
+   /*
+    * RevPi LED togglen
+    */     
+    RevPiLED := NOT RevPiLED; 
+   /*
+    * Forcing der DigitalEingaenge
+    */
+	FB_ForceMrk_I_01 (IN := I_1 ,OUT => lx_I_01);  // 
+	FB_ForceMrk_I_02 (IN := I_2 ,OUT => lx_I_02);  // 
+	FB_ForceMrk_I_03 (IN := I_3 ,OUT => lx_I_03);  // 
+	FB_ForceMrk_I_04 (IN := I_4 ,OUT => lx_I_04);  // 
+	FB_ForceMrk_I_05 (IN := I_5 ,OUT => lx_I_05);  // 
+	FB_ForceMrk_I_06 (IN := I_6 ,OUT => lx_I_06);  // 
+	FB_ForceMrk_I_07 (IN := I_7 ,OUT => lx_I_07);  // 
+	FB_ForceMrk_I_08 (IN := I_8 ,OUT => lx_I_08);  // 
+	FB_ForceMrk_I_09 (IN := I_9 ,OUT => lx_I_09);  // 
+	FB_ForceMrk_I_10 (IN := I_10,OUT => lx_I_10);  // 
+	FB_ForceMrk_I_11 (IN := I_11,OUT => lx_I_11);  // 
+	FB_ForceMrk_I_12 (IN := I_12,OUT => lx_I_12);  // 
+	FB_ForceMrk_I_13 (IN := I_13,OUT => lx_I_13);  // 
+	FB_ForceMrk_I_14 (IN := I_14,OUT => lx_I_14);  // 
+   /*
+    * Schalter am Simulationsboard
+    */ 
+    gx_RPM0     := lx_I_01; // Setzwert = 0!
+    gx_RPM1     := lx_I_02; // Setzwert = 25%!
+    gx_RPM2     := lx_I_03; // Setzwert = 50%!
+    gx_RPM3     := lx_I_04; // Setzwert von Poti!
+   /*
+    * Alle anderen Schalter setzen zurueck
+    */
+    gx_ResetRPM := lx_I_05 OR lx_I_06 OR lx_I_07 OR lx_I_08;
+
+   /*
+    * Forcing der DigitalAusgaenge
+    */
+    FB_ForceMrk_O_01 (IN := lx_O_01 OR gx_ModeRPM0, OUT => O_1); // 
+    FB_ForceMrk_O_02 (IN := lx_O_02 OR gx_ModeRPM1, OUT => O_2); // 
+    FB_ForceMrk_O_03 (IN := lx_O_03 OR gx_ModeRPM2, OUT => O_3); // 
+    FB_ForceMrk_O_04 (IN := lx_O_04 OR gx_ModeRPM3, OUT => O_4); // 
+    FB_ForceMrk_O_05 (IN := lx_O_05 , OUT => O_5); // 
+    FB_ForceMrk_O_06 (IN := lx_O_06 , OUT => O_6); // 
+    FB_ForceMrk_O_07 (IN := lx_O_07 , OUT => O_7); // 
+    FB_ForceMrk_O_08 (IN := lx_O_08 , OUT => O_8); // 
+
+   /*
+    * Rueckmeldung Mode an Ausgaenge 
+    */ 
+    FB_ForceMrk_O_09 (IN := lx_O_09 , OUT => O_9); // 
+    FB_ForceMrk_O_10 (IN := lx_O_10 , OUT => O_10); // 
+    FB_ForceMrk_O_11 (IN := lx_O_11 , OUT => O_11); // 
+    FB_ForceMrk_O_12 (IN := lx_O_12 , OUT => O_12); // 
+    FB_ForceMrk_O_13 (IN := lx_O_13 , OUT => O_13); // 
+    FB_ForceMrk_O_14 (IN := lx_O_14 , OUT => O_14); // 
+
+   /*
+    * Forcing der AnalogEingaenge (Lesen)
+    */
+    FB_ForceMrk_Input_01(IN := InputValue_1 , OUT => li_InputValue_1);
+    FB_ForceMrk_Input_02(IN := InputValue_2 , OUT => li_InputValue_2);
+    FB_ForceMrk_Input_03(IN := InputValue_3 , OUT => li_InputValue_3);
+    FB_ForceMrk_Input_04(IN := InputValue_4 , OUT => li_InputValue_4);
+   /*
+    * Umsetzen auf GV_MotorRegelung
+    */ 
+    gr_PV := li_InputValue_1; // Drehzahl aktuelle
+    gr_SP := li_InputValue_2; // Setzwert von Poti
+
+   /*
+    * Forcing der AnalogAusgaenge (Schreiben)
+    */
+   /*
+    * Umsetzen von GV_MotorRegelung
+    */ 
+    li_OutputValue_1 := TO_INT(gr_Y); // Stellwert von Regler
+
+    FB_ForceMrk_Output_01(IN := li_OutputValue_1 , OUT => OutputValue_1);
+    FB_ForceMrk_Output_02(IN := li_OutputValue_2 , OUT => OutputValue_2);
+
+END_PROGRAM

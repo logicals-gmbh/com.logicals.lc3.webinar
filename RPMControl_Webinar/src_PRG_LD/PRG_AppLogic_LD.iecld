@@ -1,0 +1,70 @@
+PROGRAM PRG_AppLogic_LD
+  VAR
+    lx_Out0 : BOOL;
+    lx_Out1 : BOOL;
+    lx_Out2 : BOOL;
+    gx_Out5 : BOOL;
+    gx_Out6 : BOOL;
+    com_logicals_Basic_Flash_FB_lc_Flash_2Hz_FBD1 : com.logicals.Basic.Flash.FB_lc_Flash_2Hz_FBD;
+    com_logicals_Basic_Flash_FB_lc_Flash_ST1 : com.logicals.Basic.Flash.FB_lc_Flash_ST;
+  END_VAR
+  VAR_EXTERNAL
+    gx_In2 : BOOL;
+    gx_In1 : BOOL;
+    gx_In3 : BOOL;
+  END_VAR
+
+  @R(1) : comment := "1of3 selection",
+    @EL(3) : CL @E(lx_Out0), tag := "lx_Out0", description := "Out0 for 1of3";
+    @EL(7) : NOCT @E(gx_In1), tag := "lx_In0", description := "Input 0";
+    @EL(9) : NCCT @E(gx_In2), tag := "lx_In2", description := "Input1";
+    @EL(11) : NCCT @E(gx_In3), tag := "lx_In2", description := "Input2";
+
+    @L(6) : @O(@PR), @I(7);
+    @L(10) : @O(7), @I(9);
+    @L(12) : @O(9), @I(11);
+    @L(8) : @O(11), @I(3);
+    @L(4) : @O(3), @I(@PR);
+  ;
+
+  @R(13) : comment := "1of3 selection",
+    @EL(15) : NCCT @E(gx_In1);
+    @EL(17) : NOCT @E(gx_In2);
+    @EL(19) : NCCT @E(gx_In3);
+    @EL(21) : CL @E(lx_Out1);
+
+    @L(14) : @O(@PR), @I(15);
+    @L(18) : @O(15), @I(17);
+    @L(20) : @O(17), @I(19);
+    @L(22) : @O(19), @I(21);
+    @L(16) : @O(21), @I(@PR);
+  ;
+
+  @R(23) : comment := "1of3 selection",
+    @EL(25) : NCCT @E(gx_In1);
+    @EL(27) : NCCT @E(gx_In2);
+    @EL(29) : NOCT @E(gx_In3);
+    @EL(31) : CL @E(lx_Out2);
+
+    @L(24) : @O(@PR), @I(25);
+    @L(28) : @O(25), @I(27);
+    @L(30) : @O(27), @I(29);
+    @L(32) : @O(29), @I(31);
+    @L(26) : @O(31), @I(@PR);
+  ;
+
+  @R(33) : comment := "1of3 selection",
+    @EL(35) : NOCT @E(lx_Out0);
+    @EL(37) : CL @E(gx_Out5);
+    @EL(39) : NOCT @E(lx_Out1);
+    @EL(41) : NOCT @E(lx_Out2);
+    @EL(45) : NCL @E(gx_Out6);
+
+    @L(34) : @O(@PR), @I(35);
+    @L(40) : @O(@PR), @I(39);
+    @L(42) : @O(@PR), @I(41);
+    @L(44) : @O(35, 39, 41), @I(37, 45);
+    @L(36) : @O(37), @I(@PR);
+    @L(46) : @O(45), @I(@PR);
+  ;
+END_PROGRAM

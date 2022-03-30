@@ -1,0 +1,450 @@
+ /*
+  * logi.cals GmbH
+  * A-3100 St. Poelten
+  * Europaplatz 7/1
+  * Tel.: 0043-5-77147
+  *
+  * logi.cals automation solutions & services GmbH
+  * D-40738 Langenfeld
+  * Postfach 1306
+  * Tel.: 0043-5-77147
+  * 
+  * Contact:
+  * dieter.goltz@logicals.com
+  * 
+  * History:
+  * Created: 
+  * DG 2021-05-05
+  * 
+  * Modified:
+  * DG 2021-02-09 Subscribe Daten Raspi4
+  */
+ 
+ /* 
+  * Description
+  * ===========
+  */ 
+ 
+ /* 
+  * Beschreibung
+  * ============
+  * MQTT Kommunikation
+  * 
+  * Subsribe der globalen Daten vom Broker
+  * 
+  */
+
+/*
+ * MQTT Subscribe
+ */
+PROGRAM PRG_Raspi2_MQTTSubscribe_Raspi4
+   
+   VAR_EXTERNAL
+     /*
+      * Publish und Subsribe Status an WebCon
+      */ 
+	  gui_MQTTPublishOkCycle    : UINT; // Anzahl der Zyklen bis MQTT Publish
+	  gui_MQTTSubscribeOkCycle  : UINT; // Anzahl der Zyklen wenn MQTT Subsribe
+	   
+      gx_MQTTPublishState       : BOOL;
+
+   END_VAR
+
+   VAR_EXTERNAL
+	    /* ProcessValue - Analogeingang_1 */
+		gr_PV : REAL;
+	    /* SetPoint     - Analogeingang_2 */
+		gr_SP : REAL;
+	    /* OutValue     - Analogausgang_1 */
+		gr_Y : REAL;
+
+	    /* ManualWert 0..100% */
+		gr_Manual : REAL;
+
+	    /* ProcessValue - Analogeingang_1 Skaliert 0..100%*/
+		gr_PV_Scale : REAL;
+	    /* SetPoint     - Analogeingang_2 Skaliert 0..100% */
+		gr_SP_Scale : REAL;
+	    /* OutValue     - Analogausgang_1 Skaliert 0..32767 */
+		gr_Y_Scale  : REAL;
+	    /* OutValue     - Regler Skaliert 0..100% */
+		gr_PID_OUT  : REAL;
+        /*
+         * Anzeige der Betriebsart 1Aus4 
+         */
+        /* An Ausgang Ausgangswert = 0% */
+        gx_ModeRPM0 : BOOL; 
+        /* An Ausgang Ausgangswert = 25% */
+        gx_ModeRPM1 : BOOL; 
+        /* An Ausgang Ausgangswert = 50% */
+        gx_ModeRPM2 : BOOL; 
+        /* An Ausgang SetPoint von Poti */
+        gx_ModeRPM3 : BOOL; 
+        
+        /* Blinkfunktion */
+        gx_Out8 : BOOL;
+   END_VAR
+    /*
+	 * PRG_Raspi2_MQTTPublish
+	 */	
+	VAR_EXTERNAL
+    /*
+     * Globaler TraceLevel
+     */ 
+     gui_TraceLevel : UINT;
+	END_VAR
+   /*
+    * Status Verbindung zum Broker 
+    */
+	VAR_EXTERNAL
+		/*
+		 * State und Channel vom Connect
+		 */ 
+		 MQTT_State   : MQTT_SUBSCRIBER_STATE;
+		 MQTT_Channel : DINT;
+	END_VAR
+
+    VAR
+	   /*
+        * Der Datentyp enthaelt alle wesentlichen Initwerte fuer die MQTT-Kommunkation
+        */
+        l_MQTTInitKom  : DT_MQTT;
+    END_VAR
+
+    VAR
+      /*
+       * Raspi4
+       */ 
+       lx_Raspi4TopicOk1  : BOOL;
+       lx_Raspi4TopicOk2  : BOOL;
+       lx_Raspi4TopicOk3  : BOOL;
+       lx_Raspi4TopicOk4  : BOOL;
+       lx_Raspi4TopicOk5  : BOOL;
+       lx_Raspi4TopicOk6  : BOOL;
+       lx_Raspi4TopicOk7  : BOOL;
+       lx_Raspi4TopicOk8  : BOOL;
+       lx_Raspi4TopicOk9  : BOOL;
+    END_VAR
+    
+    VAR
+     lx_MQTTFlash : BOOL;
+     
+     lx_RPM1 : BOOL;
+     lx_RPM2 : BOOL;
+    END_VAR
+	VAR
+		ioImageRemote     : ARRAY [0..1023] OF BYTE;
+		ioImageRemoteSize : DINT := 1024;
+		ioImageRemoteLen  : DINT := -1;
+
+	   /*
+	    * Subscribe
+	    */	
+		lx_CL1_subscribed  : BOOL := FALSE;  // 
+
+		rc_CL1  : MQTT_RC;
+
+		lx_message_received : BOOL := FALSE;
+		
+		rc_ReceiveTopic     : MQTT_RC;
+		
+		lstr_ReceiveTopic   : STRING[255];
+
+	   /*
+	    * Alle erhaltenen Topics
+	    * Array-Anpassung siehe TYPE END_TYPE Deklaration
+	    */ 
+		lstrarr_TopicArray : ARRAY [MQTT_MsgBound#Min..MQTT_MsgBound#Max] OF STRING[255];
+
+	   /*
+	    * Alle erhaltenen RC-Werte 
+	    */	
+		ldiarr_MessageRC   : ARRAY [MQTT_MsgBound#Min..MQTT_MsgBound#Max] OF DINT;
+		larr_bImageRemote  : ARRAY [0..1023] OF BYTE;
+
+	   /*
+	    * Alle erhaltenen MessageLen-Werte 
+	    */	
+		ldiarr_MessageLen    : ARRAY [MQTT_MsgBound#Min..MQTT_MsgBound#Max] OF DINT;
+
+       /*
+        * Alle Messages 
+        */ 
+		lstrarr_Messages     : ARRAY [MQTT_MsgBound#Min..MQTT_MsgBound#Max] OF STRING[1024];
+		
+		lusi_MessageIndex    : USINT := 0;
+		lusi_MessageIndexMin : USINT := MQTT_MsgBound#Min;
+		lusi_MessageIndexMax : USINT := MQTT_MsgBound#Max;
+       /*
+        * Raspi4
+        */
+		lui_Raspi4MessageLength1    : UINT;
+		lui_Raspi4MessageLength2    : UINT;
+		lui_Raspi4MessageLength3    : UINT;
+		lui_Raspi4MessageLength4    : UINT;
+		lui_Raspi4MessageLength5    : UINT;
+		lui_Raspi4MessageLength6    : UINT;
+		lui_Raspi4MessageLength7    : UINT;
+		lui_Raspi4MessageLength8    : UINT;
+		lui_Raspi4MessageLength9    : UINT;
+       /*
+        * Raspi4
+        */
+		lui_Raspi4MessageLifeTick1  : UINT;
+		lui_Raspi4MessageLifeTick2  : UINT;
+		lui_Raspi4MessageLifeTick3  : UINT;
+		lui_Raspi4MessageLifeTick4  : UINT;
+		lui_Raspi4MessageLifeTick5  : UINT;
+		lui_Raspi4MessageLifeTick6  : UINT;
+		lui_Raspi4MessageLifeTick7  : UINT;
+		lui_Raspi4MessageLifeTick8  : UINT;
+		lui_Raspi4MessageLifeTick9  : UINT;
+       /*
+        * Raspi4
+        */
+		ldi_Raspi4MessageRC1   : DINT;
+		ldi_Raspi4MessageRC2   : DINT;
+		ldi_Raspi4MessageRC3   : DINT;
+		ldi_Raspi4MessageRC4   : DINT;
+		ldi_Raspi4MessageRC5   : DINT;
+		ldi_Raspi4MessageRC6   : DINT;
+		ldi_Raspi4MessageRC7   : DINT;
+		ldi_Raspi4MessageRC8   : DINT;
+		ldi_Raspi4MessageRC9   : DINT;
+       /*
+        * Raspi4
+        */
+		lui_Raspi4MessagePosIdx1   : UINT;
+		lui_Raspi4MessagePosIdx2   : UINT;
+		lui_Raspi4MessagePosIdx3   : UINT;
+		lui_Raspi4MessagePosIdx4   : UINT;
+		lui_Raspi4MessagePosIdx5   : UINT;
+		lui_Raspi4MessagePosIdx6   : UINT;
+		lui_Raspi4MessagePosIdx7   : UINT;
+		lui_Raspi4MessagePosIdx8   : UINT;
+		lui_Raspi4MessagePosIdx9   : UINT;
+	END_VAR
+
+    VAR       
+      l_ConState : MQTT_SUBSCRIBER_STATE;
+      ldi_Ch     : DINT;
+    END_VAR
+	
+    VAR
+      lstr_PRGName   : STRING[30] := 'PRG_Raspi2_MQTTSubscribe';
+      lui_TraceLevel : UINT     := 5;
+    END_VAR
+   
+   /*
+    * Initialisierungsmerker
+    */
+    VAR
+     FB_CycleInitR_TRIG       : R_TRIG;
+    END_VAR      
+     
+	VAR
+	 li_CycleCount : INT;
+	 lx_CyclePulse : BOOL;
+	 lx_CycleInit  : BOOL;
+	END_VAR
+	
+	FB_CycleInitR_TRIG(CLK := TRUE, Q => lx_CycleInit);
+   /*
+    * Laesst die Moeglichkeit zu den TraceLevel lokal zu aendern! 
+    */	
+    IF lx_CycleInit = TRUE THEN   
+	 lui_TraceLevel := gui_TraceLevel;
+    END_IF;
+    
+    IF lx_CycleInit = TRUE THEN
+	END_IF;
+	
+	li_CycleCount := li_CycleCount + 1;
+	lx_CyclePulse := NOT lx_CyclePulse;
+
+   /*
+    * Interne Werte mit Uebergabe von MQTTConnect!
+    */
+	// MQTT_State := MQTT_GetState(ch := ldi_Ch, rc => rc, ENO => ENO);
+	
+    l_ConState := MQTT_State;
+    ldi_ch     := MQTT_Channel;
+
+	IF l_ConState = MQTT_SUBSCRIBER_STATE#CONNECTED THEN
+
+		/* connect to topic in case connection has been established */
+		IF NOT(lx_CL1_subscribed) THEN
+           /* 
+            * Topics von Raspi4
+            */
+			MQTT_Subscribe(ch := ldi_Ch, topic := l_MQTTInitKom.Raspi4TopicIOBlink,       rc => rc_CL1); //
+			MQTT_Subscribe(ch := ldi_Ch, topic := l_MQTTInitKom.Raspi4TopicIOPV_Scale,    rc => rc_CL1); //
+			MQTT_Subscribe(ch := ldi_Ch, topic := l_MQTTInitKom.Raspi4TopicIOSP_Scale,    rc => rc_CL1); //
+			MQTT_Subscribe(ch := ldi_Ch, topic := l_MQTTInitKom.Raspi4TopicIOY_Scale,     rc => rc_CL1); //
+			MQTT_Subscribe(ch := ldi_Ch, topic := l_MQTTInitKom.Raspi4TopicIOPV,          rc => rc_CL1); //
+			MQTT_Subscribe(ch := ldi_Ch, topic := l_MQTTInitKom.Raspi4TopicIOSP,          rc => rc_CL1); //
+			MQTT_Subscribe(ch := ldi_Ch, topic := l_MQTTInitKom.Raspi4TopicIOY,           rc => rc_CL1); //
+			MQTT_Subscribe(ch := ldi_Ch, topic := l_MQTTInitKom.Raspi4TopicIOModeRPM1,    rc => rc_CL1); //
+			MQTT_Subscribe(ch := ldi_Ch, topic := l_MQTTInitKom.Raspi4TopicIOModeRPM2,    rc => rc_CL1); //
+
+			lx_CL1_subscribed := rc_CL1 = MQTT_RC#OK;
+		END_IF;
+
+  		
+		// clear the receive ring buffer
+		FOR lusi_MessageIndex := MQTT_MsgBound#Min TO MQTT_MsgBound#Max DO
+		  lstrarr_Messages[lusi_MessageIndex] := '';
+		END_FOR;
+
+		/* if subscribed, obtain only the latest message */
+		lx_message_received := FALSE;
+		lusi_MessageIndex    := 0;
+
+		REPEAT
+			lstr_ReceiveTopic := MQTT_Receive(ch          := ldi_Ch, 
+                                              payload     := REF(ioImageRemote[0]), 
+                                              payload_len := ioImageRemoteSize, 
+                                              len         => ioImageRemoteLen, 
+                                              rc          => rc_ReceiveTopic);
+
+			lx_message_received := TRUE;
+
+			// convert the received byte array to a string
+			lstrarr_Messages[lusi_MessageIndex] := StringFromByteArray(ioImageRemote, ioImageRemoteLen);
+           /*
+            * Das erhaltene Topic im Array hinterlegen
+            */ 
+            lstrarr_TopicArray[lusi_MessageIndex] := lstr_ReceiveTopic;
+            ldiarr_MessageRC[lusi_MessageIndex]   := rc_ReceiveTopic;
+            
+			//
+			// Messages-Index anpassen fuer weitere Nachrichten
+			if (lusi_MessageIndex < lusi_MessageIndexMax) THEN
+				lusi_MessageIndex := lusi_MessageIndex + 1;
+			ELSE
+				lusi_MessageIndex := lusi_MessageIndexMin;
+			END_IF;
+
+			IF rc_ReceiveTopic <> MQTT_RC#OK THEN
+				EXIT;
+			ELSE
+			END_IF;
+
+		UNTIL FALSE
+
+		END_REPEAT;
+	END_IF;
+
+    lx_Raspi4TopicOk1  := FALSE;
+    lx_Raspi4TopicOk2  := FALSE;
+    lx_Raspi4TopicOk3  := FALSE;
+    lx_Raspi4TopicOk4  := FALSE;
+    lx_Raspi4TopicOk5  := FALSE;
+    lx_Raspi4TopicOk6  := FALSE;
+    lx_Raspi4TopicOk7  := FALSE;
+    lx_Raspi4TopicOk8  := FALSE;
+    lx_Raspi4TopicOk9  := FALSE;
+
+   /*
+    * Das Array der empfangenen Topics fuer Raspi4 analysieren 
+    */
+    FOR lusi_MessageIndex := MQTT_MsgBound#Min TO MQTT_MsgBound#Max DO // 0 TO 20 DO
+    /*
+     * Raspi4
+     */ 
+     IF lstrarr_TopicArray[lusi_MessageIndex] = l_MQTTInitKom.Raspi4TopicIOBlink AND lx_Raspi4TopicOk1 = FALSE THEN
+       lui_Raspi4MessagePosIdx1   := lusi_MessageIndex;
+       lui_Raspi4MessageLifeTick1 := lui_Raspi4MessageLifeTick1 + 1;
+       lui_Raspi4MessageLength1   := TO_UINT(ldiarr_MessageLen[lusi_MessageIndex]); // len(lstrarr_Messages[lusi_MessageIndex]); 
+       ldi_Raspi4MessageRC1       := ldiarr_MessageRC[lusi_MessageIndex]; 
+       lx_Raspi4TopicOk1          := TRUE;
+
+       IF lstrarr_Messages[lusi_MessageIndex] = 'TRUE' THEN
+        lx_MQTTFlash := TRUE;
+       ELSE
+        lx_MQTTFlash := FALSE;
+       END_IF;
+     END_IF;
+    /*
+     * PV 0..100% (Anzeige BarGraph)
+     */
+     IF lstrarr_TopicArray[lusi_MessageIndex] = l_MQTTInitKom.Raspi4TopicIOPV_Scale  AND lx_Raspi4TopicOk2 = FALSE THEN
+       lui_Raspi4MessagePosIdx2   := lusi_MessageIndex;
+       lui_Raspi4MessageLifeTick2 := lui_Raspi4MessageLifeTick2 + 1;
+       lui_Raspi4MessageLength2   := TO_UINT(ldiarr_MessageLen[lusi_MessageIndex]); // len(lstrarr_Messages[lusi_MessageIndex]); 
+       ldi_Raspi4MessageRC2       := ldiarr_MessageRC[lusi_MessageIndex]; 
+       lx_Raspi4TopicOk2          := TRUE;
+       gr_PV_Scale := TO_REAL(lstrarr_Messages[lusi_MessageIndex]);
+     END_IF;
+    /*
+     * SetPoint 0..100% (Anzeige BarGraph)
+     */
+     IF lstrarr_TopicArray[lusi_MessageIndex] = l_MQTTInitKom.Raspi4TopicIOSP_Scale  AND lx_Raspi4TopicOk3 = FALSE THEN
+       lui_Raspi4MessagePosIdx3   := lusi_MessageIndex;
+       lui_Raspi4MessageLifeTick3 := lui_Raspi4MessageLifeTick3 + 1;
+       lui_Raspi4MessageLength3   := TO_UINT(ldiarr_MessageLen[lusi_MessageIndex]); // len(lstrarr_Messages[lusi_MessageIndex]); 
+       ldi_Raspi4MessageRC3       := ldiarr_MessageRC[lusi_MessageIndex]; 
+       lx_Raspi4TopicOk3          := TRUE;
+       gr_SP_Scale := TO_REAL(lstrarr_Messages[lusi_MessageIndex]);
+     END_IF;
+    /* 
+     * Stellsignal 0..100% (Anzeige BarGraph)
+     */
+     IF lstrarr_TopicArray[lusi_MessageIndex] = l_MQTTInitKom.Raspi4TopicIOY AND lx_Raspi4TopicOk4 = FALSE THEN
+       lui_Raspi4MessagePosIdx4   := lusi_MessageIndex;
+       lui_Raspi4MessageLifeTick4 := lui_Raspi4MessageLifeTick4 + 1;
+       lui_Raspi4MessageLength4   := TO_UINT(ldiarr_MessageLen[lusi_MessageIndex]); // len(lstrarr_Messages[lusi_MessageIndex]); 
+       ldi_Raspi4MessageRC4       := ldiarr_MessageRC[lusi_MessageIndex]; 
+       lx_Raspi4TopicOk4          := TRUE;
+       gr_PID_OUT := TO_REAL(lstrarr_Messages[lusi_MessageIndex]);
+     END_IF;
+
+    /*
+     * RPM1
+     */ 
+     IF lstrarr_TopicArray[lusi_MessageIndex] = l_MQTTInitKom.Raspi4TopicIOModeRPM1 AND lx_Raspi4TopicOk5 = FALSE THEN
+       lui_Raspi4MessagePosIdx5   := lusi_MessageIndex;
+       lui_Raspi4MessageLifeTick5 := lui_Raspi4MessageLifeTick5 + 1;
+       lui_Raspi4MessageLength5   := TO_UINT(ldiarr_MessageLen[lusi_MessageIndex]); // len(lstrarr_Messages[lusi_MessageIndex]); 
+       ldi_Raspi4MessageRC5       := ldiarr_MessageRC[lusi_MessageIndex]; 
+       lx_Raspi4TopicOk5          := TRUE;
+
+       IF lstrarr_Messages[lusi_MessageIndex] = 'TRUE' THEN
+        lx_RPM1 := TRUE;
+       ELSE
+        lx_RPM1 := FALSE;
+       END_IF;
+        /* An Ausgang Ausgangswert = 50% */
+        gx_ModeRPM1 := lx_RPM1; 
+
+     END_IF;
+
+    /*
+     * RPM2
+     */ 
+     IF lstrarr_TopicArray[lusi_MessageIndex] = l_MQTTInitKom.Raspi4TopicIOModeRPM1 AND lx_Raspi4TopicOk6 = FALSE THEN
+       lui_Raspi4MessagePosIdx6   := lusi_MessageIndex;
+       lui_Raspi4MessageLifeTick6 := lui_Raspi4MessageLifeTick6 + 1;
+       lui_Raspi4MessageLength6   := TO_UINT(ldiarr_MessageLen[lusi_MessageIndex]); // len(lstrarr_Messages[lusi_MessageIndex]); 
+       ldi_Raspi4MessageRC6       := ldiarr_MessageRC[lusi_MessageIndex]; 
+       lx_Raspi4TopicOk6          := TRUE;
+
+       IF lstrarr_Messages[lusi_MessageIndex] = 'TRUE' THEN
+        lx_RPM2 := TRUE;
+       ELSE
+        lx_RPM2 := FALSE;
+       END_IF;
+       /* An Ausgang Ausgangswert = 25% */
+       gx_ModeRPM2 := lx_RPM2;        
+     END_IF;
+    
+    /*
+     * Alle gefunden! 
+     */ 
+     IF lx_Raspi4TopicOk1 = TRUE AND lx_Raspi4TopicOk2  = TRUE AND lx_Raspi4TopicOk3  = TRUE AND lx_Raspi4TopicOk4  = TRUE AND lx_Raspi4TopicOk5  = TRUE AND lx_Raspi4TopicOk6  = TRUE THEN             
+       lusi_MessageIndex := MQTT_MsgBound#Max;
+     END_IF;
+     
+    END_FOR;
+
+END_PROGRAM

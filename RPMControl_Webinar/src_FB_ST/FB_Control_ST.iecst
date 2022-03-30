@@ -1,0 +1,477 @@
+ USING com.logicals.Basic.Change;
+ 
+ FUNCTION_BLOCK FB_lc_Ramp_ST  {
+    EN {altName := "EN"};
+    viusi_OpC {altName := "OpC"};
+    vir_X1 {loc := "left", index := 2, altName := "X1"};
+    vir_X2 {loc := "left", index := 3, altName := "X2"};
+    vir_X3 {loc := "left", index := 4, altName := "X3"};
+    vir_LU {loc := "left", index := 5, altName := "LU"};
+    vir_LL {loc := "left", index := 6, altName := "LL"};
+    vir_SV {loc := "left", index := 7, altName := "SV"};
+    vir_SpdUp {loc := "left", index := 8, altName := "SpdUp"};
+    vir_SpdDn {loc := "left", index := 9, altName := "SpdDn"};
+    vix_Stp {loc := "left", index := 10, altName := "Stp"};
+    vix_Auto {loc := "left", index := 11, altName := "Auto"};
+    vow_St {altName := "St"};
+    vousi_Exc {altName := "Exc"};
+    vor_Y {index := 5, altName := "Y"};
+    vor_XSum {index := 6, altName := "XSum"};
+    vox_QU {index := 8, altName := "QU"};
+    vox_QL {index := 9, altName := "QL"};
+    vox_QE {index := 10, altName := "QE"};
+    voui_XSumChg {index := 11, altName := "XSumChg"};
+    instanceName := {visible};
+    width := 200;
+    height := 238;
+  }
+    VAR_INPUT
+      viusi_OpC : USINT { description := "operating mode code"; comment := "1=Reset, 2=FOLLOW, 3=HOLD, 4=BYPASS, 5=RESET-FOLLOW, 6=RESET-HOLD"; };
+
+      vir_X1 : REAL { description := "input value x1"; comment := "1. input of ramp-generator"; };
+      vir_X2 : REAL { description := "input value X2"; comment := "2. input of ramp-generator"; };
+      vir_X3 : REAL { description := "input value X3"; comment := "3. input of ramp-generator"; };
+      
+      vir_LU : REAL { description := "limit upper"; comment := "value for limitation of output Y"; };
+      vir_LL : REAL { description := "limit lower"; comment := "value for limitation of output Y"; };
+      
+      vir_SV    : REAL { description := "set value"; comment := "ramp-generator set to SV with OpCode=RESET"; };
+      vir_SpdUp : REAL { description := "speed up"; comment := "ramp speed upwards"; };
+      vir_SpdDn : REAL { description := "speed down"; comment := "ramp speed downwards"; };
+
+      vix_Stp  : BOOL { description := "Stop"; comment := "stops the calculation of the ramp-generator"; };
+      vix_Auto : BOOL { description := "Auto"; comment := "Auto start the calculation of the ramp-generator"; };
+
+      vit_CycleTime_Sec : TIME { description := "time base"; comment := "scanning time of FB"; };
+    END_VAR
+
+    VAR_OUTPUT
+      vow_St     : WORD { description := "state"; comment := "bit encoded state flags of FB"; };
+      vousi_Exc  : USINT { description := "exception"; comment := "error-code field"; };
+
+      vox_Err    : BOOL { description := "error"; comment := "error-code field"; };
+      voui_ErrNo : UINT { description := "error number"; comment := "error number field"; };
+
+      vor_Y      : REAL { description := "output value Y"; comment := "output ramp_generator limited by LU and LL"; };
+      vor_XSum   : REAL { description := "X inputs sum"; comment := "sum of inputs X1+X2+X3"; };
+      vox_QU     : BOOL { description := "LU reached"; comment := "TRUE = upper limit reached"; };
+      vox_QL     : BOOL { description := "LL reached"; comment := "TRUE = lower limit is reached"; };
+      vox_QE     : BOOL { description := "XSum reached"; comment := "TRUE = XSum (X1+X2+X3) is reached"; };
+      
+      voui_XSumChg     : UINT { description := "XSum changed"; comment := "XSum Changed"; };
+    END_VAR
+    
+    VAR
+      lr_CycleTime : REAL;
+      lr_NoCycUp   : REAL;
+      lr_NoCycDn   : REAL;
+
+      lr_FactorUp  : REAL;
+      lr_FactorDn  : REAL;
+
+  	  lx_up        : BOOL;
+  	  lx_dn        : BOOL;
+  	  
+  	  lr_xSum_HystMax : REAL;
+  	  lr_xSum_HystMin : REAL;
+
+  	  lr_xLL_HystMax : REAL;
+  	  lr_xLL_HystMin : REAL;
+
+  	  lr_xLU_HystMax : REAL;
+  	  lr_xLU_HystMin : REAL;
+  	  
+  	  lr_OldXSum     : REAL ;
+    END_VAR
+
+    VAR
+      FB_UpReached : RS;
+      FB_DnReached : RS;
+
+      lx_UpReached : BOOL;
+      lx_DnReached : BOOL;
+
+      FB_RampIn_Chg : FB_lc_ChangeREAL_ST;
+      lx_RampIn_Chg : BOOL;
+
+      lui_RampIn_Chg_Cnt : UINT;
+   
+    END_VAR
+
+    VAR
+      FB_Init_R_TRIG : R_TRIG;
+    END_VAR
+
+    VAR
+      lx_CycleInit  : BOOL;
+      lx_CyclePulse : BOOL;
+    END_VAR
+
+    FB_Init_R_TRIG(CLK := TRUE, Q => lx_CycleInit);
+    lx_CyclePulse := NOT(lx_CyclePulse);
+    
+    vox_Err    := FALSE;
+    voui_ErrNo := 0;
+
+   /*
+    * XSum berechnen!
+    */
+    vor_XSum := vir_X1 + vir_X2 + vir_X3;
+
+   /*
+    * Aenderung von XSum erkennen!
+    */    
+    FB_RampIn_Chg(vir_In := vor_XSum,voi_Out => lx_RampIn_Chg);
+
+   /*
+    * Aenderung von XSum erkennen => Zyklusmerker!
+    */    
+    IF lx_RampIn_Chg = TRUE OR lx_CycleInit = TRUE THEN
+     lui_RampIn_Chg_Cnt := lui_RampIn_Chg_Cnt + 1;
+     
+     voui_XSumChg := lui_RampIn_Chg_Cnt;
+
+     lx_DnReached := FALSE;
+     lx_UpReached := FALSE;
+    /*
+     * Y output of ramp-generator limited by LU and LL
+     *
+     * XSum sum of inputs X1 + X2 + X3, limited by LU and LL
+     *
+     * QU TRUE = upper limit is reached
+     * QL TRUE = lower limit is reached
+     * QE TRUE = XSum (X1 + X2 + X3) is reached
+     *
+     */
+   
+     lr_xSum_HystMax := lr_OldXSum + 0.5; 
+     lr_xSum_HystMin := lr_OldXSum - 0.5; 
+   
+     lr_xLL_HystMax := vir_LL + 0.5; 
+     lr_xLL_HystMin := vir_LL - 0.5; 
+   
+     lr_xLU_HystMax := vir_LU + 0.5; 
+     lr_xLU_HystMin := vir_LU - 0.5; 
+   
+    /*
+     * Ausgangswert soll in vir_SpdUp Sekunden erreicht sein!
+     */ 
+     IF vir_SpdUp > 0.0 THEN
+   	  lr_NoCycUp  := (vir_SpdUp / TO_REAL(vit_CycleTime_Sec)); //  * vir_SpdUp; // 5.0;  // Anzahl der erforderlichen Zyklen je Sekunde in vir_SpUp (= Sek) das Ende zu erreichen
+   	  lr_FactorUp := lr_OldXSum / lr_NoCycUp;              // Erhoehung je Zyklus
+   	 ELSE
+      /*
+       * Ramp aufzaehlen um in 1 Sekunde das Ziel zu erreichen
+       */	
+   	  lr_NoCycUp  := (1.0 / TO_REAL(vit_CycleTime_Sec)); //  * vir_SpdUp; // 5.0;  // Anzahl der erforderlichen Zyklen je Sekunde
+   	  lr_FactorUp := lr_OldXSum / lr_NoCycUp;              // Erhoehung je Zyklus
+     END_IF;     
+   
+    /*
+     * Ausgangswert soll in vir_SpdDn Sekunden erreicht sein!
+     */ 
+     IF vir_SpdDn > 0.0 THEN
+   	  lr_NoCycDn  := (vir_SpdDn / TO_REAL(vit_CycleTime_Sec)); //  * vir_SpdDn; // 5.0;  // Anzahl der erforderlichen Zyklen um in vir_SpDn (= Sek) das Ende zu erreichen
+   	  lr_FactorDn := lr_OldXSum / lr_NoCycDn;                    // Erhoehung je Zyklus
+   	 ELSE
+      /*
+       * Ramp abzaehlen um in 1 Sekunde das Ziel zu erreichen
+       */	
+   	  lr_NoCycDn  := (1.0 / TO_REAL(vit_CycleTime_Sec)); // * vir_SpdDn; // 5.0;   // Anzahl der erforderlichen Zyklen je Sekunde
+   	  lr_FactorDn := lr_OldXSum / lr_NoCycDn;              // Erhoehung je Zyklus
+     END_IF;     
+
+    END_IF; 
+
+    IF vor_Y > lr_xSum_HystMin AND vor_Y < lr_xSum_HystMax THEN 
+     vox_QE := TRUE; 
+     ELSE 
+     vox_QE := FALSE;
+    END_IF;
+
+    IF vor_Y > lr_xLL_HystMin AND vor_Y < lr_xLL_HystMax THEN 
+     vox_QL := TRUE; 
+     ELSE 
+     vox_QL := FALSE;
+    END_IF;
+
+    IF vor_Y > lr_xLU_HystMin AND vor_Y < lr_xLU_HystMax  THEN 
+     vox_QU := TRUE; 
+     ELSE 
+     vox_QU := FALSE;
+    END_IF;
+
+    IF vir_SpdUp = 0.0 AND vix_Auto = TRUE THEN
+     vox_Err    := TRUE;
+     voui_ErrNo := 3;
+    END_IF;
+
+    IF vir_SpdDn = 0.0  AND vix_Auto = TRUE THEN
+     vox_Err    := TRUE;
+     voui_ErrNo := 4;
+    END_IF;
+   
+    lr_CycleTime := TO_REAL(vit_CycleTime_Sec);
+
+    IF lr_CycleTime = 0.0  AND vix_Auto = TRUE THEN
+     vox_Err    := TRUE;
+     voui_ErrNo := 1;
+    END_IF;
+    
+    IF lr_OldXSum = 0.0 AND vix_Auto = TRUE THEN
+      ELSE
+     /*
+      * Fehlerhinweis!
+      */
+      voui_ErrNo := 2;
+    END_IF;
+
+    IF vox_Err = FALSE THEN
+
+       /*
+        * Rampe aufwaerts
+        */
+    	IF vor_Y < lr_OldXSum AND lx_RampIn_Chg = TRUE THEN 
+    	  lx_up := TRUE; 
+    	  lx_dn := FALSE;
+        END_IF;
+
+    	IF vor_Y > lr_OldXSum THEN // lr_xSum_HystMax THEN 
+    	  lx_UpReached := TRUE; 
+    	  lx_DnReached := FALSE; 
+        END_IF;
+
+       /*
+        * Rampe abwaerts
+        */
+    	IF vor_Y > lr_OldXSum AND lx_RampIn_Chg = TRUE THEN 
+    	  lx_dn := TRUE; 
+    	  lx_up := FALSE;
+        END_IF;
+
+    	IF vor_Y < lr_OldXSum THEN // lr_xSum_HystMin THEN 
+    	  lx_DnReached := TRUE; 
+    	  lx_UpReached := FALSE; 
+        END_IF;
+       /*
+        * Wenn extern KEIN Stop-Signal, dann erhoehen!
+        */ 
+    	IF lx_up = TRUE AND vix_Stp = FALSE AND lx_UpReached = FALSE THEN 
+    	   vor_Y := vor_Y + lr_FactorUp; 
+    	END_IF;
+
+    	IF lx_dn = TRUE AND vix_Stp = FALSE AND lx_DnReached = FALSE THEN 
+    	   vor_Y := vor_Y - lr_FactorDn; 
+    	END_IF;
+    
+        FB_UpReached(S := lx_UpReached, R1 := lx_CycleInit OR lx_DnReached);
+        FB_DnReached(S := lx_DnReached, R1 := lx_CycleInit OR lx_UpReached);
+    
+       IF (lx_DnReached  AND lx_dn) OR (lx_UpReached AND lx_up) THEN
+         // vor_Y := lr_OldXSum;
+        END_IF;
+       /*
+        * AutoMode muss gesetzt sein
+        */ 
+        IF vix_Auto = FALSE THEN
+         vox_Err    := TRUE;
+         voui_ErrNo := 10;
+         vor_Y := 0.0;
+        END_IF;
+    	
+    END_IF;
+
+    IF lx_RampIn_Chg = TRUE OR lx_CycleInit = TRUE THEN
+    /*
+     * Alten Wert sichern
+     * Bei RampeDn muss vom alten Wert aus abgefahren werden
+     */ 
+     lr_OldXSum   := vor_XSum;
+    END_IF; 
+
+    
+ END_FUNCTION_BLOCK
+
+/* 
+ * Funktionsbaustein PT1
+ * Zum Glätten von Anlogwerten 
+ */
+FUNCTION_BLOCK FB_MotorControl_PT1_ST
+
+ VAR_INPUT
+  vir_x  : REAL;					/* Eingang */
+  vir_T1 : REAL;					/* Daempfung */
+ END_VAR
+ 
+ VAR_OUTPUT
+  vor_y: REAL;						/* Ausgang */
+ END_VAR
+ 
+ VAR
+  lr_y_old : REAL;					/* Speichern der alten Ausgangsgroesse  */
+ END_VAR
+
+ vor_y:=vir_T1*lr_y_old+(1-vir_T1) * vir_x;			/* Berechnung der gedaempften Ausgangsgroesse */
+ 
+ lr_y_old := vor_y;							        /* Zwischenspeichern des aktuellen Ausgangswertes */
+
+END_FUNCTION_BLOCK
+
+/*
+ * PIDT1-Algorithmus (AnalogWerte in REAL)
+ */
+FUNCTION_BLOCK FB_MotorControl_PID_ST  {
+    width := 400;
+    minWidth := 400;
+    maxWidth := 400;
+    height := 178;
+    minHeight := 178;
+    maxHeight := 178;
+  }
+
+VAR_INPUT
+  vir_Inp     : REAL;  // control difference 
+  vir_TI      : REAL;  // Integral action time [s] 
+  vir_Kv      : REAL;  // derivative action amplification
+  vir_T1      : REAL;  // fading time constant [s]     .
+  vix_Auto    : BOOL;  // controller on automatic operation       .
+  vir_YManual : REAL;  // Manual operation preset value     .
+  vir_Lvu     : REAL;  // Upper limiting value of the actuating variable        .
+  vir_Lvd     : REAL;  // Lower limiting value of the actuating variable        .
+  vir_Kp      : REAL;  // Proportional control factor       .
+END_VAR
+
+VAR_OUTPUT
+  vox_Lu      : BOOL; // Upper Limit
+  vox_Ld      : BOOL; // Lower Limit
+
+  vor_Out     : REAL; // Output Variable
+
+  vor_P       : REAL; // Proportional Part
+  vor_I       : REAL; // Integral Part
+  vor_D       : REAL; // Derivative Part  
+END_VAR
+
+VAR
+  lx_CycleFlag  : BOOL;  // Merker fuer nicht ersten Zyklus
+  lr_IOld       : REAL;  // Eingangswert des letzten Zyklus(x(t-dt))           
+  lt_ENDT       : TIME;  // Timer  
+
+  lr_ENDT    : REAL;     // EndTimer in REAL
+
+  /* 
+   * Ermittlung per Systemaufruf in logi.CAD 3
+   */ 
+  lr_SysTaskCycleTime : REAL; //CycleTime in REAL
+
+END_VAR
+
+VAR
+  lr_dtv    : REAL;
+  lr_pdt1   : REAL;
+  
+  lx_corr_i : BOOL := FALSE; 
+END_VAR
+/* 
+ *  Calc Cycle Time  
+ */
+lr_SysTaskCycleTime := TO_REAL(SysTaskCycleTime());
+// lr_dtv := SUB(lr_SysTaskCycleTime,lr_ENDT);
+
+/*  
+ * Zeitdifferenz = Taskzeit!
+ */
+lr_dtv := lr_SysTaskCycleTime;  // In Sec! Bei 50ms = 0.05
+
+// lr_ENDT := TO_REAL(SysTaskCycleTime());
+// ENDT := TO_TIME(lr_ENDT);
+
+/*      
+ *  P Part
+ */
+vor_P := vir_Inp * vir_Kp;
+/*      
+ *  DT1 Part
+ */
+IF lx_CycleFlag AND vir_T1 > 0.0 THEN
+      /* 
+       *  D-part calculation
+       * dtv comes in sec 
+       */
+       vor_D := vir_T1 * (vor_D + vir_Kv * vir_Inp-lr_IOld) / (vir_T1 + lr_dtv); 
+ELSE
+      /* 
+       *  With T1 = 0.0 or less then 0.0 no D-Part set
+       */
+       vor_D := 0.0;
+END_IF;
+/* 
+ *   P-Part plus D-Part
+ */
+lr_pdt1 := vor_P + vor_D;
+/* 
+ *  Calc I only in automatic mode
+ */
+IF vix_Auto THEN
+       
+       IF lx_CycleFlag AND vir_Kp <> 0.0 AND vir_TI > 0.0 THEN
+            /* 
+             *  dtv = SystemTaskTime
+             */
+             vor_I := vor_I + vir_Kp * lr_dtv * (vir_Inp + lr_IOld)/2;
+
+       END_IF;
+END_IF;
+       
+IF vix_Auto THEN
+      /* 
+       *  PD-Part + I-Part
+       */
+       vor_Out := lr_pdt1 + vor_I;
+ELSE
+      /* 
+       *  Manual mode
+       */
+       vor_Out := vir_YManual;
+       lx_corr_i := TRUE;
+END_IF;
+
+lr_IOld := vir_Inp;
+
+/* 
+ * Check Limits
+ */ 
+IF vor_Out > vir_Lvu THEN
+       vor_Out    := vir_Lvu;
+       vox_Lu     := TRUE;
+       vox_Ld     := FALSE;
+       lx_corr_i  := TRUE;
+ELSE
+       IF vor_Out <= vir_Lvd THEN
+             vor_Out    := vir_Lvd;
+             vox_Lu     := FALSE;
+             vox_Ld     := TRUE;
+             lx_corr_i  := TRUE;
+       ELSE
+             vox_Lu := FALSE;
+             vox_Ld := FALSE;
+       END_IF;
+END_IF;
+
+/* 
+ *   Adapt I-Part if neccessary
+ */ 
+ IF lx_corr_i THEN
+      vor_I := vor_Out - lr_pdt1;
+ END_IF;
+
+/* 
+ *  If manual mode the Out := YMan
+ */
+ IF vix_Auto = FALSE THEN
+      vor_Out := vir_YManual;
+ END_IF;
+
+ lx_CycleFlag := TRUE;
+ 
+END_FUNCTION_BLOCK

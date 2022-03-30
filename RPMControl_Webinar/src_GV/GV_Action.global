@@ -1,0 +1,9 @@
+/*
+ * Action zwischen AppLogic und AppLoop
+ */
+GLOBALS GV_Action
+	VAR_GLOBAL
+	 gstruc_Action    : DT_Action;	    // Setzdaten von AppLogic
+	 gstruc_Action_FB : DT_ActionFB;	// Feedback-Daten von AppLoop
+	END_VAR
+END_GLOBALS

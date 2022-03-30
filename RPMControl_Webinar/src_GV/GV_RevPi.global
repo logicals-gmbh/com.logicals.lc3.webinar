@@ -1,0 +1,9 @@
+/*
+ * Globale Daten fuer RevPi
+ */
+GLOBALS GV_RevPi
+	VAR_GLOBAL
+		gstr_IPAddr : STRING[15]  := '192.168.128.83';
+		gstr_ResName : STRING[15] := 'RevPi';
+	END_VAR
+END_GLOBALS

@@ -1,0 +1,15 @@
+
+FUNCTION_BLOCK FB_MQTTCpyRevPiPar
+
+VAR_INPUT
+ vistruc_InitKom : DT_MQTT;
+END_VAR
+
+VAR_OUTPUT
+ vostruc_InitKom : DT_MQTTClient;
+END_VAR
+
+vostruc_InitKom.BrokerAdress := vistruc_InitKom.BrokerAdress;
+vostruc_InitKom.IPAdress     := vistruc_InitKom.RevPiIPAdress;
+
+END_FUNCTION_BLOCK

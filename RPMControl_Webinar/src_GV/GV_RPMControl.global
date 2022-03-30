@@ -1,0 +1,58 @@
+/*
+ * GV fuer die Motordrehzahlregelung
+ */
+GLOBALS GV_RPMControl
+	VAR_GLOBAL
+
+	    /* ProcessValue - Analogeingang_1 */
+		gr_PV : REAL;
+	    /* SetPoint     - Analogeingang_2 */
+		gr_SP : REAL;
+	    /* OutValue     - Analogausgang_1 */
+		gr_Y : REAL;
+
+	    /* ManualWert 0..100% */
+		gr_Manual : REAL;
+
+	    /* ProcessValue - Analogeingang_1 Skaliert 0..100%*/
+		gr_PV_Scale : REAL;
+	    /* SetPoint     - Analogeingang_2 Skaliert 0..100% */
+		gr_SP_Scale : REAL;
+	    /* OutValue     - Analogausgang_1 Skaliert 0..100% */
+		gr_Y_Scale  : REAL;
+        /*
+         * Setzen der Betriebsart 1Aus4 
+         */
+        /* Vom Schalter Ausgangswert = 0% */
+        gx_RPM0 : BOOL; 
+        /* Vom Schalter Ausgangswert = 25% */
+        gx_RPM1 : BOOL; 
+        /* Vom Schalter Ausgangswert = 50% */
+        gx_RPM2 : BOOL;         
+        /* Vom Schalter SetPoint von Poti */
+        gx_RPM3 : BOOL; 
+        /* SetPoint von SFC */
+        gx_RPM4 : BOOL; 
+
+        /* Vom Schalter Reset All inkl. Visu */
+        gx_ResetRPM : BOOL; 
+
+        /*
+         * Anzeige der Betriebsart 1Aus4 
+         */
+        /* An Ausgang Ausgangswert = 0% */
+        gx_ModeRPM0 : BOOL; 
+        /* An Ausgang Ausgangswert = 25% */
+        gx_ModeRPM1 : BOOL; 
+        /* An Ausgang Ausgangswert = 50% */
+        gx_ModeRPM2 : BOOL; 
+        /* An Ausgang SetPoint von Poti */
+        gx_ModeRPM3 : BOOL; 
+        /* SetPoint von SFC */
+        gx_ModeRPM4 : BOOL; 
+
+        /* Anzeige/Status Handbetrieb */
+        gx_ModeManual : BOOL; 
+
+	END_VAR
+END_GLOBALS

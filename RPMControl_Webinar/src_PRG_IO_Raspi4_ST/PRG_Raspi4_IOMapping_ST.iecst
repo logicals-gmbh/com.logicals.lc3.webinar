@@ -1,0 +1,277 @@
+ /*
+  * logi.cals GmbH
+  * A-3100 St. Poelten
+  * Europaplatz 7/1
+  * Tel.: 0043-5-77147
+  *
+  * logi.cals automation solutions & services GmbH
+  * D-40738 Langenfeld
+  * Postfach 1306
+  * Tel.: 0043-5-77147
+  * 
+  * Contact:
+  * dieter.goltz@logicals.com
+  * 
+  * History:
+  * Created: 
+  * DG 2021-05-30
+  * 
+  * Modified:
+  * DG 2021-05-30 IO
+  */
+ 
+ /* 
+  * Description
+  * ===========
+  */ 
+
+ /* 
+  * Beschreibung
+  * ============
+  */ 
+/*
+ * IO fuer Raspi4
+ */
+PROGRAM PRG_IOMapping_Raspi4_ST
+
+    USING com.logicals.Basic.Flash;
+    
+	VAR_EXTERNAL
+	    /* ProcessValue - Analogeingang_1 */
+		gr_PV : REAL;
+	    /* SetPoint     - Analogeingang_2 */
+		gr_SP : REAL;
+	    /* OutValue     - Analogausgang_1 */
+		gr_Y : REAL;
+
+	    /* ProcessValue - Analogeingang_1 Skaliert 0..100%*/
+		gr_PV_Scale : REAL;
+	    /* SetPoint     - Analogeingang_2 Skaliert 0..100% */
+		gr_SP_Scale : REAL;
+	    /* OutValue     - Analogausgang_1 Skaliert 0..100% */
+		gr_Y_Scale  : REAL;
+        /*
+         * Setzen der Betriebsart 1Aus4 
+         */
+        /* Vom Schalter Ausgangswert = 0% */
+        gx_RPM0 : BOOL; 
+        /* Vom Schalter Ausgangswert = 25% */
+        gx_RPM1 : BOOL; 
+        /* Vom Schalter Ausgangswert = 50% */
+        gx_RPM2 : BOOL;         
+        /* Vom Schalter SetPoint von Poti */
+        gx_RPM3 : BOOL; 
+
+        /* Vom Schalter Reset All inkl. Visu */
+        gx_ResetRPM : BOOL; 
+
+        /*
+         * Anzeige der Betriebsart 1Aus4 
+         */
+        /* An Ausgang Ausgangswert = 0% */
+        gx_ModeRPM0 : BOOL; 
+        /* An Ausgang Ausgangswert = 25% */
+        gx_ModeRPM1 : BOOL; 
+        /* An Ausgang Ausgangswert = 50% */
+        gx_ModeRPM2 : BOOL; 
+        /* An Ausgang SetPoint von Poti */
+        gx_ModeRPM3 : BOOL; 
+	END_VAR
+
+    VAR_EXTERNAL
+       gusi_Status_AI1 : USINT;
+       gi_Value_AI1    : INT;
+       gusi_Status_AI2 : USINT;
+       gi_Value_AI2    :INT;
+         
+       gi_Value_AO1    : INT;
+       gi_Value_AO2    : INT;
+    END_VAR
+    
+    VAR_EXTERNAL
+       gx_In1 : BOOL;
+       gx_In2 : BOOL;
+       gx_In3 : BOOL;
+       gx_In4 : BOOL;
+      	
+       gx_In5 : BOOL;
+       gx_In6 : BOOL;
+       gx_In7 : BOOL;
+       gx_In8 : BOOL;
+    END_VAR
+    
+    VAR_EXTERNAL
+	   gx_Out1 : BOOL;
+	   gx_Out2 : BOOL;
+	   gx_Out3 : BOOL;
+	   gx_Out4 : BOOL;
+	 	 
+	   gx_Out5 : BOOL;
+	   gx_Out6 : BOOL;
+	   gx_Out7 : BOOL;
+	   gx_Out8 : BOOL;
+    END_VAR
+
+    VAR_EXTERNAL
+       Slave_1002EL3162Channel1Status : USINT;
+       Slave_1002EL3162Channel1Value  : INT;
+       Slave_1002EL3162Channel2Status : USINT;
+       Slave_1002EL3162Channel2Value  : INT;
+    END_VAR
+        
+    VAR_EXTERNAL
+       Slave_1004EL1008Channel1Input: BOOL;
+       Slave_1004EL1008Channel2Input: BOOL;
+       Slave_1004EL1008Channel3Input: BOOL;
+       Slave_1004EL1008Channel4Input: BOOL;
+       Slave_1004EL1008Channel5Input: BOOL;
+       Slave_1004EL1008Channel6Input: BOOL;
+       Slave_1004EL1008Channel7Input: BOOL;
+       Slave_1004EL1008Channel8Input: BOOL;
+    END_VAR
+       
+    VAR_EXTERNAL
+       Slave_1003EL4102Channel1Output : INT;
+       Slave_1003EL4102Channel2Output : INT;
+    END_VAR
+
+    VAR_EXTERNAL
+       Slave_1005EL2008Channel1Output  : BOOL;
+       Slave_1005EL2008Channel2Output  : BOOL;
+       Slave_1005EL2008Channel3Output  : BOOL;
+       Slave_1005EL2008Channel4Output  : BOOL;
+       Slave_1005EL2008Channel5Output  : BOOL;
+       Slave_1005EL2008Channel6Output  : BOOL;
+       Slave_1005EL2008Channel7Output  : BOOL;
+       Slave_1005EL2008Channel8Output  : BOOL;
+    END_VAR
+
+    VAR_EXTERNAL
+	   gx_isConnected        : BOOL;
+	   gudi_ConfiguredSlaves : UDINT;
+	   gudi_ConnectedSlaves  : UDINT;
+    END_VAR
+
+    VAR
+	  lx_isConnected        : BOOL;
+	  ludi_ConfiguredSlaves : UDINT;
+	  ludi_ConnectedSlaves  : UDINT;
+	END_VAR
+
+    VAR
+      FB_Flash2Hz : FB_lc_Flash_2Hz_FBD;
+	END_VAR
+
+    VAR
+      FB_InitR_TRIG : R_TRIG;
+    END_VAR
+    
+    VAR
+      lx_CyclePulse  : BOOL;
+      lui_CycleCount : UINT;
+      lx_CycleInit   : BOOL;
+    END_VAR
+
+    FB_InitR_TRIG(CLK := TRUE, Q => lx_CycleInit);
+    lui_CycleCount := lui_CycleCount + 1;
+    lx_CyclePulse  := NOT(lx_CyclePulse);
+
+   /*
+    * InitCycle 
+    */
+    IF lx_CycleInit = TRUE THEN
+    
+    END_IF;
+    
+   /*
+    * Flash 
+    */
+    FB_Flash2Hz(vox_Out => gx_Out8);
+
+   /*
+    * Status EtherCAT (lokal)
+    */
+	lx_isConnected        := ECM_ACONTIS_ISCONNECTED();
+	ludi_ConfiguredSlaves := ECM_ACONTIS_CONFIGURED_SLAVES();
+	ludi_ConnectedSlaves  := ECM_ACONTIS_CONNECTED_SLAVES();
+
+   /*
+    * Status EtherCAT (GV)
+    */
+    gx_isConnected        := lx_isConnected;
+    gudi_ConfiguredSlaves := ludi_ConfiguredSlaves;
+    gudi_ConnectedSlaves  := ludi_ConnectedSlaves;
+
+   /*
+    * Analog Eingaenge 
+    * ----------------
+    */
+    gusi_Status_AI1 := Slave_1002EL3162Channel1Status;
+    gi_Value_AI1    := Slave_1002EL3162Channel1Value ;
+
+    gusi_Status_AI2 := Slave_1002EL3162Channel2Status;
+    gi_Value_AI2    := Slave_1002EL3162Channel2Value;
+
+    gr_PV := TO_REAL(gi_Value_AI1); // Prozesswert / Aktuelle Drehzahl 
+
+   /*
+    * Binaer-Eingaenge 
+    * ----------------
+    */
+
+   /*
+    * Mode von EL1008 
+    */
+    gx_In1 := Slave_1004EL1008Channel1Input;
+    gx_In2 := Slave_1004EL1008Channel2Input;
+    gx_In3 := Slave_1004EL1008Channel3Input;
+    gx_In4 := Slave_1004EL1008Channel4Input;
+    gx_In5 := Slave_1004EL1008Channel5Input;
+    gx_In6 := Slave_1004EL1008Channel6Input;
+    gx_In7 := Slave_1004EL1008Channel7Input;
+    gx_In8 := Slave_1004EL1008Channel8Input;
+
+    /* Vom Schalter Ausgangswert = 0% */
+    gx_RPM0 := gx_In1; 
+    /* Vom Schalter Ausgangswert = 25% */
+    gx_RPM1 := gx_In2; 
+    /* Vom Schalter Ausgangswert = 50% */
+    gx_RPM2 := gx_In3;         
+    /* Vom Schalter SetPoint von Poti */
+    gx_RPM3 := gx_In4; 
+
+    /* Vom Schalter Reset All inkl. Visu */
+    gx_ResetRPM := gx_In8; 
+
+   /*
+    * Analog-Ausgaenge 
+    * ----------------
+    */
+    gi_Value_AO1 := TO_INT(gr_Y); // Stellgroesse an Analogausgang
+
+    Slave_1003EL4102Channel1Output := gi_Value_AO1;
+    Slave_1003EL4102Channel2Output := gi_Value_AO2;
+    
+   /*
+    * Binaer Ausgaenge 
+    * ----------------
+    */
+   /*
+    * ModeAnzeige an EL2008 
+    */
+    gx_OUT1 := gx_ModeRPM0; 
+    gx_OUT2 := gx_ModeRPM1; 
+    gx_OUT3 := gx_ModeRPM2; 
+    gx_OUT4 := gx_ModeRPM3; 
+
+    Slave_1005EL2008Channel1Output := gx_Out1;
+    Slave_1005EL2008Channel2Output := gx_Out2;
+    Slave_1005EL2008Channel3Output := gx_Out3;
+    Slave_1005EL2008Channel4Output := gx_Out4;
+    Slave_1005EL2008Channel5Output := gx_Out5;
+    Slave_1005EL2008Channel6Output := gx_Out6;
+    Slave_1005EL2008Channel7Output := gx_Out7;
+    Slave_1005EL2008Channel8Output := gx_Out8;
+  
+END_PROGRAM
+
