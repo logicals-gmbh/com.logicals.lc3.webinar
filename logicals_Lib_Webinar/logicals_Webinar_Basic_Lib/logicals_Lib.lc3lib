@@ -3,6 +3,9 @@
  * 
  * Created:
  * 20220226 _ DG Created Version 0.0.1
+ * 20220329 _ DG Created Version 0.0.2
+ * 20220329 _ DG Created Version 0.0.3
+ * 20220330 _ DG Created Version 0.0.4
  *
  * New Name com.logi.cals.Webinar.Basic
  * 
@@ -13,7 +16,7 @@
   */
 LIBRARY com.logicals.Webinar.Basic
   
-  VERSION     := 0.0.3-SNAPSHOT;
+  VERSION     := 0.0.4-SNAPSHOT;
   VENDOR      := "logi.cals (c) GmbH";
   SUMMARY     := "logi.cals Aplication Lib / With Namespaces / Source Git-User-Dir";
   COPYRIGHT   := "(c) logi.cals GmbH 2021";

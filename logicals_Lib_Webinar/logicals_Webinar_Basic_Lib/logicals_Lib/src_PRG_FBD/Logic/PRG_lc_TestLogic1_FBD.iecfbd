@@ -67,8 +67,7 @@ PROGRAM PRG_lc_TestLogic1_FBD
   @VF(5) : @E(lx_In3), @R(420.0, 110.0, 140.0, 19.0);
   @VF(6) : @E(lx_EinsAusDrei_Out), @R(1140.0, 70.0, 200.0, 19.0);
   @VF(16) : @E(lx_EinsAusDrei2_Out), @R(1140.0, 190.0, 200.0, 19.0);
-  @C(1) : @FB(FB_lc_EinsAusDrei_Auswahl_FBD), @R(710.0, 70.0, 340.0, 58.0), @I(@N(vix_In1), @L(9.5)), @I(@N(vix_In2), @L(29.5)), @I(@N(vix_In3), @L(49.5)), @O(@N(vox_Out), @R(9.5));
-  @C(11) : @FB(FB_lc_EinsAusDrei_Auswahl2_FBD), @R(730.0, 190.0, 300.0, 58.0), @I(@N(vix_In1), @L(9.5)), @I(@N(vix_In2), @L(29.5)), @I(@N(vix_In3), @L(49.5)), @O(@N(vox_Out), @R(9.5));
+  @C(11) : @FB(FB_lc_EinsAusDrei_Auswahl2_FBD), @R(700.0, 190.0, 360.0, 58.0), @I(@N(vix_In1), @L(9.5)), @I(@N(vix_In2), @L(29.5)), @I(@N(vix_In3), @L(49.5)), @O(@N(vox_Out), @R(9.5));
   @C(21) : @FB(FB_lc_ToggleSw_FBD), @R(760.0, 510.0, 260.0, 58.0), @I(@N(vix_Set), @L(9.5)), @I(@N(vix_Trg), @L(29.5)), @I(@N(vix_Reset), @L(49.5)), @O(@N(vox_Out), @R(9.5));
   @C(10) : @FB(FB_lc_Toggle1_FBD), @R(780.0, 350.0, 200.0, 48.0), @I(@N(vix_In), @L(9.5)), @O(@N(vox_Out), @R(9.5));
   @VF(12) : @E(lx_ToggleSw_Set), @R(430.0, 510.0, 250.0, 19.0);
@@ -98,6 +97,7 @@ PROGRAM PRG_lc_TestLogic1_FBD
   @VF(48) : @E(lx_NooM_Req_d), @R(1150.0, 840.0, 190.0, 19.0);
   @VF(49) : @E(lx_NooM_Req_e), @R(1150.0, 860.0, 190.0, 19.0);
   @VF(50) : @E(lx_NooM_Req_f), @R(1150.0, 880.0, 190.0, 19.0);
+  @C(1) : @FB(FB_lc_EinsAusDrei_Auswahl_FBD), @R(710.0, 70.0, 340.0, 98.0), @I(@N(vix_In1), @L(9.5)), @I(@N(vix_In2), @L(29.5)), @I(@N(vix_In3), @L(49.5)), @O(@N(vox_Out), @R(9.5)), @O(@N(vox_Out1), @R(29.5)), @O(@N(vox_Out2), @R(49.5)), @O(@N(vox_Out3), @R(69.5));
   @CP(13) : 669.5, 79.5;
   @CP(14) : 639.5, 99.5;
   @CP(15) : 609.5, 119.5;

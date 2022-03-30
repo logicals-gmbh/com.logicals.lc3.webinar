@@ -4,9 +4,9 @@ FUNCTION_BLOCK FB_lc_EinsAusDrei_Auswahl3_FBD
     width := 350;
     minWidth := 340;
     maxWidth := 340;
-    height := 58;
-    minHeight := 58;
-    maxHeight := 58;
+    height := 98;
+    minHeight := 98;
+    maxHeight := 98;
   }
 
   VAR_INPUT
