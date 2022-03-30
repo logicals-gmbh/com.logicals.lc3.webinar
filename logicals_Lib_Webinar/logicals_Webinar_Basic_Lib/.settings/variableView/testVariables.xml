@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<project>
+    <configuration name="ConfLocalPLC">
+        <resource name="ResLocalPLC">
+            <variable instancePath="INST_lc_TestByteArrFromStr1_ST.lb_Arr[0]"/>
+            <variable instancePath="INST_lc_TestByteArrFromStr1_ST.lb_Arr[1]"/>
+            <variable instancePath="INST_lc_TestByteArrFromStr1_ST.lb_Arr[2]"/>
+            <variable instancePath="INST_lc_TestByteArrFromStr1_ST.lb_Arr[3]"/>
+            <variable instancePath="INST_lc_TestByteArrFromStr1_ST.lb_Arr[4]"/>
+            <variable instancePath="INST_lc_TestByteArrFromStr1_ST.lb_Arr[5]"/>
+            <variable instancePath="INST_lc_TestByteArrFromStr1_ST.lb_Arr[6]"/>
+            <variable instancePath="INST_lc_TestByteArrFromStr1_ST.lb_Arr[7]"/>
+            <variable instancePath="INST_lc_TestByteArrFromStr1_ST.lb_Arr[8]"/>
+            <variable instancePath="INST_lc_TestByteArrFromStr1_ST.lb_Arr[9]"/>
+            <variable instancePath="INST_lc_TestByteArrFromStr1_ST.lb_Arr[10]"/>
+            <variable instancePath="INST_lc_TestByteArrFromStr1_ST.lb_Arr[11]"/>
+            <variable instancePath="INST_lc_TestByteArrFromStr1_ST.lb_Arr[12]"/>
+            <variable instancePath="INST_lc_TestByteArrFromStr1_ST.lb_Arr[13]"/>
+            <variable instancePath="INST_lc_TestByteArrFromStr1_ST.lb_Arr[14]"/>
+            <variable instancePath="INST_lc_TestByteArrFromStr1_ST.lb_Arr[15]"/>
+        </resource>
+    </configuration>
+</project>

@@ -1,0 +1,82 @@
+ /*
+  * logi.cals GmbH
+  * A-3100 St. Poelten
+  * Europaplatz 7/1
+  * Tel.: 0043-5-77147
+  *
+  * logi.cals automation solutions & services GmbH
+  * D-40738 Langenfeld
+  * Postfach 1306
+  * Tel.: 0043-5-77147
+  * 
+  * Contact:
+  * dieter.goltz@logicals.com
+  * 
+  * History:
+  * Created:  
+  * DG 2017-03-28
+  * 
+  * Modified: 
+  * DG 2017-03-28
+  * DG 2021-03-01
+  * DG 2021-08-01
+  */ 
+
+ /*
+  * Description
+  * -----------
+  * Test Convert Blocks
+  */
+
+ /* 
+  * Beschreibung
+  * ------------
+  * Test Convert Blocks
+  */
+  
+USING com.logicals.Basic.Convert;
+
+PROGRAM PRG_lc_TestConvert1_ST
+
+VAR
+ FB_ConvRealTo2Int : FB_lc_ConvRealTo2Int_ST;
+END_VAR
+
+VAR
+  lr_Val   : REAL;
+  
+  ldi_HVal : DINT;
+  ldi_LVal : DINT;
+END_VAR
+
+VAR
+  lx_Sign    : BOOL;   // Vorzeichen
+  lx_Mill    : BOOL;   // 1000-Millionen
+  lx_00Thous : BOOL;   // 100-Millionen 
+  lx_0Thous  : BOOL;   // 10-Millionen  
+  lx_Thous   : BOOL;   // Millionen     
+  lx_Hun     : BOOL;   // HunderTausend 
+  lx_Ten     : BOOL;   // ZehnTausend   
+  lx_DSingle : BOOL;   // Tausend       
+  lx_DSing   : BOOL;   // Hundert          
+  lx_DTen    : BOOL;   // Zehn       
+  lx_DHun    : BOOL;   // Eins
+END_VAR
+
+FB_ConvRealTo2Int(vir_Val      := lr_Val,
+	              vox_Sign     => lx_Sign, 
+                  vox_Mill     => lx_Mill,    
+                  vox_00Thous  => lx_00Thous, 
+                  vox_0Thous   => lx_0Thous,  
+                  vox_Thous    => lx_Thous,   
+                  vox_Hun      => lx_Hun,     
+                  vox_Ten      => lx_Ten,     
+                  vox_DSingle  => lx_DSingle, 
+                  vox_DSing    => lx_DSing,   
+                  vox_DTen     => lx_DTen,    
+                  vox_DHun     => lx_DHun,
+                  
+	              vodi_HVal    => ldi_HVal,
+	              vodi_LVal    => ldi_LVal);
+
+END_PROGRAM

@@ -1,0 +1,1431 @@
+NAMESPACE com.logicals.Basic.ShiftSteps
+
+TYPE
+ 
+ DT_lc_StepAliveOut : STRUCT
+    OUT      : BOOL;
+    ActTime  : UINT;
+    ActCount : UINT; 
+ END_STRUCT;
+  
+ DT_lc_StepAliveState : STRUCT
+    //
+    // Gehoert zu Shift16Steps
+    //
+    ChgState    : BOOL;     // Aenderung im Schieberister stattgefunden
+    ChgStateCnt : UINT;     // Zaehler der Aenderungssignale
+    ActStateNo  : USINT;    // Aktuellen Schrittnummer
+    
+    Out01    : DT_lc_StepAliveOut;
+    Out02    : DT_lc_StepAliveOut;
+    Out03    : DT_lc_StepAliveOut;
+    Out04    : DT_lc_StepAliveOut;
+    Out05    : DT_lc_StepAliveOut;
+    Out06    : DT_lc_StepAliveOut;
+    Out07    : DT_lc_StepAliveOut;
+    Out08    : DT_lc_StepAliveOut;
+    Out09    : DT_lc_StepAliveOut;
+    Out10    : DT_lc_StepAliveOut;
+    Out11    : DT_lc_StepAliveOut;
+    Out12    : DT_lc_StepAliveOut;
+    Out13    : DT_lc_StepAliveOut;
+    Out14    : DT_lc_StepAliveOut;
+    Out15    : DT_lc_StepAliveOut;
+    Out16    : DT_lc_StepAliveOut;
+    Out17    : DT_lc_StepAliveOut;
+  END_STRUCT;
+
+
+END_TYPE
+
+/*
+ * Schieberegister mit 16 Bits
+ */
+FUNCTION_BLOCK FB_lc_Shift16Steps_ST
+/*
+ * Inputs
+ */
+VAR_INPUT
+ /* Start */
+ vix_Start : BOOL;
+ /* Reset */
+ vix_Reset : BOOL;
+ /* OnTime fuer die Timer / OnTime for timer */
+ vit_OnTime : TIME;
+END_VAR
+/*
+* Outputs
+*/
+VAR_OUTPUT
+ vostruc_StepState : DT_lc_StepAliveState;
+END_VAR
+
+VAR
+ /* Trigger fuer Aenderung eines Ausgangssignals */
+ ChgStateR_TRIG : R_TRIG;
+
+ /* Init fuer einen Init-Puls im ersten Zyklus / Init for a init pulse in the first cycle */
+ InitR_TRIG : R_TRIG;
+ /* Start fuer einen Start-Puls / Start for a start pulse */
+ StartR_TRIG : R_TRIG;
+ /* Reset fuer einen Reset-Puls / Start for a reset pulse */
+ ResetR_TRIG : R_TRIG;
+ /* 
+  * --------------
+  * RS-FlipFlops
+  * Fuer jeden Schritt ein RS_FF
+  * --------------
+  */
+ /* Schritt 1 / Step 1 */
+ RS_Step01 : RS;
+ /* Schritt 2 / Step 2 */
+ RS_Step02 : RS;
+ /* Schritt 3 / Step 3 */
+ RS_Step03 : RS;
+ /* Schritt 4 / Step 4 */
+ RS_Step04 : RS;
+ /* Schritt 5 / Step 5 */
+ RS_Step05 : RS;
+ /* Schritt 6 / Step 6 */
+ RS_Step06 : RS;
+ /* Schritt 7 / Step 7 */
+ RS_Step07 : RS;
+ /* Schritt 8 / Step 8 */
+ RS_Step08 : RS;
+ /* Schritt 1 / Step 1 */
+ RS_Step09 : RS;
+ /* Schritt 2 / Step 2 */
+ RS_Step10 : RS;
+ /* Schritt 3 / Step 3 */
+ RS_Step11 : RS;
+ /* Schritt 4 / Step 4 */
+ RS_Step12 : RS;
+ /* Schritt 5 / Step 5 */
+ RS_Step13 : RS;
+ /* Schritt 6 / Step 6 */
+ RS_Step14 : RS;
+ /* Schritt 7 / Step 7 */
+ RS_Step15 : RS;
+ /* Schritt 8 / Step 8 */
+ RS_Step16 : RS;
+ /* Init Pulse / Init pulse */
+ InitRS : RS;
+ /* 
+  * ------
+  * Timer
+  * ------- 
+ */
+ /* Wait Timer 1 */
+ TON_Step01 : TON;
+ /* Wait Timer 2 */
+ TON_Step02 : TON;
+  /* Wait Timer 3 */
+ TON_Step03 : TON;
+ /* Wait Timer 4 */
+ TON_Step04 : TON; 
+ /* Wait Timer 5 */
+ TON_Step05 : TON;
+ /* Wait Timer 6 */
+ TON_Step06 : TON;
+ /* Wait Timer 7 */
+ TON_Step07 : TON;
+ /* Wait Timer 8 */
+ TON_Step08 : TON; 
+ /* Wait Timer 9 */
+ TON_Step09 : TON; 
+ /* Wait Timer 1 */
+ TON_Step10 : TON;
+ /* Wait Timer 2 */
+ TON_Step11 : TON;
+  /* Wait Timer 3 */
+ TON_Step12 : TON;
+ /* Wait Timer 4 */
+ TON_Step13 : TON; 
+ /* Wait Timer 5 */
+ TON_Step14 : TON;
+ /* Wait Timer 6 */
+ TON_Step15 : TON;
+ /* Wait Timer 7 */
+ TON_Step16 : TON;
+ /* Wait Timer 8 */
+ TON_Step17 : TON; 
+ /* Wait Timer 9 */
+ TON_Step18 : TON; 
+ /* 
+  * -----------
+  * Counter
+  * -----------
+  */
+ /* Zaehler Zaehlen StateChanges Schieberegister */
+ ChgStateCTU : CTU;
+
+ /* Zaehler Init / Counter Init */
+ InitCTU : CTU;
+ /* Zaehler Start / Counter Start */
+ CTUStart : CTU;
+ /* Zaehler Reset / Counter Reset */ 
+ CTUReset : CTU;
+ /* Zaehler Schritt 1 / Counter Step 1 */
+ CTUStep01 : CTU;
+ /* Zaehler Schritt 2 / Counter Step 2 */
+ CTUStep02 : CTU;
+ /* Zaehler Schritt 3 / Counter Step 3 */
+ CTUStep03 : CTU;
+ /* Zaehler Schritt 4 / Counter Step 4 */
+ CTUStep04 : CTU;
+ /* Zaehler Schritt 5 / Counter Step 5 */
+ CTUStep05 : CTU;
+ /* Zaehler Schritt 6 / Counter Step 6 */
+ CTUStep06 : CTU;
+ /* Zaehler Schritt 7 / Counter Step 7 */
+ CTUStep07 : CTU;
+ /* Zaehler Schritt 8 / Counter Step 8 */
+ CTUStep08 : CTU;
+ /* Zaehler Schritt 1 / Counter Step 1 */
+ CTUStep09 : CTU;
+ /* Zaehler Schritt 2 / Counter Step 2 */
+ CTUStep10 : CTU;
+ /* Zaehler Schritt 3 / Counter Step 3 */
+ CTUStep11 : CTU;
+ /* Zaehler Schritt 4 / Counter Step 4 */
+ CTUStep12 : CTU;
+ /* Zaehler Schritt 5 / Counter Step 5 */
+ CTUStep13 : CTU;
+ /* Zaehler Schritt 6 / Counter Step 6 */
+ CTUStep14 : CTU;
+ /* Zaehler Schritt 7 / Counter Step 7 */
+ CTUStep15 : CTU;
+ /* Zaehler Schritt 8 / Counter Step 8 */
+ CTUStep16 : CTU;
+ 
+END_VAR
+
+/* Local Variables */
+VAR 
+ /* StartVar fuer Schritt 1 / StartVar for Step 1 */
+ lx_StartVar : BOOL;
+ /* 
+ * Zeitwerte der Timer
+ */
+ /* Zeitwert fuer ActVal / Time value for ActVal */
+ lt_TimeActVal : TIME;
+ /* Zeitwert fuer Schritt 1 / Time value for Step 1 */
+ lt_TimeActVal01 : TIME;
+ /* Zeitwert fuer Schritt 2 / Time value for Step 2 */
+ lt_TimeActVal02 : TIME;
+ /* Zeitwert fuer Schritt 3 / Time value for Step 3 */
+ lt_TimeActVal03 : TIME;
+ /* Zeitwert fuer Schritt 4 / Time value for Step 4 */
+ lt_TimeActVal04 : TIME;
+ /* Zeitwer5 fuer Schritt 5 / Time value for Step 5 */
+ lt_TimeActVal05 : TIME;
+ /* Zeitwert fuer Schritt 6 / Time value for Step 6 */
+ lt_TimeActVal06 : TIME;
+ /* Zeitwer5 fuer Schritt 7 / Time value for Step 7 */
+ lt_TimeActVal07 : TIME;
+ /* Zeitwert fuer Schritt 8 / Time value for Step 8 */
+ lt_TimeActVal08 : TIME;
+ /* Zeitwert fuer Schritt 9 / Time value for Step 9 */
+ lt_TimeActVal09 : TIME;
+ /* Zeitwert fuer Schritt 10 / Time value for Step 10 */
+ lt_TimeActVal10 : TIME;
+ /* Zeitwert fuer Schritt 11 / Time value for Step 11 */
+ lt_TimeActVal11 : TIME;
+ /* Zeitwert fuer Schritt 12 / Time value for Step 12 */
+ lt_TimeActVal12 : TIME;
+ /* Zeitwer5 fuer Schritt 13 / Time value for Step 13 */
+ lt_TimeActVal13 : TIME;
+ /* Zeitwert fuer Schritt 14 / Time value for Step 14 */
+ lt_TimeActVal14 : TIME;
+ /* Zeitwer5 fuer Schritt 15 / Time value for Step 15 */
+ lt_TimeActVal15 : TIME;
+ /* Zeitwert fuer Schritt 16 / Time value for Step 16 */
+ lt_TimeActVal16 : TIME;
+ /* 
+ * Aktuelle Werte der Zaehler
+ */
+ /* Aktueller Wert Init / Actual value for Init */
+ li_li_CntSet_Init : INT;
+ /* Aktueller Wert Start / Actual value for Start */
+ li_CntVal_Start : INT;
+ /* Aktueller Wert Reset / Actual value for Reset */
+ li_CntVal_Reset : INT;
+ /* Aktueller Wert Schritt 1 / Actual value for Step 1 */
+ li_CntVal_Step01 : INT;
+ /* Aktueller Wert Schritt 2 / Actual value for Step 2 */
+ li_CntVal_Step02 : INT;
+ /* Aktueller Wert Schritt 3 / Actual value for Step 3 */
+ li_CntVal_Step03 : INT;
+ /* Aktueller Wert Schritt 4 / Actual value for Step 4 */
+ li_CntVal_Step04 : INT;
+ /* Aktueller Wert Schritt 5 / Actual value for Step 5 */
+ li_CntVal_Step05 : INT;
+ /* Aktueller Wert Schritt 6 / Actual value for Step 6 */
+ li_CntVal_Step06 : INT;
+ /* Aktueller Wert Schritt 7 / Actual value for Step 7 */
+ li_CntVal_Step07 : INT;
+ /* Aktueller Wert Schritt 8 / Actual value for Step 8 */
+ li_CntVal_Step08 : INT;
+ /* Aktueller Wert Schritt 1 / Actual value for Step 1 */
+ li_CntVal_Step09 : INT;
+ /* Aktueller Wert Schritt 2 / Actual value for Step 2 */
+ li_CntVal_Step10 : INT;
+ /* Aktueller Wert Schritt 3 / Actual value for Step 3 */
+ li_CntVal_Step11 : INT;
+ /* Aktueller Wert Schritt 4 / Actual value for Step 4 */
+ li_CntVal_Step12 : INT;
+ /* Aktueller Wert Schritt 5 / Actual value for Step 5 */
+ li_CntVal_Step13 : INT;
+ /* Aktueller Wert Schritt 6 / Actual value for Step 6 */
+ li_CntVal_Step14 : INT;
+ /* Aktueller Wert Schritt 7 / Actual value for Step 7 */
+ li_CntVal_Step15 : INT;
+ /* Aktueller Wert Schritt 8 / Actual value for Step 8 */
+ li_CntVal_Step16 : INT;
+
+ /* 
+  * Setzwerte der Zaehler
+  */
+ /* Setzwert Zaehler Init / Set value for counter Init */
+ li_CntSetValInit : INT;
+ /* Setzwert Zaehler Start / Set value for counter Start */
+ li_CntSetValStart : INT;
+ /* Setzwert Zaehler Reset / Set value for counter Reset */
+ li_CntSetValReset : INT;
+ /* Setzwert Zaehler Step 1 / Set value for counter Step 1 */
+ li_CntSetValStep01 : INT;
+ /* Setzwert Zaehler Step 2 / Set value for counter Step 2 */
+ li_CntSetValStep02 : INT;
+ /* Setzwert Zaehler Step 3 / Set value for counter Step 3 */
+ li_CntSetValStep03 : INT;
+ /* Setzwert Zaehler Step 4 / Set value for counter Step 4 */
+ li_CntSetValStep04 : INT;
+ /* Setzwert Zaehler Step 5 / Set value for counter Step 5 */
+ li_CntSetValStep05 : INT;
+ /* Setzwert Zaehler Step 6 / Set value for counter Step 6 */
+ li_CntSetValStep06 : INT;
+ /* Setzwert Zaehler Step 7 / Set value for counter Step 7 */
+ li_CntSetValStep07 : INT;
+ /* Setzwert Zaehler Step 8 / Set value for counter Step 8 */
+ li_CntSetValStep08 : INT;
+ /* Setzwert Zaehler Step 1 / Set value for counter Step 1 */
+ li_CntSetValStep09 : INT;
+ /* Setzwert Zaehler Step 2 / Set value for counter Step 2 */
+ li_CntSetValStep10 : INT;
+ /* Setzwert Zaehler Step 3 / Set value for counter Step 3 */
+ li_CntSetValStep11 : INT;
+ /* Setzwert Zaehler Step 4 / Set value for counter Step 4 */
+ li_CntSetValStep12 : INT;
+ /* Setzwert Zaehler Step 5 / Set value for counter Step 5 */
+ li_CntSetValStep13 : INT;
+ /* Setzwert Zaehler Step 6 / Set value for counter Step 6 */
+ li_CntSetValStep14 : INT;
+ /* Setzwert Zaehler Step 7 / Set value for counter Step 7 */
+ li_CntSetValStep15 : INT;
+ /* Setzwert Zaehler Step 8 / Set value for counter Step 8 */
+ li_CntSetValStep16 : INT;
+
+ /* 
+ * Konstanten 
+ */
+ /* TRUE */ 
+ lx_EverTRUE : BOOL;
+ /* FALSE */ 
+ lx_EverFALSE : BOOL;
+ /* */
+END_VAR
+
+/*
+* Lokale Variablen zur Diagnose
+*/
+VAR
+  lx_ChgState      : BOOL; 
+  lx_ChgStatePulse : BOOL;
+  
+  li_CntVal_Init   : INT; 
+END_VAR
+
+Var
+ /* Lebenssignal / Alive Signal */
+  lx_CyclePulse    : BOOL;
+  lx_CycleInit     : BOOL;  
+  lui_CycleCount   : UINT;
+End_Var
+
+lx_CyclePulse  := NOT(lx_CyclePulse);
+lui_CycleCount := lui_CycleCount + 1;
+
+/* InitPulse */
+InitR_TRIG(CLK:=lx_EverTRUE, Q => lx_CycleInit);
+InitRS(S:=lx_CycleInit,R1:=vix_Reset);
+
+/*
+ * Den Impuls in einem Zaehler sichern
+ * Wenn der Zaehler sein Sollwert erreicht hat, wird der Zaehler ruckgesetzt
+ */
+InitCTU(CU:=lx_CycleInit,R:=OR(vix_Reset,InitCTU.Q),PV:=li_CntSetValInit);
+li_CntVal_Init := InitCTU.CV;
+/*
+ * EverTRUE setzen / Set EverTRUE
+ */
+lx_EverTRUE := TRUE;
+/*
+ * Initialwerte setzen / Set InitValues
+ * NUR im ersten Zyklus / Only in the first cycle
+ */
+if lx_CycleInit = TRUE then 
+  /*
+   * Zaehlerinitialisierungen
+   */
+  li_CntSetValInit  := 100;
+  li_CntSetValStart := 100;
+  li_CntSetValReset := 100;
+
+  li_CntSetValStep01 := 100;
+  li_CntSetValStep02 := 100;
+  li_CntSetValStep03 := 100;
+  li_CntSetValStep04 := 100;
+  li_CntSetValStep05 := 100;
+  li_CntSetValStep06 := 100;
+  li_CntSetValStep07 := 100;
+  li_CntSetValStep08 := 100;
+  li_CntSetValStep09 := 100;
+  li_CntSetValStep10 := 100;
+  li_CntSetValStep11 := 100;
+  li_CntSetValStep12 := 100;
+  li_CntSetValStep13 := 100;
+  li_CntSetValStep14 := 100;
+  li_CntSetValStep15 := 100;
+  li_CntSetValStep16 := 100;
+END_IF;
+
+/* StartPulse */
+StartR_TRIG(CLK:=vix_Start, Q => lx_StartVar);
+/* 
+ * Den Impuls in einem Zaehler sichern
+ * Wenn der Zaehler sein Sollwert erreicht hat, wird der Zaehler ruckgesetzt
+ */
+CTUStart(CU:=StartR_TRIG.Q,R:=OR(vix_Reset,CTUStart.Q),PV:=li_CntSetValStart);
+li_CntVal_Start := CTUStart.CV;
+
+/* ResetPulse */
+ResetR_TRIG(CLK:=vix_Reset);
+/* 
+ * Den Impuls in einem Zaehler sichern 
+ * Wenn der Zaehler sein Sollwert erreicht hat, wird der Zaehler ruckgesetzt
+ */
+CTUReset(CU:=ResetR_TRIG.Q,R:=OR(vix_Reset,CTUReset.Q),PV:=li_CntSetValReset);
+li_CntVal_Reset := CTUReset.CV;
+
+//
+// Beim Wechsel des Status auch die Aktuelle StateNo ermitteln
+//
+IF lx_ChgStatePulse THEN
+
+ IF vostruc_StepState.Out16.OUT = TRUE THEN
+  vostruc_StepState.ActStateNo := 16;
+ END_IF;
+ IF vostruc_StepState.Out15.OUT = TRUE THEN
+  vostruc_StepState.ActStateNo := 15;
+ END_IF;
+ IF vostruc_StepState.Out14.OUT = TRUE THEN
+  vostruc_StepState.ActStateNo := 14;
+ END_IF;
+ IF vostruc_StepState.Out13.OUT = TRUE THEN
+  vostruc_StepState.ActStateNo := 13;
+ END_IF;
+ IF vostruc_StepState.Out12.OUT = TRUE THEN
+  vostruc_StepState.ActStateNo := 12;
+ END_IF;
+ IF vostruc_StepState.Out11.OUT = TRUE THEN
+  vostruc_StepState.ActStateNo := 11;
+ END_IF;
+ IF vostruc_StepState.Out10.OUT = TRUE THEN
+  vostruc_StepState.ActStateNo := 10;
+ END_IF;
+ IF vostruc_StepState.Out09.OUT = TRUE THEN
+  vostruc_StepState.ActStateNo := 09;
+ END_IF;
+ IF vostruc_StepState.Out08.OUT = TRUE THEN
+  vostruc_StepState.ActStateNo := 08;
+ END_IF;
+ IF vostruc_StepState.Out07.OUT = TRUE THEN
+  vostruc_StepState.ActStateNo := 07;
+ END_IF;
+ IF vostruc_StepState.Out06.OUT = TRUE THEN
+  vostruc_StepState.ActStateNo := 06;
+ END_IF;
+ IF vostruc_StepState.Out05.OUT = TRUE THEN
+  vostruc_StepState.ActStateNo := 05;
+ END_IF;
+ IF vostruc_StepState.Out04.OUT = TRUE THEN
+  vostruc_StepState.ActStateNo := 04;
+ END_IF;
+ IF vostruc_StepState.Out03.OUT = TRUE THEN
+  vostruc_StepState.ActStateNo := 03;
+ END_IF;
+ IF vostruc_StepState.Out02.OUT = TRUE THEN
+  vostruc_StepState.ActStateNo := 02;
+ END_IF;
+ IF vostruc_StepState.Out01.OUT = TRUE THEN
+  vostruc_StepState.ActStateNo := 01;
+ END_IF;
+
+END_IF;
+
+/* 
+ * StartPulse und Setzen wenn letzter Schritt 
+ * Bei der Initialisierung wird R_TRIG.Q per Flanke gesetzt
+ */
+ 
+lx_ChgState := TON_Step16.Q OR TON_Step15.Q OR TON_Step14.Q OR TON_Step13.Q OR
+               TON_Step12.Q OR TON_Step11.Q OR TON_Step10.Q OR TON_Step09.Q OR
+               TON_Step08.Q OR TON_Step07.Q OR TON_Step06.Q OR TON_Step05.Q OR
+               TON_Step04.Q OR TON_Step03.Q OR TON_Step02.Q OR TON_Step01.Q OR lx_CycleInit;
+
+ChgStateR_TRIG(CLK := lx_ChgState, Q => lx_ChgStatePulse);
+
+/*
+ * Den Impuls in einem Zaehler sichern
+ * Wenn der Zaehler sein Sollwert erreicht hat, wird der Zaehler ruckgesetzt
+ */
+ChgStateCTU(CU:=lx_ChgStatePulse,R:=OR(vix_Reset,ChgStateCTU.Q),PV:=16);
+vostruc_StepState.ChgStateCnt := TO_UINT(ChgStateCTU.CV);
+
+vostruc_StepState.ChgState := lx_ChgStatePulse;
+
+/* Schritt 16 */
+RS_Step16(S:=TON_Step15.Q,R1:=RS_Step01.Q1);
+vostruc_StepState.Out16.OUT:=RS_Step16.Q1;
+TON_Step16(IN:=RS_Step16.Q1,PT:=vit_OnTime);
+
+/* Den Impuls in einem Zaehler sichern */
+CTUStep16(CU:=RS_Step16.Q1,R:=vix_Reset,PV:=li_CntSetValStep16);
+li_CntVal_Step16 := CTUStep16.CV;
+
+/* Schritt 15 */
+RS_Step15(S:=TON_Step14.Q,R1:=RS_Step16.Q1);
+vostruc_StepState.Out15.OUT:=RS_Step15.Q1;
+TON_Step15(IN:=RS_Step15.Q1,PT:=vit_OnTime);
+
+/* Den Impuls in einem Zaehler sichern */
+CTUStep15(CU:=RS_Step15.Q1,R:=vix_Reset,PV:=li_CntSetValStep15);
+li_CntVal_Step15 := CTUStep15.CV;
+
+/* Schritt 14 */
+RS_Step14(S:=TON_Step13.Q,R1:=RS_Step15.Q1);
+vostruc_StepState.Out14.OUT:=RS_Step14.Q1;
+TON_Step14(IN:=RS_Step14.Q1,PT:=vit_OnTime);
+
+/* Den Impuls in einem Zaehler sichern */
+CTUStep14(CU:=RS_Step14.Q1,R:=vix_Reset,PV:=li_CntSetValStep14);
+li_CntVal_Step14 := CTUStep14.CV;
+
+/* Schritt 13 */
+RS_Step13(S:=TON_Step12.Q,R1:=RS_Step14.Q1);
+vostruc_StepState.Out13.OUT:=RS_Step13.Q1;
+TON_Step13(IN:=RS_Step13.Q1,PT:=vit_OnTime);
+
+/* Den Impuls in einem Zaehler sichern */
+CTUStep13(CU:=RS_Step13.Q1,R:=vix_Reset,PV:=li_CntSetValStep13);
+li_CntVal_Step13 := CTUStep13.CV;
+
+/* Schritt 12 */
+RS_Step12(S:=TON_Step11.Q,R1:=RS_Step13.Q1);
+vostruc_StepState.Out12.OUT:=RS_Step12.Q1;
+TON_Step12(IN:=RS_Step12.Q1,PT:=vit_OnTime);
+
+/* Den Impuls in einem Zaehler sichern */
+CTUStep12(CU:=RS_Step12.Q1,R:=vix_Reset,PV:=li_CntSetValStep12);
+li_CntVal_Step12 := CTUStep12.CV;
+
+/* Schritt 11 */
+RS_Step11(S:=TON_Step10.Q,R1:=RS_Step12.Q1);
+vostruc_StepState.Out11.OUT:=RS_Step11.Q1;
+TON_Step11(IN:=RS_Step11.Q1,PT:=vit_OnTime);
+
+/* Den Impuls in einem Zaehler sichern */
+CTUStep11(CU:=RS_Step11.Q1,R:=vix_Reset,PV:=li_CntSetValStep11);
+li_CntVal_Step11 := CTUStep11.CV;
+
+/* Schritt 10 */
+RS_Step10(S:=TON_Step09.Q,R1:=RS_Step11.Q1);
+vostruc_StepState.Out10.OUT:=RS_Step10.Q1;
+TON_Step10(IN:=RS_Step10.Q1,PT:=vit_OnTime);
+
+/* Den Impuls in einem Zaehler sichern */
+CTUStep10(CU:=RS_Step10.Q1,R:=vix_Reset,PV:=li_CntSetValStep10);
+li_CntVal_Step10 := CTUStep10.CV;
+
+/* Schritt 9 */
+RS_Step09(S:=TON_Step08.Q,R1:=RS_Step10.Q1);
+vostruc_StepState.Out09.OUT:=RS_Step09.Q1;
+TON_Step09(IN:=RS_Step09.Q1,PT:=vit_OnTime);
+
+/* Den Impuls in einem Zaehler sichern */
+CTUStep09(CU:=RS_Step09.Q1,R:=vix_Reset,PV:=li_CntSetValStep09);
+li_CntVal_Step09 := CTUStep09.CV;
+
+/* Schritt 8 */
+RS_Step08(S:=TON_Step07.Q,R1:=RS_Step09.Q1);
+vostruc_StepState.Out08.OUT:=RS_Step08.Q1;
+TON_Step08(IN:=RS_Step08.Q1,PT:=vit_OnTime);
+
+/* Den Impuls in einem Zaehler sichern */
+CTUStep08(CU:=RS_Step08.Q1,R:=vix_Reset,PV:=li_CntSetValStep08);
+li_CntVal_Step08 := CTUStep08.CV;
+
+/* Schritt 7 */
+RS_Step07(S:=TON_Step06.Q,R1:=RS_Step08.Q1);
+vostruc_StepState.Out07.OUT:=RS_Step07.Q1;
+TON_Step07(IN:=RS_Step07.Q1,PT:=vit_OnTime);
+
+/* Den Impuls in einem Zaehler sichern */
+CTUStep07(CU:=RS_Step07.Q1,R:=vix_Reset,PV:=li_CntSetValStep07);
+li_CntVal_Step07 := CTUStep07.CV;
+
+/* Schritt 6 */
+RS_Step06(S:=TON_Step05.Q,R1:=RS_Step07.Q1);
+vostruc_StepState.Out06.OUT:=RS_Step06.Q1;
+TON_Step06(IN:=RS_Step06.Q1,PT:=vit_OnTime);
+
+/* Den Impuls in einem Zaehler sichern */
+CTUStep06(CU:=RS_Step06.Q1,R:=vix_Reset,PV:=li_CntSetValStep06);
+li_CntVal_Step06 := CTUStep06.CV;
+
+/* Schritt 5 */
+RS_Step05(S:=TON_Step04.Q,R1:=RS_Step06.Q1);
+vostruc_StepState.Out05.OUT:=RS_Step05.Q1;
+TON_Step05(IN:=RS_Step05.Q1,PT:=vit_OnTime);
+
+/* Den Impuls in einem Zaehler sichern */
+CTUStep05(CU:=RS_Step05.Q1,R:=vix_Reset,PV:=li_CntSetValStep05);
+li_CntVal_Step05 := CTUStep05.CV;
+
+/* Schritt 4 */
+RS_Step04(S:=TON_Step03.Q,R1:=RS_Step05.Q1);
+vostruc_StepState.Out04.OUT:=RS_Step04.Q1;
+TON_Step04(IN:=RS_Step04.Q1,PT:=vit_OnTime);
+
+/* Den Impuls in einem Zaehler sichern */
+CTUStep04(CU:=RS_Step04.Q1,R:=vix_Reset,PV:=li_CntSetValStep04);
+li_CntVal_Step04 := CTUStep04.CV;
+
+/* Schritt 3 */
+RS_Step03(S:=TON_Step02.Q,R1:=RS_Step04.Q1);
+vostruc_StepState.Out03.OUT:=RS_Step03.Q1;
+TON_Step03(IN:=RS_Step03.Q1,PT:=vit_OnTime);
+
+/* Den Impuls in einem Zaehler sichern */
+CTUStep03(CU:=RS_Step03.Q1,R:=vix_Reset,PV:=li_CntSetValStep03);
+li_CntVal_Step03 := CTUStep03.CV;
+
+/* Schritt 2 */
+RS_Step02(S:=TON_Step01.Q,R1:=RS_Step03.Q1);
+vostruc_StepState.Out02.OUT:=RS_Step02.Q1;
+TON_Step02(IN:=RS_Step02.Q1,PT:=vit_OnTime);
+
+/* Den Impuls in einem Zaehler sichern */
+CTUStep02(CU:=RS_Step02.Q1,R:=vix_Reset,PV:=li_CntSetValStep02);
+li_CntVal_Step02 := CTUStep02.CV;
+
+/* Schritt 1 */
+RS_Step01(S:=lx_StartVar OR TON_Step16.Q,R1:=RS_Step02.Q1);
+vostruc_StepState.Out01.OUT:=RS_Step01.Q1;
+TON_Step01(IN:=RS_Step01.Q1,PT:=vit_OnTime);
+
+/* Den Impuls in einem Zaehler sichern */
+CTUStep01(CU:=RS_Step01.Q1,R:=vix_Reset,PV:=li_CntSetValStep01);
+li_CntVal_Step01 := CTUStep01.CV;
+/*
+* Werte fuer Anzeige
+*/
+vostruc_StepState.Out01.ActCount := TO_UINT(CTUStep01.CV);
+vostruc_StepState.Out02.ActCount := TO_UINT(CTUStep02.CV);
+vostruc_StepState.Out03.ActCount := TO_UINT(CTUStep03.CV);
+vostruc_StepState.Out04.ActCount := TO_UINT(CTUStep04.CV);
+vostruc_StepState.Out05.ActCount := TO_UINT(CTUStep05.CV);
+vostruc_StepState.Out06.ActCount := TO_UINT(CTUStep06.CV);
+vostruc_StepState.Out07.ActCount := TO_UINT(CTUStep07.CV);
+vostruc_StepState.Out08.ActCount := TO_UINT(CTUStep08.CV);
+vostruc_StepState.Out09.ActCount := TO_UINT(CTUStep09.CV);
+vostruc_StepState.Out10.ActCount := TO_UINT(CTUStep10.CV);
+vostruc_StepState.Out11.ActCount := TO_UINT(CTUStep11.CV);
+vostruc_StepState.Out12.ActCount := TO_UINT(CTUStep12.CV);
+vostruc_StepState.Out13.ActCount := TO_UINT(CTUStep13.CV);
+vostruc_StepState.Out14.ActCount := TO_UINT(CTUStep14.CV);
+vostruc_StepState.Out15.ActCount := TO_UINT(CTUStep15.CV);
+vostruc_StepState.Out16.ActCount := TO_UINT(CTUStep16.CV);
+
+/* Aktuelle Wert der Wartezeit Schritt 1 / Actual value waiting time step 1 */
+lt_TimeActVal:=TON_Step01.ET;
+vostruc_StepState.Out01.ActTime := TO_UINT(TON_Step01.ET);
+/* Aktuelle Wert der Wartezeit Schritt 2 / Actual value waiting time step 2 */
+lt_TimeActVal01:=TON_Step02.ET;
+vostruc_StepState.Out02.ActTime := TO_UINT(TON_Step02.ET);
+/* Aktuelle Wert der Wartezeit Schritt 3 / Actual value waiting time step 3 */
+lt_TimeActVal02:=TON_Step03.ET;
+vostruc_StepState.Out03.ActTime := TO_UINT(TON_Step03.ET);
+/* Aktuelle Wert der Wartezeit Schritt 4 / Actual value waiting time step 4 */
+lt_TimeActVal03:=TON_Step04.ET;
+vostruc_StepState.Out04.ActTime := TO_UINT(TON_Step04.ET);
+/* Aktuelle Wert der Wartezeit Schritt 5 / Actual value waiting time step 5 */
+lt_TimeActVal04:=TON_Step05.ET;
+vostruc_StepState.Out05.ActTime := TO_UINT(TON_Step05.ET);
+/* Aktuelle Wert der Wartezeit Schritt 6 / Actual value waiting time step 6 */
+lt_TimeActVal05:=TON_Step06.ET;
+vostruc_StepState.Out06.ActTime := TO_UINT(TON_Step06.ET);
+/* Aktuelle Wert der Wartezeit Schritt 7 / Actual value waiting time step 7 */
+lt_TimeActVal06:=TON_Step07.ET;
+vostruc_StepState.Out07.ActTime := TO_UINT(TON_Step07.ET);
+/* Aktuelle Wert der Wartezeit Schritt 8 / Actual value waiting time step 8 */
+lt_TimeActVal07:=TON_Step08.ET;
+vostruc_StepState.Out08.ActTime := TO_UINT(TON_Step08.ET);
+/* Aktuelle Wert der Wartezeit Schritt 2 / Actual value waiting time step 2 */
+lt_TimeActVal08:=TON_Step09.ET;
+vostruc_StepState.Out09.ActTime := TO_UINT(TON_Step09.ET);
+/* Aktuelle Wert der Wartezeit Schritt 3 / Actual value waiting time step 3 */
+lt_TimeActVal09:=TON_Step10.ET;
+vostruc_StepState.Out10.ActTime := TO_UINT(TON_Step10.ET);
+/* Aktuelle Wert der Wartezeit Schritt 4 / Actual value waiting time step 4 */
+lt_TimeActVal10:=TON_Step11.ET;
+vostruc_StepState.Out11.ActTime := TO_UINT(TON_Step11.ET);
+/* Aktuelle Wert der Wartezeit Schritt 5 / Actual value waiting time step 5 */
+lt_TimeActVal11:=TON_Step12.ET;
+vostruc_StepState.Out12.ActTime := TO_UINT(TON_Step12.ET);
+/* Aktuelle Wert der Wartezeit Schritt 6 / Actual value waiting time step 6 */
+lt_TimeActVal12:=TON_Step13.ET;
+vostruc_StepState.Out13.ActTime := TO_UINT(TON_Step14.ET);
+/* Aktuelle Wert der Wartezeit Schritt 7 / Actual value waiting time step 7 */
+lt_TimeActVal13:=TON_Step14.ET;
+vostruc_StepState.Out15.ActTime := TO_UINT(TON_Step15.ET);
+/* Aktuelle Wert der Wartezeit Schritt 8 / Actual value waiting time step 8 */
+lt_TimeActVal14:=TON_Step15.ET;
+vostruc_StepState.Out16.ActTime := TO_UINT(TON_Step16.ET);
+/* Aktuelle Wert der Wartezeit Schritt 8 / Actual value waiting time step 8 */
+lt_TimeActVal15:=TON_Step16.ET;
+vostruc_StepState.Out17.ActTime := TO_UINT(TON_Step17.ET);
+
+END_FUNCTION_BLOCK
+
+/*
+ * Shift8Steps
+ */
+FUNCTION_BLOCK FB_lc_Shift8Steps_ST
+/*
+ * Inputs
+ */
+VAR_INPUT
+ /* Start */
+ vix_Start : BOOL;
+ /* Reset */
+ vix_Reset : BOOL;
+ /* MuxSetTime */
+ vit_MuxSetTime : TIME;
+END_VAR
+/*
+* Outputs
+*/
+VAR_OUTPUT
+ /* Output 1 */
+ vox_Out1 : BOOL;
+ /* Output 2 */
+ vox_Out2 : BOOL;
+ /* Output 3 */
+ vox_Out3 : BOOL;
+ /* Output 4 */
+ vox_Out4 : BOOL;
+ /* Output 5 */
+ vox_Out5 : BOOL;
+ /* Output 6 */
+ vox_Out6 : BOOL;
+ /* Output 7 */
+ vox_Out7 : BOOL;
+ /* Output 8 */
+ vox_Out8 : BOOL;
+END_VAR
+
+VAR
+ /* Init fuer einen Init-Puls im ersten Zyklus / Init for a init pulse in the first cycle */
+ R_TRIG_Init : R_TRIG;
+ /* Start fuer einen Start-Puls / Start for a start pulse */
+ R_TRIG_Start : R_TRIG;
+ /* Reset fuer einen Reset-Puls / Start for a reset pulse */
+ R_TRIG_Reset : R_TRIG;
+ /* 
+  * --------------
+  * RS-FlipFlops
+  * Fuer jeden Schritt ein RS_FF
+  * --------------
+  */
+ /* Schritt 1 / Step 1 */
+ RS_Step1 : RS;
+ /* Schritt 2 / Step 2 */
+ RS_Step2 : RS;
+ /* Schritt 3 / Step 3 */
+ RS_Step3 : RS;
+ /* Schritt 4 / Step 4 */
+ RS_Step4 : RS;
+ /* Schritt 5 / Step 5 */
+ RS_Step5 : RS;
+ /* Schritt 6 / Step 6 */
+ RS_Step6 : RS;
+ /* Schritt 7 / Step 7 */
+ RS_Step7 : RS;
+ /* Schritt 8 / Step 8 */
+ RS_Step8 : RS;
+ /* Init Pulse / Init pulse */
+ RS_Init : RS;
+ /* 
+  * ------
+  * Timer
+  * ------- 
+ */
+ /* Wait Timer 1 */
+ TON_Step1 : TON;
+ /* Wait Timer 2 */
+ TON_Step2 : TON;
+  /* Wait Timer 3 */
+ TON_Step3 : TON;
+ /* Wait Timer 4 */
+ TON_Step4 : TON; 
+ /* Wait Timer 5 */
+ TON_Step5 : TON;
+ /* Wait Timer 6 */
+ TON_Step6 : TON;
+ /* Wait Timer 7 */
+ TON_Step7 : TON;
+ /* Wait Timer 8 */
+ TON_Step8 : TON; 
+ /* Wait Timer 9 */
+ TON_Step9 : TON; 
+ /* 
+  * -----------
+  * Counter
+  * -----------
+  */
+ /* Zaehler Init / Counter Init */
+ CTUInit : CTU;
+ /* Zaehler Start / Counter Start */
+ CTUStart : CTU;
+ /* Zaehler Reset / Counter Reset */ 
+ CTUReset : CTU;
+ /* Zaehler Schritt 1 / Counter Step 1 */
+ CTUStep1 : CTU;
+ /* Zaehler Schritt 2 / Counter Step 2 */
+ CTUStep2 : CTU;
+ /* Zaehler Schritt 3 / Counter Step 3 */
+ CTUStep3 : CTU;
+ /* Zaehler Schritt 4 / Counter Step 4 */
+ CTUStep4 : CTU;
+ /* Zaehler Schritt 5 / Counter Step 5 */
+ CTUStep5 : CTU;
+ /* Zaehler Schritt 6 / Counter Step 6 */
+ CTUStep6 : CTU;
+ /* Zaehler Schritt 7 / Counter Step 7 */
+ CTUStep7 : CTU;
+ /* Zaehler Schritt 8 / Counter Step 8 */
+ CTUStep8 : CTU;
+ 
+END_VAR
+
+VAR 
+ /* OnTime fuer die Timer / OnTime for timer */
+ lt_OnTime : TIME;
+ /* StartVar fuer Schritt 1 / StartVar for Step 1 */
+ StartVar : BOOL;
+ /* 
+ * Zeitwerte der Timer
+ */
+ /* Zeitwert fuer ActVal / Time value for ActVal */
+ TimeActVal : TIME;
+ /* Zeitwert fuer Schritt 1 / Time value for Step 1 */
+ TimeActVal1 : TIME;
+ /* Zeitwert fuer Schritt 2 / Time value for Step 2 */
+ TimeActVal2 : TIME;
+ /* Zeitwert fuer Schritt 3 / Time value for Step 3 */
+ TimeActVal3 : TIME;
+ /* Zeitwert fuer Schritt 4 / Time value for Step 4 */
+ TimeActVal4 : TIME;
+ /* Zeitwer5 fuer Schritt 5 / Time value for Step 5 */
+ TimeActVal5 : TIME;
+ /* Zeitwert fuer Schritt 6 / Time value for Step 6 */
+ TimeActVal6 : TIME;
+ /* Zeitwer5 fuer Schritt 7 / Time value for Step 7 */
+ TimeActVal7 : TIME;
+ /* Zeitwert fuer Schritt 8 / Time value for Step 8 */
+ TimeActVal8 : TIME;
+ /* 
+ * Aktuelle Werte der Zaehler
+ */
+ /* Aktueller Wert Init / Actual value for Init */
+ li_CntVal_Init : INT;
+ /* Aktueller Wert Start / Actual value for Start */
+ li_CntVal_Start : INT;
+ /* Aktueller Wert Reset / Actual value for Reset */
+ li_CntVal_Reset : INT;
+ /* Aktueller Wert Schritt 1 / Actual value for Step 1 */
+ li_CntVal_Step1 : INT;
+ /* Aktueller Wert Schritt 2 / Actual value for Step 2 */
+ li_CntVal_Step2 : INT;
+ /* Aktueller Wert Schritt 3 / Actual value for Step 3 */
+ li_CntVal_Step3 : INT;
+ /* Aktueller Wert Schritt 4 / Actual value for Step 4 */
+ li_CntVal_Step4 : INT;
+ /* Aktueller Wert Schritt 5 / Actual value for Step 5 */
+ li_CntVal_Step5 : INT;
+ /* Aktueller Wert Schritt 6 / Actual value for Step 6 */
+ li_CntVal_Step6 : INT;
+ /* Aktueller Wert Schritt 7 / Actual value for Step 7 */
+ li_CntVal_Step7 : INT;
+ /* Aktueller Wert Schritt 8 / Actual value for Step 8 */
+ li_CntVal_Step8 : INT;
+ /* 
+  * Setzwerte der Zaehler
+  */
+ /* Setzwert Zaehler Init / Set value for counter Init */
+ li_CntSetValInit : INT;
+ /* Setzwert Zaehler Start / Set value for counter Start */
+ li_CntSetValStart : INT;
+ /* Setzwert Zaehler Reset / Set value for counter Reset */
+ li_CntSetValReset : INT;
+ /* Setzwert Zaehler Step 1 / Set value for counter Step 1 */
+ li_CntSetValStep1 : INT;
+ /* Setzwert Zaehler Step 2 / Set value for counter Step 2 */
+ li_CntSetValStep2	 : INT;
+ /* Setzwert Zaehler Step 3 / Set value for counter Step 3 */
+ li_CntSetValStep3 : INT;
+ /* Setzwert Zaehler Step 4 / Set value for counter Step 4 */
+ li_CntSetValStep4 : INT;
+ /* Setzwert Zaehler Step 5 / Set value for counter Step 5 */
+ li_CntSetValStep5 : INT;
+ /* Setzwert Zaehler Step 6 / Set value for counter Step 6 */
+ li_CntSetValStep6	 : INT;
+ /* Setzwert Zaehler Step 7 / Set value for counter Step 7 */
+ li_CntSetValStep7 : INT;
+ /* Setzwert Zaehler Step 8 / Set value for counter Step 8 */
+ li_CntSetValStep8 : INT;
+END_VAR
+
+VAR
+ /* 
+ * Konstanten 
+ */
+ /* TRUE */ 
+ lx_EverTRUE : BOOL := TRUE;
+ /* FALSE */ 
+ lx_EverFALSE : BOOL := FALSE;
+ /* */
+END_VAR
+/*
+ * Lokale Variablen zur Diagnose
+ */
+Var
+ /* Lebenssignal / Alive Signal */
+  lx_CyclePulse    : BOOL;
+  lx_CycleInit     : BOOL;  
+  lui_CycleCount   : UINT;
+End_Var
+
+lx_CyclePulse  := NOT(lx_CyclePulse);
+lui_CycleCount := lui_CycleCount + 1;
+
+lt_OnTime := vit_MuxSetTime;
+
+/* InitPulse */
+R_TRIG_Init(CLK:=lx_EverTRUE,Q=> lx_CycleInit);
+RS_Init(S:=R_TRIG_Init.Q,R1:=vix_Reset);
+
+/*
+ * Den Impuls in einem Zaehler sichern
+ * Wenn der Zaehler sein Sollwert erreicht hat, wird der Zaehler ruckgesetzt
+ */
+CTUInit(CU:=R_TRIG_Init.Q,R:=OR(vix_Reset,CTUInit.Q),PV:=li_CntSetValInit);
+li_CntVal_Init := CTUInit.CV;
+/*
+ * EverTRUE setzen / Set EverTRUE
+ */
+lx_EverTRUE := TRUE;
+/*
+ * Initialwerte setzen / Set InitValues
+ * NUR im ersten Zyklus / Only in the first cycle
+ */
+if lx_CycleInit = TRUE THEN
+
+  lt_OnTime := T#500ms; 
+  /*
+   * Zaehlerinitialisierungen
+   */
+  li_CntSetValInit := 100;
+  li_CntSetValStart := 100;
+  li_CntSetValReset := 100;
+  li_CntSetValStep1 := 100;
+  li_CntSetValStep2 := 100;
+  li_CntSetValStep3 := 100;
+  li_CntSetValStep4 := 100;
+  li_CntSetValStep5 := 100;
+  li_CntSetValStep6 := 100;
+  li_CntSetValStep7 := 100;
+  li_CntSetValStep8 := 100;
+END_IF;
+
+/* StartPulse */
+R_TRIG_Start(CLK:=vix_Start, Q => StartVar);
+/* 
+ * Den Impuls in einem Zaehler sichern
+ * Wenn der Zaehler sein Sollwert erreicht hat, wird der Zaehler ruckgesetzt
+ */
+CTUStart(CU:=R_TRIG_Start.Q,R:=OR(vix_Reset,CTUStart.Q),PV:=li_CntSetValStart);
+li_CntVal_Start := CTUStart.CV;
+
+/* ResetPulse */
+R_TRIG_Reset(CLK:=vix_Reset);
+/* 
+ * Den Impuls in einem Zaehler sichern 
+ * Wenn der Zaehler sein Sollwert erreicht hat, wird der Zaehler ruckgesetzt
+ */
+CTUReset(CU:=R_TRIG_Reset.Q,R:=OR(vix_Reset,CTUReset.Q),PV:=li_CntSetValReset);
+li_CntVal_Reset := CTUReset.CV;
+
+/* 
+ * StartPulse und Setzen wenn letzter Schritt 
+ * Bei der Initialisierung wird R_TRIG.Q per Flanke gesetzt
+ */
+ 
+// StartVar:=OR(R_TRIG_Init.Q,TON_Step8.Q);
+
+/* Schritt 8 */
+RS_Step8(S:=TON_Step7.Q,R1:=RS_Step1.Q1);
+vox_Out8:=RS_Step8.Q1;
+TON_Step8(IN:=RS_Step8.Q1,PT:=lt_OnTime);
+
+/* Den Impuls in einem Zaehler sichern */
+CTUStep8(CU:=RS_Step8.Q1,R:=vix_Reset,PV:=li_CntSetValStep8);
+li_CntVal_Step8 := CTUStep8.CV;
+
+/* Schritt 7 */
+RS_Step7(S:=TON_Step6.Q,R1:=RS_Step8.Q1);
+vox_Out7:=RS_Step7.Q1;
+TON_Step7(IN:=RS_Step7.Q1,PT:=lt_OnTime);
+
+/* Den Impuls in einem Zaehler sichern */
+CTUStep7(CU:=RS_Step7.Q1,R:=vix_Reset,PV:=li_CntSetValStep7);
+li_CntVal_Step7 := CTUStep7.CV;
+
+/* Schritt 6 */
+RS_Step6(S:=TON_Step5.Q,R1:=RS_Step7.Q1);
+vox_Out6:=RS_Step6.Q1;
+TON_Step6(IN:=RS_Step6.Q1,PT:=lt_OnTime);
+
+/* Den Impuls in einem Zaehler sichern */
+CTUStep6(CU:=RS_Step6.Q1,R:=vix_Reset,PV:=li_CntSetValStep6);
+li_CntVal_Step6 := CTUStep6.CV;
+
+/* Schritt 5 */
+RS_Step5(S:=TON_Step4.Q,R1:=RS_Step6.Q1);
+vox_Out5:=RS_Step5.Q1;
+TON_Step5(IN:=RS_Step5.Q1,PT:=lt_OnTime);
+
+/* Den Impuls in einem Zaehler sichern */
+CTUStep5(CU:=RS_Step5.Q1,R:=vix_Reset,PV:=li_CntSetValStep5);
+li_CntVal_Step5 := CTUStep5.CV;
+
+/* Schritt 4 */
+RS_Step4(S:=TON_Step3.Q,R1:=RS_Step5.Q1);
+vox_Out4:=RS_Step4.Q1;
+TON_Step4(IN:=RS_Step4.Q1,PT:=lt_OnTime);
+
+/* Den Impuls in einem Zaehler sichern */
+CTUStep4(CU:=RS_Step4.Q1,R:=vix_Reset,PV:=li_CntSetValStep4);
+li_CntVal_Step4 := CTUStep4.CV;
+
+/* Schritt 3 */
+RS_Step3(S:=TON_Step2.Q,R1:=RS_Step4.Q1);
+vox_Out3:=RS_Step3.Q1;
+TON_Step3(IN:=RS_Step3.Q1,PT:=lt_OnTime);
+
+/* Den Impuls in einem Zaehler sichern */
+CTUStep3(CU:=RS_Step3.Q1,R:=vix_Reset,PV:=li_CntSetValStep3);
+li_CntVal_Step3 := CTUStep3.CV;
+
+/* Schritt 2 */
+RS_Step2(S:=TON_Step1.Q,R1:=RS_Step3.Q1);
+vox_Out2:=RS_Step2.Q1;
+TON_Step2(IN:=RS_Step2.Q1,PT:=lt_OnTime);
+
+/* Den Impuls in einem Zaehler sichern */
+CTUStep2(CU:=RS_Step2.Q1,R:=vix_Reset,PV:=li_CntSetValStep2);
+li_CntVal_Step2 := CTUStep2.CV;
+
+/* Schritt 1 */
+RS_Step1(S:=StartVar OR TON_Step8.Q,R1:=RS_Step2.Q1);
+vox_Out1:=RS_Step1.Q1;
+TON_Step1(IN:=RS_Step1.Q1,PT:=lt_OnTime);
+
+/* Den Impuls in einem Zaehler sichern */
+CTUStep1(CU:=RS_Step1.Q1,R:=vix_Reset,PV:=li_CntSetValStep1);
+li_CntVal_Step1 := CTUStep1.CV;
+/*
+Werte fuer Anzeige
+*/
+/* Aktuelle Wert der Wartezeit Schritt 1 / Actual value waiting time step 1 */
+TimeActVal:=TON_Step1.ET;
+/* Aktuelle Wert der Wartezeit Schritt 2 / Actual value waiting time step 2 */
+TimeActVal1:=TON_Step2.ET;
+/* Aktuelle Wert der Wartezeit Schritt 3 / Actual value waiting time step 3 */
+TimeActVal2:=TON_Step3.ET;
+/* Aktuelle Wert der Wartezeit Schritt 4 / Actual value waiting time step 4 */
+TimeActVal3:=TON_Step4.ET;
+/* Aktuelle Wert der Wartezeit Schritt 5 / Actual value waiting time step 5 */
+TimeActVal4:=TON_Step5.ET;
+/* Aktuelle Wert der Wartezeit Schritt 6 / Actual value waiting time step 6 */
+TimeActVal5:=TON_Step6.ET;
+/* Aktuelle Wert der Wartezeit Schritt 7 / Actual value waiting time step 7 */
+TimeActVal6:=TON_Step7.ET;
+/* Aktuelle Wert der Wartezeit Schritt 8 / Actual value waiting time step 8 */
+TimeActVal7:=TON_Step8.ET;
+END_FUNCTION_BLOCK
+
+/*
+ * 4-fach Schiebergister
+ */
+FUNCTION_BLOCK FB_lc_Shift4Steps_ST
+/*
+ * Inputs
+ */
+VAR_INPUT
+ /* Start */
+ vix_Start : BOOL;
+ /* Reset */
+ vix_Reset : BOOL;
+ /* OnTime fuer die Timer / OnTime for timer */
+ vit_OnTime : TIME := T#1s;
+END_VAR
+/*
+* Outputs
+*/
+VAR_OUTPUT
+ /* Output 1 */
+ vox_Out1 : BOOL;
+ /* Output 2 */
+ vox_Out2 : BOOL;
+ /* Output 3 */
+ vox_Out3 : BOOL;
+ /* Output 4 */
+ vox_Out4 : BOOL;
+END_VAR
+/*
+* Blocks
+*/
+VAR
+ /* 
+  * ----------------
+  * Rising Trigger
+  * ----------------
+  */
+ /* Init fuer einen Init-Puls im ersten Zyklus / Init for a init pulse in the first cycle */
+ R_TRIG_Init : R_TRIG;
+ /* Start fuer einen Start-Puls / Start for a start pulse */
+ R_TRIG_Start : R_TRIG;
+ /* Reset fuer einen Reset-Puls / Start for a reset pulse */
+ R_TRIG_Reset : R_TRIG;
+ /* 
+  * --------------
+  * RS-FlipFlops
+  * --------------
+  */
+ /* Schritt 1 / Step 1 */
+ RS_Step1 : RS;
+ /* Schritt 2 / Step 2 */
+ RS_Step2 : RS;
+ /* Schritt 3 / Step 3 */
+ RS_Step3 : RS;
+ /* Schritt 4 / Step 4 */
+ RS_Step4 : RS;
+ /* Init Pulse / Init pulse */
+ RS_Init : RS;
+ /* 
+  * ------
+  * Timer
+  * ------- 
+ */
+ /* Wait Timer 1 */
+ TON_Step1 : TON;
+ /* Wait Timer 2 */
+ TON_Step2 : TON;
+  /* Wait Timer 3 */
+ TON_Step3 : TON;
+ /* Wait Timer 4 */
+ TON_Step4 : TON; 
+ /* 
+  * -----------
+  * Counter
+  * -----------
+  */
+ /* Zaehler Init / Counter Init */
+ CTUInit : CTU;
+ /* Zaehler Start / Counter Start */
+ CTUStart : CTU;
+ /* Zaehler Reset / Counter Reset */ 
+ CTUReset : CTU;
+ /* Zaehler Schritt 1 / Counter Step 1 */
+ CTUStep1 : CTU;
+ /* Zaehler Schritt 2 / Counter Step 2 */
+ CTUStep2 : CTU;
+ /* Zaehler Schritt 3 / Counter Step 3 */
+ CTUStep3 : CTU;
+ /* Zaehler Schritt 4 /  Counter Step 4 */
+ CTUStep4 : CTU;
+ 
+END_VAR
+
+/* Local Variables */
+VAR 
+ /* StartVar fuer Schritt 1 / StartVar for Step 1 */
+ StartVar : BOOL;
+ /* 
+ * Zeitwerte der Timer
+ */
+ /* Zeitwert fuer Schritt 1 / Time value for Step 1 */
+ lt_TimeActVal : TIME;
+ /* Zeitwert fuer Schritt 2 / Time value for Step 2 */
+ lt_TimeActVal1 : TIME;
+ /* Zeitwert fuer Schritt 3 / Time value for Step 3 */
+ lt_TimeActVal2 : TIME;
+ /* Zeitwert fuer Schritt 4 / Time value for Step 4 */
+ lt_TimeActVal3 : TIME;
+ /* 
+ * Aktuelle Werte der Zaehler
+ */
+ /* Aktueller Wert Init / Actual value for Init */
+ li_CntVal_Init : INT;
+ /* Aktueller Wert Start / Actual value for Start */
+ li_CntVal_Start : INT;
+ /* Aktueller Wert Reset / Actual value for Reset */
+ li_CntVal_Reset : INT;
+ /* Aktueller Wert Schritt 1 / Actual value for Step 1 */
+ li_CntVal_Step1 : INT;
+ /* Aktueller Wert Schritt 2 / Actual value for Step 2 */
+ li_CntVal_Step2 : INT;
+ /* Aktueller Wert Schritt 3 / Actual value for Step 3 */
+ li_CntVal_Step3 : INT;
+ /* Aktueller Wert Schritt 4 / Actual value for Step 4 */
+ li_CntVal_Step4 : INT;
+ /* 
+  * Setzwerte der Zaehler
+  */
+ /* Setzwert Zaehler Init / Set value for counter Init */
+ li_CntSetValInit : INT;
+ /* Setzwert Zaehler Start / Set value for counter Start */
+ li_CntSetValStart : INT;
+ /* Setzwert Zaehler Reset / Set value for counter Reset */
+ li_CntSetValReset : INT;
+ /* Setzwert Zaehler Step 1 / Set value for counter Step 1 */
+ li_CntSetValStep1 : INT;
+ /* Setzwert Zaehler Step 2 / Set value for counter Step 2 */
+ li_CntSetValStep2	 : INT;
+ /* Setzwert Zaehler Step 3 / Set value for counter Step 3 */
+ li_CntSetValStep3 : INT;
+ /* Setzwert Zaehler Step 4 / Set value for counter Step 4 */
+ li_CntSetValStep4 : INT;
+END_VAR
+
+VAR 
+ /* 
+ * Konstanten 
+ */
+ /* TRUE */ 
+ lx_EverTRUE : BOOL;
+ /* FALSE */ 
+ lx_EverFALSE : BOOL;
+END_VAR
+
+ VAR
+   FB_CycleInitR_Trig : R_TRIG; 
+ END_VAR
+  
+ VAR
+   /* Lokaler InitPuls im Baustein */
+    lx_CycleInit : BOOL;
+   /* Lokaler Zyklustaktgeber */
+    lx_CyclePulse : BOOL;
+   /* Lokaler Zyklustaktzaehler */
+    li_CycleCount : INT; 
+    /* InitZaehler */
+    li_CycleCountInitVal : INT;
+ END_VAR
+/*
+ * Standards
+ * Lokaler InitPulse
+ */
+ FB_CycleInitR_Trig(CLK := TRUE, Q => lx_CycleInit);
+
+ IF lx_CycleInit = TRUE THEN
+      li_CycleCountInitVal := li_CycleCountInitVal + 1;
+ END_IF;   
+/*
+ * Wird der Baustein bearbeitet
+ */
+ lx_CyclePulse := NOT(lx_CyclePulse);
+ li_CycleCount := li_CycleCount + 1;       
+
+/* InitPulse */
+R_TRIG_Init(
+   CLK:=lx_EverTRUE
+);
+RS_Init(
+   S:=R_TRIG_Init.Q
+  ,R1:=vix_Reset
+);
+
+/* Den Impuls in einem Zaehler sichern
+ * Wenn der Zaehler sein Sollwert erreicht hat, wird der Zaehler ruckgesetzt
+ */
+CTUInit(
+	CU:=R_TRIG_Init.Q
+	,R:=OR(vix_Reset,CTUInit.Q)
+	,PV:=li_CntSetValInit
+);
+li_CntVal_Init := CTUInit.CV;
+/*
+ * EverTRUE setzen / Set EverTRUE
+ */
+lx_EverTRUE := TRUE;
+/*
+ * Initialwerte setzen / Set InitValues
+ * NUR im ersten Zyklus / Only in the first cycle
+ */
+if lx_CycleInit = TRUE THEN 
+  /*
+   * Zaehlerinitialisierungen
+   */
+  li_CntSetValInit := 100;
+  li_CntSetValStart := 100;
+  li_CntSetValReset := 100;
+  li_CntSetValStep1 := 100;
+  li_CntSetValStep2 := 100;
+  li_CntSetValStep3 := 100;
+  li_CntSetValStep4 := 100;
+END_IF;
+
+/* StartPulse */
+R_TRIG_Start(
+   CLK:=vix_Start
+);
+/* Den Impuls in einem Zaehler sichern
+ * Wenn der Zaehler sein Sollwert erreicht hat, wird der Zaehler ruckgesetzt
+ */
+CTUStart(
+	CU:=R_TRIG_Start.Q
+	,R:=OR(vix_Reset,CTUStart.Q)
+	,PV:=li_CntSetValStart
+);
+li_CntVal_Start := CTUStart.CV;
+
+/* ResetPulse */
+R_TRIG_Reset(
+   CLK:=vix_Reset
+);
+/* Den Impuls in einem Zaehler sichern 
+ * Wenn der Zaehler sein Sollwert erreicht hat, wird der Zaehler ruckgesetzt
+ */
+CTUReset(
+	CU:=R_TRIG_Reset.Q
+	,R:=OR(vix_Reset,CTUReset.Q)
+	,PV:=li_CntSetValReset
+);
+li_CntVal_Reset := CTUReset.CV;
+
+/* 
+ * StartPulse und Setzen wenn letzter Schritt 
+ * Bei der Initialisierung wird R_TRIG.Q per Flanke gesetzt
+ */
+StartVar:=OR(R_TRIG_Init.Q,TON_Step4.Q);
+
+/* Schritt 4 */
+RS_Step4(
+   S:=TON_Step3.Q
+  ,R1:=RS_Step1.Q1
+);
+vox_Out4:=RS_Step4.Q1;
+TON_Step4(
+   IN:=RS_Step4.Q1
+  ,PT:=vit_OnTime
+);
+/* Den Impuls in einem Zaehler sichern */
+CTUStep4(
+	CU:=RS_Step4.Q1
+	,R:=vix_Reset
+	,PV:=li_CntSetValStep4
+);
+li_CntVal_Step4 := CTUStep4.CV;
+
+/* Schritt 3 */
+RS_Step3(
+   S:=TON_Step2.Q
+  ,R1:=RS_Step4.Q1
+);
+vox_Out3:=RS_Step3.Q1;
+/* Weiterschaltung naechster Schritt */
+TON_Step3(
+   IN:=RS_Step3.Q1
+  ,PT:=vit_OnTime
+);
+/* Den Impuls in einem Zaehler sichern */
+CTUStep3(
+	CU:=RS_Step3.Q1
+	,R:=vix_Reset
+	,PV:=li_CntSetValStep3
+);
+li_CntVal_Step3 := CTUStep3.CV;
+
+/* Schritt 2 */
+RS_Step2(
+   S:=TON_Step1.Q
+  ,R1:=RS_Step3.Q1
+);
+vox_Out2:=RS_Step2.Q1;
+TON_Step2(
+   IN:=RS_Step2.Q1
+  ,PT:=vit_OnTime
+);
+/* Den Impuls in einem Zaehler sichern */
+CTUStep2(
+	CU:=RS_Step2.Q1
+	,R:=vix_Reset
+	,PV:=li_CntSetValStep2
+);
+li_CntVal_Step2 := CTUStep2.CV;
+
+/* Schritt 1 */
+RS_Step1(
+   S:=StartVar
+  ,R1:=RS_Step2.Q1
+);
+vox_Out1:=RS_Step1.Q1;
+TON_Step1(
+   IN:=RS_Step1.Q1
+  ,PT:=vit_OnTime
+);
+/* Den Impuls in einem Zaehler sichern */
+CTUStep1(
+	CU:=RS_Step1.Q1
+	,R:=vix_Reset
+	,PV:=li_CntSetValStep1
+);
+li_CntVal_Step1 := CTUStep1.CV;
+/*
+ * Werte fuer Anzeige
+ */
+/* Aktuelle Wert der Wartezeit Schritt 1 / Actual value waiting time step 1 */
+lt_TimeActVal:=TON_Step1.ET;
+/* Aktuelle Wert der Wartezeit Schritt 2 / Actual value waiting time step 2 */
+lt_TimeActVal1:=TON_Step2.ET;
+/* Aktuelle Wert der Wartezeit Schritt 3 / Actual value waiting time step 3 */
+lt_TimeActVal2:=TON_Step3.ET;
+/* Aktuelle Wert der Wartezeit Schritt 4 / Actual value waiting time step 4 */
+lt_TimeActVal3:=TON_Step4.ET;
+
+END_FUNCTION_BLOCK
+
+END_NAMESPACE

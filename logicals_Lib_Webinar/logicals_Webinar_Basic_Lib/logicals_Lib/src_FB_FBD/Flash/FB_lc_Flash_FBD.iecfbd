@@ -1,0 +1,88 @@
+NAMESPACE com.logicals.Basic.Flash
+FUNCTION_BLOCK FB_lc_Flash_FBD
+  {
+    width := 260;
+    minWidth := 260;
+    maxWidth := 260;
+    height := 58;
+    minHeight := 58;
+    maxHeight := 58;
+  }
+
+  VAR
+    TON1 : TON;
+    TON : TON;
+    lx_Out : BOOL;
+    TON2 : TON;
+    lx_ToOut : BOOL := TRUE;
+  END_VAR
+  VAR_INPUT
+    Start : BOOL;
+    OnTime : TIME := T#1s;
+    OffTime : TIME := T#1s;
+  END_VAR
+  VAR_OUTPUT
+    Out : BOOL;
+  END_VAR
+
+  (*
+
+    // Network 1:
+    TON2(IN := TON1.Q, PT := OffTime);
+    NOT(IN := TON2.Q, NOT => @C(9).NOT);
+    AND(IN1 := Start, IN2 := @C(9).NOT, AND => @C(8).AND);
+    TON1(IN := @C(8).AND, PT := OnTime, Q => lx_Out);
+
+    // Network 2:
+    MOVE(EN := lx_ToOut, IN := lx_Out, MOVE => Out);
+
+  *)
+
+  @VF(1) : @E(Start), @R(210.0, 150.0, 140.0, 19.0);
+  @VF(2) : @E(OnTime), @R(210.0, 210.0, 140.0, 19.0);
+  @C(3) : @FB(TON1), @R(670.0, 190.0, 100.0, 38.0), BOOL, @I(@N(IN), @L(9.5)), @I(@N(PT), @L(29.5)), @O(@N(Q), @R(9.5)), @O(@N(ET), @R(29.5));
+  @VF(5) : @E(OffTime), @R(210.0, 320.0, 140.0, 19.0);
+  @C(9) : @F(NOT), @R(410.0, 170.0, 60.0, 18.5), BOOL, @I(@N(IN), @L(9.5)), @O(@N(NOT), @R(9.5));
+  @C(8) : @F(AND), @R(540.0, 150.0, 40.0, 38.0), BOOL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @I(@N(IN3), @L(49.5)), @I(@N(IN4), @L(69.5)), @I(@N(IN5), @L(89.5)), @I(@N(IN6), @L(109.5)), @I(@N(IN7), @L(129.5)), @I(@N(IN8), @L(149.5)), @I(@N(IN9), @L(169.5)), @I(@N(IN10), @L(189.5)), @I(@N(IN11), @L(209.5)), @I(@N(IN12), @L(229.5)), @I(@N(IN13), @L(249.5)), @I(@N(IN14), @L(269.5)), @I(@N(IN15), @L(289.5)), @I(@N(IN16), @L(309.5)), @O(@N(AND), @R(9.5));
+  @VF(15) : @E(lx_Out), @R(950.0, 190.0, 140.0, 19.0);
+  @VF(20) : @E(lx_Out), @R(460.0, 380.0, 140.0, 19.0);
+  @VF(21) : @E(Out), @R(950.0, 380.0, 140.0, 19.0);
+  @C(6) : @FB(TON2), @R(670.0, 300.0, 100.0, 38.0), BOOL, @I(@N(IN), @L(9.5)), @I(@N(PT), @L(29.5)), @O(@N(Q), @R(9.5)), @O(@N(ET), @R(29.5));
+  @C(7) : @F(MOVE), @R(700.0, 360.0, 60.0, 38.5), BOOL, @I(@N(EN), @L(9.5)), @I(@N(IN), @L(29.5)), @O(@N(ENO), @R(9.5)), @O(@N(MOVE), @R(29.5));
+  @VF(24) : @E(lx_ToOut), @R(210.0, 360.0, 140.0, 19.0);
+  @CP(17) : 860.0, 200.0;
+
+  @G(4) :
+     @L(@VF(2).o, @C(3).PT)
+    ;
+  @G(10) :
+     @L(@VF(1).o, @C(8).IN1)
+    ;
+  @G(11) :
+     @L(@C(9).NOT, @C(8).IN2)
+    ;
+  @G(12) :
+     @L(@C(8).AND, @C(3).IN)
+    ;
+  @G(16) :
+     @L(@CP(17), @C(6).IN),
+     @L(@C(3).Q, @CP(17)),
+     @L(@CP(17), @VF(15).i)
+    ;
+  @G(13) :
+     @L(@VF(5).o, @C(6).PT)
+    ;
+  @G(18) :
+     @L(@C(6).Q, @C(9).IN)
+    ;
+  @G(22) :
+     @L(@VF(20).o, @C(7).IN)
+    ;
+  @G(23) :
+     @L(@C(7).MOVE, @VF(21).i)
+    ;
+  @G(25) :
+     @L(@VF(24).o, @C(7).EN)
+    ;
+END_FUNCTION_BLOCK
+END_NAMESPACE

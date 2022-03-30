@@ -1,0 +1,265 @@
+/* -----------------------------------------
+ * logicals_Lib
+ * DG
+ * 2014-12-19
+ * -----------------------------------------
+ * logi.cals GmbH
+ * A-3100 St. Poelten
+ * Europaplatz 7/1
+ * Tel.: 0043-5-77147
+ *
+ * logi.cals automation solutions & services GmbH
+ * D-40738 Langenfeld
+ * Postfach 1306
+ * Tel.: 0049-2173-91910
+ * 
+ * Contact:
+ * dieter.goltz@logicals.com
+ * 
+ * History:
+ * Created: 
+ * DG 2016-08-09
+ *
+ * Modified:
+ * DG 2016-08-09
+ * DG 2020-07-06
+ * DG 2021-05-27 FB_lc_Control_C in logicals_Lib aufgenommen!
+ *
+ */
+
+/*
+ * Control Lib
+ */
+NAMESPACE com.logicals.Basic.Control
+
+/*
+ * PIDT1-Algorithmus von HS (AnalogWerte in REAL)
+ */
+FUNCTION_BLOCK FB_lc_Cntrl_PIDT1_ST  {
+    width := 320;
+    minWidth := 320;
+    maxWidth := 320;
+    height := 198;
+    minHeight := 198;
+    maxHeight := 198;
+  }
+
+VAR_INPUT
+  vir_Inp     : REAL;  // control difference 
+  vir_TI      : REAL;  // Integral action time [s] 
+  vir_Kv      : REAL;  // derivative action amplification
+  vir_T1      : REAL;  // fading time constant [s]     .
+  vix_Auto    : BOOL;  // controller on automatic operation       .
+  vir_YManual : REAL;  // Manual operation preset value     .
+  vir_Lvu     : REAL;  // Upper limiting value of the actuating variable        .
+  vir_Lvd     : REAL;  // Lower limiting value of the actuating variable        .
+  vir_Kp      : REAL;  // Proportional control factor       .
+
+  vir_CycTm_Sec : REAL; //CycleTime in REAL
+
+END_VAR
+
+VAR_OUTPUT
+  vox_Lu      : BOOL; // Upper Limit
+  vox_Ld      : BOOL; // Lower Limit
+  vor_Out     : REAL; // Output Variable
+  vor_P       : REAL; // Proportional Part
+  vor_I       : REAL; // Integral Part
+  vor_D       : REAL; // Derivative Part  
+END_VAR
+
+VAR_OUTPUT
+  voui_ErrNo : UINT;
+  vox_Err    : BOOL;
+END_VAR
+
+VAR
+  lx_CycleFlag  : BOOL;   // Merker fuer nicht ersten Zyklus
+  lr_IOld       : REAL;   // Eingangswert des letzten Zyklus(x(t-dt))
+END_VAR
+
+VAR
+  lr_dtv    : REAL;
+
+  lr_pdt1   : REAL;
+  lx_corr_i : BOOL := FALSE;   
+END_VAR
+
+voui_ErrNo := 0;
+vox_Err    := FALSE;
+
+IF vir_CycTm_Sec = 0.0 THEN
+ voui_ErrNo := 1;
+ vox_Err    := TRUE;
+END_IF;
+
+IF vox_Err = FALSE THEN
+  // Zeitdifferenz = Taskzeit!
+  lr_dtv := vir_CycTm_Sec;  // In Sec! Bei 50ms = 0.05
+         
+  // P Part
+  vor_P := vir_Inp * vir_Kp;
+         
+  // DT1 Part
+  IF lx_CycleFlag AND vir_T1 > 0.0 THEN
+         //
+         // D-part calculation
+         // lr_dtv comes in sec 
+         vor_D := vir_T1 * (vor_D + vir_Kv * vir_Inp-lr_IOld) / (vir_T1 + lr_dtv); 
+  ELSE
+         //
+         // With T1 = 0.0 or less then 0.0 no D-Part set
+         vor_D := 0.0;
+  END_IF;
+  
+  // P-Part plus D-Part
+  lr_pdt1 := vor_P + vor_D;
+  
+  // Calc I only in automatic mode
+  IF vix_Auto THEN
+         
+         IF lx_CycleFlag AND vir_Kp <> 0.0 AND vir_TI > 0.0 THEN
+               vor_I := vor_I + vir_Kp * lr_dtv * (vir_Inp + lr_IOld)/2;  
+         END_IF;
+  END_IF;
+         
+  IF vix_Auto THEN
+         
+         // PD-Part + I-Part
+         vor_Out := lr_pdt1 + vor_I;
+  ELSE
+         // Manual mode
+         vor_Out := vir_YManual;
+         lx_corr_i := TRUE;
+  END_IF;
+  
+  lr_IOld := vir_Inp;
+  
+  // Check Limits
+  IF vor_Out > vir_Lvu THEN
+         vor_Out    := vir_Lvu;
+         vox_Lu     := TRUE;
+         vox_Ld     := FALSE;
+         lx_corr_i := TRUE;
+  ELSE
+         IF vor_Out <= vir_Lvd THEN
+               vor_Out    := vir_Lvd;
+               vox_Lu     := FALSE;
+               vox_Ld     := TRUE;
+               lx_corr_i := TRUE;
+         ELSE
+               vox_Lu := FALSE;
+               vox_Ld := FALSE;
+         END_IF;
+  END_IF;
+  
+  //  Adapt I-Part if neccessary
+  IF lx_corr_i THEN
+        vor_I := vor_Out - lr_pdt1;
+  END_IF;
+  
+  // If maual mode the Out := YMan
+   IF vix_Auto = FALSE THEN
+        vor_Out := vir_YManual;
+  END_IF;
+  
+  lx_CycleFlag := TRUE;
+
+ END_IF;
+END_FUNCTION_BLOCK
+/*
+ * Skalierungsbaustein fuer Ein- und Ausgangswerte
+ */
+FUNCTION_BLOCK FB_lc_Cntrl_Scale_ST  {
+    width := 300;
+    minWidth := 300;
+    maxWidth := 300;
+    height := 118;
+    minHeight := 118;
+    maxHeight := 118;
+  }
+  /*
+   * MaxInVal: MaxVal from AnalogInput (digits)
+   * MinInVal: MinVal from AnalogInput (digits)
+   * MaxPhysVal: MaxPhysVal from AnalogInput (digits)
+   * MinPhysVal: MinPhysVal from AnalogInput (digits)
+   */
+  VAR_INPUT
+    vir_In            : REAL;
+    vir_MaxInVal      : REAL;
+    vir_MinInVal      : REAL;
+    vir_MaxPhysVal    : REAL;
+    vir_MinPhysVal    : REAL;
+    vir_OffsetPhysVal : REAL;
+  END_VAR
+
+  VAR_OUTPUT
+    vor_OutPhysVal   : REAL;
+    vox_InValError   : BOOL;
+    vox_PhysValError : BOOL;
+  END_VAR
+  
+  VAR_OUTPUT
+    voui_ErrNo : UINT;
+    vox_Err    : BOOL;
+  END_VAR
+
+  VAR
+    lr_DiffInVal         : REAL;
+    lr_DiffInVal_NotZero : BOOL;
+    lr_DiffPhysVal       : REAL;
+    lr_A                 : REAL;
+    lr_A_Mul_X           : REAL;
+    lr_A_Mul_X_Plus_B    : REAL;
+    lx_InValError        : BOOL;
+  END_VAR
+
+  /*
+   * Bereichgrenzen ueberwachen
+   */
+  lr_DiffInVal        := SUB(vir_MaxInVal,vir_MinInVal);
+  lr_DiffInVal_NotZero:= NE(SUB(vir_MaxInVal,vir_MinInVal),0.0);
+
+  voui_ErrNo := 0;
+  vox_Err    := FALSE;
+  
+  IF NE(SUB(vir_MaxInVal,vir_MinInVal),0.0) THEN
+   voui_ErrNo := 1;
+   vox_Err    := TRUE;
+  END_IF;
+  
+  IF vox_Err = FALSE THEN
+
+   lr_DiffPhysVal:=SUB(vir_MaxPhysVal,vir_MinPhysVal);
+   
+   IF lr_DiffInVal_NotZero THEN 
+    lr_A:=DIV(EN:=lr_DiffInVal_NotZero,IN1:=lr_DiffPhysVal,IN2:=lr_DiffInVal);
+    lx_InValError := FALSE;
+   ELSE
+    lr_A:= 0;
+    lx_InValError := TRUE;
+   END_IF;
+   
+   lr_A_Mul_X:=MUL(vir_In,lr_A);
+  /*
+   * Output Values for Function Block
+   */
+   vox_InValError:=OR(GT(vir_In,vir_MaxInVal),LT(vir_In,vir_MinInVal), lx_InValError);
+  /*
+   * Physical Value Error
+   */
+   vox_PhysValError:=NOT(lr_DiffInVal_NotZero);
+  /*
+   * lr_A_Mul_X_Plus_B calculated
+   */
+   lr_A_Mul_X_Plus_B := ADD(lr_A_Mul_X,vir_OffsetPhysVal);
+  /*
+   * To Output
+   */ 
+   vor_OutPhysVal:=lr_A_Mul_X_Plus_B;
+ 
+ END_IF;
+  
+END_FUNCTION_BLOCK
+
+END_NAMESPACE

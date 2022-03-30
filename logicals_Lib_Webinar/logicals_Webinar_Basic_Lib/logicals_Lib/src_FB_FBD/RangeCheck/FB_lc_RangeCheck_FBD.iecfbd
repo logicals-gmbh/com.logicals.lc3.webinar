@@ -1,0 +1,137 @@
+NAMESPACE com.logicals.Basic.RangeCheck
+FUNCTION_BLOCK FB_lc_RangeCheck_FBD
+  {
+    instanceNameVisible;
+    height := 100;
+    width := 300;
+    minWidth := 300;
+    maxWidth := 300;
+    minHeight := 98;
+    maxHeight := 98;
+  }
+
+  VAR
+    SR1 : SR;
+    SR2 : SR;
+  END_VAR
+  VAR_INPUT
+    vir_In : REAL;
+    vir_LU : REAL;
+    vir_LL : REAL;
+    vir_HYST : REAL;
+  END_VAR
+  VAR_OUTPUT
+    vox_InRng : BOOL;
+    vox_URchd : BOOL;
+    vox_LRchd : BOOL;
+    vox_OutOfRng : BOOL;
+  END_VAR
+
+  (*
+
+    // Network 1:
+    SUB(IN1 := vir_LU, IN2 := vir_HYST, SUB => @C(9).SUB);
+    GT(IN1 := vir_In, IN2 := @C(9).SUB, GT => @C(7).GT);
+    LT(IN1 := vir_In, IN2 := @C(9).SUB, LT => @C(22).LT);
+    SR1(S1 := @C(7).GT, R := @C(22).LT, Q1 => vox_URchd);
+    ADD(IN1 := vir_LL, IN2 := vir_HYST, ADD => @C(13).ADD);
+    LT(IN1 := vir_In, IN2 := @C(13).ADD, LT => @C(10).LT);
+    GT(IN1 := vir_In, IN2 := @C(13).ADD, GT => @C(21).GT);
+    SR2(S1 := @C(10).LT, R := @C(21).GT, Q1 => vox_LRchd);
+    OR(IN1 := SR1.Q1, IN2 := SR2.Q1, OR => (@C(35).OR, vox_OutOfRng));
+    NOT(IN := @C(35).OR, NOT => vox_InRng);
+
+  *)
+
+  @CF(1) : @R(10.0, 50.0, 870.0, 100.0), @T("E:$NRange Check"), @POU;
+  @CF(2) : @R(990.0, 50.0, 870.0, 100.0), @T("D:$NBereichspruefung"), @POU;
+  @VF(3) : @E(vir_In), @R(10.0, 230.0, 140.0, 19.0);
+  @VF(4) : @E(vir_LU), @R(10.0, 270.0, 140.0, 19.0);
+  @VF(5) : @E(vir_LL), @R(10.0, 350.0, 140.0, 19.0);
+  @VF(6) : @E(vir_HYST), @R(10.0, 410.0, 140.0, 19.0);
+  @C(7) : @F(GT), @R(460.0, 230.0, 40.0, 38.0), REAL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(GT), @R(9.5));
+  @C(10) : @F(LT), @R(460.0, 330.0, 40.0, 38.0), REAL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(LT), @R(9.5));
+  @C(9) : @F(SUB), @R(260.0, 270.0, 40.0, 38.0), REAL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(SUB), @R(9.5));
+  @C(13) : @F(ADD), @R(260.0, 350.0, 40.0, 38.0), REAL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(ADD), @R(9.5));
+  @C(19) : @FB(SR1), @R(680.0, 230.0, 80.0, 38.0), @I(@N(S1), @L(9.5)), @I(@N(R), @L(29.5)), @O(@N(Q1), @R(9.5));
+  @C(20) : @FB(SR2), @R(680.0, 330.0, 80.0, 38.0), @I(@N(S1), @L(9.5)), @I(@N(R), @L(29.5)), @O(@N(Q1), @R(9.5));
+  @C(21) : @F(GT), @R(460.0, 370.0, 40.0, 38.0), REAL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(GT), @R(9.5));
+  @C(22) : @F(LT), @R(460.0, 270.0, 40.0, 38.0), REAL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(LT), @R(9.5));
+  @VF(31) : @E(vox_URchd), @R(1720.0, 230.0, 140.0, 19.0);
+  @VF(33) : @E(vox_LRchd), @R(1720.0, 330.0, 140.0, 19.0);
+  @C(35) : @F(OR), @R(1410.0, 420.0, 40.0, 38.0), BOOL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(OR), @R(9.5));
+  @VF(38) : @E(vox_OutOfRng), @R(1720.0, 420.0, 140.0, 19.0);
+  @C(40) : @F(NOT), @R(1550.0, 490.0, 60.0, 18.5), BOOL, @I(@N(IN), @L(9.5)), @O(@N(NOT), @R(9.5));
+  @VF(42) : @E(vox_InRng), @R(1720.0, 490.0, 140.0, 19.0);
+  @CP(12) : 394.8, 239.5;
+  @CP(17) : 205.0, 380.3;
+  @CP(24) : 394.8, 334.1;
+  @CP(25) : 394.8, 277.3;
+  @CP(29) : 346.9, 277.3;
+  @CP(30) : 344.0, 359.5;
+  @CP(36) : 1304.7, 239.5;
+  @CP(37) : 1254.4, 339.5;
+  @CP(41) : 1505.7, 429.5;
+
+  @G(8) :
+     @L(@VF(3).o, @CP(12)),
+     @L(@CP(12), @C(7).IN1),
+     @L(@CP(12), @CP(25)),
+     @L(@CP(24), @C(10).IN1),
+     @L(@CP(24), @C(21).IN1),
+     @L(@CP(25), @CP(24)),
+     @L(@CP(25), @C(22).IN1)
+    ;
+  @G(11) :
+     @L(@VF(4).o, @C(9).IN1)
+    ;
+  @G(14) :
+     @L(@VF(5).o, @C(13).IN1)
+    ;
+  @G(15) :
+     @L(@C(13).ADD, @CP(30)),
+     @L(@CP(30), @C(10).IN2),
+     @L(@CP(30), @C(21).IN2)
+    ;
+  @G(16) :
+     @L(@VF(6).o, @CP(17)),
+     @L(@CP(17), @C(9).IN2),
+     @L(@CP(17), @C(13).IN2)
+    ;
+  @G(18) :
+     @L(@C(9).SUB, @CP(29)),
+     @L(@CP(29), @C(7).IN2),
+     @L(@CP(29), @C(22).IN2)
+    ;
+  @G(23) :
+     @L(@C(7).GT, @C(19).S1)
+    ;
+  @G(26) :
+     @L(@C(22).LT, @C(19).R)
+    ;
+  @G(27) :
+     @L(@C(10).LT, @C(20).S1)
+    ;
+  @G(28) :
+     @L(@C(21).GT, @C(20).R)
+    ;
+  @G(32) :
+     @L(@C(19).Q1, @CP(36)),
+     @L(@CP(36), @VF(31).i),
+     @L(@CP(36), @C(35).IN1)
+    ;
+  @G(34) :
+     @L(@C(20).Q1, @CP(37)),
+     @L(@CP(37), @VF(33).i),
+     @L(@CP(37), @C(35).IN2)
+    ;
+  @G(39) :
+     @L(@C(35).OR, @CP(41)),
+     @L(@CP(41), @VF(38).i),
+     @L(@CP(41), @C(40).IN)
+    ;
+  @G(43) :
+     @L(@C(40).NOT, @VF(42).i)
+    ;
+END_FUNCTION_BLOCK
+END_NAMESPACE

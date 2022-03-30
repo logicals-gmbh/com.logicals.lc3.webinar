@@ -1,0 +1,172 @@
+ /*
+  * logi.cals GmbH
+  * A-3100 St. Poelten
+  * Europaplatz 7/1
+  * Tel.: 0043-5-77147
+  *
+  * logi.cals automation solutions & services GmbH
+  * D-40738 Langenfeld
+  * Postfach 1306
+  * Tel.: 0043-5-77147
+  * 
+  * Contact:
+  * dieter.goltz@logicals.com
+  * 
+  * History:
+  * Created:  
+  * DG 2017-03-28
+  * 
+  * Modified: 
+  * DG 2017-03-28
+  * DG 2021-03-01
+  */ 
+
+ /*
+  * Description
+  * -----------
+  * Test OpHour Blocks
+  */
+
+ /* 
+  * Beschreibung
+  * ------------
+  * Test OpHour Blocks
+  */
+  
+USING com.logicals.Basic.OpHour;
+USING com.logicals.Basic.Trace;
+USING com.logicals.Basic.GetTime;
+
+PROGRAM PRG_lc_TestOpHour1_ST
+
+    VAR
+      FB_OpHourBySecChg    : FB_lc_OpHourBySecChg_ST;
+      lstruc_OpHourGetTime : DT_lc_OpHourGetTime;
+
+      ludi_OpHourActAllSec  : UDINT;
+      lui_OpHourActSec      : UINT;
+      lui_OpHourActMin      : UINT;
+      lui_OpHourActHour     : UINT;
+      lui_OpHourActModSec   : UINT;
+      lui_OpHourActModMin   : UINT;
+      lui_OpHourActModHour  : UINT;
+    END_VAR
+
+    VAR
+       lx_RTSInit     : BOOL;
+       lx_RTSShutDown : BOOL;
+       lx_RTSRun      : BOOL;
+       lx_RTSTerm     : BOOL;
+
+       lui_RTSInitCycle     : UINT;
+       lui_RTSShutDownCycle : UINT;
+       lui_RTSRunCycle      : UINT;
+       lui_RTSTermCycle     : UINT;
+    END_VAR	
+
+	VAR
+		lusi_sec  : USINT;   /* 0 - 60 */
+		lusi_min  : USINT;   /* 0 - 59 */
+		lusi_hour : USINT;   /* 0 - 23 */
+		lusi_mday : USINT;   /* 1 - 31 */
+		lusi_mon  : USINT;   /* 0 - 11 */
+		lui_year  : UINT;    /* 20xx */
+		lusi_wday : USINT;   /* 0 - 6 (0 = Sunday) */
+		lui_yday  : UINT;    /* 0 - 365 (0 = 1 Jan) */
+		lx_isdst  : BOOL;    /* daylight saving time */
+	END_VAR
+
+    VAR
+      FB_InitPulseR_Trig : R_TRIG; 
+    END_VAR
+
+    VAR
+      HCTrace      : FB_lc_Trace_ST;
+      lstr_PRGName : STRING[30] := 'PRG_lc_OpHour1_ST';
+      lui_TraceLevel : UINT     := 5;
+    END_VAR
+
+    VAR
+      /* Lokaler InitPuls im Baustein */
+       lx_CycleInit : BOOL;
+      /* Lokaler Zyklustaktgeber */
+       lx_CyclePulse : BOOL;
+      /* Lokaler Zyklustaktzaehler */
+       li_CycleCount : INT; 
+       /* InitZaehler */
+       li_CycleCountInitVal : INT;
+    END_VAR  
+   /*
+    * Standard Init Cycle
+    */
+    FB_InitPulseR_Trig(CLK := TRUE, Q => lx_CycleInit);
+
+    IF lx_CycleInit = TRUE THEN
+        /*
+         * Init Messages senden
+         */
+         HCTrace (vistr_TraceText := CONCAT(lstr_PRGName, ' Init!'), viui_TraceLevel := lui_TraceLevel);      
+         li_CycleCountInitVal := li_CycleCountInitVal + 1;
+    END_IF;
+   /*
+    * Block execution test
+    * Wird der Baustein bearbeitet
+    */
+    lx_CyclePulse := NOT(lx_CyclePulse);
+    li_CycleCount := li_CycleCount + 1;
+
+   /*
+    * Get Time from OS (Only Win-NTX86 and Linux)
+    * Uhrzeit und Datum lesen vom Betriebssystem (Nur Win-NTX86 und Linux)
+    */     
+    FUN_lc_GetTime_C(sec   => lusi_sec,      /* 0 - 60 */
+	                 min   => lusi_min,      /* 0 - 59 */
+	                 hour  => lusi_hour,     /* 0 - 23 */
+	                 mday  => lusi_mday,     /* 1 - 31 */
+	                 mon   => lusi_mon,      /* 0 - 11 */
+	                 year  => lui_year,      /* 20xx */
+	                 wday  => lusi_wday,     /* 0 - 6 (0 = Sunday) */
+	                 yday  => lui_yday,      /* 0 - 365 (0 = 1 Jan) */
+	                 isdst => lx_isdst);     /* daylight saving time */
+    
+    lstruc_OpHourGetTime.di_sec   := lusi_sec; 
+    lstruc_OpHourGetTime.di_min   := lusi_min; 
+    lstruc_OpHourGetTime.di_hour  := lusi_hour;
+    lstruc_OpHourGetTime.di_mday  := lusi_mday;
+    lstruc_OpHourGetTime.di_mon   := lusi_mon; 
+    lstruc_OpHourGetTime.di_year  := lui_year; 
+    lstruc_OpHourGetTime.di_wday  := lusi_wday;
+    lstruc_OpHourGetTime.di_yday  := lui_yday; 
+    lstruc_OpHourGetTime.di_isdst := lx_isdst;   
+
+   /*
+    * Get RTS status information
+    * Statusinformationen des RTS holen
+    */ 
+    RTSCycleInfo(Init     => lx_RTSInit,
+    	         Run      => lx_RTSRun,
+    	         Term     => lx_RTSTerm,
+    	         ShutDown => lx_RTSShutDown);
+    	                
+     IF lx_RTSInit = TRUE THEN
+        lui_RTSInitCycle     := lui_RTSInitCycle + 1;
+     END_IF;   
+     IF lx_RTSShutDown = TRUE THEN
+        lui_RTSShutDownCycle := lui_RTSShutDownCycle + 1;
+     END_IF;   
+     IF lx_RTSRUN = TRUE THEN
+        lui_RTSRunCycle      := lui_RTSRunCycle + 1;
+     END_IF;   
+     IF lx_RTSTerm = TRUE THEN
+        lui_RTSTermCycle     := lui_RTSTermCycle + 1;
+     END_IF;
+    
+     FB_OpHourBySecChg(vix_LoadStartVal     := FALSE, 
+                       vistruc_OpHourGetTime := lstruc_OpHourGetTime,
+                       vix_OpHourCount      := TRUE,
+                       voudi_ActAllSec      => ludi_OpHourActAllSec,
+                       voui_ActSec          => lui_OpHourActSec,    
+                       voui_ActMin          => lui_OpHourActMin,    
+                       voui_ActHour         => lui_OpHourActHour);
+       
+END_PROGRAM

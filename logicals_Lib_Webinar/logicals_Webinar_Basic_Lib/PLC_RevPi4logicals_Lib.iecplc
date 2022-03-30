@@ -1,0 +1,24 @@
+{
+	CHANNEL RevPiChannel
+		TCP
+			ADDRESS := 192.168.128.83;
+			PORT    := 1534;
+		END_TCP
+	END_CHANNEL
+}
+
+CONFIGURATION ConfRevPi
+
+	RESOURCE ResRevPi ON RevolutionPi { ON_CHANNEL := RevPiChannel }
+		
+		{ IO_IMPORT PROVIDER := GenericProvider, SERVICE := RevolutionPi }
+
+		{IO} TASK TSK_MainIO(INTERVAL := TIME#50ms, PRIORITY := 38229);
+		
+		 TASK TSK_Main(INTERVAL := TIME#100ms, PRIORITY := 38229);
+
+		 PROGRAM INST_lc_TestC_GetTime1_ST WITH TSK_Main : PRG_lc_TestC_GetTime1_ST;
+	
+	END_RESOURCE
+
+END_CONFIGURATION

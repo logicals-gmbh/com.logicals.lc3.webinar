@@ -1,0 +1,53 @@
+{
+  "project": "logicals_Lib",
+  "namespaces": [
+    "com.logicals.Basic.Actuator",
+    "com.logicals.Basic.Actuator_Sim",
+    "com.logicals.Basic.Auxiliary",
+    "com.logicals.Basic.Calc",
+    "com.logicals.Basic.Change",
+    "com.logicals.Basic.Control",
+    "com.logicals.Basic.Convert",
+    "com.logicals.Basic.Count",
+    "com.logicals.Basic.FileIO",
+    "com.logicals.Basic.Flash",
+    "com.logicals.Basic.I2C",
+    "com.logicals.Basic.I2C_LED_ELV",
+    "com.logicals.Basic.Logic",
+    "com.logicals.Basic.MQTT",
+    "com.logicals.Basic.Measure",
+    "com.logicals.Basic.RangeCheck",
+    "com.logicals.Basic.Scale",
+    "com.logicals.Basic.Select",
+    "com.logicals.Basic.Sequence",
+    "com.logicals.Basic.ShiftSteps",
+    "com.logicals.Basic.SigGen",
+    "com.logicals.Basic.TastCode",
+    "com.logicals.Basic.Trace",
+    "logicals.standard.util.delay",
+    "logicals.standard.util.schedule",
+    "logicals.system.network.tcp"
+  ],
+  "configurations": [
+    {
+      "name": "ConfLocalPLC",
+      "resources": [
+        {
+          "name": "ResLocalPLC",
+          "usings": []
+        }
+      ],
+      "usings": []
+    },
+    {
+      "name": "ConfPiXtend_V2L",
+      "resources": [
+        {
+          "name": "ResPiXtend_V2L",
+          "usings": []
+        }
+      ],
+      "usings": []
+    }
+  ]
+}

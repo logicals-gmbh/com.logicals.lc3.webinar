@@ -1,0 +1,372 @@
+NAMESPACE com.logicals.Basic.Control
+FUNCTION_BLOCK FB_lc_TestControl_FBD
+  USING com.logicals.Basic.Control;
+  {
+    vir_CycleTime_Sec {loc := "left", index := 9};
+    vii_AI_SetIn {loc := "left", index := 7};
+    vii_AI_ActIn {loc := "left", index := 6};
+    vix_ReleaseCtrl {loc := "left", index := 4};
+    voi_AutoSetOutVal {loc := "right", index := 7};
+    height := 248;
+    width := 360;
+    instanceNameVisible;
+    minWidth := 360;
+    maxWidth := 360;
+    maxHeight := 238;
+    minHeight := 238;
+  }
+
+  VAR
+    lx_CyclePulse : BOOL;
+    li_CycleCount : INT;
+    Local_TRUE : BOOL;
+    lx_InitPulse : BOOL;
+    R_TRIG : R_TRIG;
+    lr_MaxPhysInVal : REAL := 100.0;
+    lr_MinPhysInVal : REAL := 0.0;
+    lr_OffsetPhysInVal : REAL := 0.0;
+    lr_AutoActMaxInVal : REAL := 10000.0;
+    lr_AutoActMinInVal : REAL := 0.0;
+    lr_AutoActMaxInPhysVal : REAL := 10000.0;
+    lr_AutoActMinInPhysVal : REAL := 0.0;
+    lr_AutoActOffSetPhysVal : REAL := 0.0;
+    lr_DiffValAutoScaled : REAL;
+    FB_lc_Cntrl_Scale_ST1 : FB_lc_Cntrl_Scale_ST;
+    FB_lc_Cntrl_Scale_ST2 : FB_lc_Cntrl_Scale_ST;
+    FB_lc_Cntrl_PIDT1_ST1 : FB_lc_Cntrl_PIDT1_ST;
+    FB_lc_Cntrl_Scale_ST3 : FB_lc_Cntrl_Scale_ST;
+    FORCEMRK1 : FORCEMRK;
+    FORCEMRK2 : FORCEMRK;
+    FORCEMRK3 : FORCEMRK;
+    FORCEMRK4 : FORCEMRK;
+  END_VAR
+  VAR
+    lr_AutoSetMaxInVal : REAL := 10000.0;
+    lr_AutoSetMinInVal : REAL := 0.0;
+    lr_AutoSetMaxInPhysVal : REAL := 100.0;
+    lr_AutoSetMinInPhysVal : REAL := 0.0;
+    lr_AutoSetOffSetPhysVal : REAL := 0.0;
+    lr_AutoOutMaxInVal : REAL := 100.0;
+    lr_AutoOutMinInVal : REAL := 0.0;
+    lr_AutoOutMaxInPhysVal : REAL := 10000.0;
+    lr_AutoOutMinInPhysVal : REAL := 0.0;
+    lr_AutoOutOffSetPhysVal : REAL := 0.0;
+    lx_ReglerAuto : BOOL;
+    lr_ReglerKP : REAL := 0.1;
+    lr_ReglerTI : REAL := 1.0;
+    lr_ReglerT1 : REAL := 0.0;
+    lr_ReglerKV : REAL := 0.0;
+    lr_ReglerYMan : REAL := 0.0;
+    lr_ReglerLd : REAL := 0.0;
+    lr_ReglerLu : REAL := 100.0;
+    lx_AutoRampOn : BOOL;
+    lr_SetValAuto : REAL;
+    lr_SetValAutoScaled : REAL;
+    lr_AnaInSetValAuto : REAL;
+    lr_AnaInSetValAutoScaled : REAL;
+    lr_AnaInActValAuto : REAL;
+    lr_AnaInActValAutoScaled : REAL;
+    lr_AnaOutValAuto : REAL;
+    lr_AnaOutValAutoScaled : REAL;
+    lr_AnaInSetValTest : REAL;
+    lr_AnaInSetValTestScaled : REAL;
+    lr_AnaInActValTest : REAL;
+    lr_AnaInActValTestScaled : REAL;
+    lr_AnaOutValTest : REAL;
+    lr_AnaOutValTestScaled : REAL;
+    lx_ReglerFreigabe : BOOL;
+  END_VAR
+  VAR_INPUT
+    vii_AutoSetMaxRngVal : INT := 10000;
+    vii_AutoSetMinRngVal : INT := 0;
+    vir_AutoSetInVal : REAL := 0.0;
+    vix_ReleaseCtrl : BOOL := FALSE;
+    vii_AI_ActIn : INT;
+    vii_AI_SetIn : INT;
+    vir_CycleTime_Sec : REAL;
+  END_VAR
+  VAR_OUTPUT
+    voi_AutoSetOutVal : INT;
+  END_VAR
+
+  (*
+
+    // Network 1:
+    R_TRIG(CLK := Local_TRUE, Q => lx_InitPulse);
+
+    // Network 2:
+    ADD(IN1 := li_CycleCount, IN2 := 1, ADD => li_CycleCount);
+
+    // Network 3:
+    NOT(IN := lx_CyclePulse, NOT => lx_CyclePulse);
+
+    // Network 4:
+    FORCEMRK4(IN := vii_AI_SetIn);
+    TO_REAL(IN := FORCEMRK4.OUT, TO_REAL => lr_AnaInSetValAuto);
+
+    // Network 5:
+    FB_lc_Cntrl_Scale_ST1(vir_In := lr_AnaInSetValAuto, vir_MaxInVal := lr_AutoSetMaxInVal, vir_MinInVal := lr_AutoSetMinInVal, vir_MaxPhysVal := lr_AutoSetMaxInPhysVal, vir_MinPhysVal := lr_AutoSetMinInPhysVal, vir_OffsetPhysVal := lr_AutoSetOffsetPhysVal, vor_OutPhysVal => lr_AnaInSetValAutoScaled);
+
+    // Network 6:
+    FORCEMRK3(IN := vii_AI_ActIn);
+    TO_REAL(IN := FORCEMRK3.OUT, TO_REAL => lr_AnaInActValAuto);
+
+    // Network 7:
+    FB_lc_Cntrl_Scale_ST2(vir_In := lr_AnaInActValAuto, vir_MaxInVal := lr_AutoActMaxInVal, vir_MinInVal := lr_AutoActMinInVal, vir_MaxPhysVal := lr_AutoActMaxInPhysVal, vir_MinPhysVal := lr_AutoActMinInPhysVal, vir_OffsetPhysVal := lr_AutoActOffsetPhysVal, vor_OutPhysVal => lr_AnaInActValAutoScaled);
+
+    // Network 8:
+    SUB(IN1 := lr_AnaInSetValAutoScaled, IN2 := lr_AnaInActValAutoScaled, SUB => lr_DiffValAutoScaled);
+
+    // Network 9:
+    FORCEMRK1(IN := vix_ReleaseCtrl, OUT => lx_ReglerAuto);
+    FB_lc_Cntrl_PIDT1_ST1(vir_Inp := lr_DiffValAutoScaled, vir_TI := lr_ReglerTI, vir_Kv := lr_ReglerKV, vir_T1 := lr_ReglerT1, vix_Auto := lx_ReglerAuto, vir_YManual := lr_ReglerYMan, vir_Lvu := lr_ReglerLu, vir_Lvd := lr_ReglerLd, vir_Kp := lr_ReglerKP, vir_CycTm_Sec := vir_CycleTime_Sec, vor_Out => lr_AnaOutValAuto);
+
+    // Network 10:
+    FB_lc_Cntrl_Scale_ST3(vir_In := lr_AnaOutValAuto, vir_MaxInVal := lr_AutoOutMaxInVal, vir_MinInVal := lr_AutoOutMinInVal, vir_MaxPhysVal := lr_AutoOutMaxInPhysVal, vir_MinPhysVal := lr_AutoOutMinInPhysVal, vir_OffsetPhysVal := lr_AutoOutOffSetPhysVal, vor_OutPhysVal => lr_AnaOutValAutoScaled);
+
+    // Network 11:
+    MOVE(IN := lr_AnaOutValAutoScaled, MOVE => @C(102).MOVE);
+    TO_INT(IN := @C(102).MOVE, TO_INT => @C(103).TO_INT);
+    FORCEMRK2(IN := @C(103).TO_INT, OUT => voi_AutoSetOutVal);
+
+  *)
+
+  @VF(1) : @E(lx_CyclePulse), @R(950.0, 710.0, 140.0, 19.0);
+  @VF(2) : @E(lx_CyclePulse), @R(600.0, 710.0, 140.0, 19.0);
+  @VF(3) : @E(1), @R(540.0, 490.0, 140.0, 19.0), INT;
+  @VF(4) : @E(li_CycleCount), @R(540.0, 470.0, 140.0, 19.0);
+  @VF(5) : @E(li_CycleCount), @R(820.0, 470.0, 140.0, 19.0);
+  @VF(6) : @E(Local_TRUE), @R(540.0, 260.0, 140.0, 19.0);
+  @VF(7) : @E(lx_InitPulse), @R(920.0, 260.0, 140.0, 19.0);
+  @C(12) : @F(NOT), @R(790.0, 710.0, 60.0, 18.5), BOOL, @I(@N(IN), @L(9.5)), @O(@N(NOT), @R(9.5));
+  @C(13) : @F(ADD), @R(730.0, 470.0, 40.0, 38.0), INT, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @I(@N(IN3), @L(49.5)), @I(@N(IN4), @L(69.5)), @I(@N(IN5), @L(89.5)), @I(@N(IN6), @L(109.5)), @I(@N(IN7), @L(129.5)), @I(@N(IN8), @L(149.5)), @I(@N(IN9), @L(169.5)), @I(@N(IN10), @L(189.5)), @I(@N(IN11), @L(209.5)), @I(@N(IN12), @L(229.5)), @I(@N(IN13), @L(249.5)), @I(@N(IN14), @L(269.5)), @I(@N(IN15), @L(289.5)), @I(@N(IN16), @L(309.5)), @O(@N(ADD), @R(9.5));
+  @C(14) : @FB(R_TRIG), @R(720.0, 260.0, 140.0, 18.5), BOOL, @I(@N(CLK), @L(9.5)), @O(@N(Q), @R(9.5));
+  @VF(24) : @E(lr_AutoSetMaxInPhysVal), @R(430.0, 1780.0, 310.0, 19.0);
+  @VF(26) : @E(lr_AutoSetMinInPhysVal), @R(430.0, 1800.0, 310.0, 19.0);
+  @VF(28) : @E(lr_AutoSetOffsetPhysVal), @R(430.0, 1820.0, 310.0, 19.0);
+  @VF(32) : @E(lr_AnaInSetValAuto), @R(1290.0, 1640.0, 310.0, 19.0);
+  @VF(35) : @E(lr_AnaInSetValAuto), @R(430.0, 1720.0, 310.0, 19.0);
+  @C(38) : @F(TO_REAL), @R(1030.0, 1640.0, 120.0, 18.5), INT, @I(@N(IN), @L(9.5)), @O(@N(TO_REAL), @R(9.5));
+  @VF(41) : @E(lr_AnaInSetValAutoScaled), @R(1360.0, 1720.0, 240.0, 19.0);
+  @VF(30) : @E(lr_AutoSetMaxInVal), @R(430.0, 1740.0, 310.0, 19.0);
+  @VF(31) : @E(lr_AutoSetMinInVal), @R(430.0, 1760.0, 310.0, 19.0);
+  @VF(45) : @E(lr_AnaInActValAutoScaled), @R(1320.0, 2160.0, 300.0, 19.0);
+  @VF(46) : @E(lr_AutoActMaxInPhysVal), @R(430.0, 2220.0, 310.0, 19.0);
+  @VF(47) : @E(lr_AutoActMinInPhysVal), @R(430.0, 2240.0, 310.0, 19.0);
+  @VF(48) : @E(lr_AutoActOffsetPhysVal), @R(430.0, 2260.0, 310.0, 19.0);
+  @VF(49) : @E(lr_AnaInActValAuto), @R(430.0, 2160.0, 310.0, 19.0);
+  @VF(50) : @E(lr_AutoActMaxInVal), @R(430.0, 2180.0, 310.0, 19.0);
+  @VF(51) : @E(lr_AutoActMinInVal), @R(430.0, 2200.0, 310.0, 19.0);
+  @VF(52) : @E(lr_AnaInActValAuto), @R(1310.0, 2080.0, 310.0, 19.0);
+  @C(56) : @F(TO_REAL), @R(1030.0, 2080.0, 120.0, 18.5), INT, @I(@N(IN), @L(9.5)), @O(@N(TO_REAL), @R(9.5));
+  @VF(69) : @E(lr_AnaInSetValAutoScaled), @R(550.0, 2500.0, 310.0, 19.0);
+  @VF(70) : @E(lr_AnaInActValAutoScaled), @R(550.0, 2520.0, 310.0, 19.0);
+  @C(71) : @F(SUB), @R(980.0, 2500.0, 40.0, 38.0), REAL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(SUB), @R(9.5));
+  @VF(74) : @E(lr_DiffValAutoScaled), @R(1070.0, 2500.0, 330.0, 19.0);
+  @VF(77) : @E(lr_DiffValAutoScaled), @R(480.0, 2890.0, 260.0, 19.0);
+  @VF(80) : @E(lr_ReglerTI), @R(480.0, 2910.0, 260.0, 19.0);
+  @VF(82) : @E(lr_ReglerKV), @R(480.0, 2930.0, 260.0, 19.0);
+  @VF(84) : @E(lr_ReglerYMan), @R(480.0, 2990.0, 260.0, 19.0);
+  @VF(86) : @E(lr_ReglerT1), @R(480.0, 2950.0, 260.0, 19.0);
+  @VF(87) : @E(lr_ReglerLd), @R(480.0, 3030.0, 260.0, 19.0);
+  @VF(89) : @E(lr_ReglerLu), @R(480.0, 3010.0, 260.0, 19.0);
+  @VF(92) : @E(lx_ReglerAuto), @R(480.0, 2970.0, 260.0, 19.0);
+  @VF(94) : @E(lr_ReglerKP), @R(480.0, 3050.0, 260.0, 19.0);
+  @VF(96) : @E(lr_AnaOutValAuto), @R(1220.0, 2930.0, 220.0, 19.0);
+  @VF(100) : @E(lr_AnaOutValAutoScaled), @R(1330.0, 3370.0, 300.0, 19.0);
+  @VF(101) : @E(lr_AnaOutValAutoScaled), @R(530.0, 3580.0, 300.0, 19.0);
+  @C(102) : @F(MOVE), @R(890.0, 3580.0, 60.0, 18.5), REAL, @I(@N(IN), @L(9.5)), @O(@N(MOVE), @R(9.5));
+  @C(103) : @F(TO_INT), @R(990.0, 3580.0, 120.0, 18.5), REAL, @I(@N(IN), @L(9.5)), @O(@N(TO_INT), @R(9.5));
+  @VF(108) : @E(lr_AnaOutValAuto), @R(420.0, 3370.0, 260.0, 19.0);
+  @VF(110) : @E(lr_AutoOutMaxInVal), @R(420.0, 3390.0, 260.0, 19.0);
+  @VF(111) : @E(lr_AutoOutMinInVal), @R(420.0, 3410.0, 260.0, 19.0);
+  @VF(112) : @E(lr_AutoOutMaxInPhysVal), @R(420.0, 3430.0, 260.0, 19.0);
+  @VF(113) : @E(lr_AutoOutMinInPhysVal), @R(420.0, 3450.0, 260.0, 19.0);
+  @VF(114) : @E(lr_AutoOutOffSetPhysVal), @R(420.0, 3470.0, 260.0, 19.0);
+  @CF(9) : @R(740.0, 570.0, 240.0, 100.0), @T("Zyklus Pulse"), @POU;
+  @CF(10) : @R(740.0, 320.0, 240.0, 100.0), @T("Zyklus LifeTick"), @POU;
+  @CF(11) : @R(740.0, 120.0, 240.0, 100.0), @T("Lokaler InitPulse"), @POU;
+  @CF(8) : @R(660.0, 1390.0, 640.0, 100.0), @T("Automatikbetrieb"), @POU;
+  @CF(22) : @R(660.0, 1510.0, 640.0, 100.0), @T("Skalierung des Eingangswertes.$NSetzwert des Potis$NSkalierung von ??..?? nach 0..100% beachten!"), @POU;
+  @CF(64) : @R(640.0, 1900.0, 640.0, 100.0), @T("Skalierung des Istwertes.$NSetzwert der Tachospannung$NSkalierung von ??..?? nach 0..100% beachten!"), @POU;
+  @CF(68) : @R(640.0, 2340.0, 640.0, 100.0), @T("Bildung der Regeldifferenz"), @POU;
+  @CF(76) : @R(640.0, 2700.0, 640.0, 100.0), @T("Aufruf des Reglers"), @POU;
+  @CF(98) : @R(630.0, 3210.0, 640.0, 100.0), @T("Ausgabe des Sollwertes$NSkaliert 0..100% nach ??..?? Inc beachten"), @POU;
+  @C(23) : @FB(FB_lc_Cntrl_Scale_ST1), @R(890.0, 1720.0, 300.0, 118.0), @I(@N(vir_In), @L(9.5)), @I(@N(vir_MaxInVal), @L(29.5)), @I(@N(vir_MinInVal), @L(49.5)), @I(@N(vir_MaxPhysVal), @L(69.5)), @I(@N(vir_MinPhysVal), @L(89.5)), @I(@N(vir_OffsetPhysVal), @L(109.5)), @O(@N(vor_OutPhysVal), @R(9.5)), @O(@N(vox_InValError), @R(29.5)), @O(@N(vox_PhysValError), @R(49.5)), @O(@N(voui_ErrNo), @R(69.5)), @O(@N(vox_Err), @R(89.5));
+  @C(33) : @FB(FB_lc_Cntrl_Scale_ST2), @R(900.0, 2160.0, 300.0, 118.0), @I(@N(vir_In), @L(9.5)), @I(@N(vir_MaxInVal), @L(29.5)), @I(@N(vir_MinInVal), @L(49.5)), @I(@N(vir_MaxPhysVal), @L(69.5)), @I(@N(vir_MinPhysVal), @L(89.5)), @I(@N(vir_OffsetPhysVal), @L(109.5)), @O(@N(vor_OutPhysVal), @R(9.5)), @O(@N(vox_InValError), @R(29.5)), @O(@N(vox_PhysValError), @R(49.5)), @O(@N(voui_ErrNo), @R(69.5)), @O(@N(vox_Err), @R(89.5));
+  @C(58) : @FB(FB_lc_Cntrl_PIDT1_ST1), @R(820.0, 2890.0, 320.0, 198.0), @I(@N(vir_Inp), @L(9.5)), @I(@N(vir_TI), @L(29.5)), @I(@N(vir_Kv), @L(49.5)), @I(@N(vir_T1), @L(69.5)), @I(@N(vix_Auto), @L(89.5)), @I(@N(vir_YManual), @L(109.5)), @I(@N(vir_Lvu), @L(129.5)), @I(@N(vir_Lvd), @L(149.5)), @I(@N(vir_Kp), @L(169.5)), @I(@N(vir_CycTm_Sec), @L(189.5)), @O(@N(vox_Lu), @R(9.5)), @O(@N(vox_Ld), @R(29.5)), @O(@N(vor_Out), @R(49.5)), @O(@N(vor_P), @R(69.5)), @O(@N(vor_I), @R(89.5)), @O(@N(vor_D), @R(109.5)), @O(@N(voui_ErrNo), @R(129.5)), @O(@N(vox_Err), @R(149.5));
+  @C(81) : @FB(FB_lc_Cntrl_Scale_ST3), @R(850.0, 3370.0, 300.0, 118.0), @I(@N(vir_In), @L(9.5)), @I(@N(vir_MaxInVal), @L(29.5)), @I(@N(vir_MinInVal), @L(49.5)), @I(@N(vir_MaxPhysVal), @L(69.5)), @I(@N(vir_MinPhysVal), @L(89.5)), @I(@N(vir_OffsetPhysVal), @L(109.5)), @O(@N(vor_OutPhysVal), @R(9.5)), @O(@N(vox_InValError), @R(29.5)), @O(@N(vox_PhysValError), @R(49.5)), @O(@N(voui_ErrNo), @R(69.5)), @O(@N(vox_Err), @R(89.5));
+  @VF(97) : @E(vii_AI_SetIn), @R(440.0, 1640.0, 300.0, 19.0);
+  @VF(106) : @E(vii_AI_ActIn), @R(430.0, 2080.0, 310.0, 19.0);
+  @VF(115) : @E(vix_ReleaseCtrl), @R(70.0, 2970.0, 210.0, 19.0);
+  @C(116) : @FB(FORCEMRK1), @R(320.0, 2970.0, 120.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(OUT), @R(9.5));
+  @VF(119) : @E(vir_CycleTime_Sec), @R(480.0, 3070.0, 260.0, 19.0);
+  @VF(121) : @E(voi_AutoSetOutVal), @R(1320.0, 3580.0, 310.0, 19.0);
+  @C(123) : @FB(FORCEMRK2), @R(1160.0, 3580.0, 120.0, 18.0), INT, @I(@N(IN), @L(9.5)), @O(@N(OUT), @R(9.5));
+  @C(125) : @FB(FORCEMRK3), @R(830.0, 2080.0, 120.0, 18.0), INT, @I(@N(IN), @L(9.5)), @O(@N(OUT), @R(9.5));
+  @C(127) : @FB(FORCEMRK4), @R(840.0, 1640.0, 120.0, 18.0), INT, @I(@N(IN), @L(9.5)), @O(@N(OUT), @R(9.5));
+
+  @G(15) :
+     @L(@C(12).NOT, @VF(1).i)
+    ;
+  @G(16) :
+     @L(@VF(2).o, @C(12).IN)
+    ;
+  @G(17) :
+     @L(@VF(3).o, @C(13).IN2)
+    ;
+  @G(18) :
+     @L(@VF(4).o, @C(13).IN1)
+    ;
+  @G(19) :
+     @L(@C(13).ADD, @VF(5).i)
+    ;
+  @G(20) :
+     @L(@VF(6).o, @C(14).CLK)
+    ;
+  @G(21) :
+     @L(@C(14).Q, @VF(7).i)
+    ;
+  @G(39) :
+     @L(@C(38).TO_REAL, @VF(32).i)
+    ;
+  @G(65) :
+     @L(@C(56).TO_REAL, @VF(52).i)
+    ;
+  @G(72) :
+     @L(@VF(69).o, @C(71).IN1)
+    ;
+  @G(73) :
+     @L(@VF(70).o, @C(71).IN2)
+    ;
+  @G(75) :
+     @L(@C(71).SUB, @VF(74).i)
+    ;
+  @G(104) :
+     @L(@VF(101).o, @C(102).IN)
+    ;
+  @G(105) :
+     @L(@C(102).MOVE, @C(103).IN)
+    ;
+  @G(25) :
+     @L(@VF(35).o, @C(23).vir_In)
+    ;
+  @G(27) :
+     @L(@VF(30).o, @C(23).vir_MaxInVal)
+    ;
+  @G(29) :
+     @L(@VF(31).o, @C(23).vir_MinInVal)
+    ;
+  @G(36) :
+     @L(@VF(24).o, @C(23).vir_MaxPhysVal)
+    ;
+  @G(42) :
+     @L(@VF(26).o, @C(23).vir_MinPhysVal)
+    ;
+  @G(43) :
+     @L(@VF(28).o, @C(23).vir_OffsetPhysVal)
+    ;
+  @G(44) :
+     @L(@C(23).vor_OutPhysVal, @VF(41).i)
+    ;
+  @G(34) :
+     @L(@VF(49).o, @C(33).vir_In)
+    ;
+  @G(37) :
+     @L(@VF(50).o, @C(33).vir_MaxInVal)
+    ;
+  @G(40) :
+     @L(@VF(51).o, @C(33).vir_MinInVal)
+    ;
+  @G(53) :
+     @L(@VF(46).o, @C(33).vir_MaxPhysVal)
+    ;
+  @G(54) :
+     @L(@VF(47).o, @C(33).vir_MinPhysVal)
+    ;
+  @G(55) :
+     @L(@VF(48).o, @C(33).vir_OffsetPhysVal)
+    ;
+  @G(57) :
+     @L(@C(33).vor_OutPhysVal, @VF(45).i)
+    ;
+  @G(59) :
+     @L(@VF(77).o, @C(58).vir_Inp)
+    ;
+  @G(60) :
+     @L(@VF(80).o, @C(58).vir_TI)
+    ;
+  @G(61) :
+     @L(@VF(82).o, @C(58).vir_Kv)
+    ;
+  @G(62) :
+     @L(@VF(86).o, @C(58).vir_T1)
+    ;
+  @G(63) :
+     @L(@VF(84).o, @C(58).vir_YManual)
+    ;
+  @G(66) :
+     @L(@VF(89).o, @C(58).vir_Lvu)
+    ;
+  @G(67) :
+     @L(@VF(87).o, @C(58).vir_Lvd)
+    ;
+  @G(78) :
+     @L(@VF(94).o, @C(58).vir_Kp)
+    ;
+  @G(79) :
+     @L(@C(58).vor_Out, @VF(96).i)
+    ;
+  @G(83) :
+     @L(@VF(108).o, @C(81).vir_In)
+    ;
+  @G(85) :
+     @L(@VF(110).o, @C(81).vir_MaxInVal)
+    ;
+  @G(88) :
+     @L(@VF(111).o, @C(81).vir_MinInVal)
+    ;
+  @G(90) :
+     @L(@VF(112).o, @C(81).vir_MaxPhysVal)
+    ;
+  @G(91) :
+     @L(@VF(113).o, @C(81).vir_MinPhysVal)
+    ;
+  @G(93) :
+     @L(@VF(114).o, @C(81).vir_OffsetPhysVal)
+    ;
+  @G(95) :
+     @L(@C(81).vor_OutPhysVal, @VF(100).i)
+    ;
+  @G(99) :
+     @L(@VF(97).o, @C(127).IN)
+    ;
+  @G(107) :
+     @L(@VF(106).o, @C(125).IN)
+    ;
+  @G(109) :
+     @L(@VF(92).o, @C(58).vix_Auto)
+    ;
+  @G(117) :
+     @L(@VF(115).o, @C(116).IN)
+    ;
+  @G(118) :
+     @L(@C(116).OUT, @VF(92).i)
+    ;
+  @G(120) :
+     @L(@VF(119).o, @C(58).vir_CycTm_Sec)
+    ;
+  @G(122) :
+     @L(@C(103).TO_INT, @C(123).IN)
+    ;
+  @G(124) :
+     @L(@C(123).OUT, @VF(121).i)
+    ;
+  @G(126) :
+     @L(@C(125).OUT, @C(56).IN)
+    ;
+  @G(128) :
+     @L(@C(127).OUT, @C(38).IN)
+    ;
+END_FUNCTION_BLOCK
+END_NAMESPACE

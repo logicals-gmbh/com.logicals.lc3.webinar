@@ -1,0 +1,94 @@
+NAMESPACE com.logicals.Basic.OOP.Actuator
+/*
+ * Einzelsteuerfunktion FB_lc_IDF_2DirVarSpeed1_OOP_ST
+ */
+FUNCTION_BLOCK FB_lc_IDF_2DirVarSpeed1_OOP_ST
+
+VAR_INPUT
+ vix_Lock     : BOOL; // Sperren des Antriebs
+ vii_SpeedSet : INT;
+END_VAR
+
+VAR_OUTPUT
+ vox_Enable     : BOOL;
+ voi_SpeedOut   : INT;
+END_VAR
+
+/*
+ * Methoden in der OOP verhalten sich genauso wie Funktionen
+ * Rueckgabewert ist erlaubt
+ * Zugriffsmodifizierer sind PUBLIC, PRIVATE, PROTECTED, INTERNAL
+ * In LC3 wird derzeit PUBLIC unterstuetzt.
+ * Wird der Zugriffsmodifizierer nich angegeben, ist dieser immer PUBLIC
+ */
+
+/*
+ * Methode M_On
+ * Wenn kein Rueckgabewert definiert werden soll, kann der Datentyp inkl. Doppelpunkt weggelassen werden!
+ */
+METHOD PUBLIC M_On : BOOL // Rueckgabewert BOOL
+	VAR_INPUT
+	END_VAR
+   /*
+    * Anweisungsteil der Methode
+    */	
+	IF NOT vix_Lock THEN
+	 vox_Enable := TRUE;
+	ELSE
+	 vox_Enable := FALSE;
+	END_IF;  
+
+    M_On := vox_Enable;
+END_METHOD
+
+/*
+ * Methode M_Off
+ */
+METHOD PUBLIC M_Off : BOOL // Rueckgabewert BOOL
+   /*
+    * Hier koennen Uebergabewerte deklariert werden
+    */	
+	VAR_INPUT
+	END_VAR
+   /*
+    * Anweisungsteil der Methode
+    * Das Ausschalten soll IMMER funktionieren
+    */	
+    vox_Enable := FALSE;
+    
+    M_Off := vox_Enable;
+END_METHOD
+
+/*
+ * Methode M_Forward
+ */
+METHOD PUBLIC M_Forward : BOOL
+	VAR_INPUT
+	  mii_SpeedSet : INT;
+	END_VAR
+	voi_SpeedOut := ABS(mii_SpeedSet);
+END_METHOD
+
+/*
+ * Methode M_Forward
+ */
+METHOD PUBLIC M_Backward : BOOL
+	VAR_INPUT
+	  mii_SpeedSet : INT;
+	END_VAR
+	voi_SpeedOut := -ABS(mii_SpeedSet);
+END_METHOD
+
+/*
+ * Logik fuer das Sperren des Antriebs
+ * (Anweisungsteil)
+ * Sicherheitsfunktion, die immer aufgerufen wird, wenn der FB aufgerufen wird!
+ */
+ IF vix_Lock THEN
+  vox_Enable   := FALSE;
+  voi_SpeedOut := 0;
+ END_IF;
+  
+END_FUNCTION_BLOCK
+
+END_NAMESPACE

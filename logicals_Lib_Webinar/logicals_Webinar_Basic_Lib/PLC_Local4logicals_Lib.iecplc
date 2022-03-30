@@ -1,0 +1,37 @@
+/*
+ * This is a logi.CAD 3 template for a new PLC object
+ */
+
+{
+	CHANNEL ChannelLocalPLC
+		TCP
+			ADDRESS := 127.0.0.1;
+			PORT    := 1534;
+		END_TCP
+	END_CHANNEL
+}
+
+CONFIGURATION ConfLocalPLC
+	RESOURCE ResLocalPLC ON BuiltInPlc { ON_CHANNEL := ChannelLocalPLC }
+        
+		TASK TSK_Main(INTERVAL := TIME#500ms, PRIORITY := 38229);
+
+//		PROGRAM INST_TestActuator1_ST      WITH TSK_Main : PRG_lc_TestActuator1_ST;
+//		PROGRAM INST_TestActuator1_Sim_ST  WITH TSK_Main : PRG_lc_TestActuator1_Sim_ST;
+//		PROGRAM INST_TestConvert1_ST       WITH TSK_Main : PRG_lc_TestConvert1_ST;
+
+	    PROGRAM INST_lc_TestC_GetTime1_ST WITH TSK_Main : PRG_lc_TestC_GetTime1_ST;
+
+//		PROGRAM INST_lc_TestByteArrFromStr1_ST WITH TSK_Main : PRG_lc_TestC_ByteArrFromStr1_ST;
+
+//	    PROGRAM INST_lc_TestCalc2_ST WITH TSK_Main : PRG_lc_TestCalc2_ST;
+
+//	    PROGRAM INST_lc_TestOpHour1_ST WITH TSK_Main : PRG_lc_TestOpHour1_ST;
+//	    PROGRAM INST_lc_TestOpHour1_FBD WITH TSK_Main : PRG_lc_TestOpHour1_FBD;
+
+//		PROGRAM INST_TestSigGen1_FBD       WITH TSK_Main : PRG_lc_TestSigGen1_FBD;
+//		PROGRAM INST_TestConvert1_FBD      WITH TSK_Main : PRG_lc_TestConvert1_FBD;
+//		PROGRAM INST_TestRangeCheck1_FBD   WITH TSK_Main : PRG_lc_TestRangeCheck1_FBD;
+		
+	END_RESOURCE
+END_CONFIGURATION

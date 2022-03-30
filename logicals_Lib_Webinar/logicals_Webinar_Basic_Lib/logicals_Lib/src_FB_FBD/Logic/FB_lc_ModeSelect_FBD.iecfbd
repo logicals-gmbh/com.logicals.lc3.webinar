@@ -1,0 +1,245 @@
+NAMESPACE com.logicals.Basic.Logic
+FUNCTION_BLOCK FB_lc_ModeSelect_FBD
+  {
+    height := 200;
+    width := 300;
+  }
+
+  VAR
+    R_TRIG1 : R_TRIG;
+    lx_InitPulse : BOOL;
+    Local_TRUE : BOOL;
+    R_TRIG : R_TRIG;
+    R_TRIG2 : R_TRIG;
+    R_TRIG3 : R_TRIG;
+    R_TRIG4 : R_TRIG;
+    li_CycleCount : INT;
+    li_Alive : INT;
+    lx_CyclePulse : BOOL;
+    SR1 : SR;
+    SR2 : SR;
+    SR3 : SR;
+    SR4 : SR;
+  END_VAR
+  VAR_INPUT
+    vix_SetHand : BOOL;
+    vix_SetAutomatik : BOOL;
+    vix_SetTest : BOOL;
+    vix_SetSim : BOOL;
+  END_VAR
+  VAR_OUTPUT
+    vox_Handbetrieb : BOOL;
+    vox_Automatikbetrieb : BOOL;
+    vox_Testbetrieb : BOOL;
+    vox_Simbetrieb : BOOL;
+  END_VAR
+
+  (*
+
+    // Network 1:
+    R_TRIG(CLK := Local_TRUE, Q => lx_InitPulse);
+
+    // Network 2:
+    li_Alive := li_CycleCount;
+    ADD(IN1 := li_CycleCount, IN2 := 1, ADD => li_CycleCount);
+
+    // Network 3:
+    NOT(IN := lx_CyclePulse, NOT => lx_CyclePulse);
+
+    // Network 4:
+    R_TRIG1(CLK := vix_SetHand);
+    OR(IN1 := R_TRIG1.Q, IN2 := Local_TRUE, OR => @C(14).OR);
+    OR(IN1 := vox_Automatikbetrieb, IN2 := vox_Testbetrieb, IN3 := vox_Simbetrieb, OR => @C(18).OR);
+    SR1(S1 := @C(14).OR, R := @C(18).OR, Q1 => vox_Handbetrieb);
+
+    // Network 5:
+    R_TRIG2(CLK := vix_SetAutomatik);
+    OR(IN1 := vox_Handbetrieb, IN2 := vox_Testbetrieb, IN3 := vox_Simbetrieb, OR => @C(35).OR);
+    SR2(S1 := R_TRIG2.Q, R := @C(35).OR, Q1 => vox_Automatikbetrieb);
+
+    // Network 6:
+    R_TRIG3(CLK := vix_SetTest);
+    OR(IN1 := vox_Handbetrieb, IN2 := vox_Automatikbetrieb, IN3 := vox_Simbetrieb, OR => @C(48).OR);
+    SR3(S1 := R_TRIG3.Q, R := @C(48).OR, Q1 => vox_Testbetrieb);
+
+    // Network 7:
+    R_TRIG4(CLK := vix_SetSim);
+    OR(IN1 := vox_Handbetrieb, IN2 := vox_Testbetrieb, IN3 := vox_Automatikbetrieb, OR => @C(63).OR);
+    SR4(S1 := R_TRIG4.Q, R := @C(63).OR, Q1 => vox_Simbetrieb);
+
+  *)
+
+  @VF(1) : @E(vix_SetHand), @R(190.0, 100.0, 140.0, 19.0);
+  @C(2) : @FB(R_TRIG1), @R(390.0, 100.0, 140.0, 18.5), BOOL, @I(@N(CLK), @L(9.5)), @O(@N(Q), @R(9.5));
+  @VF(6) : @E(vox_Handbetrieb), @R(888.0, 99.9, 150.0, 19.0);
+  @VF(8) : @E(lx_InitPulse), @R(630.0, -1180.0, 140.0, 19.0);
+  @VF(9) : @E(Local_TRUE), @R(250.0, -1180.0, 140.0, 19.0);
+  @C(11) : @FB(R_TRIG), @R(430.0, -1180.0, 140.0, 18.5), BOOL, @I(@N(CLK), @L(9.5)), @O(@N(Q), @R(9.5));
+  @C(14) : @F(OR), @R(590.0, 100.0, 40.0, 38.0), BOOL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(OR), @R(9.5));
+  @VF(16) : @E(Local_TRUE), @R(190.0, 120.0, 140.0, 19.0);
+  @C(18) : @F(OR), @R(590.0, 180.0, 40.0, 58.0), BOOL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @I(@N(IN3), @L(49.5)), @O(@N(OR), @R(9.5));
+  @VF(20) : @E(vox_Automatikbetrieb), @R(190.0, 180.0, 200.0, 19.0);
+  @VF(21) : @E(vox_Testbetrieb), @R(190.0, 200.0, 200.0, 19.0);
+  @VF(22) : @E(vox_Simbetrieb), @R(190.0, 220.0, 200.0, 19.0);
+  @VF(26) : @E(vix_SetAutomatik), @R(190.0, 300.0, 200.0, 19.0);
+  @VF(28) : @E(vox_Handbetrieb), @R(190.0, 380.0, 200.0, 19.0);
+  @VF(29) : @E(vox_Testbetrieb), @R(190.0, 400.0, 200.0, 19.0);
+  @VF(30) : @E(vox_Simbetrieb), @R(190.0, 420.0, 200.0, 19.0);
+  @VF(31) : @E(vox_Automatikbetrieb), @R(840.0, 300.0, 210.0, 19.0);
+  @C(32) : @FB(R_TRIG2), @R(440.0, 300.0, 140.0, 18.5), BOOL, @I(@N(CLK), @L(9.5)), @O(@N(Q), @R(9.5));
+  @C(35) : @F(OR), @R(590.0, 380.0, 40.0, 58.0), BOOL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @I(@N(IN3), @L(49.5)), @O(@N(OR), @R(9.5));
+  @VF(33) : @E(vix_SetTest), @R(200.0, 520.0, 200.0, 19.0);
+  @VF(37) : @E(vox_Handbetrieb), @R(200.0, 600.0, 200.0, 19.0);
+  @VF(38) : @E(vox_Automatikbetrieb), @R(200.0, 620.0, 200.0, 19.0);
+  @VF(41) : @E(vox_Simbetrieb), @R(200.0, 640.0, 200.0, 19.0);
+  @VF(45) : @E(vox_Testbetrieb), @R(850.0, 520.0, 210.0, 19.0);
+  @C(46) : @FB(R_TRIG3), @R(450.0, 520.0, 140.0, 18.5), BOOL, @I(@N(CLK), @L(9.5)), @O(@N(Q), @R(9.5));
+  @C(48) : @F(OR), @R(600.0, 600.0, 40.0, 58.0), BOOL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @I(@N(IN3), @L(49.5)), @O(@N(OR), @R(9.5));
+  @VF(56) : @E(vix_SetSim), @R(200.0, 740.0, 200.0, 19.0);
+  @VF(57) : @E(vox_Handbetrieb), @R(200.0, 820.0, 200.0, 19.0);
+  @VF(58) : @E(vox_Testbetrieb), @R(200.0, 840.0, 200.0, 19.0);
+  @VF(59) : @E(vox_Automatikbetrieb), @R(200.0, 860.0, 200.0, 19.0);
+  @VF(60) : @E(vox_Simbetrieb), @R(850.0, 740.0, 210.0, 19.0);
+  @C(61) : @FB(R_TRIG4), @R(450.0, 740.0, 140.0, 18.5), BOOL, @I(@N(CLK), @L(9.5)), @O(@N(Q), @R(9.5));
+  @C(63) : @F(OR), @R(600.0, 820.0, 40.0, 58.0), BOOL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @I(@N(IN3), @L(49.5)), @O(@N(OR), @R(9.5));
+  @VF(71) : @E(li_CycleCount), @R(230.0, -890.0, 140.0, 19.0);
+  @VF(72) : @E(li_CycleCount), @R(510.0, -890.0, 140.0, 19.0);
+  @VF(73) : @E(1), @R(230.0, -870.0, 140.0, 19.0), INT;
+  @VF(74) : @E(li_Alive), @R(760.0, -890.0, 140.0, 19.0);
+  @VF(75) : @E(lx_CyclePulse), @R(290.0, -650.0, 140.0, 19.0);
+  @VF(76) : @E(lx_CyclePulse), @R(640.0, -650.0, 140.0, 19.0);
+  @C(79) : @F(ADD), @R(420.0, -890.0, 40.0, 38.0), INT, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @I(@N(IN3), @L(49.5)), @I(@N(IN4), @L(69.5)), @I(@N(IN5), @L(89.5)), @I(@N(IN6), @L(109.5)), @I(@N(IN7), @L(129.5)), @I(@N(IN8), @L(149.5)), @I(@N(IN9), @L(169.5)), @I(@N(IN10), @L(189.5)), @I(@N(IN11), @L(209.5)), @I(@N(IN12), @L(229.5)), @I(@N(IN13), @L(249.5)), @I(@N(IN14), @L(269.5)), @I(@N(IN15), @L(289.5)), @I(@N(IN16), @L(309.5)), @O(@N(ADD), @R(9.5));
+  @C(80) : @F(NOT), @R(480.0, -650.0, 60.0, 18.5), BOOL, @I(@N(IN), @L(9.5)), @O(@N(NOT), @R(9.5));
+  @C(4) : @FB(SR1), @R(700.0, 100.0, 80.0, 38.0), BOOL, @I(@N(S1), @L(9.5)), @I(@N(R), @L(29.5)), @O(@N(Q1), @R(9.5));
+  @C(27) : @FB(SR2), @R(700.0, 300.0, 80.0, 38.0), BOOL, @I(@N(S1), @L(9.5)), @I(@N(R), @L(29.5)), @O(@N(Q1), @R(9.5));
+  @C(47) : @FB(SR3), @R(700.0, 520.0, 80.0, 38.0), BOOL, @I(@N(S1), @L(9.5)), @I(@N(R), @L(29.5)), @O(@N(Q1), @R(9.5));
+  @C(62) : @FB(SR4), @R(710.0, 740.0, 80.0, 38.0), BOOL, @I(@N(S1), @L(9.5)), @I(@N(R), @L(29.5)), @O(@N(Q1), @R(9.5));
+  @CF(10) : @R(430.0, -1310.0, 240.0, 100.0), @T("Lokaler InitPulse"), @POU;
+  @CF(77) : @R(430.0, -1040.0, 240.0, 100.0), @T("Zyklus LifeTick"), @POU;
+  @CF(78) : @R(430.0, -790.0, 240.0, 100.0), @T("Zyklus Pulse"), @POU;
+  @OLT(87) : @R(70.0, 80.0, 80.0, 18.0), @S(1);
+  @OLT(88) : @R(820.0, -920.0, 80.0, 18.0), @S(74);
+  @OLT(89) : @R(70.0, 150.0, 80.0, 18.0), @S(20);
+  @OLT(90) : @R(70.0, 180.0, 80.0, 18.0), @S(21);
+  @OLT(91) : @R(70.0, 210.0, 80.0, 18.0), @S(22);
+  @OLT(92) : @R(70.0, 270.0, 80.0, 18.0), @S(26);
+  @OLT(93) : @R(970.0, 250.0, 80.0, 18.0), @S(31);
+  @OLT(94) : @R(960.0, 60.0, 80.0, 18.0), @S(6);
+  @OLT(95) : @R(980.0, 470.0, 80.0, 18.0), @S(45);
+
+  @G(3) :
+     @L(@VF(1).o, @C(2).CLK)
+    ;
+  @G(12) :
+     @L(@C(11).Q, @VF(8).i)
+    ;
+  @G(13) :
+     @L(@VF(9).o, @C(11).CLK)
+    ;
+  @G(5) :
+     @L(@C(2).Q, @C(14).IN1)
+    ;
+  @G(17) :
+     @L(@VF(16).o, @C(14).IN2)
+    ;
+  @G(23) :
+     @L(@VF(20).o, @C(18).IN1)
+    ;
+  @G(24) :
+     @L(@VF(21).o, @C(18).IN2)
+    ;
+  @G(25) :
+     @L(@VF(22).o, @C(18).IN3)
+    ;
+  @G(36) :
+     @L(@VF(26).o, @C(32).CLK)
+    ;
+  @G(39) :
+     @L(@VF(28).o, @C(35).IN1)
+    ;
+  @G(40) :
+     @L(@VF(29).o, @C(35).IN2)
+    ;
+  @G(43) :
+     @L(@VF(30).o, @C(35).IN3)
+    ;
+  @G(49) :
+     @L(@VF(33).o, @C(46).CLK)
+    ;
+  @G(50) :
+     @L(@VF(37).o, @C(48).IN1)
+    ;
+  @G(51) :
+     @L(@VF(38).o, @C(48).IN2)
+    ;
+  @G(54) :
+     @L(@VF(41).o, @C(48).IN3)
+    ;
+  @G(64) :
+     @L(@VF(56).o, @C(61).CLK)
+    ;
+  @G(65) :
+     @L(@VF(57).o, @C(63).IN1)
+    ;
+  @G(66) :
+     @L(@VF(58).o, @C(63).IN2)
+    ;
+  @G(69) :
+     @L(@VF(59).o, @C(63).IN3)
+    ;
+  @G(81) :
+     @L(@VF(71).o, @C(79).IN1)
+    ;
+  @G(82) :
+     @L(@C(79).ADD, @VF(72).i)
+    ;
+  @G(83) :
+     @L(@VF(73).o, @C(79).IN2)
+    ;
+  @G(84) :
+     @L(@VF(72).o, @VF(74).i)
+    ;
+  @G(85) :
+     @L(@VF(75).o, @C(80).IN)
+    ;
+  @G(86) :
+     @L(@C(80).NOT, @VF(76).i)
+    ;
+  @G(7) :
+     @L(@C(14).OR, @C(4).S1)
+    ;
+  @G(15) :
+     @L(@C(4).Q1, @VF(6).i)
+    ;
+  @G(19) :
+     @L(@C(18).OR, @C(4).R)
+    ;
+  @G(34) :
+     @L(@C(32).Q, @C(27).S1)
+    ;
+  @G(42) :
+     @L(@C(27).Q1, @VF(31).i)
+    ;
+  @G(44) :
+     @L(@C(35).OR, @C(27).R)
+    ;
+  @G(52) :
+     @L(@C(46).Q, @C(47).S1)
+    ;
+  @G(53) :
+     @L(@C(47).Q1, @VF(45).i)
+    ;
+  @G(55) :
+     @L(@C(48).OR, @C(47).R)
+    ;
+  @G(67) :
+     @L(@C(61).Q, @C(62).S1)
+    ;
+  @G(68) :
+     @L(@C(63).OR, @C(62).R)
+    ;
+  @G(70) :
+     @L(@C(62).Q1, @VF(60).i)
+    ;
+END_FUNCTION_BLOCK
+END_NAMESPACE

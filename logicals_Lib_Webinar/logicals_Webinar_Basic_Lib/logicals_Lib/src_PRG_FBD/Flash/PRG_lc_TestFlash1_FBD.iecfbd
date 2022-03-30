@@ -1,0 +1,137 @@
+PROGRAM PRG_lc_TestFlash1_FBD
+  USING com.logicals.Basic.Flash;
+  VAR
+    FB_lc_Flash_FBD : com.logicals.Basic.Flash.FB_lc_Flash_FBD;
+    lx_FlashStart : BOOL;
+    lx_FlashOut : BOOL;
+    FB_lc_Flash2_FBD : com.logicals.Basic.Flash.FB_lc_Flash2_FBD;
+    FB_lc_Flash3_FBD : com.logicals.Basic.Flash.FB_lc_Flash3_FBD := (l_OnOffTimePar := (OnTime := T#2s,OffTime := T#2s));
+    FB_lc_Flash_2Hz_FBD : com.logicals.Basic.Flash.FB_lc_Flash_2Hz_FBD;
+    FB_lc_Flash_4Hz_FBD : com.logicals.Basic.Flash.FB_lc_Flash_4Hz_FBD;
+    lx_Flash4Hz_Out : BOOL;
+    lx_Flash2Hz_Out : BOOL;
+  END_VAR
+  VAR
+    lx_Flash2_Start : BOOL;
+    lt_Flash2_OnTimePar : TIME := T#1s;
+    lt_Flash2_OffTimePar : TIME := T#1s;
+    lx_Flash2_SelPar : BOOL;
+  END_VAR
+  VAR
+    lx_Flash2_Out : BOOL;
+    lt_Flash2_OnTime : TIME;
+    lt_Flash2_OffTime : TIME;
+  END_VAR
+  VAR
+    lx_Flash3_Start : BOOL;
+  END_VAR
+  VAR
+    lx_Flash3_Out : BOOL;
+    lt_Flash3_OnTime : TIME;
+    lt_Flash3_OffTime : TIME;
+  END_VAR
+
+  (*
+
+    // Network 1:
+    FB_lc_Flash_FBD(Start := lx_FlashStart, Out => lx_FlashOut);
+
+    // Network 2:
+    FB_lc_Flash2_FBD(vix_Start := lx_Flash2_Start, vit_OnTime := lt_Flash2_OnTimePar, vit_OffTime := lt_Flash2_OffTimePar, vix_SelPar := lx_Flash2_SelPar, vox_Out => lx_Flash2_Out, vot_OnTime => lt_Flash2_OnTime, vot_OffTime => lt_Flash2_OffTime);
+
+    // Network 3:
+    FB_lc_Flash3_FBD(vix_Start := lx_Flash3_Start, vox_Out => lx_Flash3_Out, vot_OnTime => lt_Flash3_OnTime, vot_OffTime => lt_Flash3_OffTime);
+
+    // Network 4:
+    FB_lc_Flash_2Hz_FBD(vox_Out => lx_Flash2Hz_Out);
+
+    // Network 5:
+    FB_lc_Flash_4Hz_FBD(vox_Out => lx_Flash4Hz_Out);
+
+  *)
+
+  @C(18) : @FB(FB_lc_Flash_FBD), instanceNameVisible, @R(610.0, 140.0, 260.0, 58.0), @I(@N(Start), @L(9.5)), @I(@N(OnTime), @L(29.5)), @I(@N(OffTime), @L(49.5)), @O(@N(Out), @R(9.5));
+  @VF(10) : @E(lx_FlashStart), @R(280.0, 140.0, 140.0, 19.0);
+  @VF(12) : @E(lx_FlashOut), @R(1000.0, 140.0, 140.0, 19.0);
+  @C(1) : @FB(FB_lc_Flash2_FBD), @R(610.0, 350.0, 260.0, 138.0), @I(@N(vix_Start), @L(9.5)), @I(@N(vit_OnTime), @L(29.5)), @I(@N(vit_OffTime), @L(49.5)), @I(@N(vix_SelPar), @L(89.5)), @O(@N(vox_Out), @R(9.5)), @O(@N(vot_OnTime), @R(29.5)), @O(@N(vot_OffTime), @R(49.5));
+  @C(2) : @FB(FB_lc_Flash3_FBD), @R(630.0, 810.0, 260.0, 138.0), @I(@N(vix_Start), @L(9.5)), @O(@N(vox_Out), @R(9.5)), @O(@N(vot_OnTime), @R(29.5)), @O(@N(vot_OffTime), @R(49.5));
+  @C(4) : @FB(FB_lc_Flash_2Hz_FBD), @R(630.0, 1660.0, 260.0, 58.0), @O(@N(vox_Out), @R(9.5));
+  @C(3) : @FB(FB_lc_Flash_4Hz_FBD), @R(630.0, 1890.0, 260.0, 58.0), @O(@N(vox_Out), @R(9.5));
+  @VF(5) : @E(lx_Flash4Hz_Out), @R(980.0, 1890.0, 260.0, 19.0);
+  @VF(7) : @E(lx_Flash2Hz_Out), @R(980.0, 1660.0, 260.0, 19.0);
+  @CF(14) : @R(120.0, 220.0, 580.0, 99.0), @T("D:$NFlash-Block mit einstellbarer On und OffTime.$NUmschaltung zwischen externen oder internen Sollwerten (vix_SelPar)!"), @POU;
+  @CF(9) : @R(720.0, 220.0, 570.0, 99.0), @T("D:$NFlash-Block with variable On- and OffTime.$NSwitch between external and internal parameter (vix_SelPar)!"), @POU;
+  @VF(11) : @E(lx_Flash2_Start), @R(280.0, 350.0, 230.0, 19.0);
+  @VF(13) : @E(lt_Flash2_OnTimePar), @R(280.0, 370.0, 230.0, 19.0);
+  @VF(15) : @E(lt_Flash2_OffTimePar), @R(280.0, 390.0, 230.0, 19.0);
+  @VF(16) : @E(lx_Flash2_SelPar), @R(280.0, 430.0, 230.0, 19.0);
+  @OLT(24) : subElement := "lit_OnTime", @R(930.0, 470.0, 190.0, 19.0), @S(1);
+  @OLT(25) : subElement := "lit_OffTime", @R(930.0, 490.0, 190.0, 19.0), @S(1);
+  @OLT(26) : subElement := "lit_OnTimePar", @R(730.0, 530.0, 200.0, 19.0), @S(1);
+  @OLT(27) : subElement := "lit_OffTimePar", @R(730.0, 550.0, 200.0, 19.0), @S(1);
+  @VF(28) : @E(lx_Flash2_Out), @R(930.0, 350.0, 220.0, 19.0);
+  @VF(29) : @E(lt_Flash2_OnTime), @R(930.0, 370.0, 220.0, 19.0);
+  @VF(30) : @E(lt_Flash2_OffTime), @R(930.0, 390.0, 220.0, 19.0);
+  @CF(34) : @R(250.0, 610.0, 530.0, 99.0), @T("D:$NFlash-Block mit einstellbarer On und OffTime.$NInitialisierung beim Aufruf!"), @POU;
+  @CF(35) : @R(790.0, 610.0, 510.0, 99.0), @T("D:$NFlash-Block with variable On- and OffTime.$NInitialization by instance call!"), @POU;
+  @CF(36) : @R(450.0, 730.0, 700.0, 39.0), @T("Einstellwerte ausgeben!"), @POU;
+  @CF(86) : @R(560.0, 770.0, 490.0, 19.0), @T("(l_OnOffTimePar := (OnTime := T#1s, OffTime := T#1s))"), @POU;
+  @VF(37) : @E(lx_Flash3_Start), @R(320.0, 810.0, 240.0, 19.0);
+  @VF(39) : @E(lx_Flash3_Out), @R(970.0, 810.0, 250.0, 19.0);
+  @VF(41) : @E(lt_Flash3_OnTime), @R(970.0, 830.0, 250.0, 19.0);
+  @VF(42) : @E(lt_Flash3_OffTime), @R(970.0, 850.0, 250.0, 19.0);
+  @OLT(45) : subElement := "l_OnOffTimePar.OnTime", @R(720.0, 980.0, 320.0, 19.0), @S(2);
+  @OLT(46) : subElement := "l_OnOffTimePar.OffTime", @R(720.0, 1000.0, 320.0, 19.0), @S(2);
+  @CF(47) : @R(120.0, 10.0, 580.0, 99.0), @T("D:$NFlash-Block mit einstellbarer On und OffTime."), @POU;
+  @CF(48) : @R(720.0, 10.0, 570.0, 99.0), @T("D:$NFlash-Block with variable On- and OffTime."), @POU;
+  @CF(49) : @R(760.0, 1510.0, 570.0, 99.0), @T("D:$NFlash-Block 2Hz Flash Rate."), @POU;
+  @CF(50) : @R(160.0, 1510.0, 580.0, 99.0), @T("D:$NFlash-Block mit 2Hz flash rate."), @POU;
+  @CF(51) : @R(760.0, 1740.0, 570.0, 99.0), @T("D:$NFlash-Block 4Hz Flash Rate."), @POU;
+  @CF(52) : @R(160.0, 1740.0, 580.0, 99.0), @T("D:$NFlash-Block mit 4Hz flash rate."), @POU;
+
+  @G(19) :
+     @L(@VF(10).o, @C(18).Start)
+    ;
+  @G(20) :
+     @L(@C(18).Out, @VF(12).i)
+    ;
+  @G(6) :
+     @L(@C(3).vox_Out, @VF(5).i)
+    ;
+  @G(8) :
+     @L(@C(4).vox_Out, @VF(7).i)
+    ;
+  @G(17) :
+     @L(@VF(11).o, @C(1).vix_Start)
+    ;
+  @G(21) :
+     @L(@VF(13).o, @C(1).vit_OnTime)
+    ;
+  @G(22) :
+     @L(@VF(15).o, @C(1).vit_OffTime)
+    ;
+  @G(23) :
+     @L(@VF(16).o, @C(1).vix_SelPar)
+    ;
+  @G(31) :
+     @L(@C(1).vox_Out, @VF(28).i)
+    ;
+  @G(32) :
+     @L(@C(1).vot_OnTime, @VF(29).i)
+    ;
+  @G(33) :
+     @L(@C(1).vot_OffTime, @VF(30).i)
+    ;
+  @G(38) :
+     @L(@VF(37).o, @C(2).vix_Start)
+    ;
+  @G(40) :
+     @L(@C(2).vox_Out, @VF(39).i)
+    ;
+  @G(43) :
+     @L(@C(2).vot_OnTime, @VF(41).i)
+    ;
+  @G(44) :
+     @L(@C(2).vot_OffTime, @VF(42).i)
+    ;
+END_PROGRAM

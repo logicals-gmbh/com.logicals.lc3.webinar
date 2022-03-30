@@ -1,0 +1,130 @@
+NAMESPACE com.logicals.Basic.StringFind
+ /*
+  * Find Charcter in Array
+  */
+  FUNCTION_BLOCK FB_lc_FindCharInSTRING_ST  {
+    instanceName := {visible};
+    bgColor := "#B5BAFD";
+    ioFgColor := "black";
+    width := 480;
+    height := 58;
+    minWidth := 480;
+    maxWidth := 480;
+    minHeight := 58;
+    maxHeight := 58;
+  }
+
+   VAR_INPUT
+    vistr_In       : STRING[1023];
+    vistr_FindChar : STRING[1] := ';';
+   END_VAR
+
+   VAR_OUTPUT 
+    voui_NoElem  : UINT;
+    vox_Err      : BOOL;
+    voi_ErrNo    : INT;
+   END_VAR
+
+   VAR
+    lstr_FindChar : STRING[1];
+    lui_CharIdx   : UINT;
+    lui_Len       : UINT;
+   END_VAR
+
+   lui_Len := len (vistr_In);
+   
+   FOR lui_CharIdx := 1 TO lui_Len BY 1 DO
+    IF MID(IN := vistr_In,L := 1, P:=lui_CharIdx) = vistr_FindChar THEN
+       voui_NoElem := voui_NoElem + 1;
+    END_IF;
+   END_FOR;
+
+  END_FUNCTION_BLOCK
+ /*
+  * Find Charcter in einem STRING ueber ein Trennzeichen
+  */
+  FUNCTION_BLOCK FB_lc_FindValByCharInSTRING_ST  {
+    instanceName := {visible};
+    bgColor := "#B5BAFD";
+    ioFgColor := "black";
+    width := 480;
+    height := 98;
+    minWidth := 480;
+    maxWidth := 480;
+    minHeight := 98;
+    maxHeight := 98;
+  }
+
+   VAR_INPUT
+    vistr_In       : STRING[1023];
+    vistr_FindChar : STRING[1] := ';';
+   END_VAR
+
+   VAR_OUTPUT 
+    voui_NoElem   : UINT;
+    vostrarr_Find : ARRAY [0..7] OF STRING[30];
+    vorarr_Find   : ARRAY [0..7] OF REAL;
+
+    vox_Err       : BOOL;
+    voi_ErrNo     : INT;
+   END_VAR
+
+   VAR
+    lstr_FindChar : STRING[1];
+    lui_CharIdx   : UINT;
+    lui_Len       : UINT;
+   
+    lui_PosStart  : UINT;
+    lui_PosEnd    : UINT;
+    lui_ArrIdx    : UINT;
+     
+    lui_UBound    : UINT;
+    
+   END_VAR
+
+   lui_Len       := len (vistr_In);
+   lui_PosStart  := 1;
+   lui_ArrIdx    := 0;
+   voui_NoElem   := 0;
+
+  /*
+   * Wie kann ich UBOUND von einem ARRAY bekommen?
+   */ 
+   lui_UBound    := 8; 
+   
+   FOR lui_CharIdx := 1 TO lui_Len BY 1 DO
+    
+    IF MID(IN := vistr_In,L := 1, P := lui_CharIdx) = vistr_FindChar THEN
+       voui_NoElem := voui_NoElem + 1;
+       lui_PosEnd  := lui_CharIdx - 1;
+
+       IF lui_CharIdx < lui_Len THEN
+        vostrarr_Find[lui_ArrIdx] := MID(IN := vistr_In,
+       	                                 L := lui_PosEnd - lui_PosStart, 
+       	                                 P := lui_PosStart);
+       END_IF;
+       IF lui_CharIdx = lui_Len THEN
+        vostrarr_Find[lui_ArrIdx] := MID(IN := vistr_In,
+       	                                 L := lui_Len - lui_PosStart, 
+       	                                 P := lui_PosStart);
+       END_IF;
+       
+       lui_ArrIdx   := lui_ArrIdx + 1;
+       lui_PosStart := lui_PosEnd + 2; 
+    END_IF;
+    
+   END_FOR;
+
+   IF voui_NoElem = 0 THEN 
+    vox_Err    := TRUE;
+    voi_ErrNo  := 1;
+   END_IF;
+   
+   IF voui_NoElem > lui_UBound THEN 
+    vox_Err    := TRUE;
+    voi_ErrNo  := 2;
+   END_IF;
+   
+  END_FUNCTION_BLOCK
+  
+  END_NAMESPACE

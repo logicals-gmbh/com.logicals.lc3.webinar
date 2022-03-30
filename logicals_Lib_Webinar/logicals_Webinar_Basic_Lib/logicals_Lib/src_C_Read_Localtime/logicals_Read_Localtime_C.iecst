@@ -1,0 +1,27 @@
+/*
+ * ACHTUNG: Funktioniert NUR auf dem Raspberry Pi
+ * Um auch die Uhrzeit in der Build-In-OLC lesen zu koennen MUSS die Funktion GetTime_C verwendet werden.
+ */
+{CustomImplementation}
+
+NAMESPACE com.logicals.Basic.DateTime
+
+FUNCTION FUN_lc_Read_Localtime_C
+{ ImplementationProperties(functionHasCFile;) }
+
+
+VAR_OUTPUT
+    sec : DINT;
+    min : DINT;
+    hour : DINT;
+    mday : DINT;
+    mon : DINT;
+    year : DINT;
+    wday : DINT;
+    yday : DINT;
+    isdst : BOOL;
+END_VAR
+
+END_FUNCTION
+
+END_NAMESPACE

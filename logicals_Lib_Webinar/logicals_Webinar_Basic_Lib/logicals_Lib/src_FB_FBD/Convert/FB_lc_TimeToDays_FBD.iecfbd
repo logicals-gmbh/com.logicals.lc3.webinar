@@ -1,0 +1,139 @@
+NAMESPACE com.logicals.Basic.Convert
+FUNCTION_BLOCK FB_lc_TimeToDays_FBD
+  VAR
+    UUID_D0B4593F_A5CB_4A31_89F5_7C421E9CAC6A : ForceMrk;
+    UUID_95358CAA_7702_4AF4_9B22_BFAB69DBF30F : ForceMrk;
+    UUID_9EDBE6A6_63EC_4267_B8F6_98045CA94CD6 : ForceMrk;
+  END_VAR
+  VAR_INPUT
+    vit_In : TIME;
+  END_VAR
+  VAR_OUTPUT
+    vodi_Day : DINT;
+    vodi_Hour : DINT;
+    vodi_Min : DINT;
+    vodi_Sec : DINT;
+  END_VAR
+
+  (*
+
+    // Network 1:
+    TO_DINT(IN := vit_In, TO_DINT => @C(117).TO_DINT);
+    UUID_D0B4593F_A5CB_4A31_89F5_7C421E9CAC6A(IN := @C(117).TO_DINT);
+    DIV(IN1 := UUID_D0B4593F_A5CB_4A31_89F5_7C421E9CAC6A.OUT, IN2 := 86400, DIV => (@C(112).DIV, vodi_Day));
+    MUL(IN1 := @C(112).DIV, IN2 := 86400, MUL => @C(120).MUL);
+    SUB(IN1 := UUID_D0B4593F_A5CB_4A31_89F5_7C421E9CAC6A.OUT, IN2 := @C(120).MUL, SUB => @C(121).SUB);
+    UUID_95358CAA_7702_4AF4_9B22_BFAB69DBF30F(IN := @C(121).SUB);
+    DIV(IN1 := UUID_95358CAA_7702_4AF4_9B22_BFAB69DBF30F.OUT, IN2 := 3600, DIV => (@C(106).DIV, vodi_Hour));
+    MUL(IN1 := @C(106).DIV, IN2 := 3600, MUL => @C(113).MUL);
+    SUB(IN1 := UUID_95358CAA_7702_4AF4_9B22_BFAB69DBF30F.OUT, IN2 := @C(113).MUL, SUB => @C(116).SUB);
+    UUID_9EDBE6A6_63EC_4267_B8F6_98045CA94CD6(IN := @C(116).SUB);
+    DIV(IN1 := UUID_9EDBE6A6_63EC_4267_B8F6_98045CA94CD6.OUT, IN2 := 60, DIV => (@C(104).DIV, vodi_Min));
+    MUL(IN1 := @C(104).DIV, IN2 := 60, MUL => @C(115).MUL);
+    SUB(IN1 := UUID_9EDBE6A6_63EC_4267_B8F6_98045CA94CD6.OUT, IN2 := @C(115).MUL, SUB => vodi_Sec);
+
+  *)
+
+  @VF(101) : @E(3600), @R(700.0, 210.0, 80.0, 19.0), DINT;
+  @VF(102) : @E(86400), @R(370.0, 160.0, 80.0, 19.0), DINT;
+  @VF(103) : @E(vodi_Min), @R(1380.0, 240.0, 140.0, 19.0);
+  @VF(105) : @E(vodi_Hour), @R(1380.0, 190.0, 140.0, 19.0);
+  @VF(107) : @E(vodi_Sec), @R(1380.0, 290.0, 140.0, 19.0);
+  @VF(109) : @E(60), @R(1030.0, 260.0, 80.0, 19.0), DINT;
+  @VF(110) : @E(vit_In), @R(90.0, 140.0, 110.0, 19.0);
+  @VF(111) : @E(vodi_Day), @R(1380.0, 140.0, 140.0, 19.0);
+  @C(104) : @F(DIV), @R(1170.0, 240.0, 40.0, 38.0), DINT, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(DIV), @R(9.5));
+  @C(106) : @F(DIV), @R(840.0, 190.0, 40.0, 38.0), DINT, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(DIV), @R(9.5));
+  @C(108) : @F(SUB), @R(1310.0, 290.0, 40.0, 38.0), DINT, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(SUB), @R(9.5));
+  @C(112) : @F(DIV), @R(510.0, 140.0, 40.0, 38.0), DINT, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(DIV), @R(9.5));
+  @C(113) : @F(MUL), @R(920.0, 260.0, 40.0, 38.0), DINT, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(MUL), @R(9.5));
+  @C(114) : @FB(UUID_95358CAA_7702_4AF4_9B22_BFAB69DBF30F), @R(700.0, 190.0, 90.0, 18.0), DINT, @I(@N(IN), @L(9.5)), @O(@N(OUT), @R(9.5));
+  @C(115) : @F(MUL), @R(1250.0, 310.0, 40.0, 38.0), DINT, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(MUL), @R(9.5));
+  @C(116) : @F(SUB), @R(980.0, 240.0, 40.0, 38.0), DINT, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(SUB), @R(9.5));
+  @C(117) : @F(TO_DINT), @R(250.0, 140.0, 80.0, 18.0), TIME, @I(@N(IN), @L(9.5)), @O(@N(TO_DINT), @R(9.5));
+  @C(118) : @FB(UUID_9EDBE6A6_63EC_4267_B8F6_98045CA94CD6), @R(1030.0, 240.0, 90.0, 18.0), DINT, @I(@N(IN), @L(9.5)), @O(@N(OUT), @R(9.5));
+  @C(119) : @FB(UUID_D0B4593F_A5CB_4A31_89F5_7C421E9CAC6A), @R(370.0, 140.0, 90.0, 18.0), DINT, @I(@N(IN), @L(9.5)), @O(@N(OUT), @R(9.5));
+  @C(120) : @F(MUL), @R(590.0, 210.0, 40.0, 38.0), DINT, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(MUL), @R(9.5));
+  @C(121) : @F(SUB), @R(650.0, 190.0, 40.0, 38.0), DINT, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(SUB), @R(9.5));
+  @CF(100) : @R(630.0, 50.0, 620.0, 59.0), @T("60s=1min$R$N60min=1h = $a03.600s$R$N24h=1day = 86.400s"), @POU;
+  @CP(123) : 1230.0, 249.5;
+  @CP(125) : 900.0, 199.5;
+  @CP(128) : 570.0, 149.5;
+  @CP(130) : 1150.0, 249.5;
+  @CP(132) : 1130.0, 269.5;
+  @CP(134) : 820.0, 199.5;
+  @CP(136) : 800.0, 219.5;
+  @CP(139) : 490.0, 149.5;
+  @CP(141) : 470.0, 169.5;
+
+  @G(122) :
+     @L(@C(104).DIV, @CP(123)),
+     @L(@CP(123), @VF(103).i),
+     @L(@CP(123), @C(115).IN1)
+    ;
+  @G(124) :
+     @L(@C(106).DIV, @CP(125)),
+     @L(@CP(125), @VF(105).i),
+     @L(@CP(125), @C(113).IN1)
+    ;
+  @G(126) :
+     @L(@C(108).SUB, @VF(107).i)
+    ;
+  @G(127) :
+     @L(@C(112).DIV, @CP(128)),
+     @L(@CP(128), @VF(111).i),
+     @L(@CP(128), @C(120).IN1)
+    ;
+  @G(129) :
+     @L(@C(118).OUT, @CP(130)),
+     @L(@CP(130), @C(104).IN1),
+     @L(@CP(130), @C(108).IN1)
+    ;
+  @G(131) :
+     @L(@VF(109).o, @CP(132)),
+     @L(@CP(132), @C(104).IN2),
+     @L(@CP(132), @C(115).IN2)
+    ;
+  @G(133) :
+     @L(@C(114).OUT, @CP(134)),
+     @L(@CP(134), @C(106).IN1),
+     @L(@CP(134), @C(116).IN1)
+    ;
+  @G(135) :
+     @L(@VF(101).o, @CP(136)),
+     @L(@CP(136), @C(106).IN2),
+     @L(@CP(136), @C(113).IN2)
+    ;
+  @G(137) :
+     @L(@C(115).MUL, @C(108).IN2)
+    ;
+  @G(138) :
+     @L(@C(119).OUT, @CP(139)),
+     @L(@CP(139), @C(112).IN1),
+     @L(@CP(139), @C(121).IN1)
+    ;
+  @G(140) :
+     @L(@VF(102).o, @CP(141)),
+     @L(@CP(141), @C(112).IN2),
+     @L(@CP(141), @C(120).IN2)
+    ;
+  @G(142) :
+     @L(@C(121).SUB, @C(114).IN)
+    ;
+  @G(143) :
+     @L(@C(113).MUL, @C(116).IN2)
+    ;
+  @G(144) :
+     @L(@VF(110).o, @C(117).IN)
+    ;
+  @G(145) :
+     @L(@C(116).SUB, @C(118).IN)
+    ;
+  @G(146) :
+     @L(@C(117).TO_DINT, @C(119).IN)
+    ;
+  @G(147) :
+     @L(@C(120).MUL, @C(121).IN2)
+    ;
+END_FUNCTION_BLOCK
+END_NAMESPACE

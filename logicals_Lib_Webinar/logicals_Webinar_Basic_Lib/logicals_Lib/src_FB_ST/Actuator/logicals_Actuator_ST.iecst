@@ -1,0 +1,287 @@
+ /*
+  * logi.cals GmbH
+  * A-3100 St. Poelten
+  * Europaplatz 7/1
+  * Tel.: 0043-5-77147
+  *
+  * logi.cals automation solutions & services GmbH
+  * D-40738 Langenfeld
+  * Postfach 1306
+  * Tel.: 0049-2173-91910
+  * 
+  * Contact:
+  * dieter.goltz@logicals.com
+  * 
+  * History:
+  * Created:  
+  * DG 2017-03-28
+  * 
+  * Modified: 
+  * DG 2017-03-28
+  * 
+  * Description
+  * Actuator FunctionBlocks
+  * 
+  * Beschreibung
+  * Funktionsbausteine fuer Aktoren
+  * 
+  * FB_lc_Motor1R_ST      - Eine Drehrichtung
+  * FB_lc_Motor2R_ST      - Zwei Drehrichtungen - Umschaltung OHNE STOP
+  * FB_lc_Motor2R_Stop_ST - Zwei Drehrichtungen - Umschaltung MIT STOP
+  * 
+  */
+
+NAMESPACE com.logicals.Basic.Actuator
+/*
+ * Einfacher Motorbaustein
+ * Eine Drehrichtung (R)
+ */
+FUNCTION_BLOCK FB_lc_Motor1R_ST
+  
+  VAR_INPUT
+    vix_Start : BOOL;
+    vix_Stop  : BOOL;
+  END_VAR
+  
+  VAR_OUTPUT
+    vox_Motor : BOOL;
+    vox_Err   : BOOL;
+    voi_ErrNo : INT;
+  END_VAR
+
+  VAR
+    FB_StartR_TRIG : R_TRIG;  // Steigende Flanke mit Start
+    FB_MotorRS     : RS;      // Motor
+  END_VAR
+  
+  VAR
+   lx_StartPulse : BOOL;
+  END_VAR
+  
+  vox_Err   := FALSE;
+  voi_ErrNo := 0;
+  
+  FB_StartR_TRIG(CLK := vix_Start, Q => lx_StartPulse);
+
+  FB_MotorRS(S := lx_StartPulse, R1 := vix_Stop, Q1 => vox_Motor);
+  
+
+END_FUNCTION_BLOCK
+
+/*
+ * Einfacher Motorbaustein
+ * Zwei Drehrichtungen (2R)
+ * Umschaltung OHNE STOP
+ */
+FUNCTION_BLOCK FB_lc_Motor2R_ST
+  
+  VAR_INPUT
+    vix_Start : BOOL;
+    vix_Stop  : BOOL;
+    
+    vix_Left  : BOOL;
+    vix_Right : BOOL;
+  END_VAR
+  
+  VAR_OUTPUT
+    vox_MotorLeft  : BOOL;
+    vox_MotorRight : BOOL;
+    vox_Err        : BOOL;
+    voi_ErrNo      : INT;
+  END_VAR
+
+  VAR
+    FB_StartR_TRIG : R_TRIG;  // Steigende Flanke mit Start
+    FB_LeftR_TRIG : R_TRIG;   // Steigende Flanke mit Linkslauf
+    FB_RightR_TRIG : R_TRIG;  // Steigende Flanke mit Rechtslauf
+
+    FB_MotorLeftRS     : RS;      // Motor
+    FB_MotorRightRS    : RS;      // Motor
+  END_VAR
+  
+  VAR
+   lx_StartPulse : BOOL;
+
+   lx_LeftPulse  : BOOL;
+   lx_RightPulse : BOOL;
+  END_VAR
+  
+  vox_Err   := FALSE;
+  voi_ErrNo := 0;
+  
+  FB_StartR_TRIG(CLK := vix_Start, Q => lx_StartPulse);
+  FB_LeftR_TRIG(CLK := vix_Start, Q => lx_LeftPulse);
+  FB_RightR_TRIG(CLK := vix_Start, Q => lx_RightPulse);
+
+  FB_MotorLeftRS(S := lx_LeftPulse,   R1 := vix_Stop, Q1 => vox_MotorLeft);
+  FB_MotorRightRS(S := lx_RightPulse, R1 := vix_Stop, Q1 => vox_MotorRight);
+  
+
+END_FUNCTION_BLOCK
+
+/*
+ * Einfacher Motorbaustein
+ * Zwei Drehrichtungen (2R)
+ * Umschaltung MIT STOP
+ */
+FUNCTION_BLOCK FB_lc_Motor2R_STOP_ST
+  
+  VAR_INPUT
+    vix_Start : BOOL;
+    vix_Stop  : BOOL;
+    
+    vix_Left  : BOOL;
+    vix_Right : BOOL;
+  END_VAR
+  
+  VAR_OUTPUT
+    vox_MotorLeft  : BOOL;
+    vox_MotorRight : BOOL;
+
+    /* Anzeige Signal Motor in Bereitschaft */
+    vox_MotorStart : BOOL;
+    
+    /* Fehlerbit */
+    vox_Err   : BOOL;
+    /* Fehlernummer */
+    voi_ErrNo : INT;
+  END_VAR
+
+  VAR
+    StartR_TRIG : R_TRIG;  // Steigende Flanke mit Start
+    LeftR_TRIG  : R_TRIG;  // Steigende Flanke mit Linkslauf
+    RightR_TRIG : R_TRIG;  // Steigende Flanke mit Rechtslauf
+
+    MotorRS         : RS;      // Motor Freigabe
+    MotorLeftRS     : RS;      // Motor Linkslauf
+    MotorRightRS    : RS;      // Motor Rechtslauf
+  END_VAR
+  
+  VAR
+   lx_StartPulse : BOOL;
+
+   lx_LeftPulse  : BOOL;
+   lx_RightPulse : BOOL;
+   
+   lx_MotorStart : BOOL;
+  END_VAR
+  
+  vox_Err   := FALSE;
+  voi_ErrNo := 0;
+  
+  StartR_TRIG(CLK := vix_Start, Q => lx_StartPulse);
+  LeftR_TRIG(CLK := vix_Left,   Q => lx_LeftPulse);
+  RightR_TRIG(CLK := vix_Right, Q => lx_RightPulse);
+
+  MotorRS(S := lx_StartPulse,R1 := vix_Stop,Q1 => lx_MotorStart);
+  vox_MotorStart := lx_MotorStart;
+
+  MotorLeftRS(S := lx_MotorStart AND (lx_LeftPulse AND NOT vox_MotorRight),   R1 := vix_Stop, Q1 => vox_MotorLeft);
+  MotorRightRS(S := lx_MotorStart AND (lx_RightPulse AND NOT vox_MotorLeft),  R1 := vix_Stop, Q1 => vox_MotorRight);
+  
+END_FUNCTION_BLOCK
+
+/*
+ * Einfacher Motorbaustein
+ * Zwei Drehrichtungen (2R)
+ * Umschaltung MIT STOP und Rueckmeldung
+ */
+FUNCTION_BLOCK FB_lc_Motor2R_STOP_FB_ST
+
+VAR_IN_OUT
+  // Soll immer beschaltet sein
+  // Wird erzeit im Baustein nicht benutz
+  // Soll die DelayFB-Signale per RS-FF speichern!
+  vix_QuitErr     : BOOL; 
+END_VAR
+
+VAR_INPUT
+  vix_Left    : BOOL;
+  vix_Right   : BOOL;
+  vix_Stop    : BOOL;
+
+  vix_LeftFB  : BOOL;
+  vix_RightFB : BOOL;
+
+  vix_MotorProt   : BOOL;   // Motorschutzschalter
+  
+  vit_LeftFBTime  : TIME := T#10m;  
+  vit_RightFBTime : TIME := T#10m; 
+  
+END_VAR
+
+VAR_OUTPUT
+  vox_MotorLeft    : BOOL;
+  vox_MotorRight   : BOOL;
+
+  vox_LeftFBErr    : BOOL;
+  vox_RightFBErr   : BOOL;
+
+  vix_MotorProtErr : BOOL;  // Motorschutzschalter ausgeloest
+  
+  vox_Err   : BOOL;
+  vox_ErrNo : INT;  
+END_VAR
+
+/*
+ * Funktionsbaustein Instanzen
+ */
+VAR
+  /* Motorstatus Links */
+  FB_LeftRS   : RS;
+  /* Motorstatus Rechts */
+  FB_RightRS : RS;
+
+  FB_LeftR_TRIG  : R_TRIG;
+  FB_RightR_TRIG : R_TRIG;  
+
+  FB_LeftTON  : TON;
+  FB_RightTON : TON;  
+  
+END_VAR
+
+/*
+ * Lokale VAR
+ */
+VAR
+  lx_LeftPulse  : BOOL;
+  lx_RightPulse : BOOL;
+END_VAR
+
+// 
+// Dynamische Left/Right Signale
+FB_LeftR_TRIG (CLK := vix_Left, Q => lx_LeftPulse);
+FB_RightR_TRIG(CLK := vix_Right, Q => lx_RightPulse);
+
+//
+// RS fuer Drehrichtung Links
+FB_LeftRS (S := lx_LeftPulse AND NOT vox_MotorRight, R1 := vix_Stop, Q1 => vox_MotorLeft);
+//
+// RS fuer Drehrichtung Rechts
+FB_RightRS(S := lx_RightPulse AND NOT vox_MotorLeft, R1 := vix_Stop, Q1 => vox_MotorRight);
+
+//
+// Fehler als Zeitueberlauf fuer Drehrichtung Links
+FB_LeftTON (IN := vox_MotorLeft AND NOT vix_LeftFB, PT := vit_LeftFBTime, Q => vox_LeftFBErr);
+//
+// Fehler als Zeitueberlauf fuer Drehrichtung Rechts
+FB_RightTON(IN := vox_MotorRight AND NOT vix_RightFB, PT := vit_RightFBTime, Q => vox_RightFBErr);
+
+END_FUNCTION_BLOCK
+
+END_NAMESPACE
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

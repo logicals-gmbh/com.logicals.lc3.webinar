@@ -1,0 +1,254 @@
+NAMESPACE com.logicals.Basic.OOP.Actuator
+/*
+ * Einzelsteuerfunktion FB_lc_IDF_2DirVarSpeed3_OOP_ST
+ * 2022-03-29 Add DG
+ */
+FUNCTION_BLOCK FB_lc_IDF_2DirVarSpeed3_OOP_ST  {
+    height := 58;
+    width := 450;
+  }
+
+VAR_INPUT
+ vix_Lock     : BOOL {description := "Lock IDF"; comment := "Lock IDF, no function possible";};
+ vit_RampTime : TIME := T#10s {description := "RampTime for IDF"; comment := "RampTime for IDF";};
+END_VAR
+
+VAR_OUTPUT
+/* Anzeige IDF ist aktiviert per Methode M_On */ 
+ vox_Enable     : BOOL;
+/* Anzeige IDF Stellsignal fuer die GEschwindigkeit per Rampe per Methode M_FwD, M_Bwd */ 
+ voi_SpeedOut   : INT;
+
+/*
+ * Feedback-Signale Forward / Backward
+ */ 
+ vox_IsFwd : BOOL;
+ vox_IsBwd : BOOL;
+
+/*
+ * Feedback-Signale Stop (Drehrichtungsumschaltung)
+ */ 
+ vox_IsStp : BOOL;
+ 
+END_VAR
+
+VAR_OUTPUT
+  voui_CycCnt          : UINT;
+
+  voui_CycCnt_M_On      : UINT;
+  voui_CycCnt_M_Off     : UINT;
+  voui_CycCnt_M_Stp     : UINT;
+
+  voui_CycCnt_M_Fwd     : UINT;
+  voui_CycCnt_M_Bwd     : UINT;
+
+  voui_CycCnt_M_Rmp     : UINT;
+END_VAR
+
+VAR
+ FB_RampTimer    : TON;
+ lt_RampTime_PT  : TIME;
+ lt_RampTime_ET  : TIME;
+ li_SpeedInp     : INT;
+END_VAR
+
+VAR
+  lui_CycleCount     : UINT;
+  lui_CycleCountInit : UINT;
+  lx_CyclePulse      : BOOL;
+  lx_CycleInit       : BOOL := TRUE; // MUSS am Ende des Applikationsteils rueckgesetzt werden!
+END_VAR
+
+VAR
+  lui_CycCnt_M_On      : UINT;
+  lui_CycCnt_M_Off     : UINT;
+  lui_CycCnt_M_Stp     : UINT;
+
+  lui_CycCnt_M_Fwd     : UINT;
+  lui_CycCnt_M_Bwd     : UINT;
+
+  lui_CycCnt_M_Rmp     : UINT;
+
+END_VAR
+
+/*
+ * Methode M_On
+ */
+METHOD PUBLIC M_On : BOOL
+	VAR_INPUT
+	  miui_CycleCount : UINT;
+	END_VAR
+    
+	lui_CycCnt_M_On := miui_CycleCount + 1;
+	
+	IF NOT vix_Lock THEN
+	 vox_Enable := TRUE;
+	ELSE
+	 vox_Enable := FALSE;
+	END_IF;  
+
+	FB_RampTimer(IN:=FALSE);
+    M_On := vox_Enable;
+END_METHOD
+
+/*
+ * Methode M_Off
+ */
+METHOD PUBLIC M_Off : BOOL
+	VAR_INPUT
+	  miui_CycleCount : UINT;
+	END_VAR
+
+    lui_CycCnt_M_Off := miui_CycleCount + 1;
+	
+    vox_Enable := FALSE;
+    vox_IsBwd  := FALSE;
+    vox_IsFwd  := FALSE;
+     
+END_METHOD
+
+/*
+ * Methode M_Forward
+ */
+METHOD PUBLIC M_Forward : BOOL
+   /*
+    * Uebergabewert fuer M_Forward
+    */	
+	VAR_INPUT
+	  mii_SpeedSet     : INT;
+	  miui_CycleCount  : UINT;
+	END_VAR
+    
+	lui_CycCnt_M_Fwd := miui_CycleCount + 1;
+
+   /*
+    * Wert fuer die Methode M_Ramp()
+    */	
+	li_SpeedInp := ABS(mii_SpeedSet);
+	FB_RampTimer(IN:=FALSE);
+	vox_IsBwd   := FALSE;
+	vox_IsFwd   := TRUE;
+	vox_IsStp   := FALSE;
+END_METHOD
+
+/*
+ * Methode M_Backward
+ */
+METHOD PUBLIC M_Backward : BOOL
+   /*
+    * Uebergabewert fuer M_Backward
+    */	
+	VAR_INPUT
+	  mii_SpeedSet     : INT;
+	  miui_CycleCount  : UINT;
+	END_VAR
+        
+	lui_CycCnt_M_Bwd := miui_CycleCount + 1;
+
+   /*
+    * Wert fuer die Methode M_Ramp()
+    */	
+	li_SpeedInp  := -ABS(mii_SpeedSet);
+	FB_RampTimer(IN:=FALSE);
+	vox_IsFwd    := FALSE;
+	vox_IsBwd    := TRUE;
+	vox_IsStp    := FALSE;
+END_METHOD
+
+/*
+ * Methode M_Stop
+ */
+METHOD PUBLIC M_Stop : BOOL
+   /*
+    * Uebergabewert fuer M_Stop
+    */	
+	VAR_INPUT
+	  miui_CycleCount : UINT;
+	END_VAR
+            
+	lui_CycCnt_M_Stp := miui_CycleCount + 1;
+   /*
+    * Wert fuer die Methode M_Ramp()
+    */	
+	li_SpeedInp := 0;
+	FB_RampTimer(IN:=FALSE);
+	vox_IsBwd   := FALSE;
+	vox_IsFwd   := FALSE;
+	vox_IsStp   := TRUE;
+END_METHOD
+
+/*
+ * Methode M_Ramp
+ * PRIVATE wird in LC3 noch nicht unterstuetzt!
+ * 
+ * Private Methoden koennen nur im Anweisungsteil des FBs oder von anderen Methoden aufgerufen werden! 
+ * 
+ * Die Methode M_Ramp soll dafuer sorgen, dass der Antrieb OHNE Ruck angefahren wird.
+ * 
+ * Eine Methode HAT wie eine Funktion KEIN Gedaechtnis
+ * Deshalb MUESSEN Zeitvariablen IMMER in den lokalen Variablen des Funktionsbausteins zu definieren!
+ */
+  METHOD PUBLIC M_Ramp : INT
+	  VAR_INPUT
+        miui_CycleCount : UINT;
+	  END_VAR
+
+      lui_CycCnt_M_Rmp := miui_CycleCount + 1;
+
+	  M_Ramp := TO_INT((TO_REAL(FB_RampTimer.ET / TO_REAL(lt_RampTime_PT)) * li_SpeedInp));
+
+  END_METHOD
+  
+ /*
+  * Anweisungsteil des Bausteins
+  */ 
+  lui_CycleCount := lui_CycleCount + 1;
+  lx_CyclePulse := NOT(lx_CyclePulse);
+
+  IF lx_CycleInit = TRUE THEN
+    lui_CycleCountInit := lui_CycleCountInit + 1;
+  END_IF;
+
+ /*
+  * Die Zielzeit fuer die Rampe setzen (Von VAR_INPUT)
+  */ 
+  lt_RampTime_PT := vit_RampTime;
+  
+ /*
+  * Anpassung der Amplitude = Wert des Ausgangs ET / PT (Aktueller TON-Wert / Setzwert = Normierung auf 1)
+  * Multiplikation mit dem Zielwert der Geschwindigkeit!
+  */	
+  FB_RampTimer(IN := vox_IsFwd OR vox_IsBwd, PT:= lt_RampTime_PT,ET => lt_RampTime_ET);
+  voi_SpeedOut := M_Ramp();
+
+ /*
+  * Logik fuer das Sperren des Antriebs
+  */
+  IF vix_Lock THEN
+    vox_Enable := FALSE;
+    vox_IsFwd  := FALSE;
+    vox_IsBwd  := FALSE;
+    voi_SpeedOut := 0;
+  END_IF;
+ /*
+  * LifeTicks der Methoden an VAR_OUTPUT 
+  */
+  voui_CycCnt           := lui_CycleCount;
+
+  voui_CycCnt_M_On      := lui_CycCnt_M_On ;
+  voui_CycCnt_M_Off     := lui_CycCnt_M_Off;
+  voui_CycCnt_M_Stp     := lui_CycCnt_M_Stp;
+                                        
+  voui_CycCnt_M_Fwd     := lui_CycCnt_M_Fwd;
+  voui_CycCnt_M_Bwd     := lui_CycCnt_M_Bwd;
+                                        
+  voui_CycCnt_M_Rmp     := lui_CycCnt_M_Rmp;
+
+/*
+ * Initialisierungsmerker fuer den Baustein!
+ */
+  lx_CycleInit  := FALSE;
+  
+END_FUNCTION_BLOCK
+
+END_NAMESPACE

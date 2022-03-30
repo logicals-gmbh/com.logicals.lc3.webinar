@@ -1,0 +1,11 @@
+GLOBALS GV_lc_TestControl1
+	VAR_GLOBAL
+     gi_AI_ActIn : INT;
+     gi_AI_SetIn : INT;
+     gi_AutoSetOutVal : INT;
+     gi_AutoSetMaxRngVal : INT;
+     gi_AutoSetMinRngVal : INT;
+     gx_ReleaseCtrl : BOOL;
+     gr_AutoSetInVal : REAL;		
+	END_VAR
+END_GLOBALS

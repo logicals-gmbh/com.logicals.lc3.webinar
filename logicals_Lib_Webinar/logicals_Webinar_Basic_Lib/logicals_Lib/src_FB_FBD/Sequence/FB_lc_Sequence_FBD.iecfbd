@@ -1,0 +1,309 @@
+NAMESPACE com.logicals.Basic.Sequence
+FUNCTION_BLOCK FB_lc_Sequence_FBD
+  {
+    width := 300;
+    minWidth := 300;
+    maxWidth := 300;
+    height := 118;
+    minHeight := 118;
+    maxHeight := 118;
+  }
+
+  VAR
+    TON1 : TON;
+    R_TRIG1 : R_TRIG;
+    TON2 : TON;
+    TON3 : TON;
+    TON4 : TON;
+  END_VAR
+  VAR_INPUT
+    vix_Start : BOOL;
+    vix_Reset : BOOL;
+    vit_SeqTime : TIME := T#1s;
+  END_VAR
+  VAR_OUTPUT
+    vox_Step0 : BOOL;
+    vox_Step1 : BOOL;
+    vox_Step2 : BOOL;
+    vox_Step3 : BOOL;
+    vox_Step4 : BOOL;
+    votarr_StepTime : ARRAY[0..4] OF TIME;
+  END_VAR
+
+  (*
+
+    // Network 1:
+    STEP S0:
+    END_STEP
+
+    TRANSITION T0 FROM S0 TO S1
+      := R_TRIG1.Q;
+      END_TRANSITION
+
+    STEP S1:
+    END_STEP
+
+    TRANSITION T2 FROM S1 TO S0
+      := vix_Reset;
+      END_TRANSITION
+
+    TRANSITION T1 FROM S1 TO S2
+      := TON1.Q;
+      END_TRANSITION
+
+    STEP S2:
+    END_STEP
+
+    TRANSITION T5 FROM S2 TO S0
+      := vix_Reset;
+      END_TRANSITION
+
+    TRANSITION T3 FROM S2 TO S3
+      := TON2.Q;
+      END_TRANSITION
+
+    STEP S3:
+    END_STEP
+
+    TRANSITION T6 FROM S3 TO S0
+      := vix_Reset;
+      END_TRANSITION
+
+    TRANSITION T4 FROM S3 TO S4
+      := TON3.Q;
+      END_TRANSITION
+
+    STEP S4:
+    END_STEP
+
+    TRANSITION T7 FROM S4 TO S1
+      := TON4.Q;
+      END_TRANSITION
+
+    vox_Step0 := S0;
+    vox_Step1 := S1;
+    vox_Step2 := S2;
+    vox_Step3 := S3;
+    vox_Step4 := S4;
+    NOT(IN := vix_Reset, NOT => @C(43).NOT);
+    AND(IN1 := vix_Start, IN2 := @C(43).NOT, AND => @C(32).AND);
+    R_TRIG1(CLK := @C(32).AND);
+    TON1(IN := S1, PT := vit_SeqTime, ET => votarr_StepTime[1]);
+    TON2(IN := S2, PT := vit_SeqTime, ET => votarr_StepTime[2]);
+    TON3(IN := S3, PT := vit_SeqTime, ET => votarr_StepTime[3]);
+    TON4(IN := S4, PT := vit_SeqTime, ET => votarr_StepTime[4]);
+
+  *)
+
+  @STEP(1) : @STINITSTEP(S0), @R(780.0, 110.0, 40.0, 39.0);
+  @TRANSITION(2) : @IT(T0), @R(780.0, 210.0, 40.0, 39.0);
+  @STEP(4) : @STSTEP(S1), @R(780.0, 320.0, 40.0, 39.0);
+  @TRANSITION(6) : @IT(T1), @R(780.0, 500.0, 40.0, 39.0);
+  @TRANSITION(9) : @IT(T2), @R(900.0, 430.0, 40.0, 39.0);
+  @CONN(10) : @IT(To_Init1), @R(1040.0, 470.0, 130.0, 19.0), SFC_T2S;
+  @CONT(12) : @IT(To_Init1), @CONN(10), @R(430.0, 9.5, 120.0, 19.5), SFC_T2S;
+  @C(14) : @FB(TON1), @R(1190.0, 330.0, 100.0, 38.0), @I(@N(IN), @L(9.5)), @I(@N(PT), @L(29.5)), @O(@N(Q), @R(9.5)), @O(@N(ET), @R(29.5));
+  @STEP(16) : @STSTEP(S2), @R(780.0, 560.0, 40.0, 39.0);
+  @TRANSITION(18) : @IT(T3), @R(780.0, 700.0, 40.0, 39.0);
+  @STEP(20) : @STSTEP(S3), @R(780.0, 770.0, 40.0, 39.0);
+  @TRANSITION(22) : @IT(T4), @R(780.0, 910.0, 40.0, 39.0);
+  @STEP(23) : @STSTEP(S4), @R(780.0, 1040.0, 40.0, 39.0);
+  @TRANSITION(26) : @IT(T5), @R(910.0, 660.0, 40.0, 39.0);
+  @CONN(27) : @IT(TO_Init2), @R(1050.0, 700.0, 110.0, 19.0), SFC_T2S;
+  @VF(30) : @E(vix_Start), @R(150.0, 220.0, 140.0, 19.0);
+  @C(31) : @FB(R_TRIG1), @R(570.0, 220.0, 140.0, 18.5), @I(@N(CLK), @L(9.5)), @O(@N(Q), @R(9.5));
+  @CONN(34) : @IT(C1), @R(1370.0, 330.0, 60.0, 19.0), BOOL;
+  @VF(36) : @E(vit_SeqTime), @R(150.0, 380.0, 140.0, 19.0);
+  @VF(38) : @E(vix_Reset), @R(150.0, 240.0, 140.0, 19.0);
+  @C(32) : @F(AND), @R(500.0, 220.0, 40.0, 38.0), BOOL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(AND), @R(9.5));
+  @C(43) : @F(NOT), @R(400.0, 240.0, 60.0, 18.5), BOOL, @I(@N(IN), @L(9.5)), @O(@N(NOT), @R(9.5));
+  @CONT(45) : @IT(C1), @CONN(34), @R(660.0, 510.0, 60.0, 19.0), BOOL;
+  @C(48) : @FB(TON2), @R(1170.0, 570.0, 100.0, 38.0), @I(@N(IN), @L(9.5)), @I(@N(PT), @L(29.5)), @O(@N(Q), @R(9.5)), @O(@N(ET), @R(29.5));
+  @CONN(51) : @IT(C2), @R(1360.0, 570.0, 60.0, 19.0), BOOL;
+  @CONT(53) : @IT(C2), @CONN(51), @R(660.0, 710.0, 60.0, 19.0), BOOL;
+  @TRANSITION(56) : @IT(T6), @R(900.0, 850.0, 40.0, 39.0);
+  @CONN(57) : @IT(TO_Init3), @R(1060.0, 890.0, 100.0, 19.0), SFC_T2S;
+  @CONT(59) : @IT(TO_Init3), @CONN(57), @R(430.0, 50.0, 120.0, 19.0), SFC_T2S;
+  @CONT(60) : @IT(TO_Init2), @CONN(27), @R(430.0, 30.0, 120.0, 19.0), SFC_T2S;
+  @C(63) : @FB(TON3), @R(1170.0, 780.0, 100.0, 38.0), @I(@N(IN), @L(9.5)), @I(@N(PT), @L(29.5)), @O(@N(Q), @R(9.5)), @O(@N(ET), @R(29.5));
+  @CONN(65) : @IT(C3), @R(1350.0, 780.0, 60.0, 19.0), BOOL;
+  @CONT(67) : @IT(C3), @CONN(65), @R(660.0, 920.0, 60.0, 19.0), BOOL;
+  @C(70) : @FB(TON4), @R(1160.0, 1050.0, 100.0, 38.0), @I(@N(IN), @L(9.5)), @I(@N(PT), @L(29.5)), @O(@N(Q), @R(9.5)), @O(@N(ET), @R(29.5));
+  @CONN(73) : @IT(C4), @R(1350.0, 1050.0, 60.0, 19.0), BOOL;
+  @CONT(74) : @IT(C4), @CONN(73), @R(660.0, 1120.0, 60.0, 19.0), BOOL;
+  @TRANSITION(76) : @IT(T7), @R(780.0, 1110.0, 40.0, 39.0);
+  @CONN(79) : @IT(TO_Init5), @R(870.0, 1280.0, 130.0, 19.0), SFC_T2S;
+  @CONT(81) : @IT(TO_Init5), @CONN(79), @R(420.0, 280.0, 130.0, 19.0), SFC_T2S;
+  @VF(84) : @E(vox_Step0), @R(1490.0, 120.0, 140.0, 19.0);
+  @VF(86) : @E(vox_Step1), @R(1470.0, 280.0, 140.0, 19.0);
+  @VF(88) : @E(vox_Step2), @R(1480.0, 520.0, 140.0, 19.0);
+  @VF(90) : @E(vox_Step3), @R(1480.0, 730.0, 140.0, 19.0);
+  @VF(93) : @E(vox_Step4), @R(1470.0, 1010.0, 140.0, 19.0);
+  @VF(95) : @E(votarr_StepTime[4]), @R(1470.0, 1070.0, 140.0, 19.0);
+  @VF(97) : @E(votarr_StepTime[3]), @R(1480.0, 800.0, 140.0, 19.0);
+  @VF(99) : @E(votarr_StepTime[2]), @R(1480.0, 590.0, 140.0, 19.0);
+  @VF(101) : @E(votarr_StepTime[1]), @R(1470.0, 350.0, 140.0, 19.0);
+  @CP(8) : 799.5, 419.5;
+  @CP(29) : 799.5, 649.5;
+  @CP(42) : 359.5, 249.5;
+  @CP(47) : 359.5, 449.5;
+  @CP(50) : 999.5, 389.5;
+  @CP(55) : 799.5, 839.5;
+  @CP(61) : 799.5, 39.5;
+  @CP(62) : 799.5, 59.5;
+  @CP(64) : 999.5, 599.5;
+  @CP(71) : 999.5, 809.5;
+  @CP(82) : 359.5, 679.5;
+  @CP(83) : 799.5, 289.5;
+  @CP(87) : 999.5, 339.5;
+  @CP(89) : 1029.5, 579.5;
+  @CP(91) : 1029.5, 789.5;
+  @CP(92) : 1029.5, 789.5;
+  @CP(94) : 1029.5, 1059.5;
+
+  @G(3) :
+     @L(@STEP(1).out, @TRANSITION(2).in)
+    ;
+  @G(5) :
+     @L(@TRANSITION(2).out, @CP(83)),
+     @L(@CP(83), @STEP(4).in),
+     @L(@CONT(81).o, @CP(83))
+    ;
+  @G(7) :
+     @L(@STEP(4).out, @CP(8)),
+     @L(@CP(8), @TRANSITION(6).in),
+     @L(@CP(8), @TRANSITION(9).in)
+    ;
+  @G(11) :
+     @L(@TRANSITION(9).out, @CONN(10).i)
+    ;
+  @G(13) :
+     @L(@CONT(12).o, @CP(61)),
+     @L(@CP(61), @CP(62)),
+     @L(@CONT(60).o, @CP(61)),
+     @L(@CP(62), @STEP(1).in),
+     @L(@CONT(59).o, @CP(62))
+    ;
+  @G(15) :
+     @L(@STEP(4).X, @CP(87)),
+     @L(@CP(87), @C(14).IN),
+     @L(@CP(87), @VF(86).i)
+    ;
+  @G(17) :
+     @L(@TRANSITION(6).out, @STEP(16).in)
+    ;
+  @G(19) :
+     @L(@STEP(16).out, @CP(29)),
+     @L(@CP(29), @TRANSITION(18).in),
+     @L(@CP(29), @TRANSITION(26).in)
+    ;
+  @G(21) :
+     @L(@TRANSITION(18).out, @STEP(20).in)
+    ;
+  @G(24) :
+     @L(@STEP(20).out, @CP(55)),
+     @L(@CP(55), @TRANSITION(22).in),
+     @L(@CP(55), @TRANSITION(56).in)
+    ;
+  @G(25) :
+     @L(@TRANSITION(22).out, @STEP(23).in)
+    ;
+  @G(28) :
+     @L(@TRANSITION(26).out, @CONN(27).i)
+    ;
+  @G(33) :
+     @L(@C(31).Q, @TRANSITION(2).T)
+    ;
+  @G(35) :
+     @L(@C(14).Q, @CONN(34).i)
+    ;
+  @G(37) :
+     @L(@VF(36).o, @CP(50)),
+     @L(@CP(50), @C(14).PT),
+     @L(@CP(50), @CP(64)),
+     @L(@CP(64), @C(48).PT),
+     @L(@CP(64), @CP(71)),
+     @L(@CP(71), @C(63).PT),
+     @L(@CP(71), @C(70).PT)
+    ;
+  @G(39) :
+     @L(@VF(30).o, @C(32).IN1)
+    ;
+  @G(40) :
+     @L(@C(43).NOT, @C(32).IN2)
+    ;
+  @G(41) :
+     @L(@C(32).AND, @C(31).CLK)
+    ;
+  @G(44) :
+     @L(@VF(38).o, @CP(42)),
+     @L(@CP(42), @C(43).IN),
+     @L(@CP(42), @CP(47)),
+     @L(@CP(47), @TRANSITION(9).T),
+     @L(@CP(47), @CP(82)),
+     @L(@CP(82), @TRANSITION(26).T),
+     @L(@CP(82), @TRANSITION(56).T)
+    ;
+  @G(46) :
+     @L(@CONT(45).o, @TRANSITION(6).T)
+    ;
+  @G(49) :
+     @L(@STEP(16).X, @CP(89)),
+     @L(@CP(89), @C(48).IN),
+     @L(@CP(89), @VF(88).i)
+    ;
+  @G(52) :
+     @L(@C(48).Q, @CONN(51).i)
+    ;
+  @G(54) :
+     @L(@CONT(53).o, @TRANSITION(18).T)
+    ;
+  @G(58) :
+     @L(@TRANSITION(56).out, @CONN(57).i)
+    ;
+  @G(66) :
+     @L(@C(63).Q, @CONN(65).i)
+    ;
+  @G(68) :
+     @L(@STEP(20).X, @CP(92)),
+     @L(@CP(91), @C(63).IN),
+     @L(@CP(92), @CP(91)),
+     @L(@CP(92), @VF(90).i)
+    ;
+  @G(69) :
+     @L(@CONT(67).o, @TRANSITION(22).T)
+    ;
+  @G(72) :
+     @L(@STEP(23).X, @CP(94)),
+     @L(@CP(94), @C(70).IN),
+     @L(@CP(94), @VF(93).i)
+    ;
+  @G(75) :
+     @L(@C(70).Q, @CONN(73).i)
+    ;
+  @G(77) :
+     @L(@STEP(23).out, @TRANSITION(76).in)
+    ;
+  @G(78) :
+     @L(@CONT(74).o, @TRANSITION(76).T)
+    ;
+  @G(80) :
+     @L(@TRANSITION(76).out, @CONN(79).i)
+    ;
+  @G(85) :
+     @L(@STEP(1).X, @VF(84).i)
+    ;
+  @G(96) :
+     @L(@C(70).ET, @VF(95).i)
+    ;
+  @G(98) :
+     @L(@C(63).ET, @VF(97).i)
+    ;
+  @G(100) :
+     @L(@C(48).ET, @VF(99).i)
+    ;
+  @G(102) :
+     @L(@C(14).ET, @VF(101).i)
+    ;
+END_FUNCTION_BLOCK
+END_NAMESPACE

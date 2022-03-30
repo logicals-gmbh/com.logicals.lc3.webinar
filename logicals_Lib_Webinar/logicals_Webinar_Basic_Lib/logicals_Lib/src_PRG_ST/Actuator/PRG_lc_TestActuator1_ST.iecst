@@ -1,0 +1,94 @@
+ /*
+  * logi.cals GmbH
+  * A-3100 St. Poelten
+  * Europaplatz 7/1
+  * Tel.: 0043-5-77147
+  *
+  * logi.cals automation solutions & services GmbH
+  * D-40738 Langenfeld
+  * Postfach 1306
+  * Tel.: 0043-5-77147
+  * 
+  * Contact:
+  * dieter.goltz@logicals.com
+  * 
+  * History:
+  * Created:  
+  * DG 2017-03-28
+  * 
+  * Modified: 
+  * DG 2017-03-28
+  * DG 2021-03-01
+  */ 
+
+ /*
+  * Description
+  * -----------
+  * Test MotorControlBlocks
+  */
+
+ /* 
+  * Beschreibung
+  * ------------
+  * Die Programme PRG_TestActuator1_ST muessen in einer Resource in zwei Tasks aufgerufen werden
+  * und per GV "verbunden" werden!
+  * Test der Motorbausteine
+  */
+  
+USING com.logicals.Basic.Actuator;
+  
+PROGRAM PRG_lc_TestActuator1_ST
+
+VAR
+  FB_Motor    : FB_lc_Motor2R_STOP_FB_ST;
+END_VAR
+
+VAR
+  lx_StartMotorLeft  : BOOL;
+  lx_StartMotorRight : BOOL;
+  lx_StopMotor       : BOOL;
+  lx_ErrQuitMotor    : BOOL;
+
+  lx_MotorLeftFB  : BOOL;
+  lx_MotorRightFB : BOOL;
+
+  lx_MotorLeft : BOOL;
+  lx_MotorRight : BOOL;
+
+  lt_MotorLeftDelayFB  : TIME := T#1s;
+  lt_MotorRightDelayFB : TIME := T#1s;
+  
+END_VAR
+
+VAR
+END_VAR
+
+VAR
+  li_CycleCount     : INT;
+  li_CycleCountInit : INT;
+  lx_CyclePulse     : BOOL;
+  lx_CycleInit      : BOOL;
+END_VAR
+
+li_CycleCount := li_CycleCount + 1;
+lx_CyclePulse := NOT(lx_CyclePulse);
+lx_CycleInit  := TRUE;
+
+IF lx_CycleInit = TRUE THEN
+  li_CycleCountInit := li_CycleCountInit + 1;
+END_IF;
+
+FB_Motor(vix_QuitErr     := lx_ErrQuitMotor,
+	     vix_Left        := lx_StartMotorLeft, 
+	     vix_Right       := lx_StartMotorRight,
+	     vix_Stop        := lx_StopMotor,
+	     vit_LeftFBTime  := lt_MotorLeftDelayFB,
+	     vit_RightFBTime := lt_MotorRightDelayFB,
+	     vix_LeftFB      := lx_MotorLeftFB,
+	     vix_RightFB     := lx_MotorRightFB,
+	     vox_MotorLeft   => lx_MotorLeft,
+	     vox_MotorRight  => lx_MotorRight);
+
+lx_CycleInit  := FALSE;
+
+END_PROGRAM

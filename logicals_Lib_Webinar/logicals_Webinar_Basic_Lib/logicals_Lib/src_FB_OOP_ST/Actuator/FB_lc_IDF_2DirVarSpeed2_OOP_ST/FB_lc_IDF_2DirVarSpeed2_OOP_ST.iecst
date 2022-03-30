@@ -1,0 +1,166 @@
+NAMESPACE com.logicals.Basic.OOP.Actuator
+/*
+ * Einzelsteuerfunktion FB_lc_IDF_2DirVarSpeed2_OOP_ST
+ */
+FUNCTION_BLOCK FB_lc_IDF_2DirVarSpeed2_OOP_ST  {
+    height := 58;
+    width := 450;
+  }
+
+VAR_INPUT
+ vix_Lock     : BOOL;
+ vit_RampTime : TIME := T#10s;
+END_VAR
+
+VAR_OUTPUT
+ vox_Enable     : BOOL;
+ voi_SpeedOut   : INT;
+
+/*
+ * Feedback-Signale Forward / Backward
+ */ 
+ vox_IsFwd : BOOL;
+ vox_IsBwd : BOOL;
+END_VAR
+
+VAR
+ FB_RampTimer    : TON;
+ lt_RampTime_PT  : TIME;
+ lt_RampTime_ET  : TIME;
+ li_SpeedInp     : INT;
+END_VAR
+
+VAR
+  li_CycleCount     : INT;
+  li_CycleCountInit : INT;
+  lx_CyclePulse     : BOOL;
+  lx_CycleInit      : BOOL := TRUE; // MUSS am Ende des Applikationsteils rueckgesetzt werden!
+END_VAR
+
+/*
+ * Methode M_On
+ */
+METHOD PUBLIC M_On : BOOL
+	VAR_INPUT
+	END_VAR
+	
+	IF NOT vix_Lock THEN
+	 vox_Enable := TRUE;
+	ELSE
+	 vox_Enable := FALSE;
+	END_IF;  
+
+	FB_RampTimer(IN:=FALSE);
+    M_On := vox_Enable;
+END_METHOD
+
+/*
+ * Methode M_Off
+ */
+METHOD PUBLIC M_Off : BOOL
+	VAR_INPUT
+	END_VAR
+	
+    vox_Enable := FALSE;
+    vox_IsBwd  := FALSE;
+    vox_IsFwd  := FALSE;
+     
+END_METHOD
+
+/*
+ * Methode M_Forward
+ */
+METHOD PUBLIC M_Forward : BOOL
+   /*
+    * Uebergabewert fuer M_Forward
+    */	
+	VAR_INPUT
+	  mii_SpeedSet : INT;
+	END_VAR
+   /*
+    * Wert fuer die Methode M_Ramp()
+    */	
+	li_SpeedInp := ABS(mii_SpeedSet);
+	FB_RampTimer(IN:=FALSE);
+	vox_IsBwd := FALSE;
+	vox_IsFwd := TRUE;
+END_METHOD
+
+/*
+ * Methode M_Backward
+ */
+METHOD PUBLIC M_Backward : BOOL
+   /*
+    * Uebergabewert fuer M_Backward
+    */	
+	VAR_INPUT
+	  mii_SpeedSet : INT;
+	END_VAR
+   /*
+    * Wert fuer die Methode M_Ramp()
+    */	
+	li_SpeedInp  := -ABS(mii_SpeedSet);
+	FB_RampTimer(IN:=FALSE);
+	vox_IsFwd    := FALSE;
+	vox_IsBwd    := TRUE;
+END_METHOD
+
+/*
+ * Methode M_Ramp
+ * PRIVATE wird in LC3 noch nicht unterstuetzt!
+ * 
+ * Private Methoden koennen nur im Anweisungsteil des FBs oder von anderen Methoden aufgerufen werden! 
+ * 
+ * Die Methode M_Ramp soll dafuer sorgen, dass der Antrieb OHNE Ruck angefahren wird.
+ * 
+ * Eine Methode HAT wie eine Funktion KEIN Gedaechtnis
+ * Deshalb MUESSEN Zeitvariablen IMMER in den lokalen Variablen des Funktionsbausteins zu definieren!
+ */
+  METHOD PUBLIC M_Ramp : INT
+	  VAR_INPUT
+	  END_VAR
+
+	  M_Ramp := TO_INT((TO_REAL(FB_RampTimer.ET / TO_REAL(lt_RampTime_PT)) * li_SpeedInp));
+
+  END_METHOD
+  
+ /*
+  * Anweisungsteil des Bausteins
+  */ 
+  li_CycleCount := li_CycleCount + 1;
+  lx_CyclePulse := NOT(lx_CyclePulse);
+
+  IF lx_CycleInit = TRUE THEN
+    li_CycleCountInit := li_CycleCountInit + 1;
+  END_IF;
+
+ /*
+  * Die Zielzeit fuer die Rampe setzen (Von VAR_INPUT)
+  */ 
+  lt_RampTime_PT := vit_RampTime;
+  
+ /*
+  * Anpassung der Amplitude = Wert des Ausgangs ET / PT (Aktueller TON-Wert / Setzwert = Normierung auf 1)
+  * Multiplikation mit dem Zielwert der Geschwindigkeit!
+  */	
+  FB_RampTimer(IN := vox_IsFwd OR vox_IsBwd, PT:= lt_RampTime_PT,ET => lt_RampTime_ET);
+  voi_SpeedOut := M_Ramp();
+
+ /*
+  * Logik fuer das Sperren des Antriebs
+  */
+  IF vix_Lock THEN
+    vox_Enable := FALSE;
+    vox_IsFwd  := FALSE;
+    vox_IsBwd  := FALSE;
+    voi_SpeedOut := 0;
+  END_IF;
+
+/*
+ * Initialisierungsmerker fuer den Baustein!
+ */
+  lx_CycleInit  := FALSE;
+  
+END_FUNCTION_BLOCK
+
+END_NAMESPACE

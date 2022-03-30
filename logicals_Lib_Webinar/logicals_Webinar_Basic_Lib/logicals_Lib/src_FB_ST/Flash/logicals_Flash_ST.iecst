@@ -1,0 +1,34 @@
+NAMESPACE com.logicals.Basic.Flash
+
+FUNCTION_BLOCK FB_lc_Flash_ST
+ /*
+  * Flash FB with 2 TON
+  * Blinkerfunktion (Standard mit 2 TON-Bausteine)
+  */
+  VAR_INPUT
+    vix_Start   : BOOL;
+    vit_OnTime : TIME := T#1s;
+    vit_OffTime : TIME := T#1s;
+  END_VAR
+   
+  VAR_OUTPUT
+    vox_Out    : BOOL;
+    vox_Err    : BOOL;
+    voui_ErrNo : INT;
+  END_VAR
+
+  VAR
+    FB_TON  : TON;
+    FB_TON1 : TON;
+  END_VAR
+   
+ /*
+  * Blinker mit TON/TON
+  */
+  FB_TON(IN:=AND(vix_Start,NOT(FB_TON1.Q)),PT:=vit_OnTime);
+  FB_TON1(IN:=FB_TON.Q,PT:=vit_OffTime);
+  vox_Out:=FB_TON.Q;
+   
+END_FUNCTION_BLOCK
+
+END_NAMESPACE

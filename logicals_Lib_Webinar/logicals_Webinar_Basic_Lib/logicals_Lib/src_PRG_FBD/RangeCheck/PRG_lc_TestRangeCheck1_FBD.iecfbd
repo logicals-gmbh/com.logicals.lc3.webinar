@@ -1,0 +1,521 @@
+PROGRAM PRG_lc_TestRangeCheck1_FBD
+  USING com.logicals.Basic.RangeCheck;
+  USING com.logicals.Basic.SigGen;
+  VAR
+    lr_RangeCheck_In : REAL;
+    lr_RangeCheck_LU : REAL;
+    lr_RangeCheck_LL : REAL;
+    lr_RangeCheck_HYST : REAL;
+    com_logicals_Basic_RangeCheck_FB_lc_RangeCheckDWORD_FBD1 : com.logicals.Basic.RangeCheck.FB_lc_RangeCheckDWORD_FBD;
+    com_logicals_Basic_RangeCheck_FB_lc_RangeCheckREAL_FBD1 : com.logicals.Basic.RangeCheck.FB_lc_RangeCheckREAL_FBD;
+    FORCEMRK1 : FORCEMRK;
+    com_logicals_Basic_SigGen_FB_lc_GenSinCosSig_ST1 : com.logicals.Basic.SigGen.FB_lc_GenSinCosSig_ST;
+    lr_SinCosGen_StepVal : REAL := 1.0;
+    lr_SinCosGen_EndVal : REAL := 10.0;
+    com_logicals_Basic_RangeCheck_FB_lc_RangeCheckWORD_FBD1 : com.logicals.Basic.RangeCheck.FB_lc_RangeCheckWORD_FBD;
+    com_logicals_Basic_RangeCheck_FB_lc_RangeCheckINT_FBD1 : com.logicals.Basic.RangeCheck.FB_lc_RangeCheckINT_FBD;
+    com_logicals_Basic_RangeCheck_FB_lc_RangeCheckUINT_FBD1 : com.logicals.Basic.RangeCheck.FB_lc_RangeCheckUINT_FBD;
+    com_logicals_Basic_RangeCheck_FB_lc_RangeCheckDINT_FBD1 : com.logicals.Basic.RangeCheck.FB_lc_RangeCheckDINT_FBD;
+    ldw_RngChkDINT_LL : DINT;
+    com_logicals_Basic_SigGen_FB_lc_GenTriangleSig_ST1 : com.logicals.Basic.SigGen.FB_lc_GenTriangleSig_ST;
+    FORCEMRK2 : FORCEMRK;
+    lui_TriangleMaxVal : UINT := 1000;
+    FORCEMRK3 : FORCEMRK;
+    FORCEMRK4 : FORCEMRK;
+    FORCEMRK5 : FORCEMRK;
+    FORCEMRK6 : FORCEMRK;
+  END_VAR
+  VAR
+    lx_RangeCheck_InRng : BOOL;
+    lx_RangeCheck_URchd : BOOL;
+    lx_RangeCheck_LRchd : BOOL;
+    lx_RangeCheck_OutOfRng : BOOL;
+  END_VAR
+  VAR
+    lr_4LimMon_In : REAL;
+    lx_4LimMon_ResetAll : BOOL;
+    lr_4LimMon_Val_HH : REAL;
+    lr_4LimMon_Val_H : REAL;
+    lr_4LimMon_Val_L : REAL;
+    lr_4LimMon_Val_LL : REAL;
+    lr_4LimMon_Val_Hyst : REAL;
+    lr_4LimMon_DlyTm_HH_LL : REAL;
+    lr_4LimMon_DlyTm_H_L : REAL;
+  END_VAR
+  VAR
+    lr_4LimMon_GT_HH : BOOL;
+    lr_4LimMon_LT_HH : BOOL;
+    lr_4LimMon_GT_H : BOOL;
+    lr_4LimMon_LT_H : BOOL;
+    lr_4LimMon_GT_L : BOOL;
+    lr_4LimMon_LT_L : BOOL;
+    lr_4LimMon_GT_LL : BOOL;
+    lr_4LimMon_LT_LL : BOOL;
+  END_VAR
+  VAR
+    ldw_RngChkDWORD_LL : DWORD := 16#10000000;
+    ldw_RngChkDWORD_In : DWORD;
+    ldw_RngChkDWORD_UL : DWORD := 16#F0000000;
+    lx_RngChkDWORD_LLRcd : BOOL;
+    lx_RngChkDWORD_InRng : BOOL;
+    lx_RngChkDWORD_OutOfRng : BOOL;
+    lx_RngChkDWORD_ULRcd : BOOL;
+  END_VAR
+  VAR
+    lw_RngChkWORD_LL : WORD := 16#0100;
+    lw_RngChkWORD_In : WORD;
+    lw_RngChkWORD_UL : WORD := 16#0F00;
+    lx_RngChkWORD_LLRcd : BOOL;
+    lx_RngChkWORD_InRng : BOOL;
+    lx_RngChkWORD_OutOfRng : BOOL;
+    lx_RngChkWORD_ULRcd : BOOL;
+  END_VAR
+  VAR
+    li_RngChkINT_LL : INT := 200;
+    li_RngChkINT_In : INT;
+    li_RngChkINT_UL : INT := 750;
+    lx_RngChkINT_LLRcd : BOOL;
+    lx_RngChkINT_InRng : BOOL;
+    lx_RngChkINT_OutOfRng : BOOL;
+    lx_RngChkINT_ULRcd : BOOL;
+  END_VAR
+  VAR
+    lui_RngChkUINT_LL : UINT := 200;
+    lui_RngChkUINT_In : UINT;
+    lui_RngChkUINT_UL : UINT := 800;
+    lx_RngChkUINT_LLRcd : BOOL;
+    lx_RngChkUINT_InRng : BOOL;
+    lx_RngChkUINT_OutOfRng : BOOL;
+    lx_RngChkUINT_ULRcd : BOOL;
+  END_VAR
+  VAR
+    lr_RngChkREAL_LL : REAL := 2.5;
+    lr_RngChkREAL_In : REAL;
+    lr_RngChkREAL_UL : REAL := 7.5;
+    lx_RngChkREAL_LLRcd : BOOL;
+    lx_RngChkREAL_InRng : BOOL;
+    lx_RngChkREAL_OutOfRng : BOOL;
+    lx_RngChkREAL_ULRcd : BOOL;
+  END_VAR
+  VAR
+    ldi_RngChkDINT_LL : DINT;
+    ldi_RngChkDINT_In : DINT;
+    ldi_RngChkDINT_UL : DINT;
+    lx_RngChkDINT_LLRcd : BOOL;
+    lx_RngChkDINT_InRng : BOOL;
+    lx_RngChkDINT_OutOfRng : BOOL;
+    lx_RngChkDINT_ULRcd : BOOL;
+  END_VAR
+  VAR
+    com_logicals_Basic_RangeCheck_FB_lc_4LimMon_FBD1 : com.logicals.Basic.RangeCheck.FB_lc_4LimMon_FBD;
+    com_logicals_Basic_RangeCheck_FB_lc_RangeCheck_FBD1 : com.logicals.Basic.RangeCheck.FB_lc_RangeCheck_FBD;
+  END_VAR
+
+  (*
+
+    // Network 1:
+    com_logicals_Basic_RangeCheck_FB_lc_4LimMon_FBD1(vix_ResetAll := lx_4LimMon_ResetAll, vir_In := lr_4LimMon_In, vir_Val_HH := lr_4LimMon_Val_HH, vir_Val_H := lr_4LimMon_Val_H, vir_Val_L := lr_4LimMon_Val_L, vir_Val_LL := lr_4LimMon_Val_LL, vir_Val_Hyst := lr_4LimMon_Val_Hyst, vir_DlyTm_HH_LL := lr_4LimMon_DlyTm_HH_LL, vir_DlyTm_H_L := lr_4LimMon_DlyTm_H_L, vor_GT_HH => lr_4LimMon_GT_HH, vor_LT_HH => lr_4LimMon_LT_HH, vor_GT_H => lr_4LimMon_GT_H, vor_LT_H => lr_4LimMon_LT_H, vor_GT_L => lr_4LimMon_GT_L, vor_LT_L => lr_4LimMon_LT_L, vor_GT_LL => lr_4LimMon_GT_LL, vor_LT_LL => lr_4LimMon_LT_LL);
+
+    // Network 2:
+    com_logicals_Basic_RangeCheck_FB_lc_RangeCheck_FBD1(vir_In := lr_RangeCheck_In, vir_LU := lr_RangeCheck_LU, vir_LL := lr_RangeCheck_LL, vir_HYST := lr_RangeCheck_HYST, vox_InRng => lx_RangeCheck_InRng, vox_URchd => lx_RangeCheck_URchd, vox_LRchd => lx_RangeCheck_LRchd, vox_OutOfRng => lx_RangeCheck_OutOfRng);
+
+    // Network 3:
+    SysTaskCycleTime(SysTaskCycleTime => @C(166).SysTaskCycleTime);
+    FORCEMRK2(IN := @C(166).SysTaskCycleTime);
+    FORCEMRK3(IN := lui_TriangleMaxVal);
+    com_logicals_Basic_SigGen_FB_lc_GenTriangleSig_ST1(vit_CycleTime_ms := FORCEMRK2.OUT, viui_MaxVal := FORCEMRK3.OUT);
+    FORCEMRK4(IN := com_logicals_Basic_SigGen_FB_lc_GenTriangleSig_ST1.voui_Out);
+    TO_INT(IN := FORCEMRK4.OUT, TO_INT => li_RngChkINT_In);
+    com_logicals_Basic_RangeCheck_FB_lc_RangeCheckINT_FBD1(vidw_LL := li_RngChkINT_LL, vidw_In := li_RngChkINT_In, vidw_UL := li_RngChkINT_UL, vox_LLRcd => lx_RngChkINT_LLRcd, vox_InRng => lx_RngChkINT_InRng, vox_OutOfRng => lx_RngChkINT_OutOfRng, vox_ULRcd => lx_RngChkINT_ULRcd);
+    FORCEMRK5(IN := com_logicals_Basic_SigGen_FB_lc_GenTriangleSig_ST1.voui_Out);
+    TO_UINT(IN := FORCEMRK5.OUT, TO_UINT => lui_RngChkUINT_In);
+    com_logicals_Basic_RangeCheck_FB_lc_RangeCheckUINT_FBD1(vidw_LL := lui_RngChkUINT_LL, vidw_In := lui_RngChkUINT_In, vidw_UL := lui_RngChkUINT_UL, vox_LLRcd => lx_RngChkUINT_LLRcd, vox_InRng => lx_RngChkUINT_InRng, vox_OutOfRng => lx_RngChkUINT_OutOfRng, vox_ULRcd => lx_RngChkUINT_ULRcd);
+    FORCEMRK6(IN := com_logicals_Basic_SigGen_FB_lc_GenTriangleSig_ST1.voui_Out);
+    TO_DINT(IN := FORCEMRK6.OUT, TO_DINT => ldi_RngChkDINT_In);
+    com_logicals_Basic_RangeCheck_FB_lc_RangeCheckDINT_FBD1(vidw_LL := ldi_RngChkDINT_LL, vidw_In := ldi_RngChkDINT_In, vidw_UL := ldi_RngChkDINT_UL, vox_LLRcd => lx_RngChkDINT_LLRcd, vox_InRng => lx_RngChkDINT_InRng, vox_OutOfRng => lx_RngChkDINT_OutOfRng, vox_ULRcd => lx_RngChkDINT_ULRcd);
+
+    // Network 4:
+    com_logicals_Basic_RangeCheck_FB_lc_RangeCheckDWORD_FBD1(vidw_LL := ldw_RngChkDWORD_LL, vidw_In := ldw_RngChkDWORD_In, vidw_UL := ldw_RngChkDWORD_UL, vox_LLRcd => lx_RngChkDWORD_LLRcd, vox_InRng => lx_RngChkDWORD_InRng, vox_OutOfRng => lx_RngChkDWORD_OutOfRng, vox_ULRcd => lx_RngChkDWORD_ULRcd);
+
+    // Network 5:
+    com_logicals_Basic_RangeCheck_FB_lc_RangeCheckWORD_FBD1(vidw_LL := lw_RngChkWORD_LL, vidw_In := lw_RngChkWORD_In, vidw_UL := lw_RngChkWORD_UL, vox_LLRcd => lx_RngChkWORD_InRng, vox_InRng => lx_RngChkWORD_OutOfRng, vox_OutOfRng => lx_RngChkWORD_ULRcd, vox_ULRcd => lx_RngChkWORD_LLRcd);
+
+    // Network 6:
+    com_logicals_Basic_SigGen_FB_lc_GenSinCosSig_ST1(vir_StepVal := lr_SinCosGen_StepVal, vir_EndVal := lr_SinCosGen_EndVal);
+    FORCEMRK1(IN := com_logicals_Basic_SigGen_FB_lc_GenSinCosSig_ST1.vor_Sin_X, OUT => lr_RngChkREAL_In);
+    com_logicals_Basic_RangeCheck_FB_lc_RangeCheckREAL_FBD1(vidw_LL := lr_RngChkREAL_LL, vidw_In := lr_RngChkREAL_In, vidw_UL := lr_RngChkREAL_UL, vox_LLRcd => lx_RngChkREAL_LLRcd, vox_InRng => lx_RngChkREAL_InRng, vox_OutOfRng => lx_RngChkREAL_OutOfRng, vox_ULRcd => lx_RngChkREAL_ULRcd);
+
+  *)
+
+  @C(1) : @FB(com_logicals_Basic_RangeCheck_FB_lc_4LimMon_FBD1), instanceNameVisible, @R(790.0, -460.0, 300.0, 178.0), @I(@N(vix_ResetAll), @L(9.5)), @I(@N(vir_In), @L(29.5)), @I(@N(vir_Val_HH), @L(49.5)), @I(@N(vir_Val_H), @L(69.5)), @I(@N(vir_Val_L), @L(89.5)), @I(@N(vir_Val_LL), @L(109.5)), @I(@N(vir_Val_Hyst), @L(129.5)), @I(@N(vir_DlyTm_HH_LL), @L(149.5)), @I(@N(vir_DlyTm_H_L), @L(169.5)), @O(@N(vor_GT_HH), @R(9.5)), @O(@N(vor_LT_HH), @R(29.5)), @O(@N(vor_GT_H), @R(49.5)), @O(@N(vor_LT_H), @R(69.5)), @O(@N(vor_GT_L), @R(89.5)), @O(@N(vor_LT_L), @R(109.5)), @O(@N(vor_GT_LL), @R(129.5)), @O(@N(vor_LT_LL), @R(149.5));
+  @C(2) : @FB(com_logicals_Basic_RangeCheck_FB_lc_RangeCheck_FBD1), instanceNameVisible, @R(790.0, -160.0, 300.0, 98.0), @I(@N(vir_In), @L(9.5)), @I(@N(vir_LU), @L(29.5)), @I(@N(vir_LL), @L(49.5)), @I(@N(vir_HYST), @L(69.5)), @O(@N(vox_InRng), @R(9.5)), @O(@N(vox_URchd), @R(29.5)), @O(@N(vox_LRchd), @R(49.5)), @O(@N(vox_OutOfRng), @R(69.5));
+  @VF(3) : @E(lx_4LimMon_ResetAll), @R(510.0, -460.0, 250.0, 19.0);
+  @VF(4) : @E(lr_4LimMon_In), @R(510.0, -440.0, 250.0, 19.0);
+  @VF(5) : @E(lr_4LimMon_Val_HH), @R(510.0, -420.0, 250.0, 19.0);
+  @VF(6) : @E(lr_4LimMon_Val_H), @R(510.0, -400.0, 250.0, 19.0);
+  @VF(7) : @E(lr_4LimMon_Val_L), @R(510.0, -380.0, 250.0, 19.0);
+  @VF(8) : @E(lr_4LimMon_Val_LL), @R(510.0, -360.0, 250.0, 19.0);
+  @VF(9) : @E(lr_4LimMon_Val_Hyst), @R(510.0, -340.0, 250.0, 19.0);
+  @VF(10) : @E(lr_4LimMon_DlyTm_HH_LL), @R(510.0, -320.0, 250.0, 19.0);
+  @VF(11) : @E(lr_4LimMon_DlyTm_H_L), @R(510.0, -300.0, 250.0, 19.0);
+  @VF(21) : @E(lr_4LimMon_GT_HH), @R(1170.0, -460.0, 230.0, 19.0);
+  @VF(22) : @E(lr_4LimMon_LT_HH), @R(1170.0, -440.0, 230.0, 19.0);
+  @VF(23) : @E(lr_4LimMon_GT_H), @R(1170.0, -420.0, 230.0, 19.0);
+  @VF(24) : @E(lr_4LimMon_LT_H), @R(1170.0, -400.0, 230.0, 19.0);
+  @VF(25) : @E(lr_4LimMon_GT_L), @R(1170.0, -380.0, 230.0, 19.0);
+  @VF(26) : @E(lr_4LimMon_LT_L), @R(1170.0, -360.0, 230.0, 19.0);
+  @VF(27) : @E(lr_4LimMon_GT_LL), @R(1170.0, -340.0, 230.0, 19.0);
+  @VF(28) : @E(lr_4LimMon_LT_LL), @R(1170.0, -320.0, 230.0, 19.0);
+  @VF(37) : @E(lr_RangeCheck_In), @R(510.0, -160.0, 240.0, 19.0);
+  @VF(38) : @E(lr_RangeCheck_LU), @R(510.0, -140.0, 240.0, 19.0);
+  @VF(39) : @E(lr_RangeCheck_LL), @R(510.0, -120.0, 240.0, 19.0);
+  @VF(40) : @E(lr_RangeCheck_HYST), @R(510.0, -100.0, 240.0, 19.0);
+  @VF(45) : @E(lx_RangeCheck_InRng), @R(1170.0, -160.0, 230.0, 19.0);
+  @VF(47) : @E(lx_RangeCheck_URchd), @R(1170.0, -140.0, 230.0, 19.0);
+  @VF(48) : @E(lx_RangeCheck_LRchd), @R(1170.0, -120.0, 230.0, 19.0);
+  @VF(49) : @E(lx_RangeCheck_OutOfRng), @R(1170.0, -100.0, 230.0, 19.0);
+  @CF(62) : @R(920.0, -620.0, 470.0, 99.0), @T("D:$NTest logicals_Lib RangeCheck"), @POU;
+  @CF(61) : @R(390.0, -620.0, 470.0, 99.0), @T("E:$NTest logicals_Lib RangeCheck"), @POU;
+  @C(53) : @FB(com_logicals_Basic_RangeCheck_FB_lc_RangeCheckDWORD_FBD1), @R(780.0, 710.0, 300.0, 78.0), @I(@N(vidw_LL), @L(9.5)), @I(@N(vidw_In), @L(29.5)), @I(@N(vidw_UL), @L(49.5)), @O(@N(vox_LLRcd), @R(9.5)), @O(@N(vox_InRng), @R(29.5)), @O(@N(vox_OutOfRng), @R(49.5)), @O(@N(vox_ULRcd), @R(69.5));
+  @VF(54) : @E(ldw_RngChkDWORD_LL), @R(440.0, 710.0, 220.0, 19.0);
+  @VF(55) : @E(ldw_RngChkDWORD_In), @R(440.0, 730.0, 220.0, 19.0);
+  @VF(56) : @E(ldw_RngChkDWORD_UL), @R(440.0, 750.0, 220.0, 19.0);
+  @VF(60) : @E(lx_RngChkDWORD_LLRcd), @R(1170.0, 710.0, 220.0, 19.0);
+  @VF(63) : @E(lx_RngChkDWORD_InRng), @R(1170.0, 730.0, 220.0, 19.0);
+  @VF(64) : @E(lx_RngChkDWORD_OutOfRng), @R(1170.0, 750.0, 220.0, 19.0);
+  @VF(65) : @E(lx_RngChkDWORD_ULRcd), @R(1170.0, 770.0, 220.0, 19.0);
+  @VF(70) : @E(lw_RngChkWORD_LL), @R(440.0, 840.0, 220.0, 19.0);
+  @VF(71) : @E(lw_RngChkWORD_In), @R(440.0, 860.0, 220.0, 19.0);
+  @VF(72) : @E(lw_RngChkWORD_UL), @R(440.0, 880.0, 220.0, 19.0);
+  @VF(73) : @E(lx_RngChkWORD_LLRcd), @R(1170.0, 900.0, 220.0, 19.0);
+  @VF(74) : @E(lx_RngChkWORD_InRng), @R(1170.0, 840.0, 220.0, 19.0);
+  @VF(75) : @E(lx_RngChkWORD_OutOfRng), @R(1170.0, 860.0, 220.0, 19.0);
+  @VF(76) : @E(lx_RngChkWORD_ULRcd), @R(1170.0, 880.0, 220.0, 19.0);
+  @VF(77) : @E(li_RngChkINT_LL), @R(440.0, 970.0, 210.0, 19.0);
+  @VF(78) : @E(li_RngChkINT_In), @R(440.0, 990.0, 210.0, 19.0);
+  @VF(79) : @E(li_RngChkINT_UL), @R(440.0, 1010.0, 210.0, 19.0);
+  @VF(80) : @E(lx_RngChkINT_LLRcd), @R(1170.0, 970.0, 220.0, 19.0);
+  @VF(81) : @E(lx_RngChkINT_InRng), @R(1170.0, 990.0, 220.0, 19.0);
+  @VF(82) : @E(lx_RngChkINT_OutOfRng), @R(1170.0, 1010.0, 220.0, 19.0);
+  @VF(83) : @E(lx_RngChkINT_ULRcd), @R(1170.0, 1030.0, 220.0, 19.0);
+  @VF(84) : @E(lui_RngChkUINT_LL), @R(440.0, 1110.0, 210.0, 19.0);
+  @VF(85) : @E(lui_RngChkUINT_In), @R(440.0, 1130.0, 210.0, 19.0);
+  @VF(86) : @E(lui_RngChkUINT_UL), @R(440.0, 1150.0, 210.0, 19.0);
+  @VF(87) : @E(lx_RngChkUINT_LLRcd), @R(1170.0, 1110.0, 220.0, 19.0);
+  @VF(88) : @E(lx_RngChkUINT_InRng), @R(1170.0, 1130.0, 220.0, 19.0);
+  @VF(89) : @E(lx_RngChkUINT_OutOfRng), @R(1170.0, 1150.0, 220.0, 19.0);
+  @VF(90) : @E(lx_RngChkUINT_ULRcd), @R(1170.0, 1170.0, 220.0, 19.0);
+  @VF(91) : @E(lr_RngChkREAL_LL), @R(470.0, 1800.0, 250.0, 19.0);
+  @VF(92) : @E(lr_RngChkREAL_In), @R(470.0, 1820.0, 250.0, 19.0);
+  @VF(93) : @E(lr_RngChkREAL_UL), @R(470.0, 1840.0, 250.0, 19.0);
+  @VF(94) : @E(lx_RngChkREAL_LLRcd), @R(1200.0, 1800.0, 240.0, 19.0);
+  @VF(95) : @E(lx_RngChkREAL_InRng), @R(1200.0, 1820.0, 240.0, 19.0);
+  @VF(96) : @E(lx_RngChkREAL_OutOfRng), @R(1200.0, 1840.0, 240.0, 19.0);
+  @VF(97) : @E(lx_RngChkREAL_ULRcd), @R(1200.0, 1860.0, 240.0, 19.0);
+  @C(98) : @FB(com_logicals_Basic_RangeCheck_FB_lc_RangeCheckREAL_FBD1), @R(820.0, 1800.0, 300.0, 78.0), @I(@N(vidw_LL), @L(9.5)), @I(@N(vidw_In), @L(29.5)), @I(@N(vidw_UL), @L(49.5)), @O(@N(vox_LLRcd), @R(9.5)), @O(@N(vox_InRng), @R(29.5)), @O(@N(vox_OutOfRng), @R(49.5)), @O(@N(vox_ULRcd), @R(69.5));
+  @C(106) : @FB(FORCEMRK1), @R(290.0, 1820.0, 120.0, 18.0), REAL, @I(@N(IN), @L(9.5)), @O(@N(OUT), @R(9.5));
+  @C(108) : @FB(com_logicals_Basic_SigGen_FB_lc_GenSinCosSig_ST1), @R(290.0, 1590.0, 300.0, 138.0), @I(@N(vir_StepVal), @L(9.5)), @I(@N(vir_EndVal), @L(29.5)), @O(@N(vor_Sin_X), @R(9.5)), @O(@N(vor_Cos_X), @R(29.5)), @O(@N(vor_Sin_X_2), @R(49.5)), @O(@N(vor_Cos_X_2), @R(69.5)), @O(@N(voui_ErrNo), @R(89.5)), @O(@N(vox_Err), @R(109.5));
+  @CONN(109) : @IT(C1), @R(620.0, 1590.0, 60.0, 19.0), REAL;
+  @VF(111) : @E(lr_SinCosGen_StepVal), @R(50.0, 1590.0, 220.0, 19.0);
+  @VF(113) : @E(lr_SinCosGen_EndVal), @R(50.0, 1610.0, 220.0, 19.0);
+  @CONT(115) : @IT(C1), @CONN(109), @R(200.0, 1820.0, 60.0, 19.0), REAL;
+  @OLT(117) : @R(710.0, 1580.0, 110.0, 19.0), @S(109);
+  @OLT(118) : @R(190.0, 1550.0, 80.0, 19.0), @S(111);
+  @OLT(119) : @R(290.0, 1550.0, 80.0, 19.0), @S(113);
+  @OLT(120) : @R(710.0, 1750.0, 80.0, 19.0), @S(91);
+  @OLT(121) : @R(830.0, 1750.0, 80.0, 19.0), @S(92);
+  @OLT(122) : @R(940.0, 1750.0, 80.0, 19.0), @S(93);
+  @OLT(123) : @R(250.0, 1750.0, 160.0, 39.0), @S(106);
+  @C(124) : @FB(com_logicals_Basic_RangeCheck_FB_lc_RangeCheckWORD_FBD1), @R(780.0, 840.0, 300.0, 78.0), @I(@N(vidw_LL), @L(9.5)), @I(@N(vidw_In), @L(29.5)), @I(@N(vidw_UL), @L(49.5)), @O(@N(vox_LLRcd), @R(9.5)), @O(@N(vox_InRng), @R(29.5)), @O(@N(vox_OutOfRng), @R(49.5)), @O(@N(vox_ULRcd), @R(69.5));
+  @C(132) : @FB(com_logicals_Basic_RangeCheck_FB_lc_RangeCheckINT_FBD1), @R(780.0, 970.0, 300.0, 78.0), @I(@N(vidw_LL), @L(9.5)), @I(@N(vidw_In), @L(29.5)), @I(@N(vidw_UL), @L(49.5)), @O(@N(vox_LLRcd), @R(9.5)), @O(@N(vox_InRng), @R(29.5)), @O(@N(vox_OutOfRng), @R(49.5)), @O(@N(vox_ULRcd), @R(69.5));
+  @C(140) : @FB(com_logicals_Basic_RangeCheck_FB_lc_RangeCheckUINT_FBD1), @R(780.0, 1110.0, 300.0, 78.0), @I(@N(vidw_LL), @L(9.5)), @I(@N(vidw_In), @L(29.5)), @I(@N(vidw_UL), @L(49.5)), @O(@N(vox_LLRcd), @R(9.5)), @O(@N(vox_InRng), @R(29.5)), @O(@N(vox_OutOfRng), @R(49.5)), @O(@N(vox_ULRcd), @R(69.5));
+  @C(148) : @FB(com_logicals_Basic_RangeCheck_FB_lc_RangeCheckDINT_FBD1), @R(780.0, 1250.0, 300.0, 78.0), @I(@N(vidw_LL), @L(9.5)), @I(@N(vidw_In), @L(29.5)), @I(@N(vidw_UL), @L(49.5)), @O(@N(vox_LLRcd), @R(9.5)), @O(@N(vox_InRng), @R(29.5)), @O(@N(vox_OutOfRng), @R(49.5)), @O(@N(vox_ULRcd), @R(69.5));
+  @VF(149) : @E(ldi_RngChkDINT_LL), @R(440.0, 1250.0, 210.0, 19.0);
+  @VF(150) : @E(ldi_RngChkDINT_In), @R(440.0, 1270.0, 210.0, 19.0);
+  @VF(151) : @E(ldi_RngChkDINT_UL), @R(440.0, 1290.0, 210.0, 19.0);
+  @VF(152) : @E(lx_RngChkDINT_LLRcd), @R(1170.0, 1250.0, 220.0, 19.0);
+  @VF(153) : @E(lx_RngChkDINT_InRng), @R(1170.0, 1270.0, 220.0, 19.0);
+  @VF(154) : @E(lx_RngChkDINT_OutOfRng), @R(1170.0, 1290.0, 220.0, 19.0);
+  @VF(155) : @E(lx_RngChkDINT_ULRcd), @R(1170.0, 1310.0, 220.0, 19.0);
+  @CF(163) : @R(400.0, 110.0, 470.0, 99.0), @T("E:$NTest logicals_Lib RangeCheck"), @POU;
+  @CF(164) : @R(930.0, 110.0, 470.0, 99.0), @T("D:$NTest logicals_Lib RangeCheck"), @POU;
+  @C(165) : @FB(com_logicals_Basic_SigGen_FB_lc_GenTriangleSig_ST1), @R(400.0, 490.0, 300.0, 138.0), @I(@N(vit_CycleTime_ms), @L(9.5)), @I(@N(viui_MaxVal), @L(29.5)), @O(@N(voui_Out), @R(9.5)), @O(@N(vow_Out), @R(29.5)), @O(@N(voui_ErrNo), @R(49.5)), @O(@N(vox_Err), @R(69.5));
+  @C(166) : @F(SysTaskCycleTime), @R(30.0, 490.0, 160.0, 18.0), @O(@N(SysTaskCycleTime), @R(9.5));
+  @C(167) : @FB(FORCEMRK2), @R(230.0, 490.0, 120.0, 18.0), TIME, @I(@N(IN), @L(9.5)), @O(@N(OUT), @R(9.5));
+  @VF(170) : @E(lui_TriangleMaxVal), @R(50.0, 510.0, 140.0, 19.0);
+  @C(171) : @FB(FORCEMRK3), @R(230.0, 510.0, 120.0, 18.0), UINT, @I(@N(IN), @L(9.5)), @O(@N(OUT), @R(9.5));
+  @CONN(174) : @IT(C2), @R(760.0, 490.0, 60.0, 19.0), UINT;
+  @CONT(176) : @IT(C2), @CONN(174), @R(40.0, 990.0, 60.0, 19.0), UINT;
+  @C(177) : @F(TO_INT), @R(270.0, 990.0, 120.0, 18.0), UINT, @I(@N(IN), @L(9.5)), @O(@N(TO_INT), @R(9.5));
+  @CONT(180) : @IT(C2), @CONN(174), @R(40.0, 1130.0, 60.0, 19.0), UINT;
+  @C(181) : @F(TO_UINT), @R(270.0, 1130.0, 120.0, 18.0), UINT, @I(@N(IN), @L(9.5)), @O(@N(TO_UINT), @R(9.5));
+  @CONT(184) : @IT(C2), @CONN(174), @R(40.0, 1270.0, 60.0, 19.0), UINT;
+  @C(185) : @F(TO_DINT), @R(270.0, 1270.0, 120.0, 18.0), UINT, @I(@N(IN), @L(9.5)), @O(@N(TO_DINT), @R(9.5));
+  @CF(188) : @R(400.0, 360.0, 470.0, 99.0), @T("E:$NTest logicals_Lib RangeCheck$NGen Triangle signal"), @POU;
+  @CF(189) : @R(930.0, 360.0, 470.0, 99.0), @T("D:$NTest logicals_Lib RangeCheck$NGen Triangle Signal"), @POU;
+  @C(190) : @FB(FORCEMRK4), @R(130.0, 990.0, 120.0, 18.0), UINT, @I(@N(IN), @L(9.5)), @O(@N(OUT), @R(9.5));
+  @C(192) : @FB(FORCEMRK5), @R(130.0, 1130.0, 120.0, 18.0), UINT, @I(@N(IN), @L(9.5)), @O(@N(OUT), @R(9.5));
+  @C(193) : @FB(FORCEMRK6), @R(130.0, 1270.0, 120.0, 18.0), UINT, @I(@N(IN), @L(9.5)), @O(@N(OUT), @R(9.5));
+  @OLT(196) : @R(130.0, 930.0, 120.0, 39.0), @S(190);
+  @OLT(197) : @R(130.0, 1070.0, 120.0, 39.0), @S(192);
+  @OLT(198) : @R(130.0, 1210.0, 120.0, 39.0), @S(193);
+
+  @G(12) :
+     @L(@VF(3).o, @C(1).vix_ResetAll)
+    ;
+  @G(13) :
+     @L(@VF(4).o, @C(1).vir_In)
+    ;
+  @G(14) :
+     @L(@VF(5).o, @C(1).vir_Val_HH)
+    ;
+  @G(15) :
+     @L(@VF(6).o, @C(1).vir_Val_H)
+    ;
+  @G(16) :
+     @L(@VF(7).o, @C(1).vir_Val_L)
+    ;
+  @G(17) :
+     @L(@VF(8).o, @C(1).vir_Val_LL)
+    ;
+  @G(18) :
+     @L(@VF(9).o, @C(1).vir_Val_Hyst)
+    ;
+  @G(19) :
+     @L(@VF(10).o, @C(1).vir_DlyTm_HH_LL)
+    ;
+  @G(20) :
+     @L(@VF(11).o, @C(1).vir_DlyTm_H_L)
+    ;
+  @G(29) :
+     @L(@C(1).vor_GT_HH, @VF(21).i)
+    ;
+  @G(30) :
+     @L(@C(1).vor_LT_HH, @VF(22).i)
+    ;
+  @G(31) :
+     @L(@C(1).vor_GT_H, @VF(23).i)
+    ;
+  @G(32) :
+     @L(@C(1).vor_LT_H, @VF(24).i)
+    ;
+  @G(33) :
+     @L(@C(1).vor_GT_L, @VF(25).i)
+    ;
+  @G(34) :
+     @L(@C(1).vor_LT_L, @VF(26).i)
+    ;
+  @G(35) :
+     @L(@C(1).vor_GT_LL, @VF(27).i)
+    ;
+  @G(36) :
+     @L(@C(1).vor_LT_LL, @VF(28).i)
+    ;
+  @G(41) :
+     @L(@VF(37).o, @C(2).vir_In)
+    ;
+  @G(42) :
+     @L(@VF(38).o, @C(2).vir_LU)
+    ;
+  @G(43) :
+     @L(@VF(39).o, @C(2).vir_LL)
+    ;
+  @G(44) :
+     @L(@VF(40).o, @C(2).vir_HYST)
+    ;
+  @G(46) :
+     @L(@C(2).vox_InRng, @VF(45).i)
+    ;
+  @G(50) :
+     @L(@C(2).vox_URchd, @VF(47).i)
+    ;
+  @G(51) :
+     @L(@C(2).vox_LRchd, @VF(48).i)
+    ;
+  @G(52) :
+     @L(@C(2).vox_OutOfRng, @VF(49).i)
+    ;
+  @G(57) :
+     @L(@VF(54).o, @C(53).vidw_LL)
+    ;
+  @G(58) :
+     @L(@VF(55).o, @C(53).vidw_In)
+    ;
+  @G(59) :
+     @L(@VF(56).o, @C(53).vidw_UL)
+    ;
+  @G(66) :
+     @L(@C(53).vox_LLRcd, @VF(60).i)
+    ;
+  @G(67) :
+     @L(@C(53).vox_InRng, @VF(63).i)
+    ;
+  @G(68) :
+     @L(@C(53).vox_OutOfRng, @VF(64).i)
+    ;
+  @G(69) :
+     @L(@C(53).vox_ULRcd, @VF(65).i)
+    ;
+  @G(99) :
+     @L(@C(98).vox_LLRcd, @VF(94).i)
+    ;
+  @G(100) :
+     @L(@C(98).vox_InRng, @VF(95).i)
+    ;
+  @G(101) :
+     @L(@C(98).vox_OutOfRng, @VF(96).i)
+    ;
+  @G(102) :
+     @L(@C(98).vox_ULRcd, @VF(97).i)
+    ;
+  @G(103) :
+     @L(@VF(91).o, @C(98).vidw_LL)
+    ;
+  @G(104) :
+     @L(@VF(92).o, @C(98).vidw_In)
+    ;
+  @G(105) :
+     @L(@VF(93).o, @C(98).vidw_UL)
+    ;
+  @G(110) :
+     @L(@C(108).vor_Sin_X, @CONN(109).i)
+    ;
+  @G(112) :
+     @L(@VF(111).o, @C(108).vir_StepVal)
+    ;
+  @G(114) :
+     @L(@VF(113).o, @C(108).vir_EndVal)
+    ;
+  @G(116) :
+     @L(@CONT(115).o, @C(106).IN)
+    ;
+  @G(107) :
+     @L(@C(106).OUT, @VF(92).i)
+    ;
+  @G(125) :
+     @L(@VF(70).o, @C(124).vidw_LL)
+    ;
+  @G(126) :
+     @L(@VF(71).o, @C(124).vidw_In)
+    ;
+  @G(127) :
+     @L(@VF(72).o, @C(124).vidw_UL)
+    ;
+  @G(128) :
+     @L(@C(124).vox_LLRcd, @VF(74).i)
+    ;
+  @G(129) :
+     @L(@C(124).vox_InRng, @VF(75).i)
+    ;
+  @G(130) :
+     @L(@C(124).vox_OutOfRng, @VF(76).i)
+    ;
+  @G(131) :
+     @L(@C(124).vox_ULRcd, @VF(73).i)
+    ;
+  @G(133) :
+     @L(@VF(77).o, @C(132).vidw_LL)
+    ;
+  @G(134) :
+     @L(@VF(78).o, @C(132).vidw_In)
+    ;
+  @G(135) :
+     @L(@VF(79).o, @C(132).vidw_UL)
+    ;
+  @G(136) :
+     @L(@C(132).vox_LLRcd, @VF(80).i)
+    ;
+  @G(137) :
+     @L(@C(132).vox_InRng, @VF(81).i)
+    ;
+  @G(138) :
+     @L(@C(132).vox_OutOfRng, @VF(82).i)
+    ;
+  @G(139) :
+     @L(@C(132).vox_ULRcd, @VF(83).i)
+    ;
+  @G(141) :
+     @L(@VF(84).o, @C(140).vidw_LL)
+    ;
+  @G(142) :
+     @L(@VF(85).o, @C(140).vidw_In)
+    ;
+  @G(143) :
+     @L(@VF(86).o, @C(140).vidw_UL)
+    ;
+  @G(144) :
+     @L(@C(140).vox_LLRcd, @VF(87).i)
+    ;
+  @G(145) :
+     @L(@C(140).vox_InRng, @VF(88).i)
+    ;
+  @G(146) :
+     @L(@C(140).vox_OutOfRng, @VF(89).i)
+    ;
+  @G(147) :
+     @L(@C(140).vox_ULRcd, @VF(90).i)
+    ;
+  @G(156) :
+     @L(@VF(149).o, @C(148).vidw_LL)
+    ;
+  @G(157) :
+     @L(@VF(150).o, @C(148).vidw_In)
+    ;
+  @G(158) :
+     @L(@VF(151).o, @C(148).vidw_UL)
+    ;
+  @G(159) :
+     @L(@C(148).vox_LLRcd, @VF(152).i)
+    ;
+  @G(160) :
+     @L(@C(148).vox_InRng, @VF(153).i)
+    ;
+  @G(161) :
+     @L(@C(148).vox_OutOfRng, @VF(154).i)
+    ;
+  @G(162) :
+     @L(@C(148).vox_ULRcd, @VF(155).i)
+    ;
+  @G(168) :
+     @L(@C(166).SysTaskCycleTime, @C(167).IN)
+    ;
+  @G(169) :
+     @L(@C(167).OUT, @C(165).vit_CycleTime_ms)
+    ;
+  @G(172) :
+     @L(@VF(170).o, @C(171).IN)
+    ;
+  @G(173) :
+     @L(@C(171).OUT, @C(165).viui_MaxVal)
+    ;
+  @G(175) :
+     @L(@C(165).voui_Out, @CONN(174).i)
+    ;
+  @G(178) :
+     @L(@CONT(176).o, @C(190).IN)
+    ;
+  @G(179) :
+     @L(@C(177).TO_INT, @VF(78).i)
+    ;
+  @G(183) :
+     @L(@C(181).TO_UINT, @VF(85).i)
+    ;
+  @G(186) :
+     @L(@CONT(184).o, @C(193).IN)
+    ;
+  @G(187) :
+     @L(@C(185).TO_DINT, @VF(150).i)
+    ;
+  @G(191) :
+     @L(@C(190).OUT, @C(177).IN)
+    ;
+  @G(194) :
+     @L(@C(193).OUT, @C(185).IN)
+    ;
+  @G(182) :
+     @L(@C(192).OUT, @C(181).IN)
+    ;
+  @G(195) :
+     @L(@CONT(180).o, @C(192).IN)
+    ;
+END_PROGRAM

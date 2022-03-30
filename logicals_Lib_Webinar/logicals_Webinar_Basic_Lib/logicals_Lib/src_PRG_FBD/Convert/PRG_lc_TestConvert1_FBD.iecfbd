@@ -1,0 +1,282 @@
+PROGRAM PRG_lc_TestConvert1_FBD
+  USING com.logicals.Basic.Convert;
+  USING com.logicals.Basic.Calc;
+  VAR
+    lb_RealTo12Byte_Sign : BYTE := 43;
+    lb_RealTo12Byte_Mill : BYTE := 48;
+    lb_RealTo12Byte_00Thous : BYTE := 48;
+    lb_RealTo12Byte_0Thous : BYTE := 48;
+    lb_RealTo12Byte_Thous : BYTE := 48;
+    lb_RealTo12Byte_Hundred : BYTE := 48;
+    lb_RealTo12Byte_Ten : BYTE := 48;
+    lb_RealTo12Byte_Single : BYTE := 48;
+    lb_RealTo12Byte_Dot : BYTE := 46;
+    lb_RealTo12Byte_DSing : BYTE := 48;
+    lb_RealTo12Byte_DTen : BYTE := 48;
+    lb_RealTo12Byte_DHundred : BYTE := 48;
+    FB_lc_StrTo10Byte_FBD : com.logicals.Basic.Convert.FB_lc_StrTo10Byte_FBD;
+    lstr_TestIn_StrTo10Byte : STRING[127] := 'ABCDEFGHIJ';
+    lb_TestOut0_StrTo10Byte : BYTE;
+    lb_TestOut1_StrTo10Byte : BYTE;
+    lb_TestOut2_StrTo10Byte : BYTE;
+    lb_TestOut3_StrTo10Byte : BYTE;
+    lb_TestOut4_StrTo10Byte : BYTE;
+    lb_TestOut5_StrTo10Byte : BYTE;
+    lb_TestOut6_StrTo10Byte : BYTE;
+    lb_TestOut7_StrTo10Byte : BYTE;
+    lb_TestOut8_StrTo10Byte : BYTE;
+    lb_TestOut9_StrTo10Byte : BYTE;
+    FB_lc_ConvRealTo12Byte_ST : com.logicals.Basic.Convert.FB_lc_ConvRealTo12Byte_ST;
+    lb_RealTo12ByteST_Sign : BYTE := 43;
+    lb_RealTo12ByteST_Mill : BYTE := 48;
+    lb_RealTo12ByteST_00Thous : BYTE := 48;
+    lb_RealTo12ByteST_0Thous : BYTE := 48;
+    lb_RealTo12ByteST_Thous : BYTE := 48;
+    lb_RealTo12ByteST_Hundred : BYTE := 48;
+    lb_RealTo12ByteST_Ten : BYTE := 48;
+    lb_RealTo12ByteST_Single : BYTE := 48;
+    lb_RealTo12ByteST_Dot : BYTE := 46;
+    lb_RealTo12ByteST_DSing : BYTE := 48;
+    lb_RealTo12ByteST_DTen : BYTE := 48;
+    lb_RealTo12ByteST_DHundred : BYTE := 48;
+  END_VAR
+  VAR
+    FB_lc_RealTo12Byte_FBD : com.logicals.Basic.Convert.FB_lc_RealTo12Byte_FBD;
+    FB_lc_ByteNotNull_FBD : com.logicals.Basic.Convert.FB_lc_ByteNotNull_FBD;
+    FB_lc_ChrToByte_FBD : com.logicals.Basic.Convert.FB_lc_ChrToByte_FBD;
+    lstr_TestIn_ChrToByte : STRING[127] := '0';
+    lb_TestOut_ChrToByte : BYTE;
+    lb_TestIn0_ByteNotNull : BYTE;
+    lb_TestOut0_ByteNotNull : BYTE;
+    lr_TestIn_RealTo12Byte : REAL;
+  END_VAR
+
+  (*
+
+    // Network 1:
+    FB_lc_RealTo12Byte_FBD(vir_In := lr_TestIn_RealTo12Byte, vob_Sign => lb_RealTo12Byte_Sign, vob_Mill => lb_RealTo12Byte_Mill, vob_00Thous => lb_RealTo12Byte_00Thous, vob_0Thous => lb_RealTo12Byte_0Thous, vob_Thous => lb_RealTo12Byte_Thous, vob_Hun => lb_RealTo12Byte_Hundred, vob_Ten => lb_RealTo12Byte_Ten, vob_Single => lb_RealTo12Byte_Single, vob_Dot => lb_RealTo12Byte_Dot, vob_DSing => lb_RealTo12Byte_DSing, vob_DTen => lb_RealTo12Byte_DTen, vob_DHund => lb_RealTo12Byte_DHundred);
+    FB_lc_ConvRealTo12Byte_ST(vir_In := lr_TestIn_RealTo12Byte, vob_Sign => lb_RealTo12ByteST_Sign, vob_Mill => lb_RealTo12ByteST_Mill, vob_00Thous => lb_RealTo12ByteST_00Thous, vob_0Thous => lb_RealTo12ByteST_0Thous, vob_Thous => lb_RealTo12ByteST_Thous, vob_Hun => lb_RealTo12ByteST_Hundred, vob_Ten => lb_RealTo12ByteST_Ten, vob_Single => lb_RealTo12ByteST_Single, vob_Dot => lb_RealTo12ByteST_Dot, vob_DSing => lb_RealTo12ByteST_DSing, vob_DTen => lb_RealTo12ByteST_DTen, vob_DHund => lb_RealTo12ByteST_DHundred);
+
+    // Network 2:
+    FB_lc_ByteNotNull_FBD(vib_Byte0 := lb_TestIn0_ByteNotNull, vob_Byte0 => lb_TestOut0_ByteNotNull);
+
+    // Network 3:
+    FB_lc_ChrToByte_FBD(vistr_Chr_127 := lstr_TestIn_ChrToByte, vob_Out => lb_TestOut_ChrToByte);
+
+    // Network 4:
+    FB_lc_StrTo10Byte_FBD(vistr_In_127 := lstr_TestIn_StrTo10Byte, vob_Byte0 => lb_TestOut0_StrTo10Byte, vob_Byte1 => lb_TestOut1_StrTo10Byte, vob_Byte2 => lb_TestOut2_StrTo10Byte, vob_Byte3 => lb_TestOut3_StrTo10Byte, vob_Byte4 => lb_TestOut4_StrTo10Byte, vob_Byte5 => lb_TestOut5_StrTo10Byte, vob_Byte6 => lb_TestOut6_StrTo10Byte, vob_Byte7 => lb_TestOut7_StrTo10Byte, vob_Byte8 => lb_TestOut8_StrTo10Byte, vob_Byte9 => lb_TestOut9_StrTo10Byte);
+
+  *)
+
+  @C(1) : @FB(FB_lc_RealTo12Byte_FBD), instanceNameVisible, @R(650.0, 160.0, 180.0, 238.0), @I(@N(vir_In), @L(9.5)), @O(@N(vob_Sign), @R(9.5)), @O(@N(vob_Mill), @R(29.5)), @O(@N(vob_00Thous), @R(49.5)), @O(@N(vob_0Thous), @R(69.5)), @O(@N(vob_Thous), @R(89.5)), @O(@N(vob_Hun), @R(109.5)), @O(@N(vob_Ten), @R(129.5)), @O(@N(vob_Single), @R(149.5)), @O(@N(vob_Dot), @R(169.5)), @O(@N(vob_DSing), @R(189.5)), @O(@N(vob_DTen), @R(209.5)), @O(@N(vob_DHund), @R(229.5));
+  @C(2) : @FB(FB_lc_ByteNotNull_FBD), instanceNameVisible, @R(640.0, 1370.0, 160.0, 198.0), @I(@N(vib_Byte9), @L(9.5)), @I(@N(vib_Byte8), @L(29.5)), @I(@N(vib_Byte7), @L(49.5)), @I(@N(vib_Byte6), @L(69.5)), @I(@N(vib_Byte5), @L(89.5)), @I(@N(vib_Byte4), @L(109.5)), @I(@N(vib_Byte3), @L(129.5)), @I(@N(vib_Byte2), @L(149.5)), @I(@N(vib_Byte1), @L(169.5)), @I(@N(vib_Byte0), @L(189.5)), @O(@N(vob_Byte9), @R(9.5)), @O(@N(vob_Byte8), @R(29.5)), @O(@N(vob_Byte7), @R(49.5)), @O(@N(vob_Byte6), @R(69.5)), @O(@N(vob_Byte5), @R(89.5)), @O(@N(vob_Byte4), @R(109.5)), @O(@N(vob_Byte3), @R(129.5)), @O(@N(vob_Byte2), @R(149.5)), @O(@N(vob_Byte1), @R(169.5)), @O(@N(vob_Byte0), @R(189.5));
+  @C(3) : @FB(FB_lc_ChrToByte_FBD), instanceNameVisible, @R(620.0, 1600.0, 200.0, 58.0), @I(@N(vistr_Chr_127), @L(9.5)), @O(@N(vob_Out), @R(9.5));
+  @VF(4) : @E(lstr_TestIn_ChrToByte), @R(260.0, 1600.0, 260.0, 19.0);
+  @VF(6) : @E(lb_TestOut_ChrToByte), @R(900.0, 1600.0, 230.0, 19.0);
+  @VF(8) : @E(lb_TestIn0_ByteNotNull), @R(260.0, 1550.0, 260.0, 19.0);
+  @VF(10) : @E(lb_TestOut0_ByteNotNull), @R(900.0, 1550.0, 230.0, 19.0);
+  @VF(12) : @E(lr_TestIn_RealTo12Byte), @R(280.0, 160.0, 240.0, 19.0);
+  @VF(14) : @E(lb_RealTo12Byte_Sign), @R(930.0, 160.0, 260.0, 19.0);
+  @VF(15) : @E(lb_RealTo12Byte_Mill), @R(930.0, 180.0, 260.0, 19.0);
+  @VF(16) : @E(lb_RealTo12Byte_00Thous), @R(930.0, 200.0, 260.0, 19.0);
+  @VF(17) : @E(lb_RealTo12Byte_0Thous), @R(930.0, 220.0, 260.0, 19.0);
+  @VF(18) : @E(lb_RealTo12Byte_Thous), @R(930.0, 240.0, 260.0, 19.0);
+  @VF(19) : @E(lb_RealTo12Byte_Hundred), @R(930.0, 260.0, 260.0, 19.0);
+  @VF(20) : @E(lb_RealTo12Byte_Ten), @R(930.0, 280.0, 260.0, 19.0);
+  @VF(21) : @E(lb_RealTo12Byte_Single), @R(930.0, 300.0, 260.0, 19.0);
+  @VF(22) : @E(lb_RealTo12Byte_Dot), @R(930.0, 320.0, 260.0, 19.0);
+  @VF(23) : @E(lb_RealTo12Byte_DSing), @R(930.0, 340.0, 260.0, 19.0);
+  @VF(24) : @E(lb_RealTo12Byte_DTen), @R(930.0, 360.0, 260.0, 19.0);
+  @VF(25) : @E(lb_RealTo12Byte_DHundred), @R(930.0, 380.0, 260.0, 19.0);
+  @C(38) : @FB(FB_lc_StrTo10Byte_FBD), instanceNameVisible, @R(630.0, 1690.0, 180.0, 238.0), @I(@N(vistr_In_127), @L(9.5)), @O(@N(vob_Byte0), @R(9.5)), @O(@N(vob_Byte1), @R(29.5)), @O(@N(vob_Byte2), @R(49.5)), @O(@N(vob_Byte3), @R(69.5)), @O(@N(vob_Byte4), @R(89.5)), @O(@N(vob_Byte5), @R(109.5)), @O(@N(vob_Byte6), @R(129.5)), @O(@N(vob_Byte7), @R(149.5)), @O(@N(vob_Byte8), @R(169.5)), @O(@N(vob_Byte9), @R(189.5));
+  @VF(39) : @E(lstr_TestIn_StrTo10Byte), @R(260.0, 1690.0, 260.0, 19.0);
+  @VF(41) : @E(lb_TestOut0_StrTo10Byte), @R(900.0, 1690.0, 230.0, 19.0);
+  @VF(43) : @E(lb_TestOut1_StrTo10Byte), @R(900.0, 1710.0, 230.0, 19.0);
+  @VF(44) : @E(lb_TestOut2_StrTo10Byte), @R(900.0, 1730.0, 230.0, 19.0);
+  @VF(45) : @E(lb_TestOut3_StrTo10Byte), @R(900.0, 1750.0, 230.0, 19.0);
+  @VF(46) : @E(lb_TestOut4_StrTo10Byte), @R(900.0, 1770.0, 230.0, 19.0);
+  @VF(47) : @E(lb_TestOut5_StrTo10Byte), @R(900.0, 1790.0, 230.0, 19.0);
+  @VF(48) : @E(lb_TestOut6_StrTo10Byte), @R(900.0, 1810.0, 230.0, 19.0);
+  @VF(49) : @E(lb_TestOut7_StrTo10Byte), @R(900.0, 1830.0, 230.0, 19.0);
+  @VF(50) : @E(lb_TestOut8_StrTo10Byte), @R(900.0, 1850.0, 230.0, 19.0);
+  @VF(51) : @E(lb_TestOut9_StrTo10Byte), @R(900.0, 1870.0, 230.0, 19.0);
+  @CF(61) : @R(260.0, 30.0, 470.0, 99.0), @T("E:$NTest logicals_Lib Convert"), @POU;
+  @CF(62) : @R(790.0, 30.0, 470.0, 99.0), @T("D:$NTest logicals_Lib Convert"), @POU;
+  @OLT(63) : @R(280.0, 180.0, 240.0, 19.0), @S(12);
+  @OLT(64) : @R(1230.0, 160.0, 80.0, 19.0), @S(14);
+  @OLT(65) : @R(1230.0, 180.0, 80.0, 19.0), @S(15);
+  @OLT(66) : @R(1230.0, 200.0, 80.0, 19.0), @S(16);
+  @OLT(67) : @R(1230.0, 220.0, 80.0, 19.0), @S(17);
+  @OLT(68) : @R(1230.0, 240.0, 80.0, 19.0), @S(18);
+  @OLT(69) : @R(1230.0, 260.0, 80.0, 19.0), @S(19);
+  @OLT(70) : @R(1230.0, 280.0, 80.0, 19.0), @S(20);
+  @OLT(71) : @R(1230.0, 300.0, 80.0, 19.0), @S(21);
+  @OLT(72) : @R(1230.0, 320.0, 80.0, 19.0), @S(22);
+  @OLT(73) : @R(1230.0, 340.0, 80.0, 19.0), @S(23);
+  @OLT(74) : @R(1230.0, 360.0, 80.0, 19.0), @S(24);
+  @OLT(75) : @R(1230.0, 380.0, 80.0, 19.0), @S(25);
+  @OLT(76) : @R(1220.0, 1600.0, 80.0, 19.0), @S(6);
+  @OLT(77) : @R(260.0, 1620.0, 80.0, 19.0), @S(4);
+  @OLT(78) : @R(260.0, 1710.0, 260.0, 19.0), @S(39);
+  @OLT(79) : @R(1220.0, 1690.0, 80.0, 19.0), @S(41);
+  @OLT(80) : @R(1220.0, 1710.0, 80.0, 19.0), @S(43);
+  @OLT(81) : @R(1220.0, 1730.0, 80.0, 19.0), @S(44);
+  @OLT(82) : @R(1220.0, 1750.0, 80.0, 19.0), @S(45);
+  @OLT(83) : @R(1220.0, 1770.0, 80.0, 19.0), @S(46);
+  @OLT(84) : @R(1220.0, 1790.0, 80.0, 19.0), @S(47);
+  @OLT(85) : @R(1220.0, 1810.0, 80.0, 19.0), @S(48);
+  @OLT(86) : @R(1220.0, 1830.0, 80.0, 19.0), @S(49);
+  @OLT(87) : @R(1220.0, 1850.0, 80.0, 19.0), @S(50);
+  @OLT(88) : @R(1220.0, 1870.0, 80.0, 19.0), @S(51);
+  @OLT(89) : @R(440.0, 1530.0, 80.0, 19.0), @S(8);
+  @OLT(90) : @R(1220.0, 1550.0, 80.0, 19.0), @S(10);
+  @VF(93) : @E(lb_RealTo12ByteST_Sign), @R(940.0, 470.0, 260.0, 19.0);
+  @VF(94) : @E(lb_RealTo12ByteST_Mill), @R(940.0, 490.0, 260.0, 19.0);
+  @VF(95) : @E(lb_RealTo12ByteST_00Thous), @R(940.0, 510.0, 260.0, 19.0);
+  @VF(96) : @E(lb_RealTo12ByteST_0Thous), @R(940.0, 530.0, 260.0, 19.0);
+  @VF(97) : @E(lb_RealTo12ByteST_Thous), @R(940.0, 550.0, 260.0, 19.0);
+  @VF(98) : @E(lb_RealTo12ByteST_Hundred), @R(940.0, 570.0, 260.0, 19.0);
+  @VF(99) : @E(lb_RealTo12ByteST_Ten), @R(940.0, 590.0, 260.0, 19.0);
+  @VF(100) : @E(lb_RealTo12ByteST_Single), @R(940.0, 610.0, 260.0, 19.0);
+  @VF(101) : @E(lb_RealTo12ByteST_Dot), @R(940.0, 630.0, 260.0, 19.0);
+  @VF(102) : @E(lb_RealTo12ByteST_DSing), @R(940.0, 650.0, 260.0, 19.0);
+  @VF(103) : @E(lb_RealTo12ByteST_DTen), @R(940.0, 670.0, 260.0, 19.0);
+  @VF(104) : @E(lb_RealTo12ByteST_DHundred), @R(940.0, 690.0, 260.0, 19.0);
+  @OLT(117) : @R(1240.0, 470.0, 80.0, 19.0), @S(93);
+  @OLT(118) : @R(1240.0, 490.0, 80.0, 19.0), @S(94);
+  @OLT(119) : @R(1240.0, 510.0, 80.0, 19.0), @S(95);
+  @OLT(120) : @R(1240.0, 530.0, 80.0, 19.0), @S(96);
+  @OLT(121) : @R(1240.0, 550.0, 80.0, 19.0), @S(97);
+  @OLT(122) : @R(1240.0, 570.0, 80.0, 19.0), @S(98);
+  @OLT(123) : @R(1240.0, 590.0, 80.0, 19.0), @S(99);
+  @OLT(124) : @R(1240.0, 610.0, 80.0, 19.0), @S(100);
+  @OLT(125) : @R(1240.0, 630.0, 80.0, 19.0), @S(101);
+  @OLT(126) : @R(1240.0, 650.0, 80.0, 19.0), @S(102);
+  @OLT(127) : @R(1240.0, 670.0, 80.0, 19.0), @S(103);
+  @OLT(128) : @R(1240.0, 690.0, 80.0, 19.0), @S(104);
+  @C(91) : @FB(FB_lc_ConvRealTo12Byte_ST), @R(650.0, 470.0, 200.0, 358.0), @I(@N(vir_In), @L(9.5)), @O(@N(vox_Err), @R(269.5)), @O(@N(voui_ErrNo), @R(289.5)), @O(@N(vox_ValMaxErr), @R(329.5)), @O(@N(vox_ValMinErr), @R(349.5)), @O(@N(vob_Sign), @R(9.5)), @O(@N(vob_Mill), @R(29.5)), @O(@N(vob_00Thous), @R(49.5)), @O(@N(vob_0Thous), @R(69.5)), @O(@N(vob_Thous), @R(89.5)), @O(@N(vob_Hun), @R(109.5)), @O(@N(vob_Ten), @R(129.5)), @O(@N(vob_Single), @R(149.5)), @O(@N(vob_Dot), @R(169.5)), @O(@N(vob_DSing), @R(189.5)), @O(@N(vob_DTen), @R(209.5)), @O(@N(vob_DHund), @R(229.5));
+  @CP(92) : 539.5, 169.5;
+
+  @G(5) :
+     @L(@VF(4).o, @C(3).vistr_Chr_127)
+    ;
+  @G(7) :
+     @L(@C(3).vob_Out, @VF(6).i)
+    ;
+  @G(9) :
+     @L(@VF(8).o, @C(2).vib_Byte0)
+    ;
+  @G(11) :
+     @L(@C(2).vob_Byte0, @VF(10).i)
+    ;
+  @G(13) :
+     @L(@VF(12).o, @CP(92)),
+     @L(@CP(92), @C(1).vir_In),
+     @L(@CP(92), @C(91).vir_In)
+    ;
+  @G(26) :
+     @L(@C(1).vob_Sign, @VF(14).i)
+    ;
+  @G(27) :
+     @L(@C(1).vob_Mill, @VF(15).i)
+    ;
+  @G(28) :
+     @L(@C(1).vob_00Thous, @VF(16).i)
+    ;
+  @G(29) :
+     @L(@C(1).vob_0Thous, @VF(17).i)
+    ;
+  @G(30) :
+     @L(@C(1).vob_Thous, @VF(18).i)
+    ;
+  @G(31) :
+     @L(@C(1).vob_Hun, @VF(19).i)
+    ;
+  @G(32) :
+     @L(@C(1).vob_Ten, @VF(20).i)
+    ;
+  @G(33) :
+     @L(@C(1).vob_Single, @VF(21).i)
+    ;
+  @G(34) :
+     @L(@C(1).vob_Dot, @VF(22).i)
+    ;
+  @G(35) :
+     @L(@C(1).vob_DSing, @VF(23).i)
+    ;
+  @G(36) :
+     @L(@C(1).vob_DTen, @VF(24).i)
+    ;
+  @G(37) :
+     @L(@C(1).vob_DHund, @VF(25).i)
+    ;
+  @G(40) :
+     @L(@VF(39).o, @C(38).vistr_In_127)
+    ;
+  @G(42) :
+     @L(@C(38).vob_Byte0, @VF(41).i)
+    ;
+  @G(52) :
+     @L(@C(38).vob_Byte1, @VF(43).i)
+    ;
+  @G(53) :
+     @L(@C(38).vob_Byte2, @VF(44).i)
+    ;
+  @G(54) :
+     @L(@C(38).vob_Byte3, @VF(45).i)
+    ;
+  @G(55) :
+     @L(@C(38).vob_Byte4, @VF(46).i)
+    ;
+  @G(56) :
+     @L(@C(38).vob_Byte5, @VF(47).i)
+    ;
+  @G(57) :
+     @L(@C(38).vob_Byte6, @VF(48).i)
+    ;
+  @G(58) :
+     @L(@C(38).vob_Byte7, @VF(49).i)
+    ;
+  @G(59) :
+     @L(@C(38).vob_Byte8, @VF(50).i)
+    ;
+  @G(60) :
+     @L(@C(38).vob_Byte9, @VF(51).i)
+    ;
+  @G(105) :
+     @L(@C(91).vob_Sign, @VF(93).i)
+    ;
+  @G(106) :
+     @L(@C(91).vob_Mill, @VF(94).i)
+    ;
+  @G(107) :
+     @L(@C(91).vob_00Thous, @VF(95).i)
+    ;
+  @G(108) :
+     @L(@C(91).vob_0Thous, @VF(96).i)
+    ;
+  @G(109) :
+     @L(@C(91).vob_Thous, @VF(97).i)
+    ;
+  @G(110) :
+     @L(@C(91).vob_Hun, @VF(98).i)
+    ;
+  @G(111) :
+     @L(@C(91).vob_Ten, @VF(99).i)
+    ;
+  @G(112) :
+     @L(@C(91).vob_Single, @VF(100).i)
+    ;
+  @G(113) :
+     @L(@C(91).vob_Dot, @VF(101).i)
+    ;
+  @G(114) :
+     @L(@C(91).vob_DSing, @VF(102).i)
+    ;
+  @G(115) :
+     @L(@C(91).vob_DTen, @VF(103).i)
+    ;
+  @G(116) :
+     @L(@C(91).vob_DHund, @VF(104).i)
+    ;
+END_PROGRAM

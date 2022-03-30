@@ -1,0 +1,76 @@
+ /*
+  * logi.cals GmbH
+  * A-3100 St. Poelten
+  * Europaplatz 7/1
+  * Tel.: 0043-5-77147
+  *
+  * logi.cals automation solutions & services GmbH
+  * D-40738 Langenfeld
+  * Postfach 1306
+  * Tel.: 0049-2173-91910
+  * 
+  * Contact:
+  * dieter.goltz@logicals.com
+  * 
+  * History:
+  * Created:  
+  * DG 2017-03-28
+  * 
+  * Modified: 
+  * DG 2017-03-28
+  * DG 2020-11-15
+  */
+   
+ /* 
+  * Description
+  */
+   
+ /* 
+  * Beschreibung
+  * Test der Motorbausteine (Sim)
+  */
+
+USING com.logicals.Basic.Actuator_Sim;
+
+/*
+ * Dient zum Test der Motorbausteine
+ */
+PROGRAM PRG_lc_TestActuator1_Sim_ST
+
+VAR
+ li_CycleCount : INT;
+ lx_CyclePulse : BOOL;
+END_VAR
+
+VAR
+  FB_MotorSim : FB_lc_Motor2R_FB_Sim_ST;
+END_VAR
+
+VAR
+  lx_StartMotorLeft  : BOOL;
+  lx_StartMotorRight : BOOL;
+  lx_StopMotor       : BOOL;
+  lx_ErrQuitMotor    : BOOL;
+
+  lx_MotorLeftFB  : BOOL;
+  lx_MotorRightFB : BOOL;
+
+  lx_MotorLeft : BOOL;
+  lx_MotorRight : BOOL;
+
+  lt_MotorLeftDelayFB  : TIME := T#1s;
+  lt_MotorRightDelayFB : TIME := T#1s;
+  
+END_VAR
+
+li_CycleCount := li_CycleCount + 1;
+lx_CyclePulse := NOT(lx_CyclePulse);
+
+FB_MotorSim(vix_Left       := lx_MotorLeft, 
+	        vix_Right      := lx_MotorRight,
+	        vit_LeftDelay  := lt_MotorLeftDelayFB,
+	        vit_RightDelay := lt_MotorRightDelayFB,
+	        vox_LeftFB  => lx_MotorLeftFB, 
+	        vox_RightFB => lx_MotorRightFB);
+
+END_PROGRAM

@@ -1,0 +1,204 @@
+PROGRAM PRG_lc_TestLogic1_FBD
+  USING com.logicals.Basic.Logic;
+  VAR
+    lx_In1 : BOOL;
+    lx_In2 : BOOL;
+    lx_In3 : BOOL;
+    lx_EinsAusDrei_Out : BOOL;
+    lx_EinsAusDrei2_Out : BOOL;
+    FB_lc_EinsAusDrei_Auswahl_FBD : FB_lc_EinsAusDrei_Auswahl_FBD;
+    FB_lc_EinsAusDrei_Auswahl2_FBD : FB_lc_EinsAusDrei_Auswahl2_FBD;
+    FB_lc_ToggleSw_FBD : com.logicals.Basic.Logic.FB_lc_ToggleSw_FBD;
+    FB_lc_Toggle1_FBD : com.logicals.Basic.Logic.FB_lc_Toggle1_FBD;
+    lx_Toggle1_In : BOOL;
+    lx_Toggle1_Out : BOOL;
+    FB_lc_NooM_FBD : com.logicals.Basic.Logic.FB_lc_NooM_FBD;
+  END_VAR
+  VAR
+    lx_ToggleSw_Set : BOOL;
+    lx_ToggleSw_Trg : BOOL;
+    lx_ToggleSw_Reset : BOOL;
+  END_VAR
+  VAR
+    lx_ToggleSw_Out : BOOL;
+  END_VAR
+  VAR
+    lx_NooM_Req1oo6 : BOOL { description := "request 1 out of 6"; };
+    lx_NooM_Req2oo6 : BOOL { description := "request 2 out of 6"; };
+    lx_NooM_Req3oo6 : BOOL { description := "request 3 out of 6"; };
+    lx_NooM_Req4oo6 : BOOL { description := "request 4 out of 6"; };
+    lx_NooM_Req5oo6 : BOOL { description := "request 5 out of 6"; };
+    lx_NooM_Req6oo6 : BOOL { description := "request 6 out of 6"; };
+    lx_NooM_a_Rdy : BOOL { description := "a ready for operation"; };
+    lx_NooM_b_Rdy : BOOL { description := "b ready for operation"; };
+    lx_NooM_c_Rdy : BOOL { description := "c ready for operation"; };
+    lx_NooM_d_Rdy : BOOL { description := "d ready for operation"; };
+    lx_NooM_e_Rdy : BOOL { description := "e ready for operation"; };
+    lx_NooM_f_Rdy : BOOL { description := "f ready for operation"; };
+    lt_NooM_Sw_Prio_Time : TIME { description := "delay to change internal priorities"; };
+    lt_NooM_Par_Time : TIME { description := "parallel operation time"; };
+    lx_NooM_Req_a : BOOL { description := "request a"; };
+    lx_NooM_Req_b : BOOL { description := "request b"; };
+    lx_NooM_Req_c : BOOL { description := "request c"; };
+    lx_NooM_Req_d : BOOL { description := "request d"; };
+    lx_NooM_Req_e : BOOL { description := "request e"; };
+    lx_NooM_Req_f : BOOL { description := "request f"; };
+  END_VAR
+
+  (*
+
+    // Network 1:
+    FB_lc_EinsAusDrei_Auswahl_FBD(vix_In1 := lx_In1, vix_In2 := lx_In2, vix_In3 := lx_In3, vox_Out => lx_EinsAusDrei_Out);
+    FB_lc_EinsAusDrei_Auswahl2_FBD(vix_In1 := lx_In1, vix_In2 := lx_In2, vix_In3 := lx_In3, vox_Out => lx_EinsAusDrei2_Out);
+
+    // Network 2:
+    FB_lc_Toggle1_FBD(vix_In := lx_Toggle1_In, vox_Out => lx_Toggle1_Out);
+
+    // Network 3:
+    FB_lc_ToggleSw_FBD(vix_Set := lx_ToggleSw_Set, vix_Trg := lx_ToggleSw_Trg, vix_Reset := lx_ToggleSw_Reset, vox_Out => lx_ToggleSw_Out);
+
+    // Network 4:
+    FB_lc_NooM_FBD(vix_req1oo6 := lx_NooM_Req1oo6, vix_req2oo6 := lx_NooM_Req2oo6, vix_req3oo6 := lx_NooM_Req3oo6, vix_req4oo6 := lx_NooM_Req4oo6, vix_req5oo6 := lx_NooM_Req5oo6, vix_req6oo6 := lx_NooM_Req6oo6, vix_a_rdy := lx_NooM_a_Rdy, vix_b_rdy := lx_NooM_b_Rdy, vix_c_rdy := lx_NooM_c_Rdy, vix_d_rdy := lx_NooM_d_Rdy, vix_e_rdy := lx_NooM_e_Rdy, vix_f_rdy := lx_NooM_f_Rdy, vit_sw_prio_time := lt_NooM_Sw_Prio_Time, vit_par_time := lt_NooM_Par_Time, vox_req_a => lx_NooM_Req_a, vox_req_b => lx_NooM_Req_b, vox_req_c => lx_NooM_Req_c, vox_req_d => lx_NooM_Req_d, vox_req_e => lx_NooM_Req_e, vox_req_f => lx_NooM_Req_f);
+
+  *)
+
+  @VF(3) : @E(lx_In1), @R(420.0, 70.0, 140.0, 19.0);
+  @VF(4) : @E(lx_In2), @R(420.0, 90.0, 140.0, 19.0);
+  @VF(5) : @E(lx_In3), @R(420.0, 110.0, 140.0, 19.0);
+  @VF(6) : @E(lx_EinsAusDrei_Out), @R(1140.0, 70.0, 200.0, 19.0);
+  @VF(16) : @E(lx_EinsAusDrei2_Out), @R(1140.0, 190.0, 200.0, 19.0);
+  @C(1) : @FB(FB_lc_EinsAusDrei_Auswahl_FBD), @R(710.0, 70.0, 340.0, 58.0), @I(@N(vix_In1), @L(9.5)), @I(@N(vix_In2), @L(29.5)), @I(@N(vix_In3), @L(49.5)), @O(@N(vox_Out), @R(9.5));
+  @C(11) : @FB(FB_lc_EinsAusDrei_Auswahl2_FBD), @R(730.0, 190.0, 300.0, 58.0), @I(@N(vix_In1), @L(9.5)), @I(@N(vix_In2), @L(29.5)), @I(@N(vix_In3), @L(49.5)), @O(@N(vox_Out), @R(9.5));
+  @C(21) : @FB(FB_lc_ToggleSw_FBD), @R(760.0, 510.0, 260.0, 58.0), @I(@N(vix_Set), @L(9.5)), @I(@N(vix_Trg), @L(29.5)), @I(@N(vix_Reset), @L(49.5)), @O(@N(vox_Out), @R(9.5));
+  @C(10) : @FB(FB_lc_Toggle1_FBD), @R(780.0, 350.0, 200.0, 48.0), @I(@N(vix_In), @L(9.5)), @O(@N(vox_Out), @R(9.5));
+  @VF(12) : @E(lx_ToggleSw_Set), @R(430.0, 510.0, 250.0, 19.0);
+  @VF(18) : @E(lx_ToggleSw_Trg), @R(430.0, 530.0, 250.0, 19.0);
+  @VF(19) : @E(lx_ToggleSw_Reset), @R(430.0, 550.0, 250.0, 19.0);
+  @VF(20) : @E(lx_ToggleSw_Out), @R(1140.0, 510.0, 190.0, 19.0);
+  @VF(26) : @E(lx_Toggle1_In), @R(430.0, 350.0, 240.0, 19.0);
+  @VF(28) : @E(lx_Toggle1_Out), @R(1140.0, 350.0, 190.0, 19.0);
+  @C(30) : @FB(FB_lc_NooM_FBD), @R(780.0, 640.0, 220.0, 318.0), @I(@N(vix_req1oo6), @L(9.5)), @I(@N(vix_req2oo6), @L(29.5)), @I(@N(vix_req3oo6), @L(49.5)), @I(@N(vix_req4oo6), @L(69.5)), @I(@N(vix_req5oo6), @L(89.5)), @I(@N(vix_req6oo6), @L(109.5)), @I(@N(vix_a_rdy), @L(149.5)), @I(@N(vix_b_rdy), @L(169.5)), @I(@N(vix_c_rdy), @L(189.5)), @I(@N(vix_d_rdy), @L(209.5)), @I(@N(vix_e_rdy), @L(229.5)), @I(@N(vix_f_rdy), @L(249.5)), @I(@N(vit_sw_prio_time), @L(289.5)), @I(@N(vit_par_time), @L(309.5)), @O(@N(vox_req_a), @R(149.5)), @O(@N(vox_req_b), @R(169.5)), @O(@N(vox_req_c), @R(189.5)), @O(@N(vox_req_d), @R(209.5)), @O(@N(vox_req_e), @R(229.5)), @O(@N(vox_req_f), @R(249.5));
+  @VF(31) : @E(lx_NooM_Req1oo6), @R(430.0, 640.0, 250.0, 19.0);
+  @VF(32) : @E(lx_NooM_Req2oo6), @R(430.0, 660.0, 250.0, 19.0);
+  @VF(33) : @E(lx_NooM_Req3oo6), @R(430.0, 680.0, 250.0, 19.0);
+  @VF(34) : @E(lx_NooM_Req4oo6), @R(430.0, 700.0, 250.0, 19.0);
+  @VF(35) : @E(lx_NooM_Req5oo6), @R(430.0, 720.0, 250.0, 19.0);
+  @VF(36) : @E(lx_NooM_Req6oo6), @R(430.0, 740.0, 250.0, 19.0);
+  @VF(37) : @E(lx_NooM_a_Rdy), @R(430.0, 780.0, 250.0, 19.0);
+  @VF(38) : @E(lx_NooM_b_Rdy), @R(430.0, 800.0, 250.0, 19.0);
+  @VF(39) : @E(lx_NooM_c_Rdy), @R(430.0, 820.0, 250.0, 19.0);
+  @VF(40) : @E(lx_NooM_d_Rdy), @R(430.0, 840.0, 250.0, 19.0);
+  @VF(41) : @E(lx_NooM_e_Rdy), @R(430.0, 860.0, 250.0, 19.0);
+  @VF(42) : @E(lx_NooM_f_Rdy), @R(430.0, 880.0, 250.0, 19.0);
+  @VF(43) : @E(lt_NooM_Sw_Prio_Time), @R(430.0, 920.0, 250.0, 19.0);
+  @VF(44) : @E(lt_NooM_Par_Time), @R(430.0, 940.0, 250.0, 19.0);
+  @VF(45) : @E(lx_NooM_Req_a), @R(1150.0, 780.0, 190.0, 19.0);
+  @VF(46) : @E(lx_NooM_Req_b), @R(1150.0, 800.0, 190.0, 19.0);
+  @VF(47) : @E(lx_NooM_Req_c), @R(1150.0, 820.0, 190.0, 19.0);
+  @VF(48) : @E(lx_NooM_Req_d), @R(1150.0, 840.0, 190.0, 19.0);
+  @VF(49) : @E(lx_NooM_Req_e), @R(1150.0, 860.0, 190.0, 19.0);
+  @VF(50) : @E(lx_NooM_Req_f), @R(1150.0, 880.0, 190.0, 19.0);
+  @CP(13) : 669.5, 79.5;
+  @CP(14) : 639.5, 99.5;
+  @CP(15) : 609.5, 119.5;
+
+  @G(2) :
+     @L(@VF(3).o, @CP(13)),
+     @L(@CP(13), @C(1).vix_In1),
+     @L(@CP(13), @C(11).vix_In1)
+    ;
+  @G(7) :
+     @L(@VF(4).o, @CP(14)),
+     @L(@CP(14), @C(1).vix_In2),
+     @L(@CP(14), @C(11).vix_In2)
+    ;
+  @G(8) :
+     @L(@VF(5).o, @CP(15)),
+     @L(@CP(15), @C(1).vix_In3),
+     @L(@CP(15), @C(11).vix_In3)
+    ;
+  @G(9) :
+     @L(@C(1).vox_Out, @VF(6).i)
+    ;
+  @G(17) :
+     @L(@C(11).vox_Out, @VF(16).i)
+    ;
+  @G(22) :
+     @L(@VF(12).o, @C(21).vix_Set)
+    ;
+  @G(23) :
+     @L(@VF(18).o, @C(21).vix_Trg)
+    ;
+  @G(24) :
+     @L(@VF(19).o, @C(21).vix_Reset)
+    ;
+  @G(25) :
+     @L(@C(21).vox_Out, @VF(20).i)
+    ;
+  @G(27) :
+     @L(@VF(26).o, @C(10).vix_In)
+    ;
+  @G(29) :
+     @L(@C(10).vox_Out, @VF(28).i)
+    ;
+  @G(51) :
+     @L(@C(30).vox_req_a, @VF(45).i)
+    ;
+  @G(52) :
+     @L(@C(30).vox_req_b, @VF(46).i)
+    ;
+  @G(53) :
+     @L(@C(30).vox_req_c, @VF(47).i)
+    ;
+  @G(54) :
+     @L(@C(30).vox_req_d, @VF(48).i)
+    ;
+  @G(55) :
+     @L(@C(30).vox_req_e, @VF(49).i)
+    ;
+  @G(56) :
+     @L(@C(30).vox_req_f, @VF(50).i)
+    ;
+  @G(57) :
+     @L(@VF(42).o, @C(30).vix_f_rdy)
+    ;
+  @G(58) :
+     @L(@VF(41).o, @C(30).vix_e_rdy)
+    ;
+  @G(59) :
+     @L(@VF(40).o, @C(30).vix_d_rdy)
+    ;
+  @G(60) :
+     @L(@VF(39).o, @C(30).vix_c_rdy)
+    ;
+  @G(61) :
+     @L(@VF(38).o, @C(30).vix_b_rdy)
+    ;
+  @G(62) :
+     @L(@VF(37).o, @C(30).vix_a_rdy)
+    ;
+  @G(63) :
+     @L(@VF(43).o, @C(30).vit_sw_prio_time)
+    ;
+  @G(64) :
+     @L(@VF(36).o, @C(30).vix_req6oo6)
+    ;
+  @G(65) :
+     @L(@VF(44).o, @C(30).vit_par_time)
+    ;
+  @G(66) :
+     @L(@VF(31).o, @C(30).vix_req1oo6)
+    ;
+  @G(67) :
+     @L(@VF(32).o, @C(30).vix_req2oo6)
+    ;
+  @G(68) :
+     @L(@VF(33).o, @C(30).vix_req3oo6)
+    ;
+  @G(69) :
+     @L(@VF(34).o, @C(30).vix_req4oo6)
+    ;
+  @G(70) :
+     @L(@VF(35).o, @C(30).vix_req5oo6)
+    ;
+END_PROGRAM

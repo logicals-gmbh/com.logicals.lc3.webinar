@@ -1,0 +1,379 @@
+NAMESPACE com.logicals.Basic.SigGen
+FUNCTION_BLOCK FB_lc_RampUpDn_FBD
+  {
+    altName := "";
+    instanceName := {position := "manual", x := 0, y := 100, width := 140, height := 19, alignment := "center"};
+    width := 160;
+    height := 118;
+    inputValueFieldAreaWidth := 360;
+    outputValueFieldAreaWidth := 360;
+    minWidth := 160;
+    maxWidth := 160;
+    maxHeight := 118;
+    minHeight := 118;
+  }
+
+  VAR
+    deltaXAbs : REAL;
+    TON0 : TON;
+    xDampedInternal : REAL;
+  END_VAR
+  VAR_INPUT
+    vir_In : REAL { description := "value to be damped"; };
+    vir_dxUpMax : REAL { description := "maximum delta x per second for $"increasing values$""; };
+    vir_dxDnMax : REAL { description := "maximum delta x per second for $"decreasing values$""; };
+    vit_TimeBase : TIME { description := "timebase for dx and updating xOut"; };
+  END_VAR
+  VAR_OUTPUT
+    vor_Out : REAL;
+  END_VAR
+
+  (*
+
+    // Network 1:
+    SUB(IN1 := vir_In, IN2 := xDampedInternal, SUB => @C(181).SUB);
+    MUL(IN1 := @C(181).SUB, IN2 := @C(181).SUB, MUL => @C(180).MUL);
+    SQRT(IN := @C(180).MUL, SQRT => deltaXAbs);
+
+    // Network 2:
+    MUL(IN1 := vir_dxDnMax, IN2 := vir_dxDnMax, MUL => @C(192).MUL);
+    SQRT(IN := @C(192).MUL, SQRT => @C(183).SQRT);
+    LT(IN1 := deltaXAbs, IN2 := @C(183).SQRT, LT => @C(188).LT);
+    MUL(IN1 := vir_dxUpMax, IN2 := vir_dxUpMax, MUL => @C(185).MUL);
+    SQRT(IN := @C(185).MUL, SQRT => @C(196).SQRT);
+    LT(IN1 := deltaXAbs, IN2 := @C(196).SQRT, LT => @C(176).LT);
+    SUB(IN1 := vir_In, IN2 := xDampedInternal, SUB => @C(179).SUB);
+    LT(IN1 := @C(179).SUB, IN2 := 0.0, LT => @C(187).LT);
+    AND(IN1 := @C(187).LT, IN2 := @C(188).LT, AND => @C(186).AND);
+    SUB(IN1 := xDampedInternal, IN2 := @C(183).SQRT, SUB => @C(182).SUB);
+    SEL(G := @C(186).AND, IN0 := xDampedInternal, IN1 := vir_In, SEL => xDampedInternal);
+    SUB(IN1 := vir_In, IN2 := xDampedInternal, SUB => @C(193).SUB);
+    GT(IN1 := @C(193).SUB, IN2 := 0.0, GT => @C(175).GT);
+    AND(IN1 := @C(175).GT, IN2 := @C(176).LT, AND => @C(174).AND);
+    ADD(IN1 := xDampedInternal, IN2 := vir_dxUpMax, ADD => @C(177).ADD);
+    SEL(G := @C(174).AND, IN0 := xDampedInternal, IN1 := vir_In, SEL => xDampedInternal);
+    NOT(IN := TON0.Q, NOT => @C(195).NOT);
+    TON0(IN := @C(195).NOT, PT := vit_TimeBase);
+    AND(IN1 := @C(187).LT, IN2 := TON0.Q, AND => @C(197).AND);
+    SEL(G := @C(197).AND, IN0 := xDampedInternal, IN1 := @C(182).SUB, SEL => xDampedInternal);
+    AND(IN1 := @C(175).GT, IN2 := TON0.Q, AND => @C(178).AND);
+    SEL(G := @C(178).AND, IN0 := xDampedInternal, IN1 := @C(177).ADD, SEL => xDampedInternal);
+
+    // Network 3:
+    GT(IN1 := vir_dxDnMax, IN2 := 0.0, GT => @C(189).GT);
+    GT(IN1 := vir_dxUpMax, IN2 := 0.0, GT => @C(190).GT);
+    GT(IN1 := vit_TimeBase, IN2 := T#0s, GT => @C(191).GT);
+    AND(IN1 := @C(189).GT, IN2 := @C(190).GT, IN3 := @C(191).GT, AND => @C(184).AND);
+    SEL(G := @C(184).AND, IN0 := vir_In, IN1 := xDampedInternal, SEL => vor_Out);
+
+  *)
+
+  @VF(129) : @E(vir_dxUpMax), @R(0.0, 790.0, 160.0, 19.0);
+  @VF(134) : @E(xDampedInternal), @R(0.0, 650.0, 160.0, 19.0);
+  @VF(136) : @E(vit_TimeBase), @R(0.0, 70.0, 160.0, 19.0);
+  @VF(138) : @E(xDampedInternal), @R(0.0, 140.0, 160.0, 19.0);
+  @VF(140) : @E(xDampedInternal), @R(0.0, 1260.0, 160.0, 19.0);
+  @VF(145) : @E(vir_In), @R(0.0, 0.0, 160.0, 19.0);
+  @VF(148) : @E(deltaXAbs), @R(0.0, 720.0, 160.0, 19.0);
+  @VF(150) : @E(vit_TimeBase), @R(0.0, 1120.0, 160.0, 19.0);
+  @VF(152) : @E(deltaXAbs), @R(0.0, 390.0, 160.0, 19.0);
+  @VF(162) : @E(vir_dxDnMax), @R(0.0, 460.0, 160.0, 19.0);
+  @VF(164) : @E(0.0), @R(600.0, 350.0, 50.0, 19.0), REAL;
+  @VF(101) : @E(vir_In), @R(0.0, 580.0, 160.0, 19.0);
+  @VF(103) : @E(vir_dxDnMax), @R(0.0, 920.0, 160.0, 19.0);
+  @VF(169) : @E(0.0), @R(600.0, 670.0, 50.0, 19.0), REAL;
+  @VF(105) : @E(xDampedInternal), @R(1740.0, 400.0, 160.0, 19.0);
+  @VF(170) : @E(T#0s), @R(400.0, 1140.0, 50.0, 19.0), TIME;
+  @VF(107) : @E(vir_In), @R(0.0, 250.0, 160.0, 19.0);
+  @VF(171) : @E(0.0), @R(400.0, 940.0, 50.0, 19.0), REAL;
+  @VF(173) : @E(0.0), @R(400.0, 1040.0, 50.0, 19.0), REAL;
+  @VF(109) : @E(deltaXAbs), @R(1740.0, 0.0, 160.0, 19.0);
+  @VF(111) : @E(vir_In), @R(0.0, 1190.0, 160.0, 19.0);
+  @VF(114) : @E(xDampedInternal), @R(1740.0, 510.0, 160.0, 19.0);
+  @VF(116) : @E(vor_Out), @R(1740.0, 1100.0, 160.0, 19.0);
+  @VF(118) : @E(vir_dxUpMax), @R(0.0, 1020.0, 160.0, 19.0);
+  @VF(121) : @E(xDampedInternal), @R(1740.0, 840.0, 160.0, 19.0);
+  @VF(123) : @E(xDampedInternal), @R(1740.0, 700.0, 160.0, 19.0);
+  @VF(127) : @E(xDampedInternal), @R(0.0, 320.0, 160.0, 19.0);
+  @C(192) : @F(MUL), @R(460.0, 460.0, 40.0, 38.0), REAL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(MUL), @R(9.5));
+  @C(193) : @F(SUB), @R(460.0, 580.0, 40.0, 38.0), REAL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(SUB), @R(9.5));
+  @C(194) : @FB(TON0), @R(600.0, 50.0, 100.0, 38.0), @I(@N(IN), @L(9.5)), @I(@N(PT), @L(29.5)), @O(@N(Q), @R(9.5)), @O(@N(ET), @R(29.5));
+  @C(195) : @F(NOT), @R(550.0, 50.0, 40.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(NOT), @R(9.5));
+  @C(196) : @F(SQRT), @R(540.0, 790.0, 60.0, 18.0), REAL, @I(@N(IN), @L(9.5)), @O(@N(SQRT), @R(9.5));
+  @C(197) : @F(AND), @R(960.0, 330.0, 40.0, 38.0), BOOL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(AND), @R(9.5));
+  @C(163) : @F(SEL), @R(780.0, 1100.0, 120.0, 58.0), REAL, @I(@N(G), @L(9.5)), @I(@N(IN0), @L(29.5)), @I(@N(IN1), @L(49.5)), @O(@N(SEL), @R(9.5));
+  @C(165) : @F(SEL), @R(790.0, 510.0, 120.0, 58.0), REAL, @I(@N(G), @L(9.5)), @I(@N(IN0), @L(29.5)), @I(@N(IN1), @L(49.5)), @O(@N(SEL), @R(9.5));
+  @C(166) : @F(SQRT), @R(640.0, 0.0, 60.0, 18.0), REAL, @I(@N(IN), @L(9.5)), @O(@N(SQRT), @R(9.5));
+  @C(167) : @F(SEL), @R(780.0, 810.0, 120.0, 58.0), REAL, @I(@N(G), @L(9.5)), @I(@N(IN0), @L(29.5)), @I(@N(IN1), @L(49.5)), @O(@N(SEL), @R(9.5));
+  @C(168) : @F(SEL), @R(1160.0, 700.0, 120.0, 58.0), REAL, @I(@N(G), @L(9.5)), @I(@N(IN0), @L(29.5)), @I(@N(IN1), @L(49.5)), @O(@N(SEL), @R(9.5));
+  @C(172) : @F(SEL), @R(1160.0, 400.0, 120.0, 58.0), REAL, @I(@N(G), @L(9.5)), @I(@N(IN0), @L(29.5)), @I(@N(IN1), @L(49.5)), @O(@N(SEL), @R(9.5));
+  @C(174) : @F(AND), @R(720.0, 680.0, 40.0, 38.0), BOOL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(AND), @R(9.5));
+  @C(175) : @F(GT), @R(660.0, 650.0, 40.0, 38.0), REAL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(GT), @R(9.5));
+  @C(176) : @F(LT), @R(660.0, 720.0, 40.0, 38.0), REAL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(LT), @R(9.5));
+  @C(177) : @F(ADD), @R(1100.0, 740.0, 40.0, 38.0), REAL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(ADD), @R(9.5));
+  @C(178) : @F(AND), @R(960.0, 650.0, 40.0, 38.0), BOOL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(AND), @R(9.5));
+  @C(179) : @F(SUB), @R(460.0, 250.0, 40.0, 38.0), REAL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(SUB), @R(9.5));
+  @C(180) : @F(MUL), @R(560.0, 0.0, 40.0, 38.0), REAL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(MUL), @R(9.5));
+  @C(181) : @F(SUB), @R(460.0, 0.0, 40.0, 38.0), REAL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(SUB), @R(9.5));
+  @C(182) : @F(SUB), @R(1100.0, 440.0, 40.0, 38.0), REAL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(SUB), @R(9.5));
+  @C(183) : @F(SQRT), @R(540.0, 460.0, 60.0, 18.0), REAL, @I(@N(IN), @L(9.5)), @O(@N(SQRT), @R(9.5));
+  @C(184) : @F(AND), @R(600.0, 920.0, 40.0, 58.0), BOOL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @I(@N(IN3), @L(49.5)), @O(@N(AND), @R(9.5));
+  @C(185) : @F(MUL), @R(460.0, 790.0, 40.0, 38.0), REAL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(MUL), @R(9.5));
+  @C(186) : @F(AND), @R(720.0, 350.0, 40.0, 38.0), BOOL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(AND), @R(9.5));
+  @C(187) : @F(LT), @R(660.0, 330.0, 40.0, 38.0), REAL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(LT), @R(9.5));
+  @C(188) : @F(LT), @R(660.0, 390.0, 40.0, 38.0), REAL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(LT), @R(9.5));
+  @C(189) : @F(GT), @R(460.0, 920.0, 40.0, 38.0), REAL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(GT), @R(9.5));
+  @C(190) : @F(GT), @R(460.0, 1020.0, 40.0, 38.0), REAL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(GT), @R(9.5));
+  @C(191) : @F(GT), @R(460.0, 1120.0, 40.0, 38.0), TIME, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(GT), @R(9.5));
+  @CF(161) : @R(0.0, 480.0, 358.0, 68.0), @T("maximum delta x per second for $"decreasing values$"$R$NBlatt:$a0"), @S(162);
+  @CF(130) : @R(0.0, 1040.0, 358.0, 78.0), @T("maximum delta x per second for $"increasing values$"$R$NBlatt:$a0"), @S(118);
+  @CF(131) : @R(1540.0, 720.0, 358.0, 78.0), @T("$R$NBlatt:$a0"), @S(123);
+  @CF(133) : @R(0.0, 670.0, 358.0, 48.0), @T("$R$NBlatt:$a0"), @S(134);
+  @CF(135) : @R(0.0, 90.0, 358.0, 48.0), @T("timebase for dx and updating xOut$R$NBlatt:$a0"), @S(136);
+  @CF(104) : @R(1540.0, 420.0, 358.0, 78.0), @T("$R$NBlatt:$a0"), @S(105);
+  @CF(106) : @R(0.0, 270.0, 358.0, 48.0), @T("value to be damped$R$NBlatt:$a0"), @S(107);
+  @CF(141) : @R(1540.0, 530.0, 358.0, 78.0), @T("$R$NBlatt:$a0"), @S(114);
+  @CF(142) : @R(0.0, 1280.0, 358.0, 48.0), @T("$R$NBlatt:$a0"), @S(140);
+  @CF(110) : @R(0.0, 1210.0, 358.0, 48.0), @T("value to be damped$R$NBlatt:$a0"), @S(111);
+  @CF(143) : @R(0.0, 810.0, 358.0, 78.0), @T("maximum delta x per second for $"increasing values$"$R$NBlatt:$a0"), @S(129);
+  @CF(144) : @R(0.0, 20.0, 358.0, 48.0), @T("value to be damped$R$NBlatt:$a0"), @S(145);
+  @CF(146) : @R(0.0, 160.0, 358.0, 48.0), @T("$R$NBlatt:$a0"), @S(138);
+  @CF(115) : @R(1540.0, 1120.0, 358.0, 58.0), @T("$R$NBlatt:$a0"), @S(116);
+  @CF(149) : @R(0.0, 1140.0, 358.0, 48.0), @T("timebase for dx and updating xOut$R$NBlatt:$a0"), @S(150);
+  @CF(151) : @R(0.0, 410.0, 358.0, 48.0), @T("$R$NBlatt:$a0"), @S(152);
+  @CF(119) : @R(1540.0, 20.0, 358.0, 68.0), @T("$R$NBlatt:$a0"), @S(109);
+  @CF(120) : @R(1540.0, 860.0, 358.0, 78.0), @T("$R$NBlatt:$a0"), @S(121);
+  @CF(154) : @R(0.0, 600.0, 358.0, 48.0), @T("value to be damped$R$NBlatt:$a0"), @S(101);
+  @CF(156) : @R(0.0, 740.0, 358.0, 48.0), @T("$R$NBlatt:$a0"), @S(148);
+  @CF(125) : @R(0.0, 940.0, 358.0, 78.0), @T("maximum delta x per second for $"decreasing values$"$R$NBlatt:$a0"), @S(103);
+  @CF(126) : @R(0.0, 340.0, 358.0, 48.0), @T("$R$NBlatt:$a0"), @S(127);
+  @CF(159) : @R(940.0, 120.0, 708.0, 168.0), @T("function block to $"increase$" or $"decrease$" an inputvalue with given deltas per time unit.$R$N$R$NxIn = input value to be changed/damped$R$NdxUpMax = maximum value $"increase$" / $"up$" per time given on $"timeBase$"$R$NdxUpMax = maximum value for $"decrease$" / $"down$" per time given on $"timeBase$"$R$NtimeBase = update-Intervall and time-base$R$NxDamped = damped output value$R$NIf one of the inputs $"dxUpMax$", $"dxDownMax$", $"timeBase$" is $"0$", the output value $R$NxDamped will be overwritten with xIn"), @POU;
+  @OLT(128) : @R(420.0, 870.0, 66.0, 18.0), @S(129);
+  @OLT(160) : @R(430.0, 50.0, 66.0, 18.0), @S(145);
+  @OLT(100) : @R(420.0, 650.0, 66.0, 18.0), @S(101);
+  @OLT(132) : @R(1430.0, 920.0, 66.0, 18.0), @S(121);
+  @OLT(102) : @R(420.0, 980.0, 66.0, 18.0), @S(103);
+  @OLT(137) : @R(430.0, 200.0, 66.0, 18.0), @S(138);
+  @OLT(139) : @R(420.0, 1300.0, 66.0, 18.0), @S(140);
+  @OLT(108) : @R(1430.0, 20.0, 66.0, 18.0), @S(109);
+  @OLT(112) : @R(1430.0, 420.0, 66.0, 18.0), @S(105);
+  @OLT(113) : @R(1430.0, 540.0, 66.0, 18.0), @S(114);
+  @OLT(147) : @R(420.0, 740.0, 66.0, 18.0), @S(148);
+  @OLT(117) : @R(420.0, 1080.0, 66.0, 18.0), @S(118);
+  @OLT(153) : @R(430.0, 420.0, 66.0, 18.0), @S(152);
+  @OLT(122) : @R(1430.0, 740.0, 66.0, 18.0), @S(123);
+  @OLT(155) : @R(430.0, 110.0, 66.0, 18.0), @S(136);
+  @OLT(124) : @R(830.0, 1180.0, 66.0, 18.0), @S(116);
+  @OLT(157) : @R(420.0, 700.0, 66.0, 18.0), @S(134);
+  @OLT(158) : @R(420.0, 1230.0, 66.0, 18.0), @S(111);
+  @CP(204) : 960.0, 849.5;
+  @CP(207) : 440.0, 469.5;
+  @CP(209) : 400.0, 589.5;
+  @CP(211) : 370.0, 659.5;
+  @CP(231) : 370.0, 779.5;
+  @CP(233) : 1090.0, 729.5;
+  @CP(215) : 710.0, 59.5;
+  @CP(219) : 930.0, 359.5;
+  @CP(218) : 710.0, 339.5;
+  @CP(225) : 370.0, 329.5;
+  @CP(226) : 370.0, 449.5;
+  @CP(236) : 1090.0, 429.5;
+  @CP(228) : 400.0, 259.5;
+  @CP(239) : 710.0, 659.5;
+  @CP(246) : 440.0, 799.5;
+  @CP(248) : 540.0, 9.5;
+  @CP(250) : 400.0, 9.5;
+  @CP(253) : 610.0, 469.5;
+
+  @G(199) :
+     @L(@C(172).SEL, @VF(105).i)
+    ;
+  @G(200) :
+     @L(@C(166).SQRT, @VF(109).i)
+    ;
+  @G(201) :
+     @L(@C(165).SEL, @VF(114).i)
+    ;
+  @G(202) :
+     @L(@C(163).SEL, @VF(116).i)
+    ;
+  @G(203) :
+     @L(@C(167).SEL, @CP(204)),
+     @L(@CP(204), @VF(121).i)
+    ;
+  @G(205) :
+     @L(@C(168).SEL, @VF(123).i)
+    ;
+  @G(206) :
+     @L(@VF(162).o, @CP(207)),
+     @L(@CP(207), @C(192).IN1),
+     @L(@CP(207), @C(192).IN2)
+    ;
+  @G(208) :
+     @L(@VF(101).o, @CP(209)),
+     @L(@CP(209), @C(193).IN1),
+     @L(@CP(209), @C(167).IN1)
+    ;
+  @G(210) :
+     @L(@VF(134).o, @CP(211)),
+     @L(@CP(211), @C(193).IN2),
+     @L(@CP(211), @CP(231)),
+     @L(@CP(231), @C(167).IN0),
+     @L(@CP(231), @CP(233)),
+     @L(@CP(233), @C(168).IN0),
+     @L(@CP(233), @C(177).IN1)
+    ;
+  @G(212) :
+     @L(@C(195).NOT, @C(194).IN)
+    ;
+  @G(213) :
+     @L(@VF(136).o, @C(194).PT)
+    ;
+  @G(214) :
+     @L(@C(194).Q, @CP(215)),
+     @L(@CP(215), @C(195).IN),
+     @L(@CP(215), @CP(219)),
+     @L(@CP(219), @C(197).IN2),
+     @L(@CP(219), @C(178).IN2)
+    ;
+  @G(216) :
+     @L(@C(185).MUL, @C(196).IN)
+    ;
+  @G(217) :
+     @L(@C(187).LT, @CP(218)),
+     @L(@CP(218), @C(197).IN1),
+     @L(@CP(218), @C(186).IN1)
+    ;
+  @G(220) :
+     @L(@C(184).AND, @C(163).G)
+    ;
+  @G(221) :
+     @L(@VF(111).o, @C(163).IN0)
+    ;
+  @G(222) :
+     @L(@VF(140).o, @C(163).IN1)
+    ;
+  @G(223) :
+     @L(@C(186).AND, @C(165).G)
+    ;
+  @G(224) :
+     @L(@VF(127).o, @CP(225)),
+     @L(@CP(225), @CP(226)),
+     @L(@CP(226), @C(165).IN0),
+     @L(@CP(226), @CP(236)),
+     @L(@CP(236), @C(172).IN0),
+     @L(@CP(225), @C(179).IN2),
+     @L(@CP(236), @C(182).IN1)
+    ;
+  @G(227) :
+     @L(@VF(107).o, @CP(228)),
+     @L(@CP(228), @C(165).IN1),
+     @L(@CP(228), @C(179).IN1)
+    ;
+  @G(229) :
+     @L(@C(180).MUL, @C(166).IN)
+    ;
+  @G(230) :
+     @L(@C(174).AND, @C(167).G)
+    ;
+  @G(232) :
+     @L(@C(178).AND, @C(168).G)
+    ;
+  @G(234) :
+     @L(@C(177).ADD, @C(168).IN1)
+    ;
+  @G(235) :
+     @L(@C(197).AND, @C(172).G)
+    ;
+  @G(237) :
+     @L(@C(182).SUB, @C(172).IN1)
+    ;
+  @G(238) :
+     @L(@C(175).GT, @CP(239)),
+     @L(@CP(239), @C(174).IN1),
+     @L(@CP(239), @C(178).IN1)
+    ;
+  @G(240) :
+     @L(@C(176).LT, @C(174).IN2)
+    ;
+  @G(241) :
+     @L(@C(193).SUB, @C(175).IN1)
+    ;
+  @G(242) :
+     @L(@VF(169).o, @C(175).IN2)
+    ;
+  @G(243) :
+     @L(@VF(148).o, @C(176).IN1)
+    ;
+  @G(244) :
+     @L(@C(196).SQRT, @C(176).IN2)
+    ;
+  @G(245) :
+     @L(@VF(129).o, @CP(246)),
+     @L(@CP(246), @C(177).IN2),
+     @L(@CP(246), @C(185).IN1),
+     @L(@CP(246), @C(185).IN2)
+    ;
+  @G(247) :
+     @L(@C(181).SUB, @CP(248)),
+     @L(@CP(248), @C(180).IN1),
+     @L(@CP(248), @C(180).IN2)
+    ;
+  @G(249) :
+     @L(@VF(145).o, @CP(250)),
+     @L(@CP(250), @C(181).IN1)
+    ;
+  @G(251) :
+     @L(@VF(138).o, @C(181).IN2)
+    ;
+  @G(252) :
+     @L(@C(183).SQRT, @CP(253)),
+     @L(@CP(253), @C(182).IN2),
+     @L(@CP(253), @C(188).IN2)
+    ;
+  @G(254) :
+     @L(@C(192).MUL, @C(183).IN)
+    ;
+  @G(255) :
+     @L(@C(189).GT, @C(184).IN1)
+    ;
+  @G(256) :
+     @L(@C(190).GT, @C(184).IN2)
+    ;
+  @G(257) :
+     @L(@C(191).GT, @C(184).IN3)
+    ;
+  @G(258) :
+     @L(@C(188).LT, @C(186).IN2)
+    ;
+  @G(259) :
+     @L(@C(179).SUB, @C(187).IN1)
+    ;
+  @G(260) :
+     @L(@VF(164).o, @C(187).IN2)
+    ;
+  @G(261) :
+     @L(@VF(152).o, @C(188).IN1)
+    ;
+  @G(262) :
+     @L(@VF(103).o, @C(189).IN1)
+    ;
+  @G(263) :
+     @L(@VF(171).o, @C(189).IN2)
+    ;
+  @G(264) :
+     @L(@VF(118).o, @C(190).IN1)
+    ;
+  @G(265) :
+     @L(@VF(173).o, @C(190).IN2)
+    ;
+  @G(266) :
+     @L(@VF(150).o, @C(191).IN1)
+    ;
+  @G(267) :
+     @L(@VF(170).o, @C(191).IN2)
+    ;
+
+  @PAGE(198) : @R(0.0, 0.0, 1900.0, 1340.0), @LN("ramp up/down ");
+END_FUNCTION_BLOCK
+END_NAMESPACE

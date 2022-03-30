@@ -1,0 +1,49 @@
+/*
+ * This is a logi.CAD 3 template for the raspbian PLC object
+ * PiXtend_V2L
+ */
+
+{
+	CHANNEL PiXtend_V2L_Channel
+		TCP
+			ADDRESS := 192.168.128.80;
+			PORT    := 1534;
+		END_TCP
+	END_CHANNEL
+}
+
+CONFIGURATION ConfPiXtend_V2L
+	
+	RESOURCE ResPiXtend_V2L ON Raspbian { ON_CHANNEL := PiXtend_V2L_Channel }
+
+       /*
+        * Test Control
+        */
+		VAR_GLOBAL
+         gi_AutoSetMaxRngVal : INT := 1023;
+         gi_AutoSetMinRngVal : INT := 0;
+         gr_AutoSetInVal : REAL := 0.0;
+         gx_ReleaseCtrl : BOOL := FALSE;
+         gi_AI_ActIn : INT;
+         gi_AI_SetIn : INT;
+         gr_CycleTime_Sec : REAL;
+         gi_AutoSetOutVal : INT;
+		END_VAR
+
+		TASK TSK_Main(INTERVAL := TIME#100ms, PRIORITY := 38229);
+		
+		PROGRAM INST_TestActuator1_ST      WITH TSK_Main : PRG_lc_TestActuator1_ST;
+		PROGRAM INST_TestActuator1_Sim_ST  WITH TSK_Main : PRG_lc_TestActuator1_Sim_ST;
+
+		PROGRAM INST_TestActuator1_FBD     WITH TSK_Main : PRG_lc_TestActuator1_FBD;
+
+		PROGRAM INST_TestSigGen1_FBD       WITH TSK_Main : PRG_lc_TestSigGen1_FBD;
+		PROGRAM INST_TestConvert1_FBD      WITH TSK_Main : PRG_lc_TestConvert1_FBD;
+		PROGRAM INST_TestRangeCheck1_FBD   WITH TSK_Main : PRG_lc_TestRangeCheck1_FBD;
+
+		PROGRAM INST_TestControl1_FBD   WITH TSK_Main : PRG_lc_TestControl1_FBD;
+
+	END_RESOURCE
+
+END_CONFIGURATION
+

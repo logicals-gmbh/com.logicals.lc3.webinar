@@ -1,0 +1,42 @@
+h1. FB_lc_Polygon_FBD
+
+h2. Kurz-Information
+
+###. Aendern Sie die folgende Tabelle NICHT. Sie wird automatisch erzeugt.
+###. Um die Grafik der Schnittstelle zu erstellen, oeffnen Sie den Schnittstellen-Editor und druecken Sie Strg+Umschalt+P.
+
+table(#tableborders){border:1px solid grey; border-spacing: 0px;}.
+|<(tableHeaderCell). Name|@com.logicals.Basic.Calc.FB_lc_Polygon_FBD@|
+|<(tableHeaderCell). POE-Typ|Funktionsbaustein|
+|<(tableHeaderCell). Schnittstelle|!FB_lc_Polygon_FBD.png!|
+
+h2. Funktionalit&auml;t
+
+h2. Eing&auml;nge, Ausg&auml;nge, Ergebniswert
+
+###. Aendern Sie NUR die Beschreibung in der folgenden Tabelle. Die anderen Daten werden automatisch erzeugt (Bezeichner, Datentypen).
+
+###. IO_BEGIN
+
+table(#tableborders){border:1px solid grey; border-spacing: 0px;}.
+|(tableHeaderCell). Abschnitt|(tableHeaderCell). Bezeichner|(tableHeaderCell). Datentyp|(tableHeaderCell). Beschreibung|
+|Eingang:|@X@|@REAL@|Geben Sie eine Beschreibung an|
+|Eingang:|@X1@|@REAL@|Geben Sie eine Beschreibung an|
+|Eingang:|@Y1@|@REAL@|Geben Sie eine Beschreibung an|
+|Eingang:|@X2@|@REAL@|Geben Sie eine Beschreibung an|
+|Eingang:|@Y2@|@REAL@|Geben Sie eine Beschreibung an|
+|Eingang:|@X3@|@REAL@|Geben Sie eine Beschreibung an|
+|Eingang:|@Y3@|@REAL@|Geben Sie eine Beschreibung an|
+|Eingang:|@X4@|@REAL@|Geben Sie eine Beschreibung an|
+|Eingang:|@Y4@|@REAL@|Geben Sie eine Beschreibung an|
+|Eingang:|@X5@|@REAL@|Geben Sie eine Beschreibung an|
+|Eingang:|@Y5@|@REAL@|Geben Sie eine Beschreibung an|
+|Eingang:|@X6@|@REAL@|Geben Sie eine Beschreibung an|
+|Eingang:|@Y6@|@REAL@|Geben Sie eine Beschreibung an|
+|Ausgang:|@Y@|@REAL@|Geben Sie eine Beschreibung an|
+
+###. IO_END
+
+h2. Beispiel
+
+###. Dieser Abschnitt kann ein Beispiel enthalten, das die Funktionalitaet des Bausteins beschreibt.

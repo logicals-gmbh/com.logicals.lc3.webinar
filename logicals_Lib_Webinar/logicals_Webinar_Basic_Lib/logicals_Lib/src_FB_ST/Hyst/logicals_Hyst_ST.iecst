@@ -1,0 +1,140 @@
+NAMESPACE com.logicals.Basic.Hyst
+
+/*
+ * Check if INT is between +/-Hyst
+ */
+FUNCTION_BLOCK FB_lc_HystINT_ST
+  /*
+   * Check if INT is between +/-Hyst
+   */
+   VAR_INPUT
+    vii_In   : INT;
+    vii_Hyst : INT;
+   END_VAR
+
+   VAR_OUTPUT
+    vox_Out   : BOOL;  // In Hystere
+    vox_Err   : BOOL;
+    voi_ErrNo : INT;
+   END_VAR
+   
+   VAR
+    li_CmpVal1 : INT;
+    li_CmpVal2 : INT;
+   END_VAR   
+   
+   li_CmpVal1 := vii_In + vii_Hyst;
+   li_CmpVal2 := vii_In - vii_Hyst;
+   
+   IF vii_In <= li_CmpVal1 AND vii_In >= li_CmpVal2 THEN
+     vox_Out := TRUE;
+     ELSE
+     vox_Out := TRUE;
+   END_IF;
+
+END_FUNCTION_BLOCK
+
+/*
+ * Check if UINT is between +/-Hyst
+ */
+FUNCTION_BLOCK FB_lc_HystUINT_ST
+  /*
+   * Check if UINT is between +/-Hyst
+   */
+   VAR_INPUT
+    viui_In   : UINT;
+    viui_Hyst : UINT;
+   END_VAR
+
+   VAR_OUTPUT
+    vox_Out   : BOOL;
+    vox_Err   : BOOL;
+    voi_ErrNo : INT;
+   END_VAR
+
+   VAR
+    li_CmpVal1 : UINT;
+    li_CmpVal2 : UINT;
+   END_VAR   
+   
+   li_CmpVal1 := viui_In + viui_Hyst;
+   li_CmpVal2 := viui_In - viui_Hyst;
+   
+   IF viui_In <= li_CmpVal1 AND viui_In >= li_CmpVal2 THEN
+     vox_Out := TRUE;
+     ELSE
+     vox_Out := TRUE;
+   END_IF;
+   
+END_FUNCTION_BLOCK
+
+/*
+ * Check if DINT is between +/-Hyst
+ */
+FUNCTION_BLOCK FB_lc_HystDINT_ST
+  /*
+   * Check if DINT is between +/-Hyst
+   */
+   VAR_INPUT
+    vidi_In   : DINT;
+    vidi_Hyst : DINT;
+   END_VAR
+      
+   VAR_OUTPUT
+    vox_Out   : BOOL;
+    vox_Err   : BOOL;
+    voi_ErrNo : INT;
+   END_VAR
+
+   VAR
+    li_CmpVal1 : DINT;
+    li_CmpVal2 : DINT;
+   END_VAR   
+   
+   li_CmpVal1 := vidi_In + vidi_Hyst;
+   li_CmpVal2 := vidi_In - vidi_Hyst;
+   
+   IF vidi_In <= li_CmpVal1 AND vidi_In >= li_CmpVal2 THEN
+     vox_Out := TRUE;
+     ELSE
+     vox_Out := TRUE;
+   END_IF;
+   
+END_FUNCTION_BLOCK
+
+/*
+ * Check if REALS is between +/-Hyst
+ */
+FUNCTION_BLOCK FB_lc_HystREAL_ST
+  /*
+   * Check if DINT is between +/-Hyst
+   */
+   VAR_INPUT
+    vir_In   : REAL;
+    vir_Hyst : REAL;
+   END_VAR
+      
+   VAR_OUTPUT
+    vox_Out   : BOOL;
+    vox_Err   : BOOL;
+    voi_ErrNo : INT;
+   END_VAR
+
+   VAR
+    lr_CmpVal1 : REAL;
+    lr_CmpVal2 : REAL;
+   END_VAR   
+   
+   lr_CmpVal1 := vir_In + vir_Hyst;
+   lr_CmpVal2 := vir_In - vir_Hyst;
+   
+   IF vir_In <= lr_CmpVal1 AND vir_In >= lr_CmpVal2 THEN
+     vox_Out := TRUE;
+     ELSE
+     vox_Out := TRUE;
+   END_IF;
+   
+END_FUNCTION_BLOCK
+
+
+END_NAMESPACE

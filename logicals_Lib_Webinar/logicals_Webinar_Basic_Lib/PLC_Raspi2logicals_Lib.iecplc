@@ -1,0 +1,37 @@
+/*
+ * This is a logi.CAD 3 template for the raspbian PLC object
+ * Raspi2
+ */
+
+{
+	CHANNEL Raspi2_Channel
+		TCP
+			ADDRESS := 192.168.2.236;
+			PORT    := 1534;
+		END_TCP
+	END_CHANNEL
+}
+
+CONFIGURATION ConfRaspi2
+	
+	RESOURCE ResRaspi2 ON Raspbian { ON_CHANNEL := Raspi2_Channel }
+
+       /*
+        * Test System
+        */
+		VAR_GLOBAL
+		END_VAR
+
+		TASK TSK_Main(INTERVAL := TIME#500ms, PRIORITY := 38229);
+		
+		PROGRAM INST_TestC_RebootOS_ST WITH TSK_Main : PRG_lc_TestC_RebootOS_ST;
+
+		PROGRAM INST_TestC_WriteLocalTime_ST WITH TSK_Main : PRG_lc_TestC_WriteLocalTime_ST;
+		PROGRAM INST_TestC_ReadLocalTime_ST  WITH TSK_Main : PRG_lc_TestC_ReadLocalTime_ST;
+
+		PROGRAM INST_TestC_SystemCmd_ST WITH TSK_Main : PRG_lc_TestC_SystemCmd_ST;
+
+	END_RESOURCE
+
+END_CONFIGURATION
+

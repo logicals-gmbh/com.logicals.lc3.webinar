@@ -1,0 +1,162 @@
+
+Namespace com.logicals.Basic.Trace
+/*
+ * Trace mit TraceLevel
+ *
+ * 0 - Nichts tracen
+ * 1 
+ * 2
+ * 3
+ * 4
+ * 5 - Alle tracen
+ *
+ * Funktion TraceNurImInit ueberlegen
+ */
+FUNCTION_BLOCK FB_lc_Trace_ST
+  
+ VAR_INPUT
+  vistr_TraceText : STRING[128];
+  viui_TraceLevel : UINT := 5;    /* Alles Tracen */
+ END_VAR
+ 
+ VAR_OUTPUT
+ END_VAR
+ 
+ VAR
+  FB_InitRTrig     : R_TRIG; 
+ END_VAR
+
+ VAR
+   lx_TraceState : BOOL;
+ END_VAR
+
+  VAR
+   lx_CycleInit : BOOL;
+  END_VAR
+  
+  FB_InitRTrig(CLK := TRUE, Q => lx_CycleInit);
+  
+/*
+ * Nichts Tracen
+ */ 
+ IF viui_TraceLevel = 0 THEN
+ END_IF;  
+/*
+ * Wenig Tracen
+ */
+ IF viui_TraceLevel = 1 THEN
+  Trace(vistr_TraceText);
+ END_IF;  
+/*
+ * Alles Tracen
+ */
+ IF viui_TraceLevel > 1 THEN
+  Trace(vistr_TraceText);
+ END_IF;  
+
+END_FUNCTION_BLOCK
+
+/*
+ * logi.cals_Lib
+ * Trace CycleTime der ersten 10 Zyklen
+ */
+FUNCTION_BLOCK FB_lc_TraceFirstCycles_ST
+
+    VAR_INPUT
+     vii_CycleCount  : INT;
+     vistr_PrgName   : STRING[20];
+    /* TraceLevel, wenn dieser beim Aufruf nicht angegegben wird, soll immer mitgetracet werden  */ 
+     viui_TraceLevel : UINT := 5;
+    END_VAR
+  
+    VAR_OUTPUT
+    END_VAR
+    
+    VAR
+     FB_HCTrace : FB_lc_Trace_ST;
+    END_VAR
+
+    VAR
+    lt_ActCycleTime   : TIME;
+    lt_SetCycleTime   : TIME;
+    li_CycleIdx       : UINT := 1;
+    lArr_ActCycleTime : ARRAY [1..10] OF TIME;   
+
+    lt_ActCycleTime1  : TIME;
+    lt_ActCycleTime2  : TIME;
+    lt_ActCycleTime3  : TIME;
+    lt_ActCycleTime4  : TIME;
+    lt_ActCycleTime5  : TIME;
+    lt_ActCycleTime6  : TIME;
+    lt_ActCycleTime7  : TIME;
+    lt_ActCycleTime8  : TIME;
+    lt_ActCycleTime9  : TIME;
+    lt_ActCycleTime10 : TIME;
+
+    END_VAR
+
+    lt_ActCycleTime := SysTaskActualCycleTime();
+    lt_SetCycleTime := SysTaskCycleTime();
+    
+    IF vii_CycleCount = 1 THEN
+     lArr_ActCycleTime[vii_CycleCount] := lt_ActCycleTime;
+     lt_ActCycleTime1 := lt_ActCycleTime;
+     FB_HCTrace(vistr_TraceText := Concat(IN1 := vistr_PrgName, IN2 := '_Cycle1'));
+    END_IF;
+  
+    IF vii_CycleCount = 2 THEN
+     lArr_ActCycleTime[vii_CycleCount] := lt_ActCycleTime;
+     lt_ActCycleTime2 := lt_ActCycleTime;
+     FB_HCTrace(vistr_TraceText := Concat(IN1 := vistr_PrgName, IN2 := '_Cycle2'));
+    END_IF;
+
+    IF vii_CycleCount = 3 THEN
+     lArr_ActCycleTime[vii_CycleCount] := lt_ActCycleTime;
+     lt_ActCycleTime3 := lt_ActCycleTime;
+     FB_HCTrace(vistr_TraceText := Concat(IN1 := vistr_PrgName, IN2 := '_Cycle3'));
+    END_IF;
+
+    IF vii_CycleCount = 4 THEN
+     lArr_ActCycleTime[vii_CycleCount] := lt_ActCycleTime;
+     lt_ActCycleTime4 := lt_ActCycleTime;
+     FB_HCTrace(vistr_TraceText := Concat(IN1 := vistr_PrgName, IN2 := '_Cycle4'));
+    END_IF;
+
+    IF vii_CycleCount = 5 THEN
+     lArr_ActCycleTime[vii_CycleCount] := lt_ActCycleTime;
+     lt_ActCycleTime5 := lt_ActCycleTime;
+     FB_HCTrace(vistr_TraceText := Concat(IN1 := vistr_PrgName, IN2 := '_Cycle5'));
+    END_IF;
+
+    IF vii_CycleCount = 6 THEN
+     lArr_ActCycleTime[vii_CycleCount] := lt_ActCycleTime;
+     lt_ActCycleTime6 := lt_ActCycleTime;
+     FB_HCTrace(vistr_TraceText := Concat(IN1 := vistr_PrgName, IN2 := '_Cycle6'));
+    END_IF;
+
+    IF vii_CycleCount = 7 THEN
+     lArr_ActCycleTime[vii_CycleCount] := lt_ActCycleTime;
+     lt_ActCycleTime7 := lt_ActCycleTime;
+     FB_HCTrace(vistr_TraceText := Concat(IN1 := vistr_PrgName, IN2 := '_Cycle7'));
+    END_IF;
+    IF vii_CycleCount = 8 THEN
+     lArr_ActCycleTime[vii_CycleCount] := lt_ActCycleTime;
+     lt_ActCycleTime8 := lt_ActCycleTime;
+     FB_HCTrace(vistr_TraceText := Concat(IN1 := vistr_PrgName, IN2 := '_Cycle8'));
+    END_IF;
+
+    IF vii_CycleCount = 9 THEN
+     lArr_ActCycleTime[vii_CycleCount] := lt_ActCycleTime;
+     lt_ActCycleTime9 := lt_ActCycleTime;
+     FB_HCTrace(vistr_TraceText := Concat(IN1 := vistr_PrgName, IN2 := '_Cycle9'));
+    END_IF;
+
+    IF vii_CycleCount = 10 THEN
+     lArr_ActCycleTime[vii_CycleCount] := lt_ActCycleTime;
+     lt_ActCycleTime10 := lt_ActCycleTime;
+     FB_HCTrace(vistr_TraceText := Concat(IN1 := vistr_PrgName, IN2 := '_Cycle10'));
+    END_IF;
+  
+END_FUNCTION_BLOCK
+
+END_NAMESPACE

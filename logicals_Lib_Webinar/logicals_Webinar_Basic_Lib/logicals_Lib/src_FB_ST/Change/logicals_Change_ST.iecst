@@ -1,0 +1,194 @@
+NAMESPACE com.logicals.Basic.Change
+
+/*
+ * Check if BOOL is changed between two calls
+ */
+FUNCTION_BLOCK FB_lc_ChangeBOOL_ST
+  /*
+   * Change BOOL
+   * 
+   * InputValue was changed during two cycles
+   */
+   VAR_INPUT
+    vix_In : BOOL;
+   END_VAR
+
+   VAR_OUTPUT
+    vox_Out : BOOL;
+   END_VAR
+   
+   VAR
+    li_OldVal : BOOL;
+   END_VAR
+   
+   IF NE(IN1 := li_OldVal, IN2 := vix_In) THEN
+    vox_Out := TRUE;
+   ELSE
+    vox_Out := FALSE;
+   END_IF;
+   
+   li_OldVal := vix_In;
+
+END_FUNCTION_BLOCK
+
+/*
+ * Check if BYTE is changed between two calls
+ */
+FUNCTION_BLOCK FB_lc_ChangeBYTE_ST
+  /*
+   * Change BYTE
+   * 
+   * InputValue was changed during two cycles
+   */
+   VAR_INPUT
+    vix_In : BYTE;
+   END_VAR
+
+   VAR_OUTPUT
+    vox_Out : BOOL;
+   END_VAR
+   
+   VAR
+    li_OldVal : BYTE;
+   END_VAR
+   
+   IF NE(IN1 := li_OldVal, IN2 := vix_In) THEN
+    vox_Out := TRUE;
+   ELSE
+    vox_Out := FALSE;
+   END_IF;
+   
+   li_OldVal := vix_In;
+
+END_FUNCTION_BLOCK
+
+/*
+ * Check if INT is changed between two calls
+ */
+FUNCTION_BLOCK FB_lc_ChangeINT_ST
+  /*
+   * Change INT
+   * 
+   * InputValue was changed during two cycles
+   */
+   VAR_INPUT
+    vii_In : INT;
+   END_VAR
+
+   VAR_OUTPUT
+    vox_Out : BOOL;
+   END_VAR
+   
+   VAR
+    li_OldVal : INT;
+   END_VAR
+   
+   IF NE(IN1 := li_OldVal, IN2 := vii_In) THEN
+    vox_Out := TRUE;
+   ELSE
+    vox_Out := FALSE;
+   END_IF;
+   
+   li_OldVal := vii_In;
+
+END_FUNCTION_BLOCK
+
+/*
+ * Check if UINT is changed between two calls
+ */
+FUNCTION_BLOCK FB_lc_ChangeUINT_ST
+  /*
+   * Change UINT
+   * 
+   * InputValue was changed during two cycles
+   */
+   VAR_INPUT
+    viui_In : UINT;
+   END_VAR
+
+   VAR_OUTPUT
+    vox_Out : BOOL;
+   END_VAR
+   
+   VAR
+    lui_OldVal : UINT;
+   END_VAR
+   
+   IF NE(IN1 := lui_OldVal, IN2 := viui_In) THEN
+    vox_Out := TRUE;
+   ELSE
+    vox_Out := FALSE;
+   END_IF;
+   
+   lui_OldVal := viui_In;
+
+END_FUNCTION_BLOCK
+
+/*
+ * Check if DINT is changed between two calls
+ */
+FUNCTION_BLOCK FB_lc_ChangeDINT_ST
+  /*
+   * ChangeDINT als Funktionsbaustein!
+   * 
+   * InputValue was changed during two cycles
+   */
+   VAR_INPUT
+    vidi_In : DINT;
+   END_VAR
+      
+   VAR_OUTPUT
+    vox_Out : BOOL;
+   END_VAR
+
+   VAR
+    ldi_OldVal : DINT;
+    ldi_Count  : DINT;
+   END_VAR
+   
+   IF NE(IN1 := ldi_OldVal, IN2 := vidi_In) THEN
+    vox_Out := TRUE;
+   ELSE
+    vox_Out := FALSE;
+   END_IF;
+   
+   IF vox_Out = TRUE THEN
+    ldi_Count := ldi_Count + 1;
+   END_IF;
+   
+   ldi_OldVal := vidi_In;
+
+END_FUNCTION_BLOCK
+
+/*
+ * Check if UDINT is changed between two calls
+ */
+FUNCTION_BLOCK FB_lc_ChangeUDINT_ST
+  /*
+   * Change UINT
+   * 
+   * InputValue was changed during two cycles
+   */
+   VAR_INPUT
+    viudi_In : UDINT;
+   END_VAR
+
+   VAR_OUTPUT
+    vox_Out : BOOL;
+   END_VAR
+   
+   VAR
+    ludi_OldVal : UDINT;
+   END_VAR
+   
+   IF NE(IN1 := ludi_OldVal, IN2 := viudi_In) THEN
+    vox_Out := TRUE;
+   ELSE
+    vox_Out := FALSE;
+   END_IF;
+   
+   ludi_OldVal := viudi_In;
+
+END_FUNCTION_BLOCK
+
+END_NAMESPACE

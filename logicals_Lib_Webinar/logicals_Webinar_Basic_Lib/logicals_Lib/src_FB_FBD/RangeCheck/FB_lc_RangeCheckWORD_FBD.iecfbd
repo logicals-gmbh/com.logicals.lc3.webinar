@@ -1,0 +1,80 @@
+NAMESPACE com.logicals.Basic.RangeCheck
+FUNCTION_BLOCK FB_lc_RangeCheckWORD_FBD
+  {
+    width := 300;
+    minWidth := 300;
+    maxWidth := 300;
+    height := 78;
+    minHeight := 78;
+    maxHeight := 78;
+  }
+
+  VAR_INPUT
+    vidw_LL : WORD;
+    vidw_In : WORD;
+    vidw_UL : WORD;
+  END_VAR
+  VAR_OUTPUT
+    vox_LLRcd : BOOL;
+    vox_InRng : BOOL;
+    vox_OutOfRng : BOOL;
+    vox_ULRcd : BOOL;
+  END_VAR
+
+  (*
+
+    // Network 1:
+    GT(IN1 := vidw_In, IN2 := vidw_UL, GT => (@C(107).GT, vox_ULRcd));
+    LT(IN1 := vidw_In, IN2 := vidw_LL, LT => (@C(105).LT, vox_LLRcd));
+    OR(IN1 := @C(107).GT, IN2 := @C(105).LT, OR => (@C(109).OR, vox_OutOfRng));
+    NOT(IN := @C(109).OR, NOT => vox_InRng);
+
+  *)
+
+  @C(103) : @F(NOT), @R(1670.0, 340.0, 40.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(NOT), @R(9.5));
+  @C(109) : @F(OR), @R(550.0, 320.0, 40.0, 38.0), BOOL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(OR), @R(9.5));
+  @C(107) : @F(GT), @R(360.0, 300.0, 40.0, 38.0), WORD, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(GT), @R(9.5));
+  @C(105) : @F(LT), @R(360.0, 360.0, 40.0, 38.0), WORD, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(LT), @R(9.5));
+  @VF(104) : @E(vox_LLRcd), @R(1720.0, 360.0, 170.0, 19.0);
+  @VF(102) : @E(vox_InRng), @R(1720.0, 340.0, 170.0, 19.0);
+  @VF(108) : @E(vox_OutOfRng), @R(1720.0, 320.0, 170.0, 19.0);
+  @VF(106) : @E(vox_ULRcd), @R(1720.0, 300.0, 170.0, 19.0);
+  @VF(101) : @E(vidw_LL), @R(10.0, 380.0, 140.0, 19.0);
+  @VF(110) : @E(vidw_In), @R(10.0, 300.0, 140.0, 19.0);
+  @VF(111) : @E(vidw_UL), @R(10.0, 320.0, 140.0, 19.0);
+  @CP(118) : 1660.0, 329.5;
+  @CP(114) : 450.0, 369.5;
+  @CP(116) : 450.0, 309.5;
+  @CP(120) : 350.0, 309.5;
+
+  @G(112) :
+     @L(@C(103).NOT, @VF(102).i)
+    ;
+  @G(117) :
+     @L(@C(109).OR, @CP(118)),
+     @L(@CP(118), @VF(108).i),
+     @L(@CP(118), @C(103).IN)
+    ;
+  @G(113) :
+     @L(@C(105).LT, @CP(114)),
+     @L(@CP(114), @VF(104).i),
+     @L(@CP(114), @C(109).IN2)
+    ;
+  @G(115) :
+     @L(@C(107).GT, @CP(116)),
+     @L(@CP(116), @VF(106).i),
+     @L(@CP(116), @C(109).IN1)
+    ;
+  @G(119) :
+     @L(@VF(110).o, @CP(120)),
+     @L(@CP(120), @C(105).IN1),
+     @L(@CP(120), @C(107).IN1)
+    ;
+  @G(121) :
+     @L(@VF(101).o, @C(105).IN2)
+    ;
+  @G(122) :
+     @L(@VF(111).o, @C(107).IN2)
+    ;
+END_FUNCTION_BLOCK
+END_NAMESPACE

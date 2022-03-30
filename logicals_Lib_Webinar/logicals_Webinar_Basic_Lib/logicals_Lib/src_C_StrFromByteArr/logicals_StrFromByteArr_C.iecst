@@ -1,0 +1,15 @@
+{CustomImplementation}
+
+NAMESPACE com.logicals.Basic.Convert
+
+FUNCTION FUN_lc_StrFromByteArr_C : STRING[1024]
+    { ImplementationProperties(functionHasCFile;) }
+	
+	VAR_INPUT
+		vib_Arr  : ARRAY [0..1023] OF BYTE;
+		vidi_len : DINT;
+	END_VAR
+
+END_FUNCTION
+
+END_NAMESPACE

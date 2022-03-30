@@ -1,0 +1,76 @@
+NAMESPACE com.logicals.Basic.Flash
+FUNCTION_BLOCK FB_lc_Flash_4Hz_FBD
+  {
+    width := 260;
+    minWidth := 260;
+    maxWidth := 260;
+    height := 58;
+    minHeight := 58;
+    maxHeight := 58;
+  }
+
+  VAR
+    TON : TON;
+    SR : SR;
+    TOF : TOF;
+    lt_OnTime : TIME := T#0.25s;
+    lt_OffTime : TIME := T#0.25s;
+  END_VAR
+  VAR_OUTPUT
+    vox_Out : BOOL;
+  END_VAR
+
+  (*
+
+    // Network 1:
+    ADD_TIME(IN1 := lt_OffTime, IN2 := lt_OnTime, ADD_TIME => @C(108).ADD_TIME);
+    TON(IN := SR.Q1, PT := @C(108).ADD_TIME);
+    TOF(IN := TON.Q, PT := lt_OnTime, Q => vox_Out);
+    NOT(IN := TON.Q, NOT => @C(109).NOT);
+    SR(S1 := @C(109).NOT, R := TOF.Q);
+
+  *)
+
+  @C(106) : @FB(TON), @R(860.0, 320.0, 100.0, 38.0), @I(@N(IN), @L(9.5)), @I(@N(PT), @L(29.5)), @O(@N(Q), @R(9.5)), @O(@N(ET), @R(29.5));
+  @C(107) : @FB(SR), @R(570.0, 320.0, 80.0, 38.0), @I(@N(S1), @L(9.5)), @I(@N(R), @L(29.5)), @O(@N(Q1), @R(9.5));
+  @C(104) : @FB(TOF), @R(1010.0, 300.0, 100.0, 38.0), @I(@N(IN), @L(9.5)), @I(@N(PT), @L(29.5)), @O(@N(Q), @R(9.5)), @O(@N(ET), @R(29.5));
+  @C(108) : @F(ADD_TIME), @R(800.0, 340.0, 40.0, 38.0), @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(ADD_TIME), @R(9.5));
+  @C(109) : @F(NOT), @R(510.0, 320.0, 40.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(NOT), @R(9.5));
+  @VF(102) : @E(lt_OnTime), @R(670.0, 380.0, 90.0, 19.0);
+  @VF(105) : @E(lt_OffTime), @R(670.0, 340.0, 90.0, 19.0);
+  @VF(103) : @E(vox_Out), @R(1200.0, 300.0, 90.0, 19.0);
+  @CF(100) : @R(960.0, 60.0, 768.0, 118.0), @T("D:$R$NFlash Puls Generator 4Hz$R$N$R$N"), @POU;
+  @CF(101) : @R(170.0, 60.0, 768.0, 118.0), @T("E:$R$NFlash Pulse generator 4Hz$R$N"), @POU;
+  @CP(116) : 780.0, 389.5;
+  @CP(112) : 1130.0, 309.5;
+  @CP(114) : 980.0, 309.5;
+
+  @G(115) :
+     @L(@VF(102).o, @CP(116)),
+     @L(@CP(116), @C(104).PT),
+     @L(@CP(116), @C(108).IN2)
+    ;
+  @G(118) :
+     @L(@C(108).ADD_TIME, @C(106).PT)
+    ;
+  @G(120) :
+     @L(@VF(105).o, @C(108).IN1)
+    ;
+  @G(117) :
+     @L(@C(107).Q1, @C(106).IN)
+    ;
+  @G(119) :
+     @L(@C(109).NOT, @C(107).S1)
+    ;
+  @G(111) :
+     @L(@C(104).Q, @CP(112)),
+     @L(@CP(112), @VF(103).i),
+     @L(@CP(112), @C(107).R)
+    ;
+  @G(113) :
+     @L(@C(106).Q, @CP(114)),
+     @L(@CP(114), @C(104).IN),
+     @L(@CP(114), @C(109).IN)
+    ;
+END_FUNCTION_BLOCK
+END_NAMESPACE

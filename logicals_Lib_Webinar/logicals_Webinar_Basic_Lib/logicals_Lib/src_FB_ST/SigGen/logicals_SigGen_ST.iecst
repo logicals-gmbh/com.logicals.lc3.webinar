@@ -1,0 +1,174 @@
+NAMESPACE com.logicals.Basic.SigGen
+
+/*
+ * SinCos-Signalgeber
+ * 
+ * Der Max-Wert wird gesetzt
+ * Der Step-Wert wird gesetzt
+ */
+FUNCTION_BLOCK FB_lc_GenSinCosSig_ST  {
+    width := 310;
+    minWidth := 300;
+    maxWidth := 300;
+    height := 138;
+    minHeight := 138;
+    maxHeight := 138;
+  }
+  /*
+   * Signalgeber fuer
+   * Sin x, Cos x , Sin2 x und Cos2 x
+   * 
+   * Der IncrementWert wird uebergeben und der EndWert
+   */
+  VAR_INPUT
+    vir_StepVal : REAL := 0.01;
+    vir_EndVal  : REAL := 10000.0;
+  END_VAR
+
+  VAR_OUTPUT
+    vor_Sin_X : REAL;
+    vor_Cos_X : REAL;
+    vor_Sin_X_2 : REAL;
+    vor_Cos_X_2 : REAL;
+
+	voui_ErrNo : UINT;
+	vox_Err    : BOOL;
+  END_VAR
+  
+  VAR
+    lr_Var_X        : REAL := 0.0;
+    lr_A_Sin_X      : REAL;
+    lr_B_cosX       : REAL;
+    lr_C_sin2X      : REAL;
+    lr_D_cos2X      : REAL;
+    lr_ADD1         : REAL;
+    lr_Sin_lr_Var_X : REAL;
+    lr_Mul1         : REAL;
+    lr_Cos_Var_X    : REAL;
+    lr_Mul2         : REAL;
+    lr_Mul3         : REAL;
+    lr_Div1         : REAL;
+    lr_Mul4         : REAL;
+    lr_Div2         : REAL;
+  END_VAR
+ 
+/*
+ * Error-Handler!
+ */  
+ voui_ErrNo := 0;
+ vox_Err    := FALSE;
+
+ IF vir_EndVal = 0.0 THEN
+  voui_ErrNo := 1;
+  vox_Err    := TRUE;
+ END_IF;
+
+IF vox_Err    = FALSE THEN
+/*
+ * ST-Code
+ */
+ lr_Var_X        := ADD(lr_Var_X,vir_StepVal);
+ lr_Sin_lr_Var_X := SIN(lr_Var_X);
+ lr_Mul1         := MUL(lr_Sin_lr_Var_X,vir_EndVal);
+ vor_Sin_X       := lr_Mul1;
+ 
+ lr_A_Sin_X   := lr_Mul1;
+ lr_Cos_Var_X := COS(lr_Var_X);
+ lr_Mul2      := MUL(lr_Cos_Var_X,vir_EndVal);
+ vor_Cos_X    := lr_Mul2;
+
+ lr_B_cosX    := lr_Mul2;
+ lr_Mul3      := MUL(lr_A_Sin_X,lr_A_Sin_X);
+ lr_Div1      := DIV(lr_Mul3,vir_EndVal);
+ vor_Sin_X_2  :=lr_Div1;
+ 
+ lr_C_sin2X   := lr_Div1;
+ lr_Mul4      := MUL(lr_B_cosX,lr_B_cosX);
+ lr_Div2      := DIV(lr_Mul4,vir_EndVal);
+ vor_Cos_X_2  := lr_Div2;
+
+ lr_D_cos2X   := lr_Div2;
+ lr_ADD1      := ADD(lr_C_sin2X,lr_D_cos2X);
+
+END_IF;
+
+END_FUNCTION_BLOCK
+/*
+ * Erzeuen eines Dreieck-Testsignals / Create a triangle testsignal
+ */
+FUNCTION_BLOCK FB_lc_GenTriangleSig_ST  {
+    width := 300;
+    height := 138;
+    minWidth := 300;
+    minHeight := 138;
+    maxWidth := 300;
+    maxHeight := 138;
+  }
+	
+	VAR_INPUT
+		vit_CycleTime_ms : TIME := T#100ms;
+		viui_MaxVal      : UINT := 1024;
+	END_VAR
+
+	VAR_OUTPUT
+		voui_Out   : UINT;
+		vow_Out    : WORD;
+
+		voui_ErrNo : UINT;
+		vox_Err    : BOOL;
+	END_VAR
+	
+	VAR
+		lr_CycleTime : REAL;
+		lr_NoCyc     : REAL;
+		lr_Factor    : REAL;
+
+        lr_MaxVal    : REAL;
+
+		lr_Out       : REAL := 0.0;
+		lx_up        : BOOL := TRUE;
+	END_VAR
+
+    vox_Err    := FALSE;
+    voui_ErrNo := 0;
+    
+    lr_CycleTime := TO_REAL(vit_CycleTime_ms);
+    lr_MaxVal    := TO_REAL(viui_MaxVal);
+
+    IF lr_CycleTime = 0.0 THEN
+     vox_Err    := TRUE;
+     voui_ErrNo := 1;
+    END_IF;
+    
+    IF lr_MaxVal = 0.0 THEN
+     vox_Err    := TRUE;
+     voui_ErrNo := 2;
+    END_IF;
+
+    IF vox_Err = FALSE THEN
+
+    	lr_NoCyc  := (1.0 / TO_REAL(vit_CycleTime_ms)) * 5.0;
+    	lr_Factor := lr_MaxVal / lr_NoCyc;
+    	
+    	IF lr_Out > lr_MaxVal THEN 
+    	  lx_up := FALSE; 
+        END_IF;
+
+    	IF lr_Out < 0 THEN 
+    	  lx_up := TRUE; 
+    	END_IF;
+    
+    	IF lx_up THEN 
+    	   lr_Out := lr_Out + lr_Factor; 
+    	   ELSE 
+    	   lr_Out := lr_Out - lr_Factor; 
+    	END_IF;
+    	
+    	vow_Out  := TO_WORD(lr_Out);
+    	voui_Out := TO_UINT(lr_Out);
+    
+    END_IF;
+    
+END_FUNCTION_BLOCK
+
+END_NAMESPACE

@@ -1,0 +1,1241 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?fileVersion 4.0.0?><cproject storage_type_id="org.eclipse.cdt.core.XmlProjectDescriptionStorage">
+	<storageModule moduleId="org.eclipse.cdt.core.settings">
+		<cconfiguration id="LinuxARM64ID">
+			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="LinuxARM64ID" moduleId="org.eclipse.cdt.core.settings" name="LinuxARM64">
+				<externalSettings/>
+				<extensions>
+					<extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GLDErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.VCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.CWDLocator" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+				</extensions>
+			</storageModule>
+			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
+				<configuration buildProperties="" description="" id="LinuxARM64ID" name="LinuxARM64" parent="org.eclipse.cdt.build.core.prefbase.cfg">
+					<folderInfo id="LinuxARM64ID." name="/" resourcePath="">
+						<toolChain id="org.eclipse.cdt.build.core.prefbase.toolchain.865823726" name="No ToolChain" resourceTypeBasedDiscovery="false" superClass="org.eclipse.cdt.build.core.prefbase.toolchain">
+							<targetPlatform id="org.eclipse.cdt.build.core.prefbase.toolchain.865823726.1723148672" name=""/>
+							<builder enableAutoBuild="false" enableCleanBuild="false" enabledIncrementalBuild="false" id="org.eclipse.cdt.build.core.settings.default.builder.443671431" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Gnu Make Builder" superClass="org.eclipse.cdt.build.core.settings.default.builder"/>
+							<tool id="org.eclipse.cdt.build.core.settings.holder.libs.1364096686" name="holder for library settings" superClass="org.eclipse.cdt.build.core.settings.holder.libs"/>
+							<tool id="org.eclipse.cdt.build.core.settings.holder.834048902" name="Assembly" superClass="org.eclipse.cdt.build.core.settings.holder">
+								<inputType id="org.eclipse.cdt.build.core.settings.holder.inType.839172657" languageId="org.eclipse.cdt.core.assembly" languageName="Assembly" sourceContentType="org.eclipse.cdt.core.asmSource" superClass="org.eclipse.cdt.build.core.settings.holder.inType"/>
+							</tool>
+							<tool id="org.eclipse.cdt.build.core.settings.holder.288640428" name="GNU C++" superClass="org.eclipse.cdt.build.core.settings.holder">
+								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="org.eclipse.cdt.build.core.settings.holder.incpaths.1061077556" name="Include Paths" superClass="org.eclipse.cdt.build.core.settings.holder.incpaths" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.lc3.ptk.linuxa64.win_3.10.0\api\h&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\nRTS\RTSAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\nRTS\LCAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3\RTSAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3\LCAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\RTS2\RTSAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3\RTSAPI\RISMD&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.linuxa64.win64_9.2.1\bin\aarch64-none-linux-gnu\include\c++\9.2.1&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.linuxa64.win64_9.2.1\bin\aarch64-none-linux-gnu\include\c++\9.2.1\aarch64-none-linux-gnu&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.linuxa64.win64_9.2.1\bin\aarch64-none-linux-gnu\include\c++\9.2.1\backward&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.linuxa64.win64_9.2.1\bin\lib\gcc\aarch64-none-linux-gnu\9.2.1\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.linuxa64.win64_9.2.1\bin\lib\gcc\aarch64-none-linux-gnu\9.2.1\include-fixed&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.linuxa64.win64_9.2.1\bin\aarch64-none-linux-gnu\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.linuxa64.win64_9.2.1\bin\aarch64-none-linux-gnu\libc\usr\include&quot;"/>
+								</option>
+								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="org.eclipse.cdt.build.core.settings.holder.symbols.77403363" name="Symbols" superClass="org.eclipse.cdt.build.core.settings.holder.symbols" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="LC_GENERATED=1"/>
+									<listOptionValue builtIn="false" value="HAS_RT_TRACE_IMPL=1"/>
+									<listOptionValue builtIn="false" value="__cdecl"/>
+									<listOptionValue builtIn="false" value="__stdcall"/>
+									<listOptionValue builtIn="false" value="__LINUX__"/>
+								</option>
+								<inputType id="org.eclipse.cdt.build.core.settings.holder.inType.65096697" languageId="org.eclipse.cdt.core.g++" languageName="GNU C++" sourceContentType="org.eclipse.cdt.core.cxxSource,org.eclipse.cdt.core.cxxHeader" superClass="org.eclipse.cdt.build.core.settings.holder.inType"/>
+							</tool>
+							<tool id="org.eclipse.cdt.build.core.settings.holder.453038603" name="GNU C" superClass="org.eclipse.cdt.build.core.settings.holder">
+								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="org.eclipse.cdt.build.core.settings.holder.incpaths.2107476744" name="Include Paths" superClass="org.eclipse.cdt.build.core.settings.holder.incpaths" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.lc3.ptk.linuxa64.win_3.10.0\api\h&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\nRTS\RTSAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\nRTS\LCAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3\RTSAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3\LCAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\RTS2\RTSAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3\RTSAPI\RISMD&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.linuxa64.win64_9.2.1\bin\lib\gcc\aarch64-none-linux-gnu\9.2.1\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.linuxa64.win64_9.2.1\bin\lib\gcc\aarch64-none-linux-gnu\9.2.1\include-fixed&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.linuxa64.win64_9.2.1\bin\aarch64-none-linux-gnu\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.linuxa64.win64_9.2.1\bin\aarch64-none-linux-gnu\libc\usr\include&quot;"/>
+								</option>
+								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="org.eclipse.cdt.build.core.settings.holder.symbols.1975139970" name="Symbols" superClass="org.eclipse.cdt.build.core.settings.holder.symbols" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="LC_GENERATED=1"/>
+									<listOptionValue builtIn="false" value="HAS_RT_TRACE_IMPL=1"/>
+									<listOptionValue builtIn="false" value="__cdecl"/>
+									<listOptionValue builtIn="false" value="__stdcall"/>
+									<listOptionValue builtIn="false" value="__LINUX__"/>
+								</option>
+								<inputType id="org.eclipse.cdt.build.core.settings.holder.inType.343240269" languageId="org.eclipse.cdt.core.gcc" languageName="GNU C" sourceContentType="org.eclipse.cdt.core.cSource,org.eclipse.cdt.core.cHeader" superClass="org.eclipse.cdt.build.core.settings.holder.inType"/>
+							</tool>
+						</toolChain>
+					</folderInfo>
+				</configuration>
+			</storageModule>
+			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
+		</cconfiguration>
+		<cconfiguration id="LinuxX86ID">
+			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="LinuxX86ID" moduleId="org.eclipse.cdt.core.settings" name="LinuxX86">
+				<externalSettings/>
+				<extensions>
+					<extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GLDErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.VCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.CWDLocator" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+				</extensions>
+			</storageModule>
+			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
+				<configuration buildProperties="" description="" id="LinuxX86ID" name="LinuxX86" parent="org.eclipse.cdt.build.core.prefbase.cfg">
+					<folderInfo id="LinuxX86ID." name="/" resourcePath="">
+						<toolChain id="org.eclipse.cdt.build.core.prefbase.toolchain.460424863" name="No ToolChain" resourceTypeBasedDiscovery="false" superClass="org.eclipse.cdt.build.core.prefbase.toolchain">
+							<targetPlatform id="org.eclipse.cdt.build.core.prefbase.toolchain.460424863.1549701742" name=""/>
+							<builder enableAutoBuild="false" enableCleanBuild="false" enabledIncrementalBuild="false" id="org.eclipse.cdt.build.core.settings.default.builder.619665042" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Gnu Make Builder" superClass="org.eclipse.cdt.build.core.settings.default.builder"/>
+							<tool id="org.eclipse.cdt.build.core.settings.holder.libs.557942626" name="holder for library settings" superClass="org.eclipse.cdt.build.core.settings.holder.libs"/>
+							<tool id="org.eclipse.cdt.build.core.settings.holder.859415810" name="Assembly" superClass="org.eclipse.cdt.build.core.settings.holder">
+								<inputType id="org.eclipse.cdt.build.core.settings.holder.inType.780432570" languageId="org.eclipse.cdt.core.assembly" languageName="Assembly" sourceContentType="org.eclipse.cdt.core.asmSource" superClass="org.eclipse.cdt.build.core.settings.holder.inType"/>
+							</tool>
+							<tool id="org.eclipse.cdt.build.core.settings.holder.1753909994" name="GNU C++" superClass="org.eclipse.cdt.build.core.settings.holder">
+								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="org.eclipse.cdt.build.core.settings.holder.incpaths.128497241" name="Include Paths" superClass="org.eclipse.cdt.build.core.settings.holder.incpaths" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.lc3.ptk.linuxx86.win_3.10.0\api\h&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\nRTS\RTSAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\nRTS\LCAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3\RTSAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3\LCAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\RTS2\RTSAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3\RTSAPI\RISMD&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.linuxx86.win32_7.1.0.2\bin\i686-logicals-linux-gnu\i686-logicals-linux-gnu\include\c++\7.1.0&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.linuxx86.win32_7.1.0.2\bin\i686-logicals-linux-gnu\i686-logicals-linux-gnu\include\c++\7.1.0\i686-logicals-linux-gnu&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.linuxx86.win32_7.1.0.2\bin\i686-logicals-linux-gnu\i686-logicals-linux-gnu\include\c++\7.1.0\backward&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.linuxx86.win32_7.1.0.2\bin\i686-logicals-linux-gnu\lib\gcc\i686-logicals-linux-gnu\7.1.0\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.linuxx86.win32_7.1.0.2\bin\i686-logicals-linux-gnu\lib\gcc\i686-logicals-linux-gnu\7.1.0\include-fixed&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.linuxx86.win32_7.1.0.2\bin\i686-logicals-linux-gnu\i686-logicals-linux-gnu\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.linuxx86.win32_7.1.0.2\bin\i686-logicals-linux-gnu\i686-logicals-linux-gnu\sysroot\usr\include&quot;"/>
+								</option>
+								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="org.eclipse.cdt.build.core.settings.holder.symbols.1124721448" name="Symbols" superClass="org.eclipse.cdt.build.core.settings.holder.symbols" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="LC_GENERATED=1"/>
+									<listOptionValue builtIn="false" value="HAS_RT_TRACE_IMPL=1"/>
+									<listOptionValue builtIn="false" value="__cdecl"/>
+									<listOptionValue builtIn="false" value="__stdcall"/>
+									<listOptionValue builtIn="false" value="__LINUX__"/>
+								</option>
+								<inputType id="org.eclipse.cdt.build.core.settings.holder.inType.1027682644" languageId="org.eclipse.cdt.core.g++" languageName="GNU C++" sourceContentType="org.eclipse.cdt.core.cxxSource,org.eclipse.cdt.core.cxxHeader" superClass="org.eclipse.cdt.build.core.settings.holder.inType"/>
+							</tool>
+							<tool id="org.eclipse.cdt.build.core.settings.holder.1743923958" name="GNU C" superClass="org.eclipse.cdt.build.core.settings.holder">
+								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="org.eclipse.cdt.build.core.settings.holder.incpaths.936020344" name="Include Paths" superClass="org.eclipse.cdt.build.core.settings.holder.incpaths" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.lc3.ptk.linuxx86.win_3.10.0\api\h&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\nRTS\RTSAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\nRTS\LCAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3\RTSAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3\LCAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\RTS2\RTSAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3\RTSAPI\RISMD&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.linuxx86.win32_7.1.0.2\bin\i686-logicals-linux-gnu\lib\gcc\i686-logicals-linux-gnu\7.1.0\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.linuxx86.win32_7.1.0.2\bin\i686-logicals-linux-gnu\lib\gcc\i686-logicals-linux-gnu\7.1.0\include-fixed&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.linuxx86.win32_7.1.0.2\bin\i686-logicals-linux-gnu\i686-logicals-linux-gnu\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.linuxx86.win32_7.1.0.2\bin\i686-logicals-linux-gnu\i686-logicals-linux-gnu\sysroot\usr\include&quot;"/>
+								</option>
+								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="org.eclipse.cdt.build.core.settings.holder.symbols.1334004347" name="Symbols" superClass="org.eclipse.cdt.build.core.settings.holder.symbols" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="LC_GENERATED=1"/>
+									<listOptionValue builtIn="false" value="HAS_RT_TRACE_IMPL=1"/>
+									<listOptionValue builtIn="false" value="__cdecl"/>
+									<listOptionValue builtIn="false" value="__stdcall"/>
+									<listOptionValue builtIn="false" value="__LINUX__"/>
+								</option>
+								<inputType id="org.eclipse.cdt.build.core.settings.holder.inType.1786174048" languageId="org.eclipse.cdt.core.gcc" languageName="GNU C" sourceContentType="org.eclipse.cdt.core.cSource,org.eclipse.cdt.core.cHeader" superClass="org.eclipse.cdt.build.core.settings.holder.inType"/>
+							</tool>
+						</toolChain>
+					</folderInfo>
+				</configuration>
+			</storageModule>
+			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
+		</cconfiguration>
+		<cconfiguration id="BuiltInPlcID">
+			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="BuiltInPlcID" moduleId="org.eclipse.cdt.core.settings" name="BuiltInPlc">
+				<externalSettings/>
+				<extensions>
+					<extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GLDErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.VCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.CWDLocator" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+				</extensions>
+			</storageModule>
+			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
+				<configuration buildProperties="" description="" id="BuiltInPlcID" name="BuiltInPlc" parent="org.eclipse.cdt.build.core.prefbase.cfg">
+					<folderInfo id="BuiltInPlcID." name="/" resourcePath="">
+						<toolChain id="org.eclipse.cdt.build.core.prefbase.toolchain.1911460261" name="No ToolChain" resourceTypeBasedDiscovery="false" superClass="org.eclipse.cdt.build.core.prefbase.toolchain">
+							<targetPlatform id="org.eclipse.cdt.build.core.prefbase.toolchain.1911460261.762874296" name=""/>
+							<builder enableAutoBuild="false" enableCleanBuild="false" enabledIncrementalBuild="false" id="org.eclipse.cdt.build.core.settings.default.builder.1408089685" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Gnu Make Builder" superClass="org.eclipse.cdt.build.core.settings.default.builder"/>
+							<tool id="org.eclipse.cdt.build.core.settings.holder.libs.572520779" name="holder for library settings" superClass="org.eclipse.cdt.build.core.settings.holder.libs"/>
+							<tool id="org.eclipse.cdt.build.core.settings.holder.97152753" name="Assembly" superClass="org.eclipse.cdt.build.core.settings.holder">
+								<inputType id="org.eclipse.cdt.build.core.settings.holder.inType.512649399" languageId="org.eclipse.cdt.core.assembly" languageName="Assembly" sourceContentType="org.eclipse.cdt.core.asmSource" superClass="org.eclipse.cdt.build.core.settings.holder.inType"/>
+							</tool>
+							<tool id="org.eclipse.cdt.build.core.settings.holder.763576675" name="GNU C++" superClass="org.eclipse.cdt.build.core.settings.holder">
+								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="org.eclipse.cdt.build.core.settings.holder.incpaths.831365723" name="Include Paths" superClass="org.eclipse.cdt.build.core.settings.holder.incpaths" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.lc3.ptk.win32.win_3.10.0\api\h&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\nRTS\RTSAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\nRTS\LCAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3\RTSAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3\LCAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\RTS2\RTSAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3\RTSAPI\RISMD&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.compiler.gcc.win32.win32_7.1.0.1\bin\mingw\lib\gcc\i686-w64-mingw32\7.1.0\include\c++&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.compiler.gcc.win32.win32_7.1.0.1\bin\mingw\lib\gcc\i686-w64-mingw32\7.1.0\include\c++\i686-w64-mingw32&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.compiler.gcc.win32.win32_7.1.0.1\bin\mingw\lib\gcc\i686-w64-mingw32\7.1.0\include\c++\backward&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.compiler.gcc.win32.win32_7.1.0.1\bin\mingw\lib\gcc\i686-w64-mingw32\7.1.0\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.compiler.gcc.win32.win32_7.1.0.1\bin\mingw\lib\gcc\i686-w64-mingw32\7.1.0\include-fixed&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.compiler.gcc.win32.win32_7.1.0.1\bin\mingw\i686-w64-mingw32\include&quot;"/>
+								</option>
+								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="org.eclipse.cdt.build.core.settings.holder.symbols.1997443112" name="Symbols" superClass="org.eclipse.cdt.build.core.settings.holder.symbols" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="LC_GENERATED=1"/>
+									<listOptionValue builtIn="false" value="HAS_RT_TRACE_IMPL=1"/>
+									<listOptionValue builtIn="false" value="__WINDOWS__"/>
+									<listOptionValue builtIn="false" value="WANT_PTR_NULL_TRACE=1"/>
+								</option>
+								<inputType id="org.eclipse.cdt.build.core.settings.holder.inType.201793051" languageId="org.eclipse.cdt.core.g++" languageName="GNU C++" sourceContentType="org.eclipse.cdt.core.cxxSource,org.eclipse.cdt.core.cxxHeader" superClass="org.eclipse.cdt.build.core.settings.holder.inType"/>
+							</tool>
+							<tool id="org.eclipse.cdt.build.core.settings.holder.1298417582" name="GNU C" superClass="org.eclipse.cdt.build.core.settings.holder">
+								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="org.eclipse.cdt.build.core.settings.holder.incpaths.1583899388" name="Include Paths" superClass="org.eclipse.cdt.build.core.settings.holder.incpaths" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.lc3.ptk.win32.win_3.10.0\api\h&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\nRTS\RTSAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\nRTS\LCAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3\RTSAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3\LCAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\RTS2\RTSAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3\RTSAPI\RISMD&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.compiler.gcc.win32.win32_7.1.0.1\bin\mingw\lib\gcc\i686-w64-mingw32\7.1.0\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.compiler.gcc.win32.win32_7.1.0.1\bin\mingw\lib\gcc\i686-w64-mingw32\7.1.0\include-fixed&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.compiler.gcc.win32.win32_7.1.0.1\bin\mingw\i686-w64-mingw32\include&quot;"/>
+								</option>
+								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="org.eclipse.cdt.build.core.settings.holder.symbols.1339776258" name="Symbols" superClass="org.eclipse.cdt.build.core.settings.holder.symbols" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="LC_GENERATED=1"/>
+									<listOptionValue builtIn="false" value="HAS_RT_TRACE_IMPL=1"/>
+									<listOptionValue builtIn="false" value="__WINDOWS__"/>
+									<listOptionValue builtIn="false" value="WANT_PTR_NULL_TRACE=1"/>
+								</option>
+								<inputType id="org.eclipse.cdt.build.core.settings.holder.inType.1590748467" languageId="org.eclipse.cdt.core.gcc" languageName="GNU C" sourceContentType="org.eclipse.cdt.core.cSource,org.eclipse.cdt.core.cHeader" superClass="org.eclipse.cdt.build.core.settings.holder.inType"/>
+							</tool>
+						</toolChain>
+					</folderInfo>
+				</configuration>
+			</storageModule>
+			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
+		</cconfiguration>
+		<cconfiguration id="BuiltInPlcCoverageID">
+			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="BuiltInPlcCoverageID" moduleId="org.eclipse.cdt.core.settings" name="BuiltInPlcCoverage">
+				<externalSettings/>
+				<extensions>
+					<extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GLDErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.VCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.CWDLocator" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+				</extensions>
+			</storageModule>
+			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
+				<configuration buildProperties="" description="" id="BuiltInPlcCoverageID" name="BuiltInPlcCoverage" parent="org.eclipse.cdt.build.core.prefbase.cfg">
+					<folderInfo id="BuiltInPlcCoverageID." name="/" resourcePath="">
+						<toolChain id="org.eclipse.cdt.build.core.prefbase.toolchain.1370095185" name="No ToolChain" resourceTypeBasedDiscovery="false" superClass="org.eclipse.cdt.build.core.prefbase.toolchain">
+							<targetPlatform id="org.eclipse.cdt.build.core.prefbase.toolchain.1370095185.963124835" name=""/>
+							<builder enableAutoBuild="false" enableCleanBuild="false" enabledIncrementalBuild="false" id="org.eclipse.cdt.build.core.settings.default.builder.499937572" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Gnu Make Builder" superClass="org.eclipse.cdt.build.core.settings.default.builder"/>
+							<tool id="org.eclipse.cdt.build.core.settings.holder.libs.275656451" name="holder for library settings" superClass="org.eclipse.cdt.build.core.settings.holder.libs"/>
+							<tool id="org.eclipse.cdt.build.core.settings.holder.1917000885" name="Assembly" superClass="org.eclipse.cdt.build.core.settings.holder">
+								<inputType id="org.eclipse.cdt.build.core.settings.holder.inType.850013043" languageId="org.eclipse.cdt.core.assembly" languageName="Assembly" sourceContentType="org.eclipse.cdt.core.asmSource" superClass="org.eclipse.cdt.build.core.settings.holder.inType"/>
+							</tool>
+							<tool id="org.eclipse.cdt.build.core.settings.holder.1596362963" name="GNU C++" superClass="org.eclipse.cdt.build.core.settings.holder">
+								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="org.eclipse.cdt.build.core.settings.holder.incpaths.978483552" name="Include Paths" superClass="org.eclipse.cdt.build.core.settings.holder.incpaths" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.lc3.ptk.win32.win_3.10.0\api\h&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\nRTS\RTSAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\nRTS\LCAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3\RTSAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3\LCAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\RTS2\RTSAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3\RTSAPI\RISMD&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.compiler.gcc.win32.win32_7.1.0.1\bin\mingw\lib\gcc\i686-w64-mingw32\7.1.0\include\c++&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.compiler.gcc.win32.win32_7.1.0.1\bin\mingw\lib\gcc\i686-w64-mingw32\7.1.0\include\c++\i686-w64-mingw32&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.compiler.gcc.win32.win32_7.1.0.1\bin\mingw\lib\gcc\i686-w64-mingw32\7.1.0\include\c++\backward&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.compiler.gcc.win32.win32_7.1.0.1\bin\mingw\lib\gcc\i686-w64-mingw32\7.1.0\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.compiler.gcc.win32.win32_7.1.0.1\bin\mingw\lib\gcc\i686-w64-mingw32\7.1.0\include-fixed&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.compiler.gcc.win32.win32_7.1.0.1\bin\mingw\i686-w64-mingw32\include&quot;"/>
+								</option>
+								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="org.eclipse.cdt.build.core.settings.holder.symbols.311895500" name="Symbols" superClass="org.eclipse.cdt.build.core.settings.holder.symbols" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="LC_GENERATED=1"/>
+									<listOptionValue builtIn="false" value="HAS_RT_TRACE_IMPL=1"/>
+									<listOptionValue builtIn="false" value="__WINDOWS__"/>
+								</option>
+								<inputType id="org.eclipse.cdt.build.core.settings.holder.inType.2087242438" languageId="org.eclipse.cdt.core.g++" languageName="GNU C++" sourceContentType="org.eclipse.cdt.core.cxxSource,org.eclipse.cdt.core.cxxHeader" superClass="org.eclipse.cdt.build.core.settings.holder.inType"/>
+							</tool>
+							<tool id="org.eclipse.cdt.build.core.settings.holder.1762384004" name="GNU C" superClass="org.eclipse.cdt.build.core.settings.holder">
+								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="org.eclipse.cdt.build.core.settings.holder.incpaths.296505685" name="Include Paths" superClass="org.eclipse.cdt.build.core.settings.holder.incpaths" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.lc3.ptk.win32.win_3.10.0\api\h&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\nRTS\RTSAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\nRTS\LCAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3\RTSAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3\LCAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\RTS2\RTSAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3\RTSAPI\RISMD&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.compiler.gcc.win32.win32_7.1.0.1\bin\mingw\lib\gcc\i686-w64-mingw32\7.1.0\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.compiler.gcc.win32.win32_7.1.0.1\bin\mingw\lib\gcc\i686-w64-mingw32\7.1.0\include-fixed&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.compiler.gcc.win32.win32_7.1.0.1\bin\mingw\i686-w64-mingw32\include&quot;"/>
+								</option>
+								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="org.eclipse.cdt.build.core.settings.holder.symbols.1874095830" name="Symbols" superClass="org.eclipse.cdt.build.core.settings.holder.symbols" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="LC_GENERATED=1"/>
+									<listOptionValue builtIn="false" value="HAS_RT_TRACE_IMPL=1"/>
+									<listOptionValue builtIn="false" value="__WINDOWS__"/>
+								</option>
+								<inputType id="org.eclipse.cdt.build.core.settings.holder.inType.1789819328" languageId="org.eclipse.cdt.core.gcc" languageName="GNU C" sourceContentType="org.eclipse.cdt.core.cSource,org.eclipse.cdt.core.cHeader" superClass="org.eclipse.cdt.build.core.settings.holder.inType"/>
+							</tool>
+						</toolChain>
+					</folderInfo>
+				</configuration>
+			</storageModule>
+			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
+		</cconfiguration>
+		<cconfiguration id="WindowsX86ID">
+			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="WindowsX86ID" moduleId="org.eclipse.cdt.core.settings" name="WindowsX86">
+				<externalSettings/>
+				<extensions>
+					<extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GLDErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.VCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.CWDLocator" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+				</extensions>
+			</storageModule>
+			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
+				<configuration buildProperties="" description="" id="WindowsX86ID" name="WindowsX86" parent="org.eclipse.cdt.build.core.prefbase.cfg">
+					<folderInfo id="WindowsX86ID." name="/" resourcePath="">
+						<toolChain id="org.eclipse.cdt.build.core.prefbase.toolchain.1330797273" name="No ToolChain" resourceTypeBasedDiscovery="false" superClass="org.eclipse.cdt.build.core.prefbase.toolchain">
+							<targetPlatform id="org.eclipse.cdt.build.core.prefbase.toolchain.1330797273.297171734" name=""/>
+							<builder enableAutoBuild="false" enableCleanBuild="false" enabledIncrementalBuild="false" id="org.eclipse.cdt.build.core.settings.default.builder.1632905704" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Gnu Make Builder" superClass="org.eclipse.cdt.build.core.settings.default.builder"/>
+							<tool id="org.eclipse.cdt.build.core.settings.holder.libs.1270520684" name="holder for library settings" superClass="org.eclipse.cdt.build.core.settings.holder.libs"/>
+							<tool id="org.eclipse.cdt.build.core.settings.holder.457651536" name="Assembly" superClass="org.eclipse.cdt.build.core.settings.holder">
+								<inputType id="org.eclipse.cdt.build.core.settings.holder.inType.983014861" languageId="org.eclipse.cdt.core.assembly" languageName="Assembly" sourceContentType="org.eclipse.cdt.core.asmSource" superClass="org.eclipse.cdt.build.core.settings.holder.inType"/>
+							</tool>
+							<tool id="org.eclipse.cdt.build.core.settings.holder.151314066" name="GNU C++" superClass="org.eclipse.cdt.build.core.settings.holder">
+								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="org.eclipse.cdt.build.core.settings.holder.incpaths.1936115914" name="Include Paths" superClass="org.eclipse.cdt.build.core.settings.holder.incpaths" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.lc3.ptk.win32.win_3.10.0\api\h&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\nRTS\RTSAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\nRTS\LCAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3\RTSAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3\LCAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\RTS2\RTSAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3\RTSAPI\RISMD&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.compiler.gcc.win32.win32_7.1.0.1\bin\mingw\lib\gcc\i686-w64-mingw32\7.1.0\include\c++&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.compiler.gcc.win32.win32_7.1.0.1\bin\mingw\lib\gcc\i686-w64-mingw32\7.1.0\include\c++\i686-w64-mingw32&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.compiler.gcc.win32.win32_7.1.0.1\bin\mingw\lib\gcc\i686-w64-mingw32\7.1.0\include\c++\backward&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.compiler.gcc.win32.win32_7.1.0.1\bin\mingw\lib\gcc\i686-w64-mingw32\7.1.0\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.compiler.gcc.win32.win32_7.1.0.1\bin\mingw\lib\gcc\i686-w64-mingw32\7.1.0\include-fixed&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.compiler.gcc.win32.win32_7.1.0.1\bin\mingw\i686-w64-mingw32\include&quot;"/>
+								</option>
+								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="org.eclipse.cdt.build.core.settings.holder.symbols.1003888679" name="Symbols" superClass="org.eclipse.cdt.build.core.settings.holder.symbols" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="LC_GENERATED=1"/>
+									<listOptionValue builtIn="false" value="HAS_RT_TRACE_IMPL=1"/>
+									<listOptionValue builtIn="false" value="__WINDOWS__"/>
+								</option>
+								<inputType id="org.eclipse.cdt.build.core.settings.holder.inType.276130915" languageId="org.eclipse.cdt.core.g++" languageName="GNU C++" sourceContentType="org.eclipse.cdt.core.cxxSource,org.eclipse.cdt.core.cxxHeader" superClass="org.eclipse.cdt.build.core.settings.holder.inType"/>
+							</tool>
+							<tool id="org.eclipse.cdt.build.core.settings.holder.451381757" name="GNU C" superClass="org.eclipse.cdt.build.core.settings.holder">
+								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="org.eclipse.cdt.build.core.settings.holder.incpaths.286345493" name="Include Paths" superClass="org.eclipse.cdt.build.core.settings.holder.incpaths" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.lc3.ptk.win32.win_3.10.0\api\h&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\nRTS\RTSAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\nRTS\LCAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3\RTSAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3\LCAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\RTS2\RTSAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3\RTSAPI\RISMD&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.compiler.gcc.win32.win32_7.1.0.1\bin\mingw\lib\gcc\i686-w64-mingw32\7.1.0\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.compiler.gcc.win32.win32_7.1.0.1\bin\mingw\lib\gcc\i686-w64-mingw32\7.1.0\include-fixed&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.compiler.gcc.win32.win32_7.1.0.1\bin\mingw\i686-w64-mingw32\include&quot;"/>
+								</option>
+								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="org.eclipse.cdt.build.core.settings.holder.symbols.1828963547" name="Symbols" superClass="org.eclipse.cdt.build.core.settings.holder.symbols" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="LC_GENERATED=1"/>
+									<listOptionValue builtIn="false" value="HAS_RT_TRACE_IMPL=1"/>
+									<listOptionValue builtIn="false" value="__WINDOWS__"/>
+								</option>
+								<inputType id="org.eclipse.cdt.build.core.settings.holder.inType.812933389" languageId="org.eclipse.cdt.core.gcc" languageName="GNU C" sourceContentType="org.eclipse.cdt.core.cSource,org.eclipse.cdt.core.cHeader" superClass="org.eclipse.cdt.build.core.settings.holder.inType"/>
+							</tool>
+						</toolChain>
+					</folderInfo>
+				</configuration>
+			</storageModule>
+			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
+		</cconfiguration>
+		<cconfiguration id="RevolutionPiID">
+			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="RevolutionPiID" moduleId="org.eclipse.cdt.core.settings" name="RevolutionPi">
+				<externalSettings/>
+				<extensions>
+					<extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GLDErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.VCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.CWDLocator" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+				</extensions>
+			</storageModule>
+			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
+				<configuration buildProperties="" description="" id="RevolutionPiID" name="RevolutionPi" parent="org.eclipse.cdt.build.core.prefbase.cfg">
+					<folderInfo id="RevolutionPiID." name="/" resourcePath="">
+						<toolChain id="org.eclipse.cdt.build.core.prefbase.toolchain.1163092652" name="No ToolChain" resourceTypeBasedDiscovery="false" superClass="org.eclipse.cdt.build.core.prefbase.toolchain">
+							<targetPlatform id="org.eclipse.cdt.build.core.prefbase.toolchain.1163092652.572086313" name=""/>
+							<builder enableAutoBuild="false" enableCleanBuild="false" enabledIncrementalBuild="false" id="org.eclipse.cdt.build.core.settings.default.builder.1265691867" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Gnu Make Builder" superClass="org.eclipse.cdt.build.core.settings.default.builder"/>
+							<tool id="org.eclipse.cdt.build.core.settings.holder.libs.1555430466" name="holder for library settings" superClass="org.eclipse.cdt.build.core.settings.holder.libs"/>
+							<tool id="org.eclipse.cdt.build.core.settings.holder.1917817534" name="Assembly" superClass="org.eclipse.cdt.build.core.settings.holder">
+								<inputType id="org.eclipse.cdt.build.core.settings.holder.inType.598545627" languageId="org.eclipse.cdt.core.assembly" languageName="Assembly" sourceContentType="org.eclipse.cdt.core.asmSource" superClass="org.eclipse.cdt.build.core.settings.holder.inType"/>
+							</tool>
+							<tool id="org.eclipse.cdt.build.core.settings.holder.1670223458" name="GNU C++" superClass="org.eclipse.cdt.build.core.settings.holder">
+								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="org.eclipse.cdt.build.core.settings.holder.incpaths.306647059" name="Include Paths" superClass="org.eclipse.cdt.build.core.settings.holder.incpaths" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk.raspbian_3.10.0\api\h&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\nRTS\RTSAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\nRTS\LCAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3\RTSAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3\LCAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\RTS2\RTSAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3\RTSAPI\RISMD&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.raspbian.win32_7.1.0.2\bin\armv6-logicals-linux-gnueabihf\armv6-logicals-linux-gnueabihf\include\c++\7.1.0&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.raspbian.win32_7.1.0.2\bin\armv6-logicals-linux-gnueabihf\armv6-logicals-linux-gnueabihf\include\c++\7.1.0\armv6-logicals-linux-gnueabihf&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.raspbian.win32_7.1.0.2\bin\armv6-logicals-linux-gnueabihf\armv6-logicals-linux-gnueabihf\include\c++\7.1.0\backward&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.raspbian.win32_7.1.0.2\bin\armv6-logicals-linux-gnueabihf\lib\gcc\armv6-logicals-linux-gnueabihf\7.1.0\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.raspbian.win32_7.1.0.2\bin\armv6-logicals-linux-gnueabihf\lib\gcc\armv6-logicals-linux-gnueabihf\7.1.0\include-fixed&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.raspbian.win32_7.1.0.2\bin\armv6-logicals-linux-gnueabihf\armv6-logicals-linux-gnueabihf\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.raspbian.win32_7.1.0.2\bin\armv6-logicals-linux-gnueabihf\armv6-logicals-linux-gnueabihf\sysroot\usr\include&quot;"/>
+								</option>
+								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="org.eclipse.cdt.build.core.settings.holder.symbols.924889477" name="Symbols" superClass="org.eclipse.cdt.build.core.settings.holder.symbols" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="__cdecl"/>
+									<listOptionValue builtIn="false" value="__stdcall"/>
+									<listOptionValue builtIn="false" value="LC_GENERATED=1"/>
+									<listOptionValue builtIn="false" value="HAS_RT_TRACE_IMPL=1"/>
+									<listOptionValue builtIn="false" value="__LINUX__"/>
+									<listOptionValue builtIn="false" value="__LINUX_ARM11__"/>
+									<listOptionValue builtIn="false" value="_POSIX_C_SOURCE=199309L"/>
+								</option>
+								<inputType id="org.eclipse.cdt.build.core.settings.holder.inType.572125572" languageId="org.eclipse.cdt.core.g++" languageName="GNU C++" sourceContentType="org.eclipse.cdt.core.cxxSource,org.eclipse.cdt.core.cxxHeader" superClass="org.eclipse.cdt.build.core.settings.holder.inType"/>
+							</tool>
+							<tool id="org.eclipse.cdt.build.core.settings.holder.1314236635" name="GNU C" superClass="org.eclipse.cdt.build.core.settings.holder">
+								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="org.eclipse.cdt.build.core.settings.holder.incpaths.932754936" name="Include Paths" superClass="org.eclipse.cdt.build.core.settings.holder.incpaths" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk.raspbian_3.10.0\api\h&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\nRTS\RTSAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\nRTS\LCAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3\RTSAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3\LCAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\RTS2\RTSAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3\RTSAPI\RISMD&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.raspbian.win32_7.1.0.2\bin\armv6-logicals-linux-gnueabihf\lib\gcc\armv6-logicals-linux-gnueabihf\7.1.0\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.raspbian.win32_7.1.0.2\bin\armv6-logicals-linux-gnueabihf\lib\gcc\armv6-logicals-linux-gnueabihf\7.1.0\include-fixed&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.raspbian.win32_7.1.0.2\bin\armv6-logicals-linux-gnueabihf\armv6-logicals-linux-gnueabihf\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.raspbian.win32_7.1.0.2\bin\armv6-logicals-linux-gnueabihf\armv6-logicals-linux-gnueabihf\sysroot\usr\include&quot;"/>
+								</option>
+								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="org.eclipse.cdt.build.core.settings.holder.symbols.1894207997" name="Symbols" superClass="org.eclipse.cdt.build.core.settings.holder.symbols" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="__cdecl"/>
+									<listOptionValue builtIn="false" value="__stdcall"/>
+									<listOptionValue builtIn="false" value="LC_GENERATED=1"/>
+									<listOptionValue builtIn="false" value="HAS_RT_TRACE_IMPL=1"/>
+									<listOptionValue builtIn="false" value="__LINUX__"/>
+									<listOptionValue builtIn="false" value="__LINUX_ARM11__"/>
+									<listOptionValue builtIn="false" value="_POSIX_C_SOURCE=199309L"/>
+								</option>
+								<inputType id="org.eclipse.cdt.build.core.settings.holder.inType.160874728" languageId="org.eclipse.cdt.core.gcc" languageName="GNU C" sourceContentType="org.eclipse.cdt.core.cSource,org.eclipse.cdt.core.cHeader" superClass="org.eclipse.cdt.build.core.settings.holder.inType"/>
+							</tool>
+						</toolChain>
+					</folderInfo>
+				</configuration>
+			</storageModule>
+			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
+		</cconfiguration>
+		<cconfiguration id="phyboardRegorID">
+			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="phyboardRegorID" moduleId="org.eclipse.cdt.core.settings" name="phyboardRegor">
+				<externalSettings/>
+				<extensions>
+					<extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GLDErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.VCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.CWDLocator" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+				</extensions>
+			</storageModule>
+			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
+				<configuration buildProperties="" description="" id="phyboardRegorID" name="phyboardRegor" parent="org.eclipse.cdt.build.core.prefbase.cfg">
+					<folderInfo id="phyboardRegorID." name="/" resourcePath="">
+						<toolChain id="org.eclipse.cdt.build.core.prefbase.toolchain.241713564" name="No ToolChain" resourceTypeBasedDiscovery="false" superClass="org.eclipse.cdt.build.core.prefbase.toolchain">
+							<targetPlatform id="org.eclipse.cdt.build.core.prefbase.toolchain.241713564.1214212011" name=""/>
+							<builder enableAutoBuild="false" enableCleanBuild="false" enabledIncrementalBuild="false" id="org.eclipse.cdt.build.core.settings.default.builder.341789243" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Gnu Make Builder" superClass="org.eclipse.cdt.build.core.settings.default.builder"/>
+							<tool id="org.eclipse.cdt.build.core.settings.holder.libs.790865776" name="holder for library settings" superClass="org.eclipse.cdt.build.core.settings.holder.libs"/>
+							<tool id="org.eclipse.cdt.build.core.settings.holder.1565046350" name="Assembly" superClass="org.eclipse.cdt.build.core.settings.holder">
+								<inputType id="org.eclipse.cdt.build.core.settings.holder.inType.614844209" languageId="org.eclipse.cdt.core.assembly" languageName="Assembly" sourceContentType="org.eclipse.cdt.core.asmSource" superClass="org.eclipse.cdt.build.core.settings.holder.inType"/>
+							</tool>
+							<tool id="org.eclipse.cdt.build.core.settings.holder.1435055626" name="GNU C++" superClass="org.eclipse.cdt.build.core.settings.holder">
+								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="org.eclipse.cdt.build.core.settings.holder.incpaths.58194065" name="Include Paths" superClass="org.eclipse.cdt.build.core.settings.holder.incpaths" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk.raspbian_3.10.0\api\h&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\nRTS\RTSAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\nRTS\LCAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3\RTSAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3\LCAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\RTS2\RTSAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3\RTSAPI\RISMD&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.raspbian.win32_7.1.0.2\bin\armv6-logicals-linux-gnueabihf\armv6-logicals-linux-gnueabihf\include\c++\7.1.0&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.raspbian.win32_7.1.0.2\bin\armv6-logicals-linux-gnueabihf\armv6-logicals-linux-gnueabihf\include\c++\7.1.0\armv6-logicals-linux-gnueabihf&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.raspbian.win32_7.1.0.2\bin\armv6-logicals-linux-gnueabihf\armv6-logicals-linux-gnueabihf\include\c++\7.1.0\backward&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.raspbian.win32_7.1.0.2\bin\armv6-logicals-linux-gnueabihf\lib\gcc\armv6-logicals-linux-gnueabihf\7.1.0\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.raspbian.win32_7.1.0.2\bin\armv6-logicals-linux-gnueabihf\lib\gcc\armv6-logicals-linux-gnueabihf\7.1.0\include-fixed&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.raspbian.win32_7.1.0.2\bin\armv6-logicals-linux-gnueabihf\armv6-logicals-linux-gnueabihf\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.raspbian.win32_7.1.0.2\bin\armv6-logicals-linux-gnueabihf\armv6-logicals-linux-gnueabihf\sysroot\usr\include&quot;"/>
+								</option>
+								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="org.eclipse.cdt.build.core.settings.holder.symbols.2116106070" name="Symbols" superClass="org.eclipse.cdt.build.core.settings.holder.symbols" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="__cdecl"/>
+									<listOptionValue builtIn="false" value="__stdcall"/>
+									<listOptionValue builtIn="false" value="LC_GENERATED=1"/>
+									<listOptionValue builtIn="false" value="HAS_RT_TRACE_IMPL=1"/>
+									<listOptionValue builtIn="false" value="__LINUX__"/>
+									<listOptionValue builtIn="false" value="__LINUX_ARM11__"/>
+									<listOptionValue builtIn="false" value="_POSIX_C_SOURCE=199309L"/>
+								</option>
+								<inputType id="org.eclipse.cdt.build.core.settings.holder.inType.875700466" languageId="org.eclipse.cdt.core.g++" languageName="GNU C++" sourceContentType="org.eclipse.cdt.core.cxxSource,org.eclipse.cdt.core.cxxHeader" superClass="org.eclipse.cdt.build.core.settings.holder.inType"/>
+							</tool>
+							<tool id="org.eclipse.cdt.build.core.settings.holder.1932531611" name="GNU C" superClass="org.eclipse.cdt.build.core.settings.holder">
+								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="org.eclipse.cdt.build.core.settings.holder.incpaths.1634391156" name="Include Paths" superClass="org.eclipse.cdt.build.core.settings.holder.incpaths" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk.raspbian_3.10.0\api\h&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\nRTS\RTSAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\nRTS\LCAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3\RTSAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3\LCAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\RTS2\RTSAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3\RTSAPI\RISMD&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.raspbian.win32_7.1.0.2\bin\armv6-logicals-linux-gnueabihf\lib\gcc\armv6-logicals-linux-gnueabihf\7.1.0\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.raspbian.win32_7.1.0.2\bin\armv6-logicals-linux-gnueabihf\lib\gcc\armv6-logicals-linux-gnueabihf\7.1.0\include-fixed&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.raspbian.win32_7.1.0.2\bin\armv6-logicals-linux-gnueabihf\armv6-logicals-linux-gnueabihf\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.raspbian.win32_7.1.0.2\bin\armv6-logicals-linux-gnueabihf\armv6-logicals-linux-gnueabihf\sysroot\usr\include&quot;"/>
+								</option>
+								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="org.eclipse.cdt.build.core.settings.holder.symbols.1815812505" name="Symbols" superClass="org.eclipse.cdt.build.core.settings.holder.symbols" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="__cdecl"/>
+									<listOptionValue builtIn="false" value="__stdcall"/>
+									<listOptionValue builtIn="false" value="LC_GENERATED=1"/>
+									<listOptionValue builtIn="false" value="HAS_RT_TRACE_IMPL=1"/>
+									<listOptionValue builtIn="false" value="__LINUX__"/>
+									<listOptionValue builtIn="false" value="__LINUX_ARM11__"/>
+									<listOptionValue builtIn="false" value="_POSIX_C_SOURCE=199309L"/>
+								</option>
+								<inputType id="org.eclipse.cdt.build.core.settings.holder.inType.1214319160" languageId="org.eclipse.cdt.core.gcc" languageName="GNU C" sourceContentType="org.eclipse.cdt.core.cSource,org.eclipse.cdt.core.cHeader" superClass="org.eclipse.cdt.build.core.settings.holder.inType"/>
+							</tool>
+						</toolChain>
+					</folderInfo>
+				</configuration>
+			</storageModule>
+			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
+		</cconfiguration>
+		<cconfiguration id="phyboardWegaID">
+			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="phyboardWegaID" moduleId="org.eclipse.cdt.core.settings" name="phyboardWega">
+				<externalSettings/>
+				<extensions>
+					<extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GLDErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.VCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.CWDLocator" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+				</extensions>
+			</storageModule>
+			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
+				<configuration buildProperties="" description="" id="phyboardWegaID" name="phyboardWega" parent="org.eclipse.cdt.build.core.prefbase.cfg">
+					<folderInfo id="phyboardWegaID." name="/" resourcePath="">
+						<toolChain id="org.eclipse.cdt.build.core.prefbase.toolchain.956835745" name="No ToolChain" resourceTypeBasedDiscovery="false" superClass="org.eclipse.cdt.build.core.prefbase.toolchain">
+							<targetPlatform id="org.eclipse.cdt.build.core.prefbase.toolchain.956835745.205864987" name=""/>
+							<builder enableAutoBuild="false" enableCleanBuild="false" enabledIncrementalBuild="false" id="org.eclipse.cdt.build.core.settings.default.builder.343570565" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Gnu Make Builder" superClass="org.eclipse.cdt.build.core.settings.default.builder"/>
+							<tool id="org.eclipse.cdt.build.core.settings.holder.libs.953293487" name="holder for library settings" superClass="org.eclipse.cdt.build.core.settings.holder.libs"/>
+							<tool id="org.eclipse.cdt.build.core.settings.holder.1572004796" name="Assembly" superClass="org.eclipse.cdt.build.core.settings.holder">
+								<inputType id="org.eclipse.cdt.build.core.settings.holder.inType.584720461" languageId="org.eclipse.cdt.core.assembly" languageName="Assembly" sourceContentType="org.eclipse.cdt.core.asmSource" superClass="org.eclipse.cdt.build.core.settings.holder.inType"/>
+							</tool>
+							<tool id="org.eclipse.cdt.build.core.settings.holder.1149195687" name="GNU C++" superClass="org.eclipse.cdt.build.core.settings.holder">
+								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="org.eclipse.cdt.build.core.settings.holder.incpaths.1114427620" name="Include Paths" superClass="org.eclipse.cdt.build.core.settings.holder.incpaths" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk.raspbian_3.10.0\api\h&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\nRTS\RTSAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\nRTS\LCAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3\RTSAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3\LCAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\RTS2\RTSAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3\RTSAPI\RISMD&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.raspbian.win32_7.1.0.2\bin\armv6-logicals-linux-gnueabihf\armv6-logicals-linux-gnueabihf\include\c++\7.1.0&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.raspbian.win32_7.1.0.2\bin\armv6-logicals-linux-gnueabihf\armv6-logicals-linux-gnueabihf\include\c++\7.1.0\armv6-logicals-linux-gnueabihf&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.raspbian.win32_7.1.0.2\bin\armv6-logicals-linux-gnueabihf\armv6-logicals-linux-gnueabihf\include\c++\7.1.0\backward&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.raspbian.win32_7.1.0.2\bin\armv6-logicals-linux-gnueabihf\lib\gcc\armv6-logicals-linux-gnueabihf\7.1.0\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.raspbian.win32_7.1.0.2\bin\armv6-logicals-linux-gnueabihf\lib\gcc\armv6-logicals-linux-gnueabihf\7.1.0\include-fixed&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.raspbian.win32_7.1.0.2\bin\armv6-logicals-linux-gnueabihf\armv6-logicals-linux-gnueabihf\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.raspbian.win32_7.1.0.2\bin\armv6-logicals-linux-gnueabihf\armv6-logicals-linux-gnueabihf\sysroot\usr\include&quot;"/>
+								</option>
+								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="org.eclipse.cdt.build.core.settings.holder.symbols.1233783220" name="Symbols" superClass="org.eclipse.cdt.build.core.settings.holder.symbols" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="__cdecl"/>
+									<listOptionValue builtIn="false" value="__stdcall"/>
+									<listOptionValue builtIn="false" value="LC_GENERATED=1"/>
+									<listOptionValue builtIn="false" value="HAS_RT_TRACE_IMPL=1"/>
+									<listOptionValue builtIn="false" value="__LINUX__"/>
+									<listOptionValue builtIn="false" value="__LINUX_ARM11__"/>
+									<listOptionValue builtIn="false" value="_POSIX_C_SOURCE=199309L"/>
+								</option>
+								<inputType id="org.eclipse.cdt.build.core.settings.holder.inType.963852943" languageId="org.eclipse.cdt.core.g++" languageName="GNU C++" sourceContentType="org.eclipse.cdt.core.cxxSource,org.eclipse.cdt.core.cxxHeader" superClass="org.eclipse.cdt.build.core.settings.holder.inType"/>
+							</tool>
+							<tool id="org.eclipse.cdt.build.core.settings.holder.2041431738" name="GNU C" superClass="org.eclipse.cdt.build.core.settings.holder">
+								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="org.eclipse.cdt.build.core.settings.holder.incpaths.894487311" name="Include Paths" superClass="org.eclipse.cdt.build.core.settings.holder.incpaths" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk.raspbian_3.10.0\api\h&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\nRTS\RTSAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\nRTS\LCAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3\RTSAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3\LCAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\RTS2\RTSAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3\RTSAPI\RISMD&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.raspbian.win32_7.1.0.2\bin\armv6-logicals-linux-gnueabihf\lib\gcc\armv6-logicals-linux-gnueabihf\7.1.0\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.raspbian.win32_7.1.0.2\bin\armv6-logicals-linux-gnueabihf\lib\gcc\armv6-logicals-linux-gnueabihf\7.1.0\include-fixed&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.raspbian.win32_7.1.0.2\bin\armv6-logicals-linux-gnueabihf\armv6-logicals-linux-gnueabihf\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.raspbian.win32_7.1.0.2\bin\armv6-logicals-linux-gnueabihf\armv6-logicals-linux-gnueabihf\sysroot\usr\include&quot;"/>
+								</option>
+								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="org.eclipse.cdt.build.core.settings.holder.symbols.351364878" name="Symbols" superClass="org.eclipse.cdt.build.core.settings.holder.symbols" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="__cdecl"/>
+									<listOptionValue builtIn="false" value="__stdcall"/>
+									<listOptionValue builtIn="false" value="LC_GENERATED=1"/>
+									<listOptionValue builtIn="false" value="HAS_RT_TRACE_IMPL=1"/>
+									<listOptionValue builtIn="false" value="__LINUX__"/>
+									<listOptionValue builtIn="false" value="__LINUX_ARM11__"/>
+									<listOptionValue builtIn="false" value="_POSIX_C_SOURCE=199309L"/>
+								</option>
+								<inputType id="org.eclipse.cdt.build.core.settings.holder.inType.561528328" languageId="org.eclipse.cdt.core.gcc" languageName="GNU C" sourceContentType="org.eclipse.cdt.core.cSource,org.eclipse.cdt.core.cHeader" superClass="org.eclipse.cdt.build.core.settings.holder.inType"/>
+							</tool>
+						</toolChain>
+					</folderInfo>
+				</configuration>
+			</storageModule>
+			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
+		</cconfiguration>
+		<cconfiguration id="RaspbianID">
+			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="RaspbianID" moduleId="org.eclipse.cdt.core.settings" name="Raspbian">
+				<externalSettings/>
+				<extensions>
+					<extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GLDErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.VCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.CWDLocator" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+				</extensions>
+			</storageModule>
+			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
+				<configuration buildProperties="" description="" id="RaspbianID" name="Raspbian" parent="org.eclipse.cdt.build.core.prefbase.cfg">
+					<folderInfo id="RaspbianID." name="/" resourcePath="">
+						<toolChain id="org.eclipse.cdt.build.core.prefbase.toolchain.927920641" name="No ToolChain" resourceTypeBasedDiscovery="false" superClass="org.eclipse.cdt.build.core.prefbase.toolchain">
+							<targetPlatform id="org.eclipse.cdt.build.core.prefbase.toolchain.927920641.1568343058" name=""/>
+							<builder enableAutoBuild="false" enableCleanBuild="false" enabledIncrementalBuild="false" id="org.eclipse.cdt.build.core.settings.default.builder.951392334" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Gnu Make Builder" superClass="org.eclipse.cdt.build.core.settings.default.builder"/>
+							<tool id="org.eclipse.cdt.build.core.settings.holder.libs.917822889" name="holder for library settings" superClass="org.eclipse.cdt.build.core.settings.holder.libs"/>
+							<tool id="org.eclipse.cdt.build.core.settings.holder.1909623476" name="Assembly" superClass="org.eclipse.cdt.build.core.settings.holder">
+								<inputType id="org.eclipse.cdt.build.core.settings.holder.inType.1872514064" languageId="org.eclipse.cdt.core.assembly" languageName="Assembly" sourceContentType="org.eclipse.cdt.core.asmSource" superClass="org.eclipse.cdt.build.core.settings.holder.inType"/>
+							</tool>
+							<tool id="org.eclipse.cdt.build.core.settings.holder.960300293" name="GNU C++" superClass="org.eclipse.cdt.build.core.settings.holder">
+								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="org.eclipse.cdt.build.core.settings.holder.incpaths.782671965" name="Include Paths" superClass="org.eclipse.cdt.build.core.settings.holder.incpaths" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk.raspbian_3.10.0\api\h&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\nRTS\RTSAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\nRTS\LCAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3\RTSAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3\LCAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\RTS2\RTSAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3\RTSAPI\RISMD&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.raspbian.win32_7.1.0.2\bin\armv6-logicals-linux-gnueabihf\armv6-logicals-linux-gnueabihf\include\c++\7.1.0&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.raspbian.win32_7.1.0.2\bin\armv6-logicals-linux-gnueabihf\armv6-logicals-linux-gnueabihf\include\c++\7.1.0\armv6-logicals-linux-gnueabihf&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.raspbian.win32_7.1.0.2\bin\armv6-logicals-linux-gnueabihf\armv6-logicals-linux-gnueabihf\include\c++\7.1.0\backward&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.raspbian.win32_7.1.0.2\bin\armv6-logicals-linux-gnueabihf\lib\gcc\armv6-logicals-linux-gnueabihf\7.1.0\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.raspbian.win32_7.1.0.2\bin\armv6-logicals-linux-gnueabihf\lib\gcc\armv6-logicals-linux-gnueabihf\7.1.0\include-fixed&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.raspbian.win32_7.1.0.2\bin\armv6-logicals-linux-gnueabihf\armv6-logicals-linux-gnueabihf\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.raspbian.win32_7.1.0.2\bin\armv6-logicals-linux-gnueabihf\armv6-logicals-linux-gnueabihf\sysroot\usr\include&quot;"/>
+								</option>
+								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="org.eclipse.cdt.build.core.settings.holder.symbols.1787313947" name="Symbols" superClass="org.eclipse.cdt.build.core.settings.holder.symbols" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="__cdecl"/>
+									<listOptionValue builtIn="false" value="__stdcall"/>
+									<listOptionValue builtIn="false" value="LC_GENERATED=1"/>
+									<listOptionValue builtIn="false" value="HAS_RT_TRACE_IMPL=1"/>
+									<listOptionValue builtIn="false" value="__LINUX__"/>
+									<listOptionValue builtIn="false" value="__LINUX_ARM11__"/>
+									<listOptionValue builtIn="false" value="_POSIX_C_SOURCE=199309L"/>
+								</option>
+								<inputType id="org.eclipse.cdt.build.core.settings.holder.inType.1209477680" languageId="org.eclipse.cdt.core.g++" languageName="GNU C++" sourceContentType="org.eclipse.cdt.core.cxxSource,org.eclipse.cdt.core.cxxHeader" superClass="org.eclipse.cdt.build.core.settings.holder.inType"/>
+							</tool>
+							<tool id="org.eclipse.cdt.build.core.settings.holder.1062595463" name="GNU C" superClass="org.eclipse.cdt.build.core.settings.holder">
+								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="org.eclipse.cdt.build.core.settings.holder.incpaths.2032120488" name="Include Paths" superClass="org.eclipse.cdt.build.core.settings.holder.incpaths" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk.raspbian_3.10.0\api\h&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\nRTS\RTSAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\nRTS\LCAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3\RTSAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3\LCAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\RTS2\RTSAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3\RTSAPI\RISMD&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.raspbian.win32_7.1.0.2\bin\armv6-logicals-linux-gnueabihf\lib\gcc\armv6-logicals-linux-gnueabihf\7.1.0\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.raspbian.win32_7.1.0.2\bin\armv6-logicals-linux-gnueabihf\lib\gcc\armv6-logicals-linux-gnueabihf\7.1.0\include-fixed&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.raspbian.win32_7.1.0.2\bin\armv6-logicals-linux-gnueabihf\armv6-logicals-linux-gnueabihf\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.raspbian.win32_7.1.0.2\bin\armv6-logicals-linux-gnueabihf\armv6-logicals-linux-gnueabihf\sysroot\usr\include&quot;"/>
+								</option>
+								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="org.eclipse.cdt.build.core.settings.holder.symbols.824624272" name="Symbols" superClass="org.eclipse.cdt.build.core.settings.holder.symbols" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="__cdecl"/>
+									<listOptionValue builtIn="false" value="__stdcall"/>
+									<listOptionValue builtIn="false" value="LC_GENERATED=1"/>
+									<listOptionValue builtIn="false" value="HAS_RT_TRACE_IMPL=1"/>
+									<listOptionValue builtIn="false" value="__LINUX__"/>
+									<listOptionValue builtIn="false" value="__LINUX_ARM11__"/>
+									<listOptionValue builtIn="false" value="_POSIX_C_SOURCE=199309L"/>
+								</option>
+								<inputType id="org.eclipse.cdt.build.core.settings.holder.inType.94364908" languageId="org.eclipse.cdt.core.gcc" languageName="GNU C" sourceContentType="org.eclipse.cdt.core.cSource,org.eclipse.cdt.core.cHeader" superClass="org.eclipse.cdt.build.core.settings.holder.inType"/>
+							</tool>
+						</toolChain>
+					</folderInfo>
+				</configuration>
+			</storageModule>
+			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
+		</cconfiguration>
+		<cconfiguration id="MICAID">
+			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="MICAID" moduleId="org.eclipse.cdt.core.settings" name="MICA">
+				<externalSettings/>
+				<extensions>
+					<extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GLDErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.VCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.CWDLocator" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+				</extensions>
+			</storageModule>
+			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
+				<configuration buildProperties="" description="" id="MICAID" name="MICA" parent="org.eclipse.cdt.build.core.prefbase.cfg">
+					<folderInfo id="MICAID." name="/" resourcePath="">
+						<toolChain id="org.eclipse.cdt.build.core.prefbase.toolchain.1448171847" name="No ToolChain" resourceTypeBasedDiscovery="false" superClass="org.eclipse.cdt.build.core.prefbase.toolchain">
+							<targetPlatform id="org.eclipse.cdt.build.core.prefbase.toolchain.1448171847.382252402" name=""/>
+							<builder enableAutoBuild="false" enableCleanBuild="false" enabledIncrementalBuild="false" id="org.eclipse.cdt.build.core.settings.default.builder.956618670" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Gnu Make Builder" superClass="org.eclipse.cdt.build.core.settings.default.builder"/>
+							<tool id="org.eclipse.cdt.build.core.settings.holder.libs.89571722" name="holder for library settings" superClass="org.eclipse.cdt.build.core.settings.holder.libs"/>
+							<tool id="org.eclipse.cdt.build.core.settings.holder.388109117" name="Assembly" superClass="org.eclipse.cdt.build.core.settings.holder">
+								<inputType id="org.eclipse.cdt.build.core.settings.holder.inType.1260232936" languageId="org.eclipse.cdt.core.assembly" languageName="Assembly" sourceContentType="org.eclipse.cdt.core.asmSource" superClass="org.eclipse.cdt.build.core.settings.holder.inType"/>
+							</tool>
+							<tool id="org.eclipse.cdt.build.core.settings.holder.772405240" name="GNU C++" superClass="org.eclipse.cdt.build.core.settings.holder">
+								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="org.eclipse.cdt.build.core.settings.holder.incpaths.1164417629" name="Include Paths" superClass="org.eclipse.cdt.build.core.settings.holder.incpaths" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk.raspbian_3.10.0\api\h&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\nRTS\RTSAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\nRTS\LCAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3\RTSAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3\LCAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\RTS2\RTSAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3\RTSAPI\RISMD&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.raspbian.win32_7.1.0.2\bin\armv6-logicals-linux-gnueabihf\armv6-logicals-linux-gnueabihf\include\c++\7.1.0&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.raspbian.win32_7.1.0.2\bin\armv6-logicals-linux-gnueabihf\armv6-logicals-linux-gnueabihf\include\c++\7.1.0\armv6-logicals-linux-gnueabihf&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.raspbian.win32_7.1.0.2\bin\armv6-logicals-linux-gnueabihf\armv6-logicals-linux-gnueabihf\include\c++\7.1.0\backward&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.raspbian.win32_7.1.0.2\bin\armv6-logicals-linux-gnueabihf\lib\gcc\armv6-logicals-linux-gnueabihf\7.1.0\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.raspbian.win32_7.1.0.2\bin\armv6-logicals-linux-gnueabihf\lib\gcc\armv6-logicals-linux-gnueabihf\7.1.0\include-fixed&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.raspbian.win32_7.1.0.2\bin\armv6-logicals-linux-gnueabihf\armv6-logicals-linux-gnueabihf\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.raspbian.win32_7.1.0.2\bin\armv6-logicals-linux-gnueabihf\armv6-logicals-linux-gnueabihf\sysroot\usr\include&quot;"/>
+								</option>
+								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="org.eclipse.cdt.build.core.settings.holder.symbols.40126169" name="Symbols" superClass="org.eclipse.cdt.build.core.settings.holder.symbols" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="__cdecl"/>
+									<listOptionValue builtIn="false" value="__stdcall"/>
+									<listOptionValue builtIn="false" value="LC_GENERATED=1"/>
+									<listOptionValue builtIn="false" value="HAS_RT_TRACE_IMPL=1"/>
+									<listOptionValue builtIn="false" value="__LINUX__"/>
+									<listOptionValue builtIn="false" value="__LINUX_ARM11__"/>
+									<listOptionValue builtIn="false" value="_POSIX_C_SOURCE=199309L"/>
+								</option>
+								<inputType id="org.eclipse.cdt.build.core.settings.holder.inType.1243424684" languageId="org.eclipse.cdt.core.g++" languageName="GNU C++" sourceContentType="org.eclipse.cdt.core.cxxSource,org.eclipse.cdt.core.cxxHeader" superClass="org.eclipse.cdt.build.core.settings.holder.inType"/>
+							</tool>
+							<tool id="org.eclipse.cdt.build.core.settings.holder.604536116" name="GNU C" superClass="org.eclipse.cdt.build.core.settings.holder">
+								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="org.eclipse.cdt.build.core.settings.holder.incpaths.1219502516" name="Include Paths" superClass="org.eclipse.cdt.build.core.settings.holder.incpaths" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk.raspbian_3.10.0\api\h&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\nRTS\RTSAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\nRTS\LCAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3\RTSAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3\LCAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\RTS2\RTSAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3\RTSAPI\RISMD&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.raspbian.win32_7.1.0.2\bin\armv6-logicals-linux-gnueabihf\lib\gcc\armv6-logicals-linux-gnueabihf\7.1.0\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.raspbian.win32_7.1.0.2\bin\armv6-logicals-linux-gnueabihf\lib\gcc\armv6-logicals-linux-gnueabihf\7.1.0\include-fixed&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.raspbian.win32_7.1.0.2\bin\armv6-logicals-linux-gnueabihf\armv6-logicals-linux-gnueabihf\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.raspbian.win32_7.1.0.2\bin\armv6-logicals-linux-gnueabihf\armv6-logicals-linux-gnueabihf\sysroot\usr\include&quot;"/>
+								</option>
+								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="org.eclipse.cdt.build.core.settings.holder.symbols.193066181" name="Symbols" superClass="org.eclipse.cdt.build.core.settings.holder.symbols" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="__cdecl"/>
+									<listOptionValue builtIn="false" value="__stdcall"/>
+									<listOptionValue builtIn="false" value="LC_GENERATED=1"/>
+									<listOptionValue builtIn="false" value="HAS_RT_TRACE_IMPL=1"/>
+									<listOptionValue builtIn="false" value="__LINUX__"/>
+									<listOptionValue builtIn="false" value="__LINUX_ARM11__"/>
+									<listOptionValue builtIn="false" value="_POSIX_C_SOURCE=199309L"/>
+								</option>
+								<inputType id="org.eclipse.cdt.build.core.settings.holder.inType.440123886" languageId="org.eclipse.cdt.core.gcc" languageName="GNU C" sourceContentType="org.eclipse.cdt.core.cSource,org.eclipse.cdt.core.cHeader" superClass="org.eclipse.cdt.build.core.settings.holder.inType"/>
+							</tool>
+						</toolChain>
+					</folderInfo>
+				</configuration>
+			</storageModule>
+			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
+		</cconfiguration>
+		<cconfiguration id="ArduinoNanoV3ID">
+			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="ArduinoNanoV3ID" moduleId="org.eclipse.cdt.core.settings" name="ArduinoNanoV3">
+				<externalSettings/>
+				<extensions>
+					<extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GLDErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.VCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.CWDLocator" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+				</extensions>
+			</storageModule>
+			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
+				<configuration buildProperties="" description="" id="ArduinoNanoV3ID" name="ArduinoNanoV3" parent="org.eclipse.cdt.build.core.prefbase.cfg">
+					<folderInfo id="ArduinoNanoV3ID." name="/" resourcePath="">
+						<toolChain id="org.eclipse.cdt.build.core.prefbase.toolchain.1435127193" name="No ToolChain" resourceTypeBasedDiscovery="false" superClass="org.eclipse.cdt.build.core.prefbase.toolchain">
+							<targetPlatform id="org.eclipse.cdt.build.core.prefbase.toolchain.1435127193.1793531148" name=""/>
+							<builder enableAutoBuild="false" enableCleanBuild="false" enabledIncrementalBuild="false" id="org.eclipse.cdt.build.core.settings.default.builder.837073760" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Gnu Make Builder" superClass="org.eclipse.cdt.build.core.settings.default.builder"/>
+							<tool id="org.eclipse.cdt.build.core.settings.holder.libs.1871820209" name="holder for library settings" superClass="org.eclipse.cdt.build.core.settings.holder.libs"/>
+							<tool id="org.eclipse.cdt.build.core.settings.holder.2129551970" name="Assembly" superClass="org.eclipse.cdt.build.core.settings.holder">
+								<inputType id="org.eclipse.cdt.build.core.settings.holder.inType.291861598" languageId="org.eclipse.cdt.core.assembly" languageName="Assembly" sourceContentType="org.eclipse.cdt.core.asmSource" superClass="org.eclipse.cdt.build.core.settings.holder.inType"/>
+							</tool>
+							<tool id="org.eclipse.cdt.build.core.settings.holder.984004812" name="GNU C++" superClass="org.eclipse.cdt.build.core.settings.holder">
+								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="org.eclipse.cdt.build.core.settings.holder.incpaths.1465507384" name="Include Paths" superClass="org.eclipse.cdt.build.core.settings.holder.incpaths" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk.urts3.avr.arduinonano.win_3.10.0\api\urts3\h&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk.urts3.avr.arduinonano.win_3.10.0\api\arduino\h&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk.urts3.avr.arduinonano.win_3.10.0\api\arduino\h\hardware\variant&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk.urts3.avr.arduinonano.win_3.10.0\api\arduino\h\libraries&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\nRTS\RTSAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\nRTS\LCAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3\RTSAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3\LCAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3\RTSAPI\RISMD&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.arduino.win32_4.9.2.1\bin\avrgcc\lib\gcc\avr\4.9.2\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.arduino.win32_4.9.2.1\bin\avrgcc\lib\gcc\avr\4.9.2\include-fixed&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.arduino.win32_4.9.2.1\bin\avrgcc\avr\include&quot;"/>
+								</option>
+								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="org.eclipse.cdt.build.core.settings.holder.symbols.1725522298" name="Symbols" superClass="org.eclipse.cdt.build.core.settings.holder.symbols" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="LC_GENERATED=1"/>
+									<listOptionValue builtIn="false" value="F_CPU=16000000L"/>
+									<listOptionValue builtIn="false" value="ARDUINO=10802"/>
+									<listOptionValue builtIn="false" value="ARDUINO_AVR_NANO"/>
+									<listOptionValue builtIn="false" value="ARDUINO_ARCH_AVR"/>
+								</option>
+								<inputType id="org.eclipse.cdt.build.core.settings.holder.inType.61097854" languageId="org.eclipse.cdt.core.g++" languageName="GNU C++" sourceContentType="org.eclipse.cdt.core.cxxSource,org.eclipse.cdt.core.cxxHeader" superClass="org.eclipse.cdt.build.core.settings.holder.inType"/>
+							</tool>
+							<tool id="org.eclipse.cdt.build.core.settings.holder.2085232545" name="GNU C" superClass="org.eclipse.cdt.build.core.settings.holder">
+								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="org.eclipse.cdt.build.core.settings.holder.incpaths.325271269" name="Include Paths" superClass="org.eclipse.cdt.build.core.settings.holder.incpaths" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk.urts3.avr.arduinonano.win_3.10.0\api\urts3\h&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk.urts3.avr.arduinonano.win_3.10.0\api\arduino\h&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk.urts3.avr.arduinonano.win_3.10.0\api\arduino\h\hardware\variant&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk.urts3.avr.arduinonano.win_3.10.0\api\arduino\h\libraries&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\nRTS\RTSAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\nRTS\LCAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3\RTSAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3\LCAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3\RTSAPI\RISMD&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.arduino.win32_4.9.2.1\bin\avrgcc\lib\gcc\avr\4.9.2\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.arduino.win32_4.9.2.1\bin\avrgcc\lib\gcc\avr\4.9.2\include-fixed&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.arduino.win32_4.9.2.1\bin\avrgcc\avr\include&quot;"/>
+								</option>
+								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="org.eclipse.cdt.build.core.settings.holder.symbols.1822744683" name="Symbols" superClass="org.eclipse.cdt.build.core.settings.holder.symbols" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="LC_GENERATED=1"/>
+									<listOptionValue builtIn="false" value="F_CPU=16000000L"/>
+									<listOptionValue builtIn="false" value="ARDUINO=10802"/>
+									<listOptionValue builtIn="false" value="ARDUINO_AVR_NANO"/>
+									<listOptionValue builtIn="false" value="ARDUINO_ARCH_AVR"/>
+								</option>
+								<inputType id="org.eclipse.cdt.build.core.settings.holder.inType.733958815" languageId="org.eclipse.cdt.core.gcc" languageName="GNU C" sourceContentType="org.eclipse.cdt.core.cSource,org.eclipse.cdt.core.cHeader" superClass="org.eclipse.cdt.build.core.settings.holder.inType"/>
+							</tool>
+						</toolChain>
+					</folderInfo>
+				</configuration>
+			</storageModule>
+			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
+		</cconfiguration>
+		<cconfiguration id="ControllinoMAXIID">
+			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="ControllinoMAXIID" moduleId="org.eclipse.cdt.core.settings" name="ControllinoMAXI">
+				<externalSettings/>
+				<extensions>
+					<extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GLDErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.VCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.CWDLocator" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+				</extensions>
+			</storageModule>
+			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
+				<configuration buildProperties="" description="" id="ControllinoMAXIID" name="ControllinoMAXI" parent="org.eclipse.cdt.build.core.prefbase.cfg">
+					<folderInfo id="ControllinoMAXIID." name="/" resourcePath="">
+						<toolChain id="org.eclipse.cdt.build.core.prefbase.toolchain.785431950" name="No ToolChain" resourceTypeBasedDiscovery="false" superClass="org.eclipse.cdt.build.core.prefbase.toolchain">
+							<targetPlatform id="org.eclipse.cdt.build.core.prefbase.toolchain.785431950.1828218722" name=""/>
+							<builder enableAutoBuild="false" enableCleanBuild="false" enabledIncrementalBuild="false" id="org.eclipse.cdt.build.core.settings.default.builder.1401437806" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Gnu Make Builder" superClass="org.eclipse.cdt.build.core.settings.default.builder"/>
+							<tool id="org.eclipse.cdt.build.core.settings.holder.libs.795155053" name="holder for library settings" superClass="org.eclipse.cdt.build.core.settings.holder.libs"/>
+							<tool id="org.eclipse.cdt.build.core.settings.holder.2041203615" name="Assembly" superClass="org.eclipse.cdt.build.core.settings.holder">
+								<inputType id="org.eclipse.cdt.build.core.settings.holder.inType.1207778273" languageId="org.eclipse.cdt.core.assembly" languageName="Assembly" sourceContentType="org.eclipse.cdt.core.asmSource" superClass="org.eclipse.cdt.build.core.settings.holder.inType"/>
+							</tool>
+							<tool id="org.eclipse.cdt.build.core.settings.holder.143899907" name="GNU C++" superClass="org.eclipse.cdt.build.core.settings.holder">
+								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="org.eclipse.cdt.build.core.settings.holder.incpaths.1159726267" name="Include Paths" superClass="org.eclipse.cdt.build.core.settings.holder.incpaths" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk.urts3.avr.controllinomaxi.win_3.10.0\api\urts3\h&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk.urts3.avr.controllinomaxi.win_3.10.0\api\arduino\h&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk.urts3.avr.controllinomaxi.win_3.10.0\api\arduino\h\hardware\variant&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk.urts3.avr.controllinomaxi.win_3.10.0\api\arduino\h\libraries&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\nRTS\RTSAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\nRTS\LCAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3\RTSAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3\LCAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3\RTSAPI\RISMD&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.arduino.win32_4.9.2.1\bin\avrgcc\lib\gcc\avr\4.9.2\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.arduino.win32_4.9.2.1\bin\avrgcc\lib\gcc\avr\4.9.2\include-fixed&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.arduino.win32_4.9.2.1\bin\avrgcc\avr\include&quot;"/>
+								</option>
+								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="org.eclipse.cdt.build.core.settings.holder.symbols.1919469169" name="Symbols" superClass="org.eclipse.cdt.build.core.settings.holder.symbols" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="LC_GENERATED=1"/>
+									<listOptionValue builtIn="false" value="F_CPU=16000000L"/>
+									<listOptionValue builtIn="false" value="ARDUINO=10802"/>
+									<listOptionValue builtIn="false" value="ARDUINO_AVR_MEGA2560"/>
+									<listOptionValue builtIn="false" value="ARDUINO_ARCH_AVR"/>
+								</option>
+								<inputType id="org.eclipse.cdt.build.core.settings.holder.inType.1297510341" languageId="org.eclipse.cdt.core.g++" languageName="GNU C++" sourceContentType="org.eclipse.cdt.core.cxxSource,org.eclipse.cdt.core.cxxHeader" superClass="org.eclipse.cdt.build.core.settings.holder.inType"/>
+							</tool>
+							<tool id="org.eclipse.cdt.build.core.settings.holder.365408665" name="GNU C" superClass="org.eclipse.cdt.build.core.settings.holder">
+								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="org.eclipse.cdt.build.core.settings.holder.incpaths.1964769767" name="Include Paths" superClass="org.eclipse.cdt.build.core.settings.holder.incpaths" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk.urts3.avr.controllinomaxi.win_3.10.0\api\urts3\h&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk.urts3.avr.controllinomaxi.win_3.10.0\api\arduino\h&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk.urts3.avr.controllinomaxi.win_3.10.0\api\arduino\h\hardware\variant&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk.urts3.avr.controllinomaxi.win_3.10.0\api\arduino\h\libraries&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\nRTS\RTSAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\nRTS\LCAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3\RTSAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3\LCAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3\RTSAPI\RISMD&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.arduino.win32_4.9.2.1\bin\avrgcc\lib\gcc\avr\4.9.2\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.arduino.win32_4.9.2.1\bin\avrgcc\lib\gcc\avr\4.9.2\include-fixed&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.arduino.win32_4.9.2.1\bin\avrgcc\avr\include&quot;"/>
+								</option>
+								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="org.eclipse.cdt.build.core.settings.holder.symbols.1997681738" name="Symbols" superClass="org.eclipse.cdt.build.core.settings.holder.symbols" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="LC_GENERATED=1"/>
+									<listOptionValue builtIn="false" value="F_CPU=16000000L"/>
+									<listOptionValue builtIn="false" value="ARDUINO=10802"/>
+									<listOptionValue builtIn="false" value="ARDUINO_AVR_MEGA2560"/>
+									<listOptionValue builtIn="false" value="ARDUINO_ARCH_AVR"/>
+								</option>
+								<inputType id="org.eclipse.cdt.build.core.settings.holder.inType.1831907882" languageId="org.eclipse.cdt.core.gcc" languageName="GNU C" sourceContentType="org.eclipse.cdt.core.cSource,org.eclipse.cdt.core.cHeader" superClass="org.eclipse.cdt.build.core.settings.holder.inType"/>
+							</tool>
+						</toolChain>
+					</folderInfo>
+				</configuration>
+			</storageModule>
+			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
+		</cconfiguration>
+		<cconfiguration id="ControllinoMAXIAutomationID">
+			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="ControllinoMAXIAutomationID" moduleId="org.eclipse.cdt.core.settings" name="ControllinoMAXIAutomation">
+				<externalSettings/>
+				<extensions>
+					<extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GLDErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.VCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.CWDLocator" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+				</extensions>
+			</storageModule>
+			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
+				<configuration buildProperties="" description="" id="ControllinoMAXIAutomationID" name="ControllinoMAXIAutomation" parent="org.eclipse.cdt.build.core.prefbase.cfg">
+					<folderInfo id="ControllinoMAXIAutomationID." name="/" resourcePath="">
+						<toolChain id="org.eclipse.cdt.build.core.prefbase.toolchain.297695464" name="No ToolChain" resourceTypeBasedDiscovery="false" superClass="org.eclipse.cdt.build.core.prefbase.toolchain">
+							<targetPlatform id="org.eclipse.cdt.build.core.prefbase.toolchain.297695464.1514200231" name=""/>
+							<builder enableAutoBuild="false" enableCleanBuild="false" enabledIncrementalBuild="false" id="org.eclipse.cdt.build.core.settings.default.builder.96145167" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Gnu Make Builder" superClass="org.eclipse.cdt.build.core.settings.default.builder"/>
+							<tool id="org.eclipse.cdt.build.core.settings.holder.libs.1565148027" name="holder for library settings" superClass="org.eclipse.cdt.build.core.settings.holder.libs"/>
+							<tool id="org.eclipse.cdt.build.core.settings.holder.2006798010" name="Assembly" superClass="org.eclipse.cdt.build.core.settings.holder">
+								<inputType id="org.eclipse.cdt.build.core.settings.holder.inType.2042848401" languageId="org.eclipse.cdt.core.assembly" languageName="Assembly" sourceContentType="org.eclipse.cdt.core.asmSource" superClass="org.eclipse.cdt.build.core.settings.holder.inType"/>
+							</tool>
+							<tool id="org.eclipse.cdt.build.core.settings.holder.461117274" name="GNU C++" superClass="org.eclipse.cdt.build.core.settings.holder">
+								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="org.eclipse.cdt.build.core.settings.holder.incpaths.2008749241" name="Include Paths" superClass="org.eclipse.cdt.build.core.settings.holder.incpaths" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk.urts3.avr.controllinomaxiautomation.win_3.10.0\api\urts3\h&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk.urts3.avr.controllinomaxiautomation.win_3.10.0\api\arduino\h&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk.urts3.avr.controllinomaxiautomation.win_3.10.0\api\arduino\h\hardware\variant&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk.urts3.avr.controllinomaxiautomation.win_3.10.0\api\arduino\h\libraries&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\nRTS\RTSAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\nRTS\LCAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3\RTSAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3\LCAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3\RTSAPI\RISMD&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.arduino.win32_4.9.2.1\bin\avrgcc\lib\gcc\avr\4.9.2\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.arduino.win32_4.9.2.1\bin\avrgcc\lib\gcc\avr\4.9.2\include-fixed&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.arduino.win32_4.9.2.1\bin\avrgcc\avr\include&quot;"/>
+								</option>
+								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="org.eclipse.cdt.build.core.settings.holder.symbols.1235726764" name="Symbols" superClass="org.eclipse.cdt.build.core.settings.holder.symbols" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="LC_GENERATED=1"/>
+									<listOptionValue builtIn="false" value="F_CPU=16000000L"/>
+									<listOptionValue builtIn="false" value="ARDUINO=10802"/>
+									<listOptionValue builtIn="false" value="ARDUINO_AVR_MEGA2560"/>
+									<listOptionValue builtIn="false" value="ARDUINO_ARCH_AVR"/>
+								</option>
+								<inputType id="org.eclipse.cdt.build.core.settings.holder.inType.25262581" languageId="org.eclipse.cdt.core.g++" languageName="GNU C++" sourceContentType="org.eclipse.cdt.core.cxxSource,org.eclipse.cdt.core.cxxHeader" superClass="org.eclipse.cdt.build.core.settings.holder.inType"/>
+							</tool>
+							<tool id="org.eclipse.cdt.build.core.settings.holder.651717543" name="GNU C" superClass="org.eclipse.cdt.build.core.settings.holder">
+								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="org.eclipse.cdt.build.core.settings.holder.incpaths.1037872273" name="Include Paths" superClass="org.eclipse.cdt.build.core.settings.holder.incpaths" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk.urts3.avr.controllinomaxiautomation.win_3.10.0\api\urts3\h&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk.urts3.avr.controllinomaxiautomation.win_3.10.0\api\arduino\h&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk.urts3.avr.controllinomaxiautomation.win_3.10.0\api\arduino\h\hardware\variant&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk.urts3.avr.controllinomaxiautomation.win_3.10.0\api\arduino\h\libraries&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\nRTS\RTSAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\nRTS\LCAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3\RTSAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3\LCAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3\RTSAPI\RISMD&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.arduino.win32_4.9.2.1\bin\avrgcc\lib\gcc\avr\4.9.2\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.arduino.win32_4.9.2.1\bin\avrgcc\lib\gcc\avr\4.9.2\include-fixed&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.arduino.win32_4.9.2.1\bin\avrgcc\avr\include&quot;"/>
+								</option>
+								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="org.eclipse.cdt.build.core.settings.holder.symbols.1360369066" name="Symbols" superClass="org.eclipse.cdt.build.core.settings.holder.symbols" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="LC_GENERATED=1"/>
+									<listOptionValue builtIn="false" value="F_CPU=16000000L"/>
+									<listOptionValue builtIn="false" value="ARDUINO=10802"/>
+									<listOptionValue builtIn="false" value="ARDUINO_AVR_MEGA2560"/>
+									<listOptionValue builtIn="false" value="ARDUINO_ARCH_AVR"/>
+								</option>
+								<inputType id="org.eclipse.cdt.build.core.settings.holder.inType.127600412" languageId="org.eclipse.cdt.core.gcc" languageName="GNU C" sourceContentType="org.eclipse.cdt.core.cSource,org.eclipse.cdt.core.cHeader" superClass="org.eclipse.cdt.build.core.settings.holder.inType"/>
+							</tool>
+						</toolChain>
+					</folderInfo>
+				</configuration>
+			</storageModule>
+			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
+		</cconfiguration>
+		<cconfiguration id="ControllinoMEGAID">
+			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="ControllinoMEGAID" moduleId="org.eclipse.cdt.core.settings" name="ControllinoMEGA">
+				<externalSettings/>
+				<extensions>
+					<extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GLDErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.VCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.CWDLocator" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+				</extensions>
+			</storageModule>
+			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
+				<configuration buildProperties="" description="" id="ControllinoMEGAID" name="ControllinoMEGA" parent="org.eclipse.cdt.build.core.prefbase.cfg">
+					<folderInfo id="ControllinoMEGAID." name="/" resourcePath="">
+						<toolChain id="org.eclipse.cdt.build.core.prefbase.toolchain.73137342" name="No ToolChain" resourceTypeBasedDiscovery="false" superClass="org.eclipse.cdt.build.core.prefbase.toolchain">
+							<targetPlatform id="org.eclipse.cdt.build.core.prefbase.toolchain.73137342.523250195" name=""/>
+							<builder enableAutoBuild="false" enableCleanBuild="false" enabledIncrementalBuild="false" id="org.eclipse.cdt.build.core.settings.default.builder.251396677" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Gnu Make Builder" superClass="org.eclipse.cdt.build.core.settings.default.builder"/>
+							<tool id="org.eclipse.cdt.build.core.settings.holder.libs.186213655" name="holder for library settings" superClass="org.eclipse.cdt.build.core.settings.holder.libs"/>
+							<tool id="org.eclipse.cdt.build.core.settings.holder.778583757" name="Assembly" superClass="org.eclipse.cdt.build.core.settings.holder">
+								<inputType id="org.eclipse.cdt.build.core.settings.holder.inType.1649111723" languageId="org.eclipse.cdt.core.assembly" languageName="Assembly" sourceContentType="org.eclipse.cdt.core.asmSource" superClass="org.eclipse.cdt.build.core.settings.holder.inType"/>
+							</tool>
+							<tool id="org.eclipse.cdt.build.core.settings.holder.457733226" name="GNU C++" superClass="org.eclipse.cdt.build.core.settings.holder">
+								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="org.eclipse.cdt.build.core.settings.holder.incpaths.509055842" name="Include Paths" superClass="org.eclipse.cdt.build.core.settings.holder.incpaths" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk.urts3.avr.controllinomega.win_3.10.0\api\urts3\h&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk.urts3.avr.controllinomega.win_3.10.0\api\arduino\h&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk.urts3.avr.controllinomega.win_3.10.0\api\arduino\h\hardware\variant&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk.urts3.avr.controllinomega.win_3.10.0\api\arduino\h\libraries&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\nRTS\RTSAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\nRTS\LCAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3\RTSAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3\LCAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3\RTSAPI\RISMD&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.arduino.win32_4.9.2.1\bin\avrgcc\lib\gcc\avr\4.9.2\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.arduino.win32_4.9.2.1\bin\avrgcc\lib\gcc\avr\4.9.2\include-fixed&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.arduino.win32_4.9.2.1\bin\avrgcc\avr\include&quot;"/>
+								</option>
+								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="org.eclipse.cdt.build.core.settings.holder.symbols.406502039" name="Symbols" superClass="org.eclipse.cdt.build.core.settings.holder.symbols" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="LC_GENERATED=1"/>
+									<listOptionValue builtIn="false" value="F_CPU=16000000L"/>
+									<listOptionValue builtIn="false" value="ARDUINO=10802"/>
+									<listOptionValue builtIn="false" value="ARDUINO_AVR_MEGA2560"/>
+									<listOptionValue builtIn="false" value="ARDUINO_ARCH_AVR"/>
+								</option>
+								<inputType id="org.eclipse.cdt.build.core.settings.holder.inType.1639338831" languageId="org.eclipse.cdt.core.g++" languageName="GNU C++" sourceContentType="org.eclipse.cdt.core.cxxSource,org.eclipse.cdt.core.cxxHeader" superClass="org.eclipse.cdt.build.core.settings.holder.inType"/>
+							</tool>
+							<tool id="org.eclipse.cdt.build.core.settings.holder.1464001603" name="GNU C" superClass="org.eclipse.cdt.build.core.settings.holder">
+								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="org.eclipse.cdt.build.core.settings.holder.incpaths.1671077156" name="Include Paths" superClass="org.eclipse.cdt.build.core.settings.holder.incpaths" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk.urts3.avr.controllinomega.win_3.10.0\api\urts3\h&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk.urts3.avr.controllinomega.win_3.10.0\api\arduino\h&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk.urts3.avr.controllinomega.win_3.10.0\api\arduino\h\hardware\variant&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk.urts3.avr.controllinomega.win_3.10.0\api\arduino\h\libraries&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\nRTS\RTSAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\nRTS\LCAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3\RTSAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3\LCAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3\RTSAPI\RISMD&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.arduino.win32_4.9.2.1\bin\avrgcc\lib\gcc\avr\4.9.2\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.arduino.win32_4.9.2.1\bin\avrgcc\lib\gcc\avr\4.9.2\include-fixed&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.arduino.win32_4.9.2.1\bin\avrgcc\avr\include&quot;"/>
+								</option>
+								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="org.eclipse.cdt.build.core.settings.holder.symbols.848859372" name="Symbols" superClass="org.eclipse.cdt.build.core.settings.holder.symbols" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="LC_GENERATED=1"/>
+									<listOptionValue builtIn="false" value="F_CPU=16000000L"/>
+									<listOptionValue builtIn="false" value="ARDUINO=10802"/>
+									<listOptionValue builtIn="false" value="ARDUINO_AVR_MEGA2560"/>
+									<listOptionValue builtIn="false" value="ARDUINO_ARCH_AVR"/>
+								</option>
+								<inputType id="org.eclipse.cdt.build.core.settings.holder.inType.2084889318" languageId="org.eclipse.cdt.core.gcc" languageName="GNU C" sourceContentType="org.eclipse.cdt.core.cSource,org.eclipse.cdt.core.cHeader" superClass="org.eclipse.cdt.build.core.settings.holder.inType"/>
+							</tool>
+						</toolChain>
+					</folderInfo>
+				</configuration>
+			</storageModule>
+			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
+		</cconfiguration>
+		<cconfiguration id="ControllinoMINIID">
+			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="ControllinoMINIID" moduleId="org.eclipse.cdt.core.settings" name="ControllinoMINI">
+				<externalSettings/>
+				<extensions>
+					<extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GLDErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.VCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.CWDLocator" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+				</extensions>
+			</storageModule>
+			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
+				<configuration buildProperties="" description="" id="ControllinoMINIID" name="ControllinoMINI" parent="org.eclipse.cdt.build.core.prefbase.cfg">
+					<folderInfo id="ControllinoMINIID." name="/" resourcePath="">
+						<toolChain id="org.eclipse.cdt.build.core.prefbase.toolchain.720071489" name="No ToolChain" resourceTypeBasedDiscovery="false" superClass="org.eclipse.cdt.build.core.prefbase.toolchain">
+							<targetPlatform id="org.eclipse.cdt.build.core.prefbase.toolchain.720071489.1670245709" name=""/>
+							<builder enableAutoBuild="false" enableCleanBuild="false" enabledIncrementalBuild="false" id="org.eclipse.cdt.build.core.settings.default.builder.1854005109" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Gnu Make Builder" superClass="org.eclipse.cdt.build.core.settings.default.builder"/>
+							<tool id="org.eclipse.cdt.build.core.settings.holder.libs.1583212587" name="holder for library settings" superClass="org.eclipse.cdt.build.core.settings.holder.libs"/>
+							<tool id="org.eclipse.cdt.build.core.settings.holder.1740423280" name="Assembly" superClass="org.eclipse.cdt.build.core.settings.holder">
+								<inputType id="org.eclipse.cdt.build.core.settings.holder.inType.1971145020" languageId="org.eclipse.cdt.core.assembly" languageName="Assembly" sourceContentType="org.eclipse.cdt.core.asmSource" superClass="org.eclipse.cdt.build.core.settings.holder.inType"/>
+							</tool>
+							<tool id="org.eclipse.cdt.build.core.settings.holder.946728501" name="GNU C++" superClass="org.eclipse.cdt.build.core.settings.holder">
+								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="org.eclipse.cdt.build.core.settings.holder.incpaths.1663102633" name="Include Paths" superClass="org.eclipse.cdt.build.core.settings.holder.incpaths" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk.urts3.avr.controllinomini.win_3.10.0\api\urts3\h&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk.urts3.avr.controllinomini.win_3.10.0\api\arduino\h&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk.urts3.avr.controllinomini.win_3.10.0\api\arduino\h\hardware\variant&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk.urts3.avr.controllinomini.win_3.10.0\api\arduino\h\libraries&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\nRTS\RTSAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\nRTS\LCAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3\RTSAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3\LCAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3\RTSAPI\RISMD&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.arduino.win32_4.9.2.1\bin\avrgcc\lib\gcc\avr\4.9.2\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.arduino.win32_4.9.2.1\bin\avrgcc\lib\gcc\avr\4.9.2\include-fixed&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.arduino.win32_4.9.2.1\bin\avrgcc\avr\include&quot;"/>
+								</option>
+								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="org.eclipse.cdt.build.core.settings.holder.symbols.122861431" name="Symbols" superClass="org.eclipse.cdt.build.core.settings.holder.symbols" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="LC_GENERATED=1"/>
+									<listOptionValue builtIn="false" value="F_CPU=16000000L"/>
+									<listOptionValue builtIn="false" value="ARDUINO=10802"/>
+									<listOptionValue builtIn="false" value="ARDUINO_AVR_UNO"/>
+									<listOptionValue builtIn="false" value="ARDUINO_ARCH_AVR"/>
+								</option>
+								<inputType id="org.eclipse.cdt.build.core.settings.holder.inType.1957823132" languageId="org.eclipse.cdt.core.g++" languageName="GNU C++" sourceContentType="org.eclipse.cdt.core.cxxSource,org.eclipse.cdt.core.cxxHeader" superClass="org.eclipse.cdt.build.core.settings.holder.inType"/>
+							</tool>
+							<tool id="org.eclipse.cdt.build.core.settings.holder.1865205134" name="GNU C" superClass="org.eclipse.cdt.build.core.settings.holder">
+								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="org.eclipse.cdt.build.core.settings.holder.incpaths.1103626066" name="Include Paths" superClass="org.eclipse.cdt.build.core.settings.holder.incpaths" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk.urts3.avr.controllinomini.win_3.10.0\api\urts3\h&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk.urts3.avr.controllinomini.win_3.10.0\api\arduino\h&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk.urts3.avr.controllinomini.win_3.10.0\api\arduino\h\hardware\variant&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk.urts3.avr.controllinomini.win_3.10.0\api\arduino\h\libraries&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\nRTS\RTSAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\nRTS\LCAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3\RTSAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3\LCAPI&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\_LC3p_V3.10.0\plugins\com.logicals.ptk_3.10.0\API\uRTS3\RTSAPI\RISMD&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.arduino.win32_4.9.2.1\bin\avrgcc\lib\gcc\avr\4.9.2\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.arduino.win32_4.9.2.1\bin\avrgcc\lib\gcc\avr\4.9.2\include-fixed&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;d:\_lc3p_v3.10.0\plugins\com.logicals.compiler.gcc.arduino.win32_4.9.2.1\bin\avrgcc\avr\include&quot;"/>
+								</option>
+								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="org.eclipse.cdt.build.core.settings.holder.symbols.886538528" name="Symbols" superClass="org.eclipse.cdt.build.core.settings.holder.symbols" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="LC_GENERATED=1"/>
+									<listOptionValue builtIn="false" value="F_CPU=16000000L"/>
+									<listOptionValue builtIn="false" value="ARDUINO=10802"/>
+									<listOptionValue builtIn="false" value="ARDUINO_AVR_UNO"/>
+									<listOptionValue builtIn="false" value="ARDUINO_ARCH_AVR"/>
+								</option>
+								<inputType id="org.eclipse.cdt.build.core.settings.holder.inType.1701370861" languageId="org.eclipse.cdt.core.gcc" languageName="GNU C" sourceContentType="org.eclipse.cdt.core.cSource,org.eclipse.cdt.core.cHeader" superClass="org.eclipse.cdt.build.core.settings.holder.inType"/>
+							</tool>
+						</toolChain>
+					</folderInfo>
+				</configuration>
+			</storageModule>
+			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
+		</cconfiguration>
+	</storageModule>
+	<storageModule moduleId="cdtBuildSystem" version="4.0.0">
+		<project id="lc3projects.null.2126441315" name="lc3projects"/>
+	</storageModule>
+	<storageModule moduleId="scannerConfiguration">
+		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		<scannerConfigBuildInfo instanceId="ControllinoMINIID">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="ControllinoMAXIAutomationID">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="LinuxARM64ID">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="LinuxX86ID">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="ArduinoNanoV3ID">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="BuiltInPlcID">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="BuiltInPlcCoverageID">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="phyboardWegaID">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="RaspbianID">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="ControllinoMEGAID">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="MICAID">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="RevolutionPiID">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="WindowsX86ID">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="phyboardRegorID">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="ControllinoMAXIID">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+	</storageModule>
+	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
+</cproject>

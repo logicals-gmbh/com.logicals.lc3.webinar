@@ -1,0 +1,62 @@
+ /*
+  * logi.cals GmbH
+  * A-3100 St. Poelten
+  * Europaplatz 7/1
+  * Tel.: 0043-5-77147
+  *
+  * logi.cals automation solutions & services GmbH
+  * D-40738 Langenfeld
+  * Postfach 1306
+  * Tel.: 0043-5-77147
+  * 
+  * Contact:
+  * dieter.goltz@logicals.com
+  * 
+  * History:
+  * Created:  
+  * DG 2021-08-16
+  * 
+  * Modified: 
+  * DG 2017-03-28
+  * DG 2021-08-16
+  */ 
+
+ /*
+  * Description
+  * -----------
+  * Test C_GetTime Blocks
+  */
+
+ /* 
+  * Beschreibung
+  * ------------
+  * Test C_GetTime Blocks
+  */
+  
+USING com.logicals.Basic.GetTime;
+
+PROGRAM PRG_lc_TestC_GetTime1_ST
+	
+	VAR
+		lusi_sec  : USINT;   /* 0 - 60 */
+		lusi_min  : USINT;   /* 0 - 59 */
+		lusi_hour : USINT;   /* 0 - 23 */
+		lusi_mday : USINT;   /* 1 - 31 */
+		lusi_mon  : USINT;   /* 0 - 11 */
+		lui_year  : UINT;    /* 20xx */
+		lusi_wday : USINT;   /* 0 - 6 (0 = Sunday) */
+		lui_yday  : UINT;    /* 0 - 365 (0 = 1 Jan) */
+		lx_isdst  : BOOL;    /* daylight saving time */
+	END_VAR
+    
+    FUN_lc_GetTime_C(sec   => lusi_sec,      /* 0 - 60 */
+	                 min   => lusi_min,      /* 0 - 59 */
+	                 hour  => lusi_hour,     /* 0 - 23 */
+	                 mday  => lusi_mday,     /* 1 - 31 */
+	                 mon   => lusi_mon,      /* 0 - 11 */
+	                 year  => lui_year,      /* 20xx */
+	                 wday  => lusi_wday,     /* 0 - 6 (0 = Sunday) */
+	                 yday  => lui_yday,      /* 0 - 365 (0 = 1 Jan) */
+	                 isdst => lx_isdst);     /* daylight saving time */
+    
+END_PROGRAM

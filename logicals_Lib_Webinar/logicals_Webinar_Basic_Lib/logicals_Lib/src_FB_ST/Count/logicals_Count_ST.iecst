@@ -1,0 +1,149 @@
+/*
+ * Zaehlerfunktionen / Counter blocks 
+ */
+NameSpace com.logicals.Basic.Count
+/*
+ * Increment Zaehler / Increment Counter
+ */  
+FUNCTION FUN_lc_INC_INT_ST : INT {
+    hideIONames;
+    width := 150;
+    minWidth := 140;
+    maxWidth := 140;
+    height := 18;
+    minHeight := 18;
+    maxHeight := 18;
+  }
+ FUN_lc_INC_INT_ST := FUN_lc_INC_INT_ST + 1;
+END_FUNCTION
+
+/*
+ * Decrement Zaehler / Decrement Counter
+ */  
+FUNCTION FUN_lc_DEC_INT_ST : INT  {
+    hideIONames;
+    width := 150;
+    minWidth := 140;
+    maxWidth := 140;
+    height := 18;
+    minHeight := 18;
+    maxHeight := 18;
+  }
+ FUN_lc_DEC_INT_ST := FUN_lc_DEC_INT_ST - 1;
+END_FUNCTION
+
+/*
+ * Increment Wert / Increment Value
+ */  
+FUNCTION_BLOCK FB_lc_INCVAL_INT_ST  {
+    hideIONames;
+    width := 150;
+    minWidth := 140;
+    maxWidth := 140;
+    maxHeight := 18;
+    minHeight := 18;
+    height := 18;
+  }
+ VAR_INPUT
+  vii_In : INT;
+ END_VAR
+ VAR_OUTPUT
+  voi_Out : INT;
+ END_VAR
+ voi_Out := vii_In + 1;
+END_FUNCTION_BLOCK
+
+/*
+ * Decrement Wert / Decrement Value
+ */  
+FUNCTION_BLOCK FB_lc_DECVAL_INT_ST  {
+    height := 28;
+    hideIONames;
+    width := 150;
+    minWidth := 140;
+    maxWidth := 140;
+    minHeight := 18;
+    maxHeight := 18;
+  }
+ VAR_INPUT
+  vii_In : INT;
+ END_VAR
+ VAR_OUTPUT
+  voi_Out : INT;
+ END_VAR
+ voi_Out := vii_In - 1;
+END_FUNCTION_BLOCK
+
+/*
+ * Zaehler Ab Null / Counter from Zero
+ */  
+FUNCTION_BLOCK FB_lc_CntFromZero_ST  {
+    width := 260;
+    minWidth := 260;
+    maxWidth := 260;
+    maxHeight := 38;
+    minHeight := 38;
+    height := 38;
+  }
+   /*
+    * Zaehler Ab Null
+    */  
+   VAR_INPUT
+     vix_CntEdge: BOOL;
+     vix_CntReset : BOOL;
+   END_VAR
+
+   VAR_OUTPUT
+     voui_CntVal : UINT;
+   END_VAR
+   
+   VAR
+     R_TRIG : R_TRIG;
+   END_VAR
+  /*
+   * ST-Code
+   */
+  R_TRIG(CLK := vix_CntEdge);
+  voui_CntVal:= ADD(EN:=R_TRIG.Q,IN1:=voui_CntVal,IN2:=1);
+  /*
+   * Reset des Zaehlers / Reset Counter
+   */
+  IF vix_CntReset = TRUE THEN
+   voui_CntVal := 0;
+  END_IF;
+  
+END_FUNCTION_BLOCK
+
+/*
+ * Counter fuer Messages als Increment Counter
+ */
+FUNCTION_BLOCK FB_lc_CntMsg_ST  {
+    width := 260;
+    minWidth := 260;
+    maxWidth := 260;
+    height := 58;
+    minHeight := 58;
+    maxHeight := 58;
+  }
+
+   VAR_INPUT
+     vix_Cnt: BOOL;
+   END_VAR
+
+   VAR_OUTPUT
+     voui_CntVal : UINT;
+
+     voui_ErrNo  : UINT;
+     vox_Err     : BOOL;
+   END_VAR
+
+   voui_ErrNo  := 0;
+   vox_Err     := FALSE;
+
+   IF vix_Cnt = TRUE THEN
+    voui_CntVal := voui_CntVal + 1;
+   END_IF;
+
+END_FUNCTION_BLOCK
+
+END_NAMESPACE

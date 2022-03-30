@@ -1,0 +1,432 @@
+/* -----------------------------------------
+ * logicals_Lib
+ * -----------------------------------------
+ * logi.cals GmbH
+ * A-3100 St. Poelten
+ * Europaplatz 7/1
+ * Tel.: 0043-5-77147
+ *
+ * logi.cals automation solutions & services GmbH
+ * D-40738 Langenfeld
+ * Postfach 1306
+ * Tel.: 0043-5-77147
+ * 
+ * Contact:
+ * dieter.goltz@logicals.com
+ * 
+ * History:
+ * 
+ * Created: 
+ * DG 2014-09-21
+ *
+ * Modified:
+ * 2015-07-10 - DG Erstellt 
+ * 2015-08-26 - DG Bearbeitet
+ * 2015-09-18 - DG Bearbeitet
+ * 2015-09-29 - DG Bearbeitet
+ * 2016-08-09 - DG Bearbeitet
+ * 2021-08-09 - DG bearbeitet
+ * 2021-09-15 - DG bearbeitet / Test UpDate bei gleicher Lib-Version
+ * 2021-09-15 - DG bearbeitet / Test UpDate SNAPSHOT Lib-Version
+ *
+ */
+
+NAMESPACE com.logicals.Basic.Auxiliary
+
+USING com.logicals.Basic.Flash;
+
+FUNCTION_BLOCK FB_lc_UpDnValINT_ST
+  /*
+   * Mit diesem Baustein soll ein Wert auf- und abwaerts gesetzt werden koennen
+   * Wird Up/Dn eine bestimmte Verzugszeit (vit_UpTimeDelay und vit_DnTimeDelay) gehalten dann soll
+   * per TaktSignal (vit_UpTimeTact und vit_DnTimeTact) auf- bzw. abgezaehlt werden
+   * 
+   */
+   VAR_INPUT
+    vix_Up    : BOOL;   // Wert aufzaehlen
+    vix_Dn    : BOOL;   // Wert abzaehlen
+    vix_Init  : BOOL;   // Wert auf InitWert setzen
+    vix_Clear : BOOL;   // Wert loeschen = 0
+    vix_Set   : BOOL;   // Wert setzen = an den VAR_OUTPUT uebergeben
+    
+    vii_InitVal  : INT;
+    vii_SetVal   : INT;
+    vii_ClearVal : INT;
+    
+    vii_IncVal   : INT;
+    vii_DecVal   : INT;
+    vii_StartVal : INT;
+    
+    vii_MaxVal   : INT;
+    vii_MinVal   : INT;
+    
+    vit_UpTimeTact  : TIME;
+    vit_DnTimeTact  : TIME;
+    vit_UpTimeDelay : TIME;
+    vit_DnTimeDelay : TIME;   
+   END_VAR
+
+   VAR_OUTPUT
+     voi_SetVal : INT;
+     voxErr     : BOOL;
+     voi_ErrNo  : INT;     
+   END_VAR
+
+   VAR
+    li_ActVal  : INT;
+    //
+    lx_IncTact : BOOL;
+    lx_DecTact : BOOL;
+
+    lx_UpPulse : BOOL;
+    lx_DnPulse : BOOL;
+    
+    lx_DelayUp    : BOOL;
+    lx_DelayDn    : BOOL;
+   END_VAR
+
+   VAR
+   /*
+    * USING zum Flash-Namespace
+    */
+    IncTact : FB_lc_Flash_ST;
+    DecTact : FB_lc_Flash_ST;
+   
+    DelayUpTON : TON;
+    DelayDnTON : TON;
+
+    UpR_TRIG : R_TRIG;
+    DnR_TRIG : R_TRIG;
+        
+   END_VAR
+
+   UpR_TRIG(CLK := vix_Up,Q => lx_UpPulse);
+   DnR_TRIG(CLK := vix_Dn,Q => lx_DnPulse);
+
+   DelayUpTON(Q => lx_DelayUp);
+   DelayDnTON(Q => lx_DelayDn);
+   
+   IF lx_DelayUp THEN 
+    IncTact(vit_OnTime := vit_UpTimeTact, vit_OffTime := vit_UpTimeTact,vox_Out => lx_IncTact); 
+   END_IF;
+   
+   IF lx_DelayDn THEN 
+    DecTact(vit_OnTime := vit_DnTimeTact, vit_OffTime := vit_DnTimeTact,vox_Out => lx_DecTact); 
+   END_IF;
+
+   IF lx_UpPulse THEN
+    IF li_ActVal < vii_MaxVal THEN
+     li_ActVal := li_ActVal + 1;
+    END_IF;
+   END_IF;
+
+   IF lx_DnPulse THEN
+    IF li_ActVal > vii_MinVal THEN
+     li_ActVal := li_ActVal - 1;
+     END_IF;
+   END_IF;
+   
+   IF vix_Set THEN
+    voi_SetVal := li_ActVal;
+   END_IF;
+
+   IF vix_Init THEN
+    li_ActVal := vii_InitVal;
+   END_IF;
+
+   IF vix_Clear THEN
+    li_ActVal := vii_ClearVal;
+   END_IF;
+      
+END_FUNCTION_BLOCK
+
+/*
+ * Abfrage des Betriebssystems
+ */
+FUNCTION_BLOCK FB_lc_CheckOS_ST
+  
+   VAR_INPUT
+  	 viostr_OSName       : STRING[64];
+  	 viostr_OSType       : STRING[64];
+   END_VAR
+   
+   VAR_OUTPUT
+     vox_Err    : BOOL;
+     vodi_ErrNo : DINT;
+   END_VAR
+   
+  	vox_Err    := FALSE;
+  	vodi_ErrNo := -1;
+
+  	IF viostr_OSName = '' THEN
+  	 vox_Err    := TRUE;
+     vodi_ErrNo := 1;
+  	END_IF;
+  	 
+  	IF viostr_OSType = '' THEN
+  	 vox_Err    := TRUE;
+     vodi_ErrNo := 2;
+    END_IF;
+
+  	IF viostr_OSName = 'Linux' AND viostr_OSType = 'Linux' THEN
+     vodi_ErrNo := 0 ;
+  	END_IF;
+
+  	IF viostr_OSName = 'Win' AND viostr_OSType = 'Win' THEN
+     vodi_ErrNo := 0 ;
+  	END_IF;
+
+END_FUNCTION_BLOCK
+
+/*
+ * Monoflop / Monoflop
+ */
+FUNCTION_BLOCK FB_lc_MonoFlop_ST
+   /*
+    * Monoflop
+    */
+   VAR_INPUT
+    /* 
+     * Signal zur Triggerung des MonoFlops
+     */
+    vix_SetOut : BOOL;
+    /* 
+     * Soll das MonoFlop im TestMode betrieben werden
+     * Verwendung des Lokalen TestSignals zur AnsteuerungL
+     */
+    vix_TestMode : BOOL;
+
+    /* 
+     * Monoflop-Verzoegerungszeit
+     */
+    vit_PulseTime : TIME := T#1s;
+   END_VAR
+  
+   VAR_OUTPUT
+     /* AusgangsSignal des MonoFlops */
+     vox_Out    : BOOL;
+     vox_Err    : BOOL;
+     vodi_ErrNo : DINT; 
+   END_VAR
+   
+   VAR
+     RS     : RS;
+     TON    : TON;
+     R_TRIG : R_TRIG;
+   END_VAR 
+  /*
+   * Lokale Variablen
+   */
+   VAR
+    /* Lokales Testsignal */
+    lx_Test : BOOL;
+   END_VAR
+
+   vox_Err    := FALSE;
+   vodi_ErrNo := 0; 
+
+   IF vit_PulseTime = T#0s THEN
+   vox_Err    := TRUE;
+   vodi_ErrNo := 1; 
+   END_IF;
+  /*
+   * Ausgangssignal per TON begrenzen bzw. zu erweitern
+   */   
+   R_TRIG(CLK:=OR(AND(vix_SetOut,NOT(vix_TestMode)),lx_Test));
+  /*
+   * Setzen mit dem Eingangssignal
+   * Ruecksetzen nach Ablauf der PulseTime 
+   */
+   RS(S:=R_TRIG.Q,R1 := TON.Q);
+   vox_Out := RS.Q1;
+   TON(IN:=RS.Q1,PT := vit_PulseTime);
+
+END_FUNCTION_BLOCK
+
+/*
+ * Betriebsstundenzaehler / Operational hour count
+ */
+FUNCTION_BLOCK FB_lc_OpHour_ST  {
+    width := 350;
+  }
+  /*
+   * Betriebsstundenzaehler / Operation hour
+   */
+  VAR_INPUT
+    /* Start der Erfassung */
+    vix_Start : BOOL;
+    /* Laden eines Startewertes */
+    vix_LdStartVal : BOOL;
+    /* Startwert Sekunden */
+    viudi_StartSec : UDINT;
+    /* Startwert Minuten */
+    viudi_StartMin : UDINT;
+    /* Startwert Stunden */
+    viudi_StartHour : UDINT;
+    /* Startwert Tag */
+    viudi_StartDay : UDINT;
+    /* Startwert Monat */
+    viudi_StartMon : UDINT;
+    /* Startwert Jahr */
+    viudi_StartYear : UDINT;
+
+    /* Reset ActWerte */
+    vix_ResetActVal : BOOL;
+
+  END_VAR
+  
+  VAR_OUTPUT
+    /* Alle Sekunden berechnen */
+    voudi_ActSecAll : UDINT;
+    /* Istwert Sekunden */
+    voudi_ActSec : UDINT;
+    /* Istwert Minuten */
+    voudi_ActMin : UDINT;
+    /* Istwert Stunden */
+    voudi_ActHour : UDINT;
+    /* Istwert Tag */
+    voudi_ActDay : UDINT;
+    /* Istwert Monat */
+    voudi_ActMon : UDINT;
+    /* Istwert Jahr */
+    voudi_ActYear : UDINT;
+  END_VAR
+
+  VAR_OUTPUT
+     /* Alle Sekunden zaehlen */
+     voudi_AllSec : UDINT;
+     /* Fehlerbit */
+     vox_Err      : BOOL;
+     /* Fehlernummer */
+     voi_ErrNo    : INT;
+  END_VAR
+
+  VAR
+    /* Sekundenpulse / Second pulse */
+    FB_SecPulseEdgeR_TRIG : R_TRIG;
+
+    /* Zaehler Sekunden / Counter Second */
+    FB_Sec_CTU : CTU_UDINT;
+    /* Zaehler Minuten / Counter Minutes */
+    FB_Min_CTU : CTU_UDINT;
+    /* Zaehler Stunden / Counter Hour */
+    FB_Hour_CTU : CTU_UDINT;
+  END_VAR
+  
+  VAR    
+    lt_SecPulseTime : TIME := T#500ms;
+  END_VAR
+
+  VAR
+    FB_SecTactTON   : TON;
+    FB_SecTact1TON  : TON;
+
+    lx_SecPulse     : BOOL;
+    lx_SecPulseEdge : BOOL;
+  END_VAR
+   /*
+    * ST-Code
+    */
+    vox_Err   := FALSE;
+    voi_ErrNo := 0;
+    
+   /*
+    * Takterzeugung / Creating internal tact signal
+    */
+    FB_SecTactTON(IN:=AND(vix_Start,NOT(FB_SecTact1TON.Q)),PT:=lt_SecPulseTime);
+    lx_SecPulse:=FB_SecTactTON.Q;
+    FB_SecTact1TON(IN:=FB_SecTactTON.Q,PT:=lt_SecPulseTime);
+   
+    FB_SecPulseEdgeR_TRIG(CLK:=FB_SecTactTON.Q);
+    lx_SecPulseEdge:=FB_SecPulseEdgeR_TRIG.Q;
+    
+    IF lx_SecPulseEdge = TRUE THEN
+      voudi_AllSec := voudi_AllSec + 1;
+    END_IF;
+    
+    FB_Sec_CTU(CU:=lx_SecPulseEdge,R:=OR(FB_Sec_CTU.Q,vix_LdStartVal),PV:=59);
+    voudi_ActSec:=FB_Sec_CTU.CV;
+    
+    FB_Min_CTU(CU:=FB_Sec_CTU.Q,R:=OR(FB_Min_CTU.Q,vix_LdStartVal),PV:=59);
+    voudi_ActMin:=FB_Min_CTU.CV;
+    
+    FB_Hour_CTU(CU:=FB_Min_CTU.Q,R:=OR(FB_Hour_CTU.Q,vix_LdStartVal),PV:=23);
+    voudi_ActHour:=FB_Hour_CTU.CV;
+
+    IF vix_ResetActVal = TRUE THEN
+    END_IF;
+    
+    IF vix_LdStartVal = TRUE THEN
+     /* Das macht keinen Sinn, weil die Aktuellen Werte der Zaehler nicht gesetzt werden (Koennen) */
+     voudi_ActYear := viudi_StartYear;
+     voudi_ActMon  := viudi_StartMon;
+     voudi_ActDay  := viudi_StartDay;
+     voudi_ActHour := viudi_StartHour;
+     voudi_ActMin  := viudi_StartMin;
+     voudi_ActSec  := viudi_StartSec;
+ 
+     voudi_ActSecAll:=ADD(voudi_ActSec,MUL(voudi_ActMin,60),MUL(voudi_ActHour,3600));
+    END_IF;
+    
+END_FUNCTION_BLOCK
+
+/*
+ * Berechnen der DiffTime / Calculate Diff Time
+ */
+FUNCTION_BLOCK FB_lc_CalcDiffDateTime_ST
+  /*
+   * Aus Start/EndZeit die Differenzzeit berechnen
+   */
+  VAR_INPUT
+    /* Start der Erfassung */
+    vix_Start : BOOL;
+    /* Laden eines Startewertes */
+    vix_LdStartVal : BOOL;
+
+    /* Startwert Sekunden */
+    viudi_StartSec : UDINT;
+    /* Startwert Minuten */
+    viudi_StartMin : UDINT;
+    /* Startwert Stunden */
+    viudi_StartHour : UDINT;
+    /* Startwert Tag */
+    viudi_StartDay : UDINT;
+    /* Startwert Monat */
+    viudi_StartMon : UDINT;
+    /* Startwert Jahr */
+    viudi_StartYear : UDINT;
+
+    /* Endwert Sekunden */
+    viudi_EndSec : INT;
+    /* Endwert Minuten */
+    viudi_EndMin : INT;
+    /* Endwert Stunden */
+    viudi_EndHour : INT;
+    /* Endwert Tag */
+    viudi_EndDay : INT;
+    /* Endwert Monat */
+    viudi_EndMon : INT;
+    /* Endwert Jahr */
+    viudi_EndYear : INT;
+
+  END_VAR
+  
+  VAR_OUTPUT
+    /* Diffwert Sekunden */
+    voudi_DiffSec : INT;
+    /* Diffwert Minuten */
+    voudi_DiffMin : INT;
+    /* Diffwert Stunden */
+    voudi_DiffHour : INT;
+    /* Diffwert Tag */
+    voudi_DiffDay : INT;
+    /* Diffwert Monat */
+    voudi_DiffMon : INT;
+    /* Diffwert Jahr */
+    voudi_DiffYear : INT;
+  END_VAR
+
+END_FUNCTION_BLOCK
+
+END_NAMESPACE
+

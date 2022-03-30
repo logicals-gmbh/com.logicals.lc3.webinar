@@ -1,0 +1,373 @@
+NAMESPACE com.logicals.Basic.Convert
+FUNCTION_BLOCK FB_lc_StrTo10Byte_FBD
+  {
+    altName := "StrToBy";
+    width := 180;
+    minWidth := 180;
+    minHeight := 238;
+    maxWidth := 180;
+    maxHeight := 238;
+    pageSize := "1340x950";
+    inputValueFieldAreaWidth := 160;
+    outputValueFieldAreaWidth := 160;
+    height := 238;
+  }
+
+  VAR
+    FB_lc_ChrToByte : FB_lc_ChrToByte_FBD;
+    FB_lc_ChrToByte1 : FB_lc_ChrToByte_FBD;
+    FB_lc_ChrToByte2 : FB_lc_ChrToByte_FBD;
+    FB_lc_ChrToByte3 : FB_lc_ChrToByte_FBD;
+    FB_lc_ChrToByte4 : FB_lc_ChrToByte_FBD;
+    FB_lc_ChrToByte5 : FB_lc_ChrToByte_FBD;
+    FB_lc_ChrToByte6 : FB_lc_ChrToByte_FBD;
+    FB_lc_ChrToByte7 : FB_lc_ChrToByte_FBD;
+    FB_lc_ChrToByte8 : FB_lc_ChrToByte_FBD;
+    FB_lc_ChrToByte9 : FB_lc_ChrToByte_FBD;
+  END_VAR
+  VAR_INPUT
+    vistr_In_127 : STRING[127];
+  END_VAR
+  VAR_OUTPUT
+    vob_Byte0 : BYTE;
+    vob_Byte1 : BYTE;
+    vob_Byte2 : BYTE;
+    vob_Byte3 : BYTE;
+    vob_Byte4 : BYTE;
+    vob_Byte5 : BYTE;
+    vob_Byte6 : BYTE;
+    vob_Byte7 : BYTE;
+    vob_Byte8 : BYTE;
+    vob_Byte9 : BYTE;
+  END_VAR
+
+  (*
+
+    // Network 1:
+    TO_INT(IN := 1, TO_INT => @C(148).TO_INT);
+    TO_INT(IN := 1, TO_INT => @C(160).TO_INT);
+    MID(IN := vistr_In_127, L := @C(148).TO_INT, P := @C(160).TO_INT, MID => @C(153).MID);
+    FB_lc_ChrToByte2(vistr_Chr_127 := @C(153).MID, vob_Out => vob_Byte0);
+    TO_INT(IN := 1, TO_INT => @C(142).TO_INT);
+    TO_INT(IN := 2, TO_INT => @C(143).TO_INT);
+    MID(IN := vistr_In_127, L := @C(142).TO_INT, P := @C(143).TO_INT, MID => @C(141).MID);
+    FB_lc_ChrToByte1(vistr_Chr_127 := @C(141).MID, vob_Out => vob_Byte1);
+    TO_INT(IN := 1, TO_INT => @C(169).TO_INT);
+    TO_INT(IN := 3, TO_INT => @C(159).TO_INT);
+    MID(IN := vistr_In_127, L := @C(169).TO_INT, P := @C(159).TO_INT, MID => @C(144).MID);
+    FB_lc_ChrToByte(vistr_Chr_127 := @C(144).MID, vob_Out => vob_Byte2);
+    TO_INT(IN := 1, TO_INT => @C(168).TO_INT);
+    TO_INT(IN := 4, TO_INT => @C(170).TO_INT);
+    MID(IN := vistr_In_127, L := @C(168).TO_INT, P := @C(170).TO_INT, MID => @C(167).MID);
+    FB_lc_ChrToByte3(vistr_Chr_127 := @C(167).MID, vob_Out => vob_Byte3);
+    TO_INT(IN := 1, TO_INT => @C(149).TO_INT);
+    TO_INT(IN := 5, TO_INT => @C(157).TO_INT);
+    MID(IN := vistr_In_127, L := @C(149).TO_INT, P := @C(157).TO_INT, MID => @C(156).MID);
+    FB_lc_ChrToByte4(vistr_Chr_127 := @C(156).MID, vob_Out => vob_Byte4);
+    TO_INT(IN := 1, TO_INT => @C(154).TO_INT);
+    TO_INT(IN := 6, TO_INT => @C(158).TO_INT);
+    MID(IN := vistr_In_127, L := @C(154).TO_INT, P := @C(158).TO_INT, MID => @C(155).MID);
+    FB_lc_ChrToByte5(vistr_Chr_127 := @C(155).MID, vob_Out => vob_Byte5);
+    TO_INT(IN := 1, TO_INT => @C(151).TO_INT);
+    TO_INT(IN := 7, TO_INT => @C(152).TO_INT);
+    MID(IN := vistr_In_127, L := @C(151).TO_INT, P := @C(152).TO_INT, MID => @C(150).MID);
+    FB_lc_ChrToByte6(vistr_Chr_127 := @C(150).MID, vob_Out => vob_Byte6);
+    TO_INT(IN := 1, TO_INT => @C(165).TO_INT);
+    TO_INT(IN := 8, TO_INT => @C(166).TO_INT);
+    MID(IN := vistr_In_127, L := @C(165).TO_INT, P := @C(166).TO_INT, MID => @C(164).MID);
+    FB_lc_ChrToByte7(vistr_Chr_127 := @C(164).MID, vob_Out => vob_Byte7);
+    TO_INT(IN := 1, TO_INT => @C(146).TO_INT);
+    TO_INT(IN := 9, TO_INT => @C(147).TO_INT);
+    MID(IN := vistr_In_127, L := @C(146).TO_INT, P := @C(147).TO_INT, MID => @C(145).MID);
+    FB_lc_ChrToByte8(vistr_Chr_127 := @C(145).MID, vob_Out => vob_Byte8);
+    TO_INT(IN := 1, TO_INT => @C(162).TO_INT);
+    TO_INT(IN := 10, TO_INT => @C(163).TO_INT);
+    MID(IN := vistr_In_127, L := @C(162).TO_INT, P := @C(163).TO_INT, MID => @C(161).MID);
+    FB_lc_ChrToByte9(vistr_Chr_127 := @C(161).MID, vob_Out => vob_Byte9);
+
+  *)
+
+  @VF(129) : @E(1), @R(320.0, 690.0, 40.0, 19.0), BOOL;
+  @VF(130) : @E(2), @R(320.0, 150.0, 40.0, 19.0), BYTE;
+  @VF(131) : @E(8), @R(320.0, 710.0, 40.0, 19.0), BYTE;
+  @VF(132) : @E(vistr_In_127), @R(0.0, 20.0, 190.0, 19.0);
+  @VF(133) : @E(9), @R(320.0, 800.0, 40.0, 19.0), BYTE;
+  @VF(134) : @E(1), @R(320.0, 320.0, 40.0, 19.0), BOOL;
+  @VF(135) : @E(10), @R(320.0, 890.0, 40.0, 19.0), BYTE;
+  @VF(136) : @E(1), @R(320.0, 600.0, 40.0, 19.0), BOOL;
+  @VF(137) : @E(5), @R(320.0, 430.0, 40.0, 19.0), BYTE;
+  @VF(138) : @E(6), @R(320.0, 520.0, 40.0, 19.0), BYTE;
+  @VF(139) : @E(vob_Byte8), @R(1190.0, 760.0, 110.0, 19.0);
+  @VF(100) : @E(1), @R(320.0, 500.0, 40.0, 19.0), BOOL;
+  @VF(101) : @E(vob_Byte2), @R(1190.0, 210.0, 110.0, 19.0);
+  @VF(103) : @E(vob_Byte5), @R(1190.0, 480.0, 110.0, 19.0);
+  @VF(105) : @E(7), @R(320.0, 620.0, 40.0, 19.0), BYTE;
+  @VF(106) : @E(1), @R(320.0, 870.0, 40.0, 19.0), BOOL;
+  @VF(107) : @E(1), @R(320.0, 40.0, 40.0, 19.0), BOOL;
+  @VF(108) : @E(vob_Byte4), @R(1190.0, 390.0, 110.0, 19.0);
+  @VF(110) : @E(vob_Byte3), @R(1190.0, 300.0, 110.0, 19.0);
+  @VF(112) : @E(1), @R(320.0, 230.0, 40.0, 19.0), BOOL;
+  @VF(113) : @E(vob_Byte9), @R(1190.0, 850.0, 110.0, 19.0);
+  @VF(115) : @E(vob_Byte6), @R(1190.0, 580.0, 110.0, 19.0);
+  @VF(117) : @E(4), @R(320.0, 340.0, 40.0, 19.0), BYTE;
+  @VF(118) : @E(1), @R(320.0, 60.0, 40.0, 19.0), BOOL;
+  @VF(119) : @E(vob_Byte1), @R(1190.0, 110.0, 110.0, 19.0);
+  @VF(121) : @E(1), @R(320.0, 780.0, 40.0, 19.0), BOOL;
+  @VF(122) : @E(3), @R(320.0, 250.0, 40.0, 19.0), BYTE;
+  @VF(123) : @E(1), @R(320.0, 410.0, 40.0, 19.0), BOOL;
+  @VF(124) : @E(1), @R(320.0, 130.0, 40.0, 19.0), BOOL;
+  @VF(125) : @E(vob_Byte0), @R(1190.0, 20.0, 110.0, 19.0);
+  @VF(127) : @E(vob_Byte7), @R(1190.0, 670.0, 110.0, 19.0);
+  @C(141) : @F(MID), @R(510.0, 110.0, 100.0, 58.0), INT, @I(@N(IN), @L(9.5)), @I(@N(L), @L(29.5)), @I(@N(P), @L(49.5)), @O(@N(MID), @R(9.5));
+  @C(142) : @F(TO_INT), @R(390.0, 130.0, 80.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(TO_INT), @R(9.5));
+  @C(143) : @F(TO_INT), @R(390.0, 150.0, 80.0, 18.0), BYTE, @I(@N(IN), @L(9.5)), @O(@N(TO_INT), @R(9.5));
+  @C(144) : @F(MID), @R(510.0, 210.0, 100.0, 58.0), INT, @I(@N(IN), @L(9.5)), @I(@N(L), @L(29.5)), @I(@N(P), @L(49.5)), @O(@N(MID), @R(9.5));
+  @C(145) : @F(MID), @R(510.0, 760.0, 100.0, 58.0), INT, @I(@N(IN), @L(9.5)), @I(@N(L), @L(29.5)), @I(@N(P), @L(49.5)), @O(@N(MID), @R(9.5));
+  @C(146) : @F(TO_INT), @R(390.0, 780.0, 80.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(TO_INT), @R(9.5));
+  @C(147) : @F(TO_INT), @R(390.0, 800.0, 80.0, 18.0), BYTE, @I(@N(IN), @L(9.5)), @O(@N(TO_INT), @R(9.5));
+  @C(148) : @F(TO_INT), @R(390.0, 40.0, 80.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(TO_INT), @R(9.5));
+  @C(149) : @F(TO_INT), @R(390.0, 410.0, 80.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(TO_INT), @R(9.5));
+  @C(150) : @F(MID), @R(510.0, 580.0, 100.0, 58.0), INT, @I(@N(IN), @L(9.5)), @I(@N(L), @L(29.5)), @I(@N(P), @L(49.5)), @O(@N(MID), @R(9.5));
+  @C(151) : @F(TO_INT), @R(390.0, 600.0, 80.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(TO_INT), @R(9.5));
+  @C(152) : @F(TO_INT), @R(390.0, 620.0, 80.0, 18.0), BYTE, @I(@N(IN), @L(9.5)), @O(@N(TO_INT), @R(9.5));
+  @C(153) : @F(MID), @R(510.0, 20.0, 100.0, 58.0), INT, @I(@N(IN), @L(9.5)), @I(@N(L), @L(29.5)), @I(@N(P), @L(49.5)), @O(@N(MID), @R(9.5));
+  @C(154) : @F(TO_INT), @R(390.0, 500.0, 80.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(TO_INT), @R(9.5));
+  @C(155) : @F(MID), @R(510.0, 480.0, 100.0, 58.0), INT, @I(@N(IN), @L(9.5)), @I(@N(L), @L(29.5)), @I(@N(P), @L(49.5)), @O(@N(MID), @R(9.5));
+  @C(156) : @F(MID), @R(510.0, 390.0, 100.0, 58.0), INT, @I(@N(IN), @L(9.5)), @I(@N(L), @L(29.5)), @I(@N(P), @L(49.5)), @O(@N(MID), @R(9.5));
+  @C(157) : @F(TO_INT), @R(390.0, 430.0, 80.0, 18.0), BYTE, @I(@N(IN), @L(9.5)), @O(@N(TO_INT), @R(9.5));
+  @C(158) : @F(TO_INT), @R(390.0, 520.0, 80.0, 18.0), BYTE, @I(@N(IN), @L(9.5)), @O(@N(TO_INT), @R(9.5));
+  @C(159) : @F(TO_INT), @R(390.0, 250.0, 80.0, 18.0), BYTE, @I(@N(IN), @L(9.5)), @O(@N(TO_INT), @R(9.5));
+  @C(160) : @F(TO_INT), @R(390.0, 60.0, 80.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(TO_INT), @R(9.5));
+  @C(161) : @F(MID), @R(510.0, 850.0, 100.0, 58.0), INT, @I(@N(IN), @L(9.5)), @I(@N(L), @L(29.5)), @I(@N(P), @L(49.5)), @O(@N(MID), @R(9.5));
+  @C(162) : @F(TO_INT), @R(390.0, 870.0, 80.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(TO_INT), @R(9.5));
+  @C(163) : @F(TO_INT), @R(390.0, 890.0, 80.0, 18.0), BYTE, @I(@N(IN), @L(9.5)), @O(@N(TO_INT), @R(9.5));
+  @C(164) : @F(MID), @R(510.0, 670.0, 100.0, 58.0), INT, @I(@N(IN), @L(9.5)), @I(@N(L), @L(29.5)), @I(@N(P), @L(49.5)), @O(@N(MID), @R(9.5));
+  @C(165) : @F(TO_INT), @R(390.0, 690.0, 80.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(TO_INT), @R(9.5));
+  @C(166) : @F(TO_INT), @R(390.0, 710.0, 80.0, 18.0), BYTE, @I(@N(IN), @L(9.5)), @O(@N(TO_INT), @R(9.5));
+  @C(167) : @F(MID), @R(510.0, 300.0, 100.0, 58.0), INT, @I(@N(IN), @L(9.5)), @I(@N(L), @L(29.5)), @I(@N(P), @L(49.5)), @O(@N(MID), @R(9.5));
+  @C(168) : @F(TO_INT), @R(390.0, 320.0, 80.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(TO_INT), @R(9.5));
+  @C(169) : @F(TO_INT), @R(390.0, 230.0, 80.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(TO_INT), @R(9.5));
+  @C(170) : @F(TO_INT), @R(390.0, 340.0, 80.0, 18.0), BYTE, @I(@N(IN), @L(9.5)), @O(@N(TO_INT), @R(9.5));
+  @C(128) : @FB(FB_lc_ChrToByte7), @R(690.0, 670.0, 200.0, 58.0), @I(@N(vistr_Chr_127), @L(9.5)), @O(@N(vob_Out), @R(9.5));
+  @C(140) : @FB(FB_lc_ChrToByte8), @R(690.0, 760.0, 200.0, 58.0), @I(@N(vistr_Chr_127), @L(9.5)), @O(@N(vob_Out), @R(9.5));
+  @C(102) : @FB(FB_lc_ChrToByte), @R(690.0, 210.0, 200.0, 58.0), @I(@N(vistr_Chr_127), @L(9.5)), @O(@N(vob_Out), @R(9.5));
+  @C(104) : @FB(FB_lc_ChrToByte5), @R(690.0, 480.0, 200.0, 58.0), @I(@N(vistr_Chr_127), @L(9.5)), @O(@N(vob_Out), @R(9.5));
+  @C(109) : @FB(FB_lc_ChrToByte4), @R(690.0, 390.0, 200.0, 58.0), @I(@N(vistr_Chr_127), @L(9.5)), @O(@N(vob_Out), @R(9.5));
+  @C(111) : @FB(FB_lc_ChrToByte3), @R(690.0, 300.0, 200.0, 58.0), @I(@N(vistr_Chr_127), @L(9.5)), @O(@N(vob_Out), @R(9.5));
+  @C(114) : @FB(FB_lc_ChrToByte9), @R(690.0, 850.0, 200.0, 58.0), @I(@N(vistr_Chr_127), @L(9.5)), @O(@N(vob_Out), @R(9.5));
+  @C(116) : @FB(FB_lc_ChrToByte6), @R(690.0, 580.0, 200.0, 58.0), @I(@N(vistr_Chr_127), @L(9.5)), @O(@N(vob_Out), @R(9.5));
+  @C(120) : @FB(FB_lc_ChrToByte1), @R(690.0, 110.0, 200.0, 58.0), @I(@N(vistr_Chr_127), @L(9.5)), @O(@N(vob_Out), @R(9.5));
+  @C(126) : @FB(FB_lc_ChrToByte2), @R(690.0, 20.0, 200.0, 58.0), @I(@N(vistr_Chr_127), @L(9.5)), @O(@N(vob_Out), @R(9.5));
+  @CP(184) : 310.0, 29.5;
+  @CP(185) : 310.0, 119.5;
+  @CP(190) : 310.0, 219.5;
+  @CP(193) : 310.0, 309.5;
+  @CP(194) : 310.0, 399.5;
+  @CP(195) : 310.0, 489.5;
+  @CP(196) : 310.0, 589.5;
+  @CP(197) : 310.0, 679.5;
+  @CP(198) : 310.0, 769.5;
+
+  @G(183) :
+     @L(@VF(132).o, @CP(184)),
+     @L(@CP(184), @CP(185)),
+     @L(@CP(185), @C(141).IN),
+     @L(@CP(185), @CP(190)),
+     @L(@CP(190), @C(144).IN),
+     @L(@CP(190), @CP(193)),
+     @L(@CP(193), @CP(194)),
+     @L(@CP(194), @CP(195)),
+     @L(@CP(195), @CP(196)),
+     @L(@CP(196), @CP(197)),
+     @L(@CP(197), @CP(198)),
+     @L(@CP(198), @C(145).IN),
+     @L(@CP(196), @C(150).IN),
+     @L(@CP(184), @C(153).IN),
+     @L(@CP(195), @C(155).IN),
+     @L(@CP(194), @C(156).IN),
+     @L(@CP(198), @C(161).IN),
+     @L(@CP(197), @C(164).IN),
+     @L(@CP(193), @C(167).IN)
+    ;
+  @G(186) :
+     @L(@C(142).TO_INT, @C(141).L)
+    ;
+  @G(187) :
+     @L(@C(143).TO_INT, @C(141).P)
+    ;
+  @G(188) :
+     @L(@VF(124).o, @C(142).IN)
+    ;
+  @G(189) :
+     @L(@VF(130).o, @C(143).IN)
+    ;
+  @G(191) :
+     @L(@C(169).TO_INT, @C(144).L)
+    ;
+  @G(192) :
+     @L(@C(159).TO_INT, @C(144).P)
+    ;
+  @G(199) :
+     @L(@C(146).TO_INT, @C(145).L)
+    ;
+  @G(200) :
+     @L(@C(147).TO_INT, @C(145).P)
+    ;
+  @G(201) :
+     @L(@VF(121).o, @C(146).IN)
+    ;
+  @G(202) :
+     @L(@VF(133).o, @C(147).IN)
+    ;
+  @G(203) :
+     @L(@VF(107).o, @C(148).IN)
+    ;
+  @G(204) :
+     @L(@VF(123).o, @C(149).IN)
+    ;
+  @G(205) :
+     @L(@C(151).TO_INT, @C(150).L)
+    ;
+  @G(206) :
+     @L(@C(152).TO_INT, @C(150).P)
+    ;
+  @G(207) :
+     @L(@VF(136).o, @C(151).IN)
+    ;
+  @G(208) :
+     @L(@VF(105).o, @C(152).IN)
+    ;
+  @G(209) :
+     @L(@C(148).TO_INT, @C(153).L)
+    ;
+  @G(210) :
+     @L(@C(160).TO_INT, @C(153).P)
+    ;
+  @G(211) :
+     @L(@VF(100).o, @C(154).IN)
+    ;
+  @G(212) :
+     @L(@C(154).TO_INT, @C(155).L)
+    ;
+  @G(213) :
+     @L(@C(158).TO_INT, @C(155).P)
+    ;
+  @G(214) :
+     @L(@C(149).TO_INT, @C(156).L)
+    ;
+  @G(215) :
+     @L(@C(157).TO_INT, @C(156).P)
+    ;
+  @G(216) :
+     @L(@VF(137).o, @C(157).IN)
+    ;
+  @G(217) :
+     @L(@VF(138).o, @C(158).IN)
+    ;
+  @G(218) :
+     @L(@VF(122).o, @C(159).IN)
+    ;
+  @G(219) :
+     @L(@VF(118).o, @C(160).IN)
+    ;
+  @G(220) :
+     @L(@C(162).TO_INT, @C(161).L)
+    ;
+  @G(221) :
+     @L(@C(163).TO_INT, @C(161).P)
+    ;
+  @G(222) :
+     @L(@VF(106).o, @C(162).IN)
+    ;
+  @G(223) :
+     @L(@VF(135).o, @C(163).IN)
+    ;
+  @G(224) :
+     @L(@C(165).TO_INT, @C(164).L)
+    ;
+  @G(225) :
+     @L(@C(166).TO_INT, @C(164).P)
+    ;
+  @G(226) :
+     @L(@VF(129).o, @C(165).IN)
+    ;
+  @G(227) :
+     @L(@VF(131).o, @C(166).IN)
+    ;
+  @G(229) :
+     @L(@C(168).TO_INT, @C(167).L)
+    ;
+  @G(230) :
+     @L(@C(170).TO_INT, @C(167).P)
+    ;
+  @G(231) :
+     @L(@VF(134).o, @C(168).IN)
+    ;
+  @G(233) :
+     @L(@VF(112).o, @C(169).IN)
+    ;
+  @G(234) :
+     @L(@VF(117).o, @C(170).IN)
+    ;
+  @G(1) :
+     @L(@C(153).MID, @C(126).vistr_Chr_127)
+    ;
+  @G(2) :
+     @L(@C(141).MID, @C(120).vistr_Chr_127)
+    ;
+  @G(3) :
+     @L(@C(144).MID, @C(102).vistr_Chr_127)
+    ;
+  @G(4) :
+     @L(@C(167).MID, @C(111).vistr_Chr_127)
+    ;
+  @G(5) :
+     @L(@C(156).MID, @C(109).vistr_Chr_127)
+    ;
+  @G(6) :
+     @L(@C(155).MID, @C(104).vistr_Chr_127)
+    ;
+  @G(7) :
+     @L(@C(126).vob_Out, @VF(125).i)
+    ;
+  @G(8) :
+     @L(@C(120).vob_Out, @VF(119).i)
+    ;
+  @G(9) :
+     @L(@C(102).vob_Out, @VF(101).i)
+    ;
+  @G(10) :
+     @L(@C(111).vob_Out, @VF(110).i)
+    ;
+  @G(11) :
+     @L(@C(109).vob_Out, @VF(108).i)
+    ;
+  @G(12) :
+     @L(@C(104).vob_Out, @VF(103).i)
+    ;
+  @G(13) :
+     @L(@C(116).vob_Out, @VF(115).i)
+    ;
+  @G(14) :
+     @L(@C(128).vob_Out, @VF(127).i)
+    ;
+  @G(15) :
+     @L(@C(140).vob_Out, @VF(139).i)
+    ;
+  @G(16) :
+     @L(@C(114).vob_Out, @VF(113).i)
+    ;
+  @G(17) :
+     @L(@C(161).MID, @C(114).vistr_Chr_127)
+    ;
+  @G(18) :
+     @L(@C(145).MID, @C(140).vistr_Chr_127)
+    ;
+  @G(19) :
+     @L(@C(164).MID, @C(128).vistr_Chr_127)
+    ;
+  @G(20) :
+     @L(@C(150).MID, @C(116).vistr_Chr_127)
+    ;
+END_FUNCTION_BLOCK
+END_NAMESPACE

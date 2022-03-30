@@ -1,0 +1,55 @@
+ /*
+  * logi.cals GmbH
+  * A-3100 St. Poelten
+  * Europaplatz 7/1
+  * Tel.: 0043-5-77147
+  *
+  * logi.cals automation solutions & services GmbH
+  * D-40738 Langenfeld
+  * Postfach 1306
+  * Tel.: 0043-5-77147
+  * 
+  * Contact:
+  * dieter.goltz@logicals.com
+  * 
+  * History:
+  * Created:  
+  * DG 2017-03-28
+  * 
+  * Modified: 
+  * DG 2017-03-28
+  * DG 2021-03-01
+  */ 
+
+ /*
+  * Description
+  * -----------
+  * Test Calc Blocks
+  */
+
+ /* 
+  * Beschreibung
+  * ------------
+  * Test Calc Blocks
+  */
+  
+USING com.logicals.Basic.Calc;
+
+PROGRAM PRG_lc_TestCalc1_ST
+
+VAR
+  FB_Surface    : FB_lc_Surface_ST;
+  FB_VolumeTank : FB_lc_VolumeTank_ST;
+END_VAR
+
+VAR
+  lr_Height   : REAL := 1.0;
+  lr_Diameter : REAL := 1.0;
+  lr_Surface  : REAL;
+  lr_VolTank  : REAL := 1.0;
+END_VAR
+
+FB_Surface(vir_Diameter := lr_Diameter,vor_Surface => lr_Surface);
+FB_VolumeTank(vir_Diameter :=lr_Diameter,vor_VolTank => lr_VolTank);
+
+END_PROGRAM

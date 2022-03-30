@@ -1,0 +1,196 @@
+PROGRAM PRG_lc_TestActuator1_FBD
+  USING com.logicals.Basic.Actuator;
+  VAR
+    FB_MotorLeftRightStop_FBD : FB_lc_Motor2R_Stop_FBD;
+    FORCEMRK1 : FORCEMRK;
+    FORCEMRK2 : FORCEMRK;
+    FORCEMRK3 : FORCEMRK;
+    FORCEMRK4 : FORCEMRK;
+    FORCEMRK5 : FORCEMRK;
+    CTUD_DINT1 : CTUD_DINT;
+    lx_Reset : BOOL;
+    ludi_CountVal : UDINT;
+    lx_Init : BOOL;
+    lx_Run : BOOL;
+    lx_Term : BOOL;
+    lx_ShutDown : BOOL;
+  END_VAR
+  VAR
+    lx_MotorLeft : BOOL;
+    lx_StartLeft : BOOL;
+    lx_MotorRight : BOOL;
+    lx_MotorStop : BOOL;
+    lx_StartRight : BOOL;
+  END_VAR
+  VAR_EXTERNAL
+    gx_MotorLeft : BOOL;
+    gx_StartLeft : BOOL;
+    gx_MotorRight : BOOL;
+    gx_MotorStop : BOOL;
+    gx_StartRight : BOOL;
+    gx_LightBarrier1 : BOOL;
+  END_VAR
+
+  (*
+
+    // Network 1:
+    RTSCycleInfo(Init => lx_Init, Run => lx_Run, Shutdown => lx_ShutDown, Term => lx_Term);
+
+    // Network 2:
+    FORCEMRK1(IN := gx_StartLeft);
+    OR(IN1 := FORCEMRK1.OUT, IN2 := lx_StartLeft, OR => @C(27).OR);
+    FORCEMRK2(IN := gx_StartRight);
+    OR(IN1 := FORCEMRK2.OUT, IN2 := lx_StartRight, OR => @C(30).OR);
+    FORCEMRK3(IN := gx_MotorStop);
+    OR(IN1 := FORCEMRK3.OUT, IN2 := lx_MotorStop, OR => @C(33).OR);
+    FB_MotorLeftRightStop_FBD(vix_StartLeft := @C(27).OR, vix_StartRight := @C(30).OR, vix_Stop := @C(33).OR);
+    FORCEMRK4(IN := FB_MotorLeftRightStop_FBD.vox_MotorLeft, OUT => gx_MotorLeft);
+    FORCEMRK5(IN := FB_MotorLeftRightStop_FBD.vox_MotorRight, OUT => gx_MotorRight);
+
+    // Network 3:
+    AND(IN1 := gx_MotorLeft, IN2 := gx_LightBarrier1, AND => @C(45).AND);
+    AND(IN1 := gx_MotorRight, IN2 := gx_LightBarrier1, AND => @C(48).AND);
+    OR(IN1 := lx_Reset, IN2 := lx_Init, OR => @C(68).OR);
+    CTUD_DINT1(CU := @C(45).AND, CD := @C(48).AND, R := @C(68).OR);
+    TO_UDINT(IN := CTUD_DINT1.CV, TO_UDINT => ludi_CountVal);
+
+  *)
+
+  @VF(2) : @E(gx_MotorLeft), @R(1310.0, 580.0, 140.0, 19.0);
+  @VF(3) : @E(gx_MotorRight), @R(1310.0, 600.0, 140.0, 19.0);
+  @VF(4) : @E(gx_StartLeft), @R(190.0, 580.0, 140.0, 19.0);
+  @VF(5) : @E(gx_StartRight), @R(190.0, 620.0, 140.0, 19.0);
+  @VF(6) : @E(gx_MotorStop), @R(190.0, 660.0, 140.0, 19.0);
+  @C(7) : @FB(FORCEMRK1), @R(380.0, 580.0, 120.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(OUT), @R(9.5));
+  @C(8) : @FB(FORCEMRK2), @R(380.0, 620.0, 120.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(OUT), @R(9.5));
+  @C(9) : @FB(FORCEMRK3), @R(380.0, 660.0, 120.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(OUT), @R(9.5));
+  @C(10) : @FB(FORCEMRK4), @R(1160.0, 580.0, 120.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(OUT), @R(9.5));
+  @C(11) : @FB(FORCEMRK5), @R(1160.0, 600.0, 120.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(OUT), @R(9.5));
+  @CF(22) : @R(50.0, 400.0, 830.0, 99.0), @T("MotorLeftRightStop$NFunktionstest."), @POU;
+  @CF(23) : @R(990.0, 400.0, 830.0, 99.0), @T("MotorLeftRightStop$NFunction Test."), @POU;
+  @VF(24) : @E(lx_StartLeft), @R(190.0, 600.0, 140.0, 19.0);
+  @VF(25) : @E(lx_StartRight), @R(190.0, 640.0, 140.0, 19.0);
+  @VF(26) : @E(lx_MotorStop), @R(190.0, 680.0, 140.0, 19.0);
+  @C(27) : @F(OR), @R(590.0, 580.0, 40.0, 38.0), BOOL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(OR), @R(9.5));
+  @C(30) : @F(OR), @R(590.0, 620.0, 40.0, 38.0), BOOL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(OR), @R(9.5));
+  @C(33) : @F(OR), @R(590.0, 660.0, 40.0, 38.0), BOOL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(OR), @R(9.5));
+  @OLT(36) : @R(80.0, 590.0, 80.0, 19.0), @S(24);
+  @OLT(37) : @R(80.0, 630.0, 80.0, 19.0), @S(25);
+  @OLT(38) : @R(80.0, 670.0, 80.0, 19.0), @S(26);
+  @C(39) : @FB(CTUD_DINT1), @R(900.0, 1020.0, 120.0, 98.0), @I(@N(CU), @L(9.5)), @I(@N(CD), @L(29.5)), @I(@N(R), @L(49.5)), @I(@N(LD), @L(69.5)), @I(@N(PV), @L(89.5)), @O(@N(QU), @R(9.5)), @O(@N(QD), @R(29.5)), @O(@N(CV), @R(49.5));
+  @VF(40) : @E(gx_MotorLeft), @R(180.0, 1020.0, 210.0, 19.0);
+  @VF(41) : @E(gx_MotorRight), @R(180.0, 1080.0, 210.0, 19.0);
+  @VF(44) : @E(gx_LightBarrier1), @R(180.0, 1040.0, 210.0, 19.0);
+  @C(45) : @F(AND), @R(580.0, 1020.0, 40.0, 38.0), BOOL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(AND), @R(9.5));
+  @C(48) : @F(AND), @R(580.0, 1080.0, 40.0, 38.0), BOOL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(AND), @R(9.5));
+  @VF(51) : @E(lx_Reset), @R(480.0, 1130.0, 140.0, 19.0);
+  @VF(53) : @E(ludi_CountVal), @R(1240.0, 1060.0, 140.0, 19.0);
+  @C(55) : @F(TO_UDINT), @R(1080.0, 1060.0, 120.0, 18.0), DINT, @I(@N(IN), @L(9.5)), @O(@N(TO_UDINT), @R(9.5));
+  @CF(57) : @R(50.0, 50.0, 830.0, 99.0), @T("logi.RTS Sttus"), @POU;
+  @C(58) : @F(RTSCycleInfo), @R(710.0, 230.0, 120.0, 78.0), @O(@N(Init), @R(9.5)), @O(@N(Run), @R(29.5)), @O(@N(Shutdown), @R(49.5)), @O(@N(Term), @R(69.5));
+  @VF(59) : @E(lx_Init), @R(960.0, 230.0, 140.0, 19.0);
+  @VF(61) : @E(lx_Run), @R(960.0, 250.0, 140.0, 19.0);
+  @VF(63) : @E(lx_Term), @R(960.0, 290.0, 140.0, 19.0);
+  @VF(64) : @E(lx_ShutDown), @R(960.0, 270.0, 140.0, 19.0);
+  @CF(67) : @R(990.0, 50.0, 830.0, 99.0), @T("logi.RTS State"), @POU;
+  @C(68) : @F(OR), @R(700.0, 1130.0, 40.0, 38.0), BOOL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(OR), @R(9.5));
+  @VF(70) : @E(lx_Init), @R(480.0, 1150.0, 140.0, 19.0);
+  @CF(72) : @R(60.0, 870.0, 830.0, 99.0), @T("MotorLeftRightStop$NPositionszaehler."), @POU;
+  @CF(73) : @R(1000.0, 870.0, 830.0, 99.0), @T("MotorLeftRightStop$NPosition counter."), @POU;
+  @OLT(74) : @R(1240.0, 1020.0, 80.0, 19.0), @S(53);
+  @C(1) : @FB(FB_MotorLeftRightStop_FBD), @R(790.0, 580.0, 330.0, 78.0), @I(@N(vix_StartLeft), @L(9.5)), @I(@N(vix_StartRight), @L(29.5)), @I(@N(vix_Stop), @L(49.5)), @O(@N(vox_MotorLeft), @R(9.5)), @O(@N(vox_MotorRight), @R(29.5)), @O(@N(vox_Err), @R(49.5)), @O(@N(voi_ErrNo), @R(69.5));
+  @CP(50) : 509.5, 1049.5;
+
+  @G(12) :
+     @L(@VF(5).o, @C(8).IN)
+    ;
+  @G(13) :
+     @L(@VF(6).o, @C(9).IN)
+    ;
+  @G(14) :
+     @L(@C(7).OUT, @C(27).IN1)
+    ;
+  @G(15) :
+     @L(@C(8).OUT, @C(30).IN1)
+    ;
+  @G(16) :
+     @L(@C(9).OUT, @C(33).IN1)
+    ;
+  @G(17) :
+     @L(@VF(4).o, @C(7).IN)
+    ;
+  @G(18) :
+     @L(@C(1).vox_MotorLeft, @C(10).IN)
+    ;
+  @G(19) :
+     @L(@C(1).vox_MotorRight, @C(11).IN)
+    ;
+  @G(20) :
+     @L(@C(10).OUT, @VF(2).i)
+    ;
+  @G(21) :
+     @L(@C(11).OUT, @VF(3).i)
+    ;
+  @G(28) :
+     @L(@C(27).OR, @C(1).vix_StartLeft)
+    ;
+  @G(29) :
+     @L(@VF(24).o, @C(27).IN2)
+    ;
+  @G(31) :
+     @L(@C(30).OR, @C(1).vix_StartRight)
+    ;
+  @G(32) :
+     @L(@VF(25).o, @C(30).IN2)
+    ;
+  @G(34) :
+     @L(@C(33).OR, @C(1).vix_Stop)
+    ;
+  @G(35) :
+     @L(@VF(26).o, @C(33).IN2)
+    ;
+  @G(42) :
+     @L(@VF(40).o, @C(45).IN1)
+    ;
+  @G(43) :
+     @L(@VF(41).o, @C(48).IN1)
+    ;
+  @G(46) :
+     @L(@C(45).AND, @C(39).CU)
+    ;
+  @G(47) :
+     @L(@VF(44).o, @CP(50)),
+     @L(@CP(50), @C(45).IN2),
+     @L(@CP(50), @C(48).IN2)
+    ;
+  @G(49) :
+     @L(@C(48).AND, @C(39).CD)
+    ;
+  @G(52) :
+     @L(@VF(51).o, @C(68).IN1)
+    ;
+  @G(54) :
+     @L(@C(39).CV, @C(55).IN)
+    ;
+  @G(56) :
+     @L(@C(55).TO_UDINT, @VF(53).i)
+    ;
+  @G(60) :
+     @L(@C(58).Init, @VF(59).i)
+    ;
+  @G(62) :
+     @L(@C(58).Run, @VF(61).i)
+    ;
+  @G(65) :
+     @L(@C(58).Shutdown, @VF(64).i)
+    ;
+  @G(66) :
+     @L(@C(58).Term, @VF(63).i)
+    ;
+  @G(69) :
+     @L(@C(68).OR, @C(39).R)
+    ;
+  @G(71) :
+     @L(@VF(70).o, @C(68).IN2)
+    ;
+END_PROGRAM

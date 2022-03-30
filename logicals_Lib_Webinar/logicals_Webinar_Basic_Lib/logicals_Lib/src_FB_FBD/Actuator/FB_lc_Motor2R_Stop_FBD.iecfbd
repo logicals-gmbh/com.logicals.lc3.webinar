@@ -1,0 +1,132 @@
+NAMESPACE com.logicals.Basic.Actuator
+FUNCTION_BLOCK FB_lc_Motor2R_Stop_FBD
+  VAR
+    RS1 : RS;
+    RS2 : RS;
+    R_TRIG1 : R_TRIG;
+    R_TRIG2 : R_TRIG;
+  END_VAR
+  VAR_INPUT
+    vix_StartLeft : BOOL;
+    vix_StartRight : BOOL;
+    vix_Stop : BOOL;
+  END_VAR
+  VAR_OUTPUT
+    vox_MotorLeft : BOOL;
+    vox_MotorRight : BOOL;
+    vox_Err : BOOL;
+    voi_ErrNo : INT;
+  END_VAR
+
+  (*
+
+    // Network 1:
+    AND(IN1 := vix_StartLeft, IN2 := vix_Stop, IN3 := vix_StartRight, AND => (@C(33).AND, vox_Err));
+    MOVE(EN := @C(33).AND, IN := 1, MOVE => voi_ErrNo);
+
+    // Network 2:
+    NOT(IN := vox_MotorRight, NOT => @C(23).NOT);
+    AND(IN1 := vix_StartLeft, IN2 := @C(23).NOT, AND => @C(19).AND);
+    R_TRIG1(CLK := @C(19).AND);
+    RS1(S := R_TRIG1.Q, R1 := vix_Stop, Q1 => vox_MotorLeft);
+
+    // Network 3:
+    NOT(IN := vox_MotorLeft, NOT => @C(25).NOT);
+    AND(IN1 := vix_StartRight, IN2 := @C(25).NOT, AND => @C(21).AND);
+    R_TRIG2(CLK := @C(21).AND);
+    RS2(S := R_TRIG2.Q, R1 := vix_Stop, Q1 => vox_MotorRight);
+
+  *)
+
+  @VF(1) : @E(vix_StartLeft), @R(520.0, 410.0, 140.0, 19.0);
+  @VF(2) : @E(vix_StartRight), @R(520.0, 510.0, 140.0, 19.0);
+  @VF(3) : @E(vix_Stop), @R(520.0, 460.0, 140.0, 19.0);
+  @VF(4) : @E(vox_MotorLeft), @R(1240.0, 410.0, 140.0, 19.0);
+  @VF(5) : @E(vox_MotorRight), @R(1240.0, 510.0, 140.0, 19.0);
+  @VF(6) : @E(vix_Stop), @R(520.0, 560.0, 140.0, 19.0);
+  @C(7) : @FB(RS1), @R(1030.0, 410.0, 80.0, 38.0), @I(@N(S), @L(9.5)), @I(@N(R1), @L(29.5)), @O(@N(Q1), @R(9.5));
+  @C(8) : @FB(RS2), @R(1030.0, 510.0, 80.0, 38.0), @I(@N(S), @L(9.5)), @I(@N(R1), @L(29.5)), @O(@N(Q1), @R(9.5));
+  @C(9) : @FB(R_TRIG1), @R(830.0, 410.0, 140.0, 18.0), @I(@N(CLK), @L(9.5)), @O(@N(Q), @R(9.5));
+  @C(10) : @FB(R_TRIG2), @R(830.0, 510.0, 140.0, 18.0), @I(@N(CLK), @L(9.5)), @O(@N(Q), @R(9.5));
+  @C(19) : @F(AND), @R(780.0, 410.0, 40.0, 38.0), BOOL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(AND), @R(9.5));
+  @C(21) : @F(AND), @R(780.0, 510.0, 40.0, 38.0), BOOL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(AND), @R(9.5));
+  @C(23) : @F(NOT), @R(700.0, 430.0, 60.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(NOT), @R(9.5));
+  @C(25) : @F(NOT), @R(700.0, 530.0, 60.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(NOT), @R(9.5));
+  @VF(27) : @E(vox_MotorRight), @R(520.0, 430.0, 140.0, 19.0);
+  @VF(29) : @E(vox_MotorLeft), @R(520.0, 530.0, 140.0, 19.0);
+  @CF(31) : @R(40.0, 20.0, 850.0, 99.0), @T("Motorbaustein. $NUmschaltung der Drehrichtung ueber Stop."), @POU;
+  @CF(32) : @R(980.0, 20.0, 850.0, 99.0), @T("Motorblock. $NSwitch the direction by Stop command."), @POU;
+  @C(33) : @F(AND), @R(740.0, 180.0, 40.0, 58.0), BOOL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @I(@N(IN3), @L(49.5)), @O(@N(AND), @R(9.5));
+  @C(34) : @F(MOVE), @R(840.0, 240.0, 60.0, 38.0), INT, @I(@N(EN), @L(9.5)), @I(@N(IN), @L(29.5)), @O(@N(ENO), @R(9.5)), @O(@N(MOVE), @R(29.5));
+  @VF(35) : @E(vix_StartLeft), @R(520.0, 180.0, 140.0, 19.0);
+  @VF(36) : @E(vix_Stop), @R(520.0, 200.0, 140.0, 19.0);
+  @VF(37) : @E(1), @R(520.0, 260.0, 140.0, 19.0), INT;
+  @VF(38) : @E(vox_Err), @R(1020.0, 180.0, 140.0, 19.0);
+  @VF(39) : @E(voi_ErrNo), @R(1020.0, 260.0, 140.0, 19.0);
+  @VF(46) : @E(vix_StartRight), @R(520.0, 220.0, 140.0, 19.0);
+  @CP(40) : 809.5, 189.5;
+
+  @G(12) :
+     @L(@C(9).Q, @C(7).S)
+    ;
+  @G(14) :
+     @L(@C(10).Q, @C(8).S)
+    ;
+  @G(15) :
+     @L(@C(7).Q1, @VF(4).i)
+    ;
+  @G(16) :
+     @L(@C(8).Q1, @VF(5).i)
+    ;
+  @G(17) :
+     @L(@VF(3).o, @C(7).R1)
+    ;
+  @G(18) :
+     @L(@VF(6).o, @C(8).R1)
+    ;
+  @G(11) :
+     @L(@VF(1).o, @C(19).IN1)
+    ;
+  @G(20) :
+     @L(@C(19).AND, @C(9).CLK)
+    ;
+  @G(13) :
+     @L(@C(21).AND, @C(10).CLK)
+    ;
+  @G(22) :
+     @L(@VF(2).o, @C(21).IN1)
+    ;
+  @G(24) :
+     @L(@C(23).NOT, @C(19).IN2)
+    ;
+  @G(26) :
+     @L(@C(25).NOT, @C(21).IN2)
+    ;
+  @G(28) :
+     @L(@VF(27).o, @C(23).IN)
+    ;
+  @G(30) :
+     @L(@VF(29).o, @C(25).IN)
+    ;
+  @G(41) :
+     @L(@VF(35).o, @C(33).IN1)
+    ;
+  @G(42) :
+     @L(@C(33).AND, @CP(40)),
+     @L(@CP(40), @VF(38).i),
+     @L(@CP(40), @C(34).EN)
+    ;
+  @G(43) :
+     @L(@VF(36).o, @C(33).IN2)
+    ;
+  @G(44) :
+     @L(@VF(37).o, @C(34).IN)
+    ;
+  @G(45) :
+     @L(@C(34).MOVE, @VF(39).i)
+    ;
+  @G(47) :
+     @L(@VF(46).o, @C(33).IN3)
+    ;
+END_FUNCTION_BLOCK
+END_NAMESPACE

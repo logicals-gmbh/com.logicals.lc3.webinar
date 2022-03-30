@@ -1,0 +1,75 @@
+ /*
+  * logi.cals GmbH
+  * A-3100 St. Poelten
+  * Europaplatz 7/1
+  * Tel.: 0043-5-77147
+  *
+  * logi.cals automation solutions & services GmbH
+  * D-40738 Langenfeld
+  * Postfach 1306
+  * Tel.: 0043-5-77147
+  * 
+  * Contact:
+  * dieter.goltz@logicals.com
+  * 
+  * History:
+  * Created:  
+  * DG 2017-03-28
+  * 
+  * Modified: 
+  * DG 2017-03-28
+  * DG 2021-03-01
+  */ 
+
+ /*
+  * Description
+  * -----------
+  * Test RebootOS
+  */
+
+ /* 
+  * Beschreibung
+  * ------------
+  * Test RebootOS
+  */
+  
+USING com.logicals.Basic.System;
+
+PROGRAM PRG_lc_TestC_RebootOS_ST
+
+    VAR
+     lx_TestRebootOS : BOOL;
+    END_VAR
+
+   /*
+    * Initialisierungsmerker
+    */
+    VAR
+       FB_InitR_TRIG : R_TRIG;
+    END_VAR      
+  
+   /*
+    * Wird der Baustein bearbeitet
+    */
+    VAR
+       lx_CycleInit  : BOOL;
+       lx_CyclePulse : BOOL;
+       li_CycleCount : INT;
+   END_VAR
+
+  /*
+   * Lokaler InitPulse
+   */
+   FB_InitR_TRIG(CLK:= TRUE, Q => lx_CycleInit);
+  
+  /*
+   * Wird der Baustein bearbeitet
+   */
+   lx_CyclePulse := NOT(lx_CyclePulse);
+   li_CycleCount := li_CycleCount + 1;
+
+   IF lx_TestRebootOS = TRUE THEN
+    FUN_lc_RebootOS_C();
+   END_IF;
+ 
+END_PROGRAM

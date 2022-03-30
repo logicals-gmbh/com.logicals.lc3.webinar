@@ -1,0 +1,310 @@
+PROGRAM PRG_lc_TestControl1_FBD
+  USING com.logicals.Basic.Control;
+  VAR
+    CTU4 : CTU;
+    CTU3 : CTU;
+    CTU2 : CTU;
+    CTU1 : CTU;
+    FB_lc_ModeSelect_FBD : com.logicals.Basic.Logic.FB_lc_ModeSelect_FBD;
+    R_TRIG : R_TRIG;
+    li_CountModeSimPV : INT;
+    li_CountPV : INT := 100;
+    lx_SimBetrieb : BOOL;
+    li_CountModeTestPV : INT;
+    lx_TestBetrieb : BOOL;
+    li_CountModeAutoPV : INT;
+    lx_AutomatikBetrieb : BOOL;
+    li_CountModeManPV : INT;
+    lx_HandBetrieb : BOOL;
+    lx_Test_TestBetrieb : BOOL;
+    lx_Test_SimBetrieb : BOOL;
+    lx_Test_AutomatikBetrieb : BOOL;
+    lx_Test_HandBetrieb : BOOL;
+    lt_SysTaskActualCycleTime : TIME;
+    lt_SysTaskCycleTime : TIME;
+    lx_Term : BOOL;
+    lx_ShutDown : BOOL;
+    lx_Run : BOOL;
+    lx_Init : BOOL;
+    lx_CyclePulse : BOOL;
+    li_CycleCount : INT;
+    lx_InitPulse : BOOL;
+    Local_TRUE : BOOL;
+    FB_lc_TestControl_FBD : com.logicals.Basic.Control.FB_lc_TestControl_FBD;
+    FORCEMRK1 : FORCEMRK;
+    FORCEMRK2 : FORCEMRK;
+    FORCEMRK3 : FORCEMRK;
+  END_VAR
+  VAR_EXTERNAL
+    gi_AI_ActIn : INT;
+    gi_AI_SetIn : INT;
+    gi_AutoSetOutVal : INT;
+    gi_AutoSetMaxRngVal : INT;
+    gi_AutoSetMinRngVal : INT;
+    gx_ReleaseCtrl : BOOL;
+    gr_AutoSetInVal : REAL;
+  END_VAR
+
+  (*
+
+    // Network 1:
+    R_TRIG(CLK := Local_TRUE, Q => lx_InitPulse);
+
+    // Network 2:
+    ADD(IN1 := li_CycleCount, IN2 := 1, ADD => li_CycleCount);
+
+    // Network 3:
+    NOT(IN := lx_CyclePulse, NOT => lx_CyclePulse);
+
+    // Network 4:
+    RTSCycleInfo(Init => lx_Init, Run => lx_Run, Shutdown => lx_ShutDown, Term => lx_Term);
+
+    // Network 5:
+    SysTaskCycleTime(SysTaskCycleTime => lt_SysTaskCycleTime);
+
+    // Network 6:
+    SysTaskActualCycleTime(SysTaskActualCycleTime => lt_SysTaskActualCycleTime);
+
+    // Network 7:
+    FB_lc_ModeSelect_FBD(vix_SetHand := lx_Test_HandBetrieb, vix_SetAutomatik := lx_Test_AutomatikBetrieb, vix_SetTest := lx_Test_TestBetrieb, vix_SetSim := lx_Test_SimBetrieb, vox_Handbetrieb => lx_HandBetrieb, vox_Automatikbetrieb => lx_AutomatikBetrieb, vox_Testbetrieb => lx_TestBetrieb, vox_Simbetrieb => lx_SimBetrieb);
+
+    // Network 8:
+    CTU1(CU := lx_HandBetrieb, R := CTU1.Q, PV := li_CountPV, CV => li_CountModeManPV);
+
+    // Network 9:
+    CTU2(CU := lx_AutomatikBetrieb, R := CTU2.Q, PV := li_CountPV, CV => li_CountModeAutoPV);
+
+    // Network 10:
+    CTU3(CU := lx_TestBetrieb, R := CTU3.Q, PV := li_CountPV, CV => li_CountModeTestPV);
+
+    // Network 11:
+    CTU4(CU := lx_SimBetrieb, R := CTU4.Q, PV := li_CountPV, CV => li_CountModeSimPV);
+
+    // Network 12:
+    FORCEMRK2(IN := gi_AI_ActIn);
+    FORCEMRK1(IN := gi_AI_SetIn);
+    TO_REAL(IN := lt_SysTaskCycleTime, TO_REAL => @C(8).TO_REAL);
+    FB_lc_TestControl_FBD(vii_AutoSetMaxRngVal := gi_AutoSetMaxRngVal, vii_AutoSetMinRngVal := gi_AutoSetMinRngVal, vir_AutoSetInVal := gr_AutoSetInVal, vix_ReleaseCtrl := gx_ReleaseCtrl, vii_AI_ActIn := FORCEMRK2.OUT, vii_AI_SetIn := FORCEMRK1.OUT, vir_CycleTime_Sec := @C(8).TO_REAL);
+    FORCEMRK3(IN := FB_lc_TestControl_FBD.voi_AutoSetOutVal, OUT => gi_AutoSetOutVal);
+
+  *)
+
+  @C(160) : @FB(CTU4), @R(720.0, 2400.0, 100.0, 58.0), @I(@N(CU), @L(9.5)), @I(@N(R), @L(29.5)), @I(@N(PV), @L(49.5)), @O(@N(Q), @R(9.5)), @O(@N(CV), @R(49.5));
+  @C(159) : @FB(CTU3), @R(720.0, 2310.0, 100.0, 58.0), @I(@N(CU), @L(9.5)), @I(@N(R), @L(29.5)), @I(@N(PV), @L(49.5)), @O(@N(Q), @R(9.5)), @O(@N(CV), @R(49.5));
+  @C(158) : @FB(CTU2), @R(720.0, 2220.0, 100.0, 58.0), @I(@N(CU), @L(9.5)), @I(@N(R), @L(29.5)), @I(@N(PV), @L(49.5)), @O(@N(Q), @R(9.5)), @O(@N(CV), @R(49.5));
+  @C(157) : @FB(CTU1), @R(720.0, 2130.0, 100.0, 58.0), @I(@N(CU), @L(9.5)), @I(@N(R), @L(29.5)), @I(@N(PV), @L(49.5)), @O(@N(Q), @R(9.5)), @O(@N(CV), @R(49.5));
+  @C(57) : @FB(FB_lc_ModeSelect_FBD), instanceNameVisible, @R(900.0, 1650.0, 300.0, 200.0), @I(@N(vix_SetHand), @L(9.5)), @I(@N(vix_SetAutomatik), @L(29.5)), @I(@N(vix_SetTest), @L(49.5)), @I(@N(vix_SetSim), @L(69.5)), @O(@N(vox_Handbetrieb), @R(9.5)), @O(@N(vox_Automatikbetrieb), @R(29.5)), @O(@N(vox_Testbetrieb), @R(49.5)), @O(@N(vox_Simbetrieb), @R(69.5));
+  @C(36) : @FB(R_TRIG), @R(800.0, 170.0, 140.0, 18.5), @I(@N(CLK), @L(9.5)), @O(@N(Q), @R(9.5));
+  @C(41) : @F(SysTaskActualCycleTime), @R(530.0, 1210.0, 484.0, 18.5), @O(@N(SysTaskActualCycleTime), @R(9.5));
+  @C(40) : @F(SysTaskCycleTime), @R(530.0, 1120.0, 480.0, 18.0), @O(@N(SysTaskCycleTime), @R(9.5));
+  @C(39) : @F(RTSCycleInfo), @R(829.0, 860.0, 120.0, 78.0), @O(@N(Init), @R(9.5)), @O(@N(Run), @R(29.5)), @O(@N(Shutdown), @R(49.5)), @O(@N(Term), @R(69.5));
+  @C(38) : @F(NOT), @R(870.0, 620.0, 60.0, 18.5), BOOL, @I(@N(IN), @L(9.5)), @O(@N(NOT), @R(9.5));
+  @C(37) : @F(ADD), @R(810.0, 380.0, 40.0, 38.0), INT, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @I(@N(IN3), @L(49.5)), @I(@N(IN4), @L(69.5)), @I(@N(IN5), @L(89.5)), @I(@N(IN6), @L(109.5)), @I(@N(IN7), @L(129.5)), @I(@N(IN8), @L(149.5)), @I(@N(IN9), @L(169.5)), @I(@N(IN10), @L(189.5)), @I(@N(IN11), @L(209.5)), @I(@N(IN12), @L(229.5)), @I(@N(IN13), @L(249.5)), @I(@N(IN14), @L(269.5)), @I(@N(IN15), @L(289.5)), @I(@N(IN16), @L(309.5)), @O(@N(ADD), @R(9.5));
+  @VF(188) : @E(li_CountModeSimPV), @R(920.0, 2440.0, 220.0, 19.0);
+  @VF(175) : @E(li_CountPV), @R(510.0, 2440.0, 140.0, 19.0);
+  @VF(107) : @E(lx_SimBetrieb), @R(510.0, 2400.0, 140.0, 19.0);
+  @VF(186) : @E(li_CountModeTestPV), @R(920.0, 2350.0, 220.0, 19.0);
+  @VF(173) : @E(li_CountPV), @R(510.0, 2350.0, 140.0, 19.0);
+  @VF(105) : @E(lx_TestBetrieb), @R(510.0, 2310.0, 140.0, 19.0);
+  @VF(184) : @E(li_CountModeAutoPV), @R(920.0, 2260.0, 220.0, 19.0);
+  @VF(171) : @E(li_CountPV), @R(510.0, 2260.0, 140.0, 19.0);
+  @VF(103) : @E(lx_AutomatikBetrieb), @R(510.0, 2220.0, 140.0, 19.0);
+  @VF(169) : @E(li_CountPV), @R(510.0, 2170.0, 140.0, 19.0);
+  @VF(182) : @E(li_CountModeManPV), @R(920.0, 2170.0, 220.0, 19.0);
+  @VF(101) : @E(lx_HandBetrieb), @R(510.0, 2130.0, 140.0, 19.0);
+  @VF(71) : @E(lx_Test_TestBetrieb), @R(510.0, 1690.0, 230.0, 19.0);
+  @VF(72) : @E(lx_Test_SimBetrieb), @R(510.0, 1710.0, 230.0, 19.0);
+  @VF(85) : @E(lx_TestBetrieb), @R(1320.0, 1690.0, 250.0, 19.0);
+  @VF(82) : @E(lx_SimBetrieb), @R(1320.0, 1710.0, 250.0, 19.0);
+  @VF(70) : @E(lx_Test_AutomatikBetrieb), @R(510.0, 1670.0, 230.0, 19.0);
+  @VF(84) : @E(lx_AutomatikBetrieb), @R(1320.0, 1670.0, 250.0, 19.0);
+  @VF(67) : @E(lx_Test_HandBetrieb), @R(510.0, 1650.0, 230.0, 19.0);
+  @VF(83) : @E(lx_HandBetrieb), @R(1320.0, 1650.0, 250.0, 19.0);
+  @VF(30) : @E(lt_SysTaskActualCycleTime), @R(1140.0, 1210.0, 240.0, 19.0);
+  @VF(29) : @E(lt_SysTaskCycleTime), @R(1140.0, 1120.0, 240.0, 19.0);
+  @VF(28) : @E(lx_Term), @R(1000.0, 920.0, 140.0, 19.0);
+  @VF(27) : @E(lx_ShutDown), @R(1000.0, 900.0, 140.0, 19.0);
+  @VF(26) : @E(lx_Run), @R(1000.0, 880.0, 140.0, 19.0);
+  @VF(25) : @E(lx_Init), @R(1000.0, 860.0, 140.0, 19.0);
+  @VF(23) : @E(lx_CyclePulse), @R(680.0, 620.0, 140.0, 19.0);
+  @VF(24) : @E(lx_CyclePulse), @R(1030.0, 620.0, 140.0, 19.0);
+  @VF(22) : @E(1), @R(620.0, 400.0, 140.0, 19.0), INT;
+  @VF(21) : @E(li_CycleCount), @R(900.0, 380.0, 140.0, 19.0);
+  @VF(20) : @E(li_CycleCount), @R(620.0, 380.0, 140.0, 19.0);
+  @VF(19) : @E(lx_InitPulse), @R(1000.0, 170.0, 140.0, 19.0);
+  @VF(18) : @E(Local_TRUE), @R(620.0, 170.0, 140.0, 19.0);
+  @OLT(190) : @R(1150.0, 2390.0, 80.0, 19.0), @S(188);
+  @OLT(191) : @R(1150.0, 2310.0, 80.0, 19.0), @S(186);
+  @OLT(192) : @R(1150.0, 2220.0, 80.0, 19.0), @S(184);
+  @OLT(177) : @R(360.0, 2150.0, 80.0, 19.0), @S(169);
+  @OLT(193) : @R(1150.0, 2130.0, 80.0, 19.0), @S(182);
+  @CF(152) : @R(500.0, 1980.0, 980.0, 100.0), @T("RPMControl$NLaufzeitueberwachung der Betriebsarten!"), @POU;
+  @CF(55) : @R(490.0, 1490.0, 980.0, 100.0), @T("RPMControl$NVerschiedene Betriebsraten fuer setzen!"), @POU;
+  @CF(35) : @R(830.0, 990.0, 240.0, 100.0), @T("TaskCycleTime"), @POU;
+  @CF(34) : @R(820.0, 690.0, 240.0, 100.0), @T("RTS_Cycle-Infos"), @POU;
+  @CF(33) : @R(820.0, 480.0, 240.0, 100.0), @T("Zyklus Pulse"), @POU;
+  @CF(32) : @R(820.0, 230.0, 240.0, 100.0), @T("Zyklus LifeTick"), @POU;
+  @CF(31) : @R(820.0, 30.0, 240.0, 100.0), @T("Lokaler InitPulse"), @POU;
+  @CF(6) : @R(490.0, 2750.0, 980.0, 100.0), @T("RPMControl$NTest des Reglers!$NIO-Werte als GV aus IO-Mapping-Task!"), @POU;
+  @VF(7) : @E(lt_SysTaskCycleTime), @R(320.0, 3250.0, 240.0, 19.0);
+  @C(8) : @F(TO_REAL), @R(610.0, 3250.0, 120.0, 18.0), TIME, @I(@N(IN), @L(9.5)), @O(@N(TO_REAL), @R(9.5));
+  @C(5) : @FB(FB_lc_TestControl_FBD), instanceNameVisible, @R(770.0, 3070.0, 360.0, 238.0), @I(@N(vii_AutoSetMaxRngVal), @L(9.5)), @I(@N(vii_AutoSetMinRngVal), @L(29.5)), @I(@N(vir_AutoSetInVal), @L(49.5)), @I(@N(vix_ReleaseCtrl), @L(89.5)), @I(@N(vii_AI_ActIn), @L(129.5)), @I(@N(vii_AI_SetIn), @L(149.5)), @I(@N(vir_CycleTime_Sec), @L(189.5)), @O(@N(voi_AutoSetOutVal), @R(149.5));
+  @VF(11) : @E(gi_AI_ActIn), @R(320.0, 3190.0, 240.0, 19.0);
+  @VF(12) : @E(gi_AI_SetIn), @R(320.0, 3210.0, 240.0, 19.0);
+  @VF(13) : @E(gi_AutoSetOutVal), @R(1300.0, 3210.0, 170.0, 19.0);
+  @VF(14) : @E(gi_AutoSetMaxRngVal), @R(320.0, 3070.0, 240.0, 19.0);
+  @VF(15) : @E(gi_AutoSetMinRngVal), @R(320.0, 3090.0, 240.0, 19.0);
+  @VF(16) : @E(gx_ReleaseCtrl), @R(320.0, 3150.0, 240.0, 19.0);
+  @VF(17) : @E(gr_AutoSetInVal), @R(320.0, 3110.0, 240.0, 19.0);
+  @C(63) : @FB(FORCEMRK1), @R(610.0, 3210.0, 120.0, 18.0), INT, @I(@N(IN), @L(9.5)), @O(@N(OUT), @R(9.5));
+  @C(65) : @FB(FORCEMRK2), @R(610.0, 3190.0, 120.0, 18.0), INT, @I(@N(IN), @L(9.5)), @O(@N(OUT), @R(9.5));
+  @C(68) : @FB(FORCEMRK3), @R(1160.0, 3210.0, 120.0, 18.0), INT, @I(@N(IN), @L(9.5)), @O(@N(OUT), @R(9.5));
+
+  @G(189) :
+     @L(@C(160).CV, @VF(188).i)
+    ;
+  @G(176) :
+     @L(@VF(175).o, @C(160).PV)
+    ;
+  @G(108) :
+     @L(@VF(107).o, @C(160).CU)
+    ;
+  @G(168) :
+     @L(@C(160).Q, @C(160).R)
+    ;
+  @G(187) :
+     @L(@C(159).CV, @VF(186).i)
+    ;
+  @G(174) :
+     @L(@VF(173).o, @C(159).PV)
+    ;
+  @G(106) :
+     @L(@VF(105).o, @C(159).CU)
+    ;
+  @G(167) :
+     @L(@C(159).Q, @C(159).R)
+    ;
+  @G(185) :
+     @L(@C(158).CV, @VF(184).i)
+    ;
+  @G(172) :
+     @L(@VF(171).o, @C(158).PV)
+    ;
+  @G(104) :
+     @L(@VF(103).o, @C(158).CU)
+    ;
+  @G(165) :
+     @L(@C(158).Q, @C(158).R)
+    ;
+  @G(170) :
+     @L(@VF(169).o, @C(157).PV)
+    ;
+  @G(183) :
+     @L(@C(157).CV, @VF(182).i)
+    ;
+  @G(102) :
+     @L(@VF(101).o, @C(157).CU)
+    ;
+  @G(166) :
+     @L(@C(157).Q, @C(157).R)
+    ;
+  @G(89) :
+     @L(@C(57).vox_Simbetrieb, @VF(82).i)
+    ;
+  @G(4) :
+     @L(@VF(72).o, @C(57).vix_SetSim)
+    ;
+  @G(88) :
+     @L(@C(57).vox_Testbetrieb, @VF(85).i)
+    ;
+  @G(3) :
+     @L(@VF(71).o, @C(57).vix_SetTest)
+    ;
+  @G(87) :
+     @L(@C(57).vox_Automatikbetrieb, @VF(84).i)
+    ;
+  @G(2) :
+     @L(@VF(70).o, @C(57).vix_SetAutomatik)
+    ;
+  @G(86) :
+     @L(@C(57).vox_Handbetrieb, @VF(83).i)
+    ;
+  @G(1) :
+     @L(@VF(67).o, @C(57).vix_SetHand)
+    ;
+  @G(54) :
+     @L(@C(41).SysTaskActualCycleTime, @VF(30).i)
+    ;
+  @G(53) :
+     @L(@C(40).SysTaskCycleTime, @VF(29).i)
+    ;
+  @G(51) :
+     @L(@C(39).Shutdown, @VF(27).i)
+    ;
+  @G(52) :
+     @L(@C(39).Term, @VF(28).i)
+    ;
+  @G(50) :
+     @L(@C(39).Run, @VF(26).i)
+    ;
+  @G(49) :
+     @L(@C(39).Init, @VF(25).i)
+    ;
+  @G(47) :
+     @L(@VF(23).o, @C(38).IN)
+    ;
+  @G(48) :
+     @L(@C(38).NOT, @VF(24).i)
+    ;
+  @G(46) :
+     @L(@VF(22).o, @C(37).IN2)
+    ;
+  @G(44) :
+     @L(@VF(20).o, @C(37).IN1)
+    ;
+  @G(45) :
+     @L(@C(37).ADD, @VF(21).i)
+    ;
+  @G(42) :
+     @L(@VF(18).o, @C(36).CLK)
+    ;
+  @G(43) :
+     @L(@C(36).Q, @VF(19).i)
+    ;
+  @G(9) :
+     @L(@VF(7).o, @C(8).IN)
+    ;
+  @G(10) :
+     @L(@C(8).TO_REAL, @C(5).vir_CycleTime_Sec)
+    ;
+  @G(56) :
+     @L(@VF(14).o, @C(5).vii_AutoSetMaxRngVal)
+    ;
+  @G(58) :
+     @L(@VF(15).o, @C(5).vii_AutoSetMinRngVal)
+    ;
+  @G(59) :
+     @L(@VF(17).o, @C(5).vir_AutoSetInVal)
+    ;
+  @G(60) :
+     @L(@VF(16).o, @C(5).vix_ReleaseCtrl)
+    ;
+  @G(61) :
+     @L(@VF(11).o, @C(65).IN)
+    ;
+  @G(62) :
+     @L(@VF(12).o, @C(63).IN)
+    ;
+  @G(64) :
+     @L(@C(63).OUT, @C(5).vii_AI_SetIn)
+    ;
+  @G(66) :
+     @L(@C(65).OUT, @C(5).vii_AI_ActIn)
+    ;
+  @G(69) :
+     @L(@C(68).OUT, @VF(13).i)
+    ;
+  @G(73) :
+     @L(@C(5).voi_AutoSetOutVal, @C(68).IN)
+    ;
+END_PROGRAM

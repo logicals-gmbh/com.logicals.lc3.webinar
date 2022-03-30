@@ -1,0 +1,31 @@
+NAMESPACE com.logicals.OpAut.Control
+
+FUNCTION_BLOCK FB_OpAut_TYP_I_ST
+
+ VAR_INPUT
+  Start, Reset : BOOL;
+  e, TN_T0 : REAL;
+ END_VAR
+
+ VAR_OUTPUT
+  Y_I : REAL;
+ END_VAR
+
+ VAR
+  Y_I_alt : REAL;
+ END_VAR
+ 
+ IF Start AND TN_T0>0.001 THEN
+  Y_I := Y_I_alt + e/TN_T0;
+  y_I_alt := y_I;
+ ELSE
+  Y_I:=Y_I_alt;
+ END_IF;
+  
+ IF Reset THEN
+  y_I := 0;
+  y_I_alt := 0;
+ END_IF;
+
+END_FUNCTION_BLOCK
+END_NAMESPACE

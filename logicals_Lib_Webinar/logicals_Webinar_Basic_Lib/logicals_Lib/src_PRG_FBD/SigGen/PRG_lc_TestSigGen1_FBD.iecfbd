@@ -1,0 +1,85 @@
+PROGRAM PRG_lc_TestSigGen1_FBD
+  USING com.logicals.Basic.SigGen;
+  USING com.logicals.Basic.Change;
+  USING com.logicals.Basic.Count;
+  VAR
+    FB_lc_GenSinCosSig_ST1 : FB_lc_GenSinCosSig_ST;
+    FB_lc_GenTriangleSig_ST1 : FB_lc_GenTriangleSig_ST;
+    FB_lc_ChangeUINT1 : FB_lc_ChangeUINT_ST;
+    FB_lc_CntMsg_ST1 : FB_lc_CntMsg_ST;
+    lui_CntVal : UINT;
+    lr_EndVal : REAL := 1023;
+    lr_StepVal : REAL := 0.1;
+    lr_Sin_X : REAL;
+    lr_Cos_X : REAL;
+    lr_Sin_X2 : REAL;
+    lr_Cos_X2 : REAL;
+    com_logicals_Basic_SigGen_FB_lc_RampUpDn_FBD1 : com.logicals.Basic.SigGen.FB_lc_RampUpDn_FBD;
+  END_VAR
+
+  (*
+
+    // Network 1:
+    FB_lc_GenSinCosSig_ST1(vir_StepVal := lr_StepVal, vir_EndVal := lr_EndVal, vor_Sin_X => lr_Sin_X, vor_Cos_X => lr_Cos_X, vor_Sin_X_2 => lr_Sin_X2, vor_Cos_X_2 => lr_Cos_X2);
+
+    // Network 2:
+    SysTaskActualCycleTime(SysTaskActualCycleTime => @C(3).SysTaskActualCycleTime);
+    FB_lc_GenTriangleSig_ST1(vit_CycleTime_ms := @C(3).SysTaskActualCycleTime);
+    FB_lc_ChangeUINT1(viui_In := FB_lc_GenTriangleSig_ST1.voui_Out);
+    FB_lc_CntMsg_ST1(vix_Cnt := FB_lc_ChangeUINT1.voi_Out, voui_CntVal => lui_CntVal);
+
+    // Network 3:
+    com_logicals_Basic_SigGen_FB_lc_RampUpDn_FBD1();
+
+  *)
+
+  @C(1) : @FB(FB_lc_GenSinCosSig_ST1), @R(780.0, 270.0, 300.0, 138.0), @I(@N(vir_StepVal), @L(9.5)), @I(@N(vir_EndVal), @L(29.5)), @O(@N(vor_Sin_X), @R(9.5)), @O(@N(vor_Cos_X), @R(29.5)), @O(@N(vor_Sin_X_2), @R(49.5)), @O(@N(vor_Cos_X_2), @R(69.5)), @O(@N(voui_ErrNo), @R(89.5)), @O(@N(vox_Err), @R(109.5));
+  @C(2) : @FB(FB_lc_GenTriangleSig_ST1), @R(780.0, 560.0, 300.0, 138.0), @I(@N(vit_CycleTime_ms), @L(9.5)), @I(@N(viui_MaxVal), @L(29.5)), @O(@N(voui_Out), @R(9.5)), @O(@N(vow_Out), @R(29.5)), @O(@N(voui_ErrNo), @R(49.5)), @O(@N(vox_Err), @R(69.5));
+  @C(3) : @F(SysTaskActualCycleTime), @R(470.0, 560.0, 184.0, 18.0), @O(@N(SysTaskActualCycleTime), @R(9.5));
+  @C(5) : @FB(FB_lc_ChangeUINT1), @R(1120.0, 560.0, 250.0, 18.0), @I(@N(viui_In), @L(9.5)), @O(@N(vox_Out), @R(9.5));
+  @C(7) : @FB(FB_lc_CntMsg_ST1), @R(1440.0, 560.0, 260.0, 58.0), @I(@N(vix_Cnt), @L(9.5)), @O(@N(voui_CntVal), @R(9.5)), @O(@N(voui_ErrNo), @R(29.5)), @O(@N(vox_Err), @R(49.5));
+  @VF(9) : @E(lui_CntVal), @R(1750.0, 560.0, 140.0, 19.0);
+  @VF(11) : @E(lr_EndVal), @R(510.0, 290.0, 140.0, 19.0);
+  @VF(13) : @E(lr_StepVal), @R(510.0, 270.0, 140.0, 19.0);
+  @VF(15) : @E(lr_Sin_X), @R(1160.0, 270.0, 140.0, 19.0);
+  @VF(16) : @E(lr_Cos_X), @R(1160.0, 290.0, 140.0, 19.0);
+  @VF(17) : @E(lr_Sin_X2), @R(1160.0, 310.0, 140.0, 19.0);
+  @VF(18) : @E(lr_Cos_X2), @R(1160.0, 330.0, 140.0, 19.0);
+  @OLT(23) : @R(1750.0, 530.0, 80.0, 19.0), @S(9);
+  @OLT(24) : @R(1340.0, 230.0, 120.0, 19.0), @S(15);
+  @OLT(26) : @R(1340.0, 250.0, 120.0, 19.0), @S(16);
+  @OLT(25) : @R(1340.0, 270.0, 120.0, 19.0), @S(17);
+  @OLT(27) : @R(1340.0, 290.0, 120.0, 19.0), @S(18);
+  @C(28) : @FB(com_logicals_Basic_SigGen_FB_lc_RampUpDn_FBD1), @R(850.0, 830.0, 160.0, 118.0), @I(@N(vir_In), @L(9.5)), @I(@N(vir_dxUpMax), @L(29.5)), @I(@N(vir_dxDnMax), @L(49.5)), @I(@N(vit_TimeBase), @L(69.5)), @O(@N(vor_Out), @R(9.5));
+
+  @G(4) :
+     @L(@C(3).SysTaskActualCycleTime, @C(2).vit_CycleTime_ms)
+    ;
+  @G(6) :
+     @L(@C(2).voui_Out, @C(5).viui_In)
+    ;
+  @G(8) :
+     @L(@C(5).vox_Out, @C(7).vix_Cnt)
+    ;
+  @G(10) :
+     @L(@C(7).voui_CntVal, @VF(9).i)
+    ;
+  @G(12) :
+     @L(@VF(11).o, @C(1).vir_EndVal)
+    ;
+  @G(14) :
+     @L(@VF(13).o, @C(1).vir_StepVal)
+    ;
+  @G(19) :
+     @L(@C(1).vor_Cos_X_2, @VF(18).i)
+    ;
+  @G(20) :
+     @L(@C(1).vor_Sin_X_2, @VF(17).i)
+    ;
+  @G(21) :
+     @L(@C(1).vor_Cos_X, @VF(16).i)
+    ;
+  @G(22) :
+     @L(@C(1).vor_Sin_X, @VF(15).i)
+    ;
+END_PROGRAM

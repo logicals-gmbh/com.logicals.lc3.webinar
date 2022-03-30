@@ -1,0 +1,31 @@
+NAMESPACE com.logicals.Basic.Count
+FUNCTION_BLOCK FB_lc_IncUINT_FBD
+  VAR_OUTPUT
+    Cnt : UINT := 0;
+  END_VAR
+
+  (*
+
+    // Network 1:
+    ADD(IN1 := Cnt, IN2 := 1, ADD => Cnt);
+
+  *)
+
+  @C(103) : @F(ADD), @R(730.0, 460.0, 40.0, 38.0), UINT, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(ADD), @R(9.5));
+  @VF(104) : @E(Cnt), @R(600.0, 460.0, 90.0, 19.0);
+  @VF(101) : @E(1), @R(600.0, 480.0, 40.0, 19.0), UINT;
+  @VF(102) : @E(Cnt), @R(1620.0, 460.0, 90.0, 19.0);
+  @CF(100) : @R(330.0, 330.0, 430.0, 48.0), @T("Increment UINT-Variable to count events$R$N(starting with 0, count modulo 64K=2^16)"), @POU;
+  @CF(1) : @R(870.0, 330.0, 430.0, 48.0), @T("UINT-Variable erhoehen um Ereignisse zu zaehlen$N(Start mit 0, zaehlt modulo 64K=2^16)"), @POU;
+
+  @G(107) :
+     @L(@VF(104).o, @C(103).IN1)
+    ;
+  @G(108) :
+     @L(@VF(101).o, @C(103).IN2)
+    ;
+  @G(106) :
+     @L(@C(103).ADD, @VF(102).i)
+    ;
+END_FUNCTION_BLOCK
+END_NAMESPACE

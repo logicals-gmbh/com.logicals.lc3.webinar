@@ -1,0 +1,65 @@
+PROGRAM PRG_lc_TestSequence1_FBD
+  USING com.logicals.Basic.Sequence;
+  VAR
+    lx_Sequence_Start : BOOL;
+    lx_Sequence_Reset : BOOL;
+    lt_Sequence_SeqTime : TIME := T#1s;
+  END_VAR
+  VAR
+    lx_Sequence_Step0 : BOOL;
+    lx_Sequence_Step1 : BOOL;
+    lx_Sequence_Step2 : BOOL;
+    lx_Sequence_Step3 : BOOL;
+    lx_Sequence_Step4 : BOOL;
+    ltarr_Sequence_StepTime : ARRAY[0..4] OF TIME;
+  END_VAR
+  VAR
+    com_logicals_Basic_Sequence_FB_lc_Sequence_FBD2 : com.logicals.Basic.Sequence.FB_lc_Sequence_FBD;
+  END_VAR
+
+  (*
+
+    // Network 1:
+    com_logicals_Basic_Sequence_FB_lc_Sequence_FBD2(vix_Start := lx_Sequence_Start, vix_Reset := lx_Sequence_Reset, vit_SeqTime := lt_Sequence_SeqTime, vox_Step0 => lx_Sequence_Step0, vox_Step1 => lx_Sequence_Step1, vox_Step2 => lx_Sequence_Step2, vox_Step3 => lx_Sequence_Step3, vox_Step4 => lx_Sequence_Step4, votarr_StepTime => ltarr_Sequence_StepTime);
+
+  *)
+
+  @C(2) : @FB(com_logicals_Basic_Sequence_FB_lc_Sequence_FBD2), @R(840.0, 240.0, 300.0, 118.0), @I(@N(vix_Start), @L(9.5)), @I(@N(vix_Reset), @L(29.5)), @I(@N(vit_SeqTime), @L(49.5)), @O(@N(vox_Step0), @R(9.5)), @O(@N(vox_Step1), @R(29.5)), @O(@N(vox_Step2), @R(49.5)), @O(@N(vox_Step3), @R(69.5)), @O(@N(vox_Step4), @R(89.5)), @O(@N(votarr_StepTime), @R(109.5));
+  @VF(1) : @E(lx_Sequence_Start), @R(550.0, 240.0, 230.0, 19.0);
+  @VF(3) : @E(lx_Sequence_Reset), @R(550.0, 260.0, 230.0, 19.0);
+  @VF(4) : @E(lt_Sequence_SeqTime), @R(550.0, 280.0, 230.0, 19.0);
+  @VF(8) : @E(lx_Sequence_Step0), @R(1220.0, 240.0, 230.0, 19.0);
+  @VF(9) : @E(lx_Sequence_Step1), @R(1220.0, 260.0, 230.0, 19.0);
+  @VF(10) : @E(lx_Sequence_Step2), @R(1220.0, 280.0, 230.0, 19.0);
+  @VF(11) : @E(lx_Sequence_Step3), @R(1220.0, 300.0, 230.0, 19.0);
+  @VF(12) : @E(lx_Sequence_Step4), @R(1220.0, 320.0, 230.0, 19.0);
+  @VF(13) : @E(ltarr_Sequence_StepTime), @R(1220.0, 340.0, 230.0, 19.0);
+
+  @G(5) :
+     @L(@VF(1).o, @C(2).vix_Start)
+    ;
+  @G(6) :
+     @L(@VF(3).o, @C(2).vix_Reset)
+    ;
+  @G(7) :
+     @L(@VF(4).o, @C(2).vit_SeqTime)
+    ;
+  @G(14) :
+     @L(@C(2).vox_Step0, @VF(8).i)
+    ;
+  @G(15) :
+     @L(@C(2).vox_Step1, @VF(9).i)
+    ;
+  @G(16) :
+     @L(@C(2).vox_Step2, @VF(10).i)
+    ;
+  @G(17) :
+     @L(@C(2).vox_Step3, @VF(11).i)
+    ;
+  @G(18) :
+     @L(@C(2).vox_Step4, @VF(12).i)
+    ;
+  @G(19) :
+     @L(@C(2).votarr_StepTime, @VF(13).i)
+    ;
+END_PROGRAM

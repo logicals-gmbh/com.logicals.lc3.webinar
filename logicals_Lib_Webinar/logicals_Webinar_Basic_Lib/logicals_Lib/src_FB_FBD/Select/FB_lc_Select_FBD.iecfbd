@@ -1,0 +1,214 @@
+NAMESPACE com.logicals.Basic.Select
+FUNCTION_BLOCK FB_lc_Select_FBD
+  {
+    vir_default {index := 0};
+    vix_selectX1 {index := 1};
+    vir_X1 {index := 2};
+    vix_selectX2 {index := 3};
+    vir_X2 {index := 4};
+    vix_selectX3 {index := 5};
+    vir_X3 {index := 6};
+    vix_selectX4 {index := 7};
+    vir_X4 {index := 8};
+    vix_selectX5 {index := 9};
+    vir_X5 {index := 10};
+    vix_selectX6 {index := 11};
+    vir_X6 {index := 12};
+    vix_selectX7 {index := 13};
+    vir_X7 {index := 14};
+    vix_selectX8 {index := 15};
+    vir_X8 {index := 16};
+    vix_selectX9 {index := 17};
+    vir_X9 {index := 18};
+    vor_Out {index := 0};
+    altName := "";
+    instanceName := {position := "manual", x := 0, y := 560, width := 280, height := 19, alignment := "center"};
+    width := 280;
+    height := 378;
+    inputValueFieldAreaWidth := 360;
+    outputValueFieldAreaWidth := 360;
+    minWidth := 280;
+    maxWidth := 280;
+    minHeight := 378;
+    maxHeight := 378;
+  }
+
+  VAR_INPUT
+    vir_default : REAL { description := "default"; };
+    vix_selectX1 : BOOL { description := "select value X1"; };
+    vir_X1 : REAL { description := "value 1"; };
+    vix_selectX2 : BOOL { description := "select value X2"; };
+    vir_X2 : REAL { description := "value 2"; };
+    vix_selectX3 : BOOL { description := "select value X3"; };
+    vir_X3 : REAL { description := "value 3"; };
+    vix_selectX4 : BOOL { description := "select value X4"; };
+    vir_X4 : REAL { description := "value 4"; };
+    vix_selectX5 : BOOL { description := "select value X5"; };
+    vir_X5 : REAL { description := "value 5"; };
+    vix_selectX6 : BOOL { description := "select value X6"; };
+    vir_X6 : REAL { description := "value 6"; };
+    vix_selectX7 : BOOL { description := "select value X7"; };
+    vir_X7 : REAL { description := "value 7"; };
+    vix_selectX8 : BOOL { description := "select value X8"; };
+    vir_X8 : REAL { description := "value 8"; };
+    vix_selectX9 : BOOL { description := "select value X9"; };
+    vir_X9 : REAL { description := "value 9"; };
+  END_VAR
+  VAR_OUTPUT
+    vor_Out : REAL { description := "actual value"; };
+  END_VAR
+
+  (*
+
+    // Network 1:
+    SEL(G := vix_selectX1, IN0 := vir_default, IN1 := vir_X1, SEL => @C(144).SEL);
+    SEL(G := vix_selectX2, IN0 := @C(144).SEL, IN1 := vir_X2, SEL => @C(146).SEL);
+    SEL(G := vix_selectX3, IN0 := @C(146).SEL, IN1 := vir_X3, SEL => @C(145).SEL);
+    SEL(G := vix_selectX4, IN0 := @C(145).SEL, IN1 := vir_X4, SEL => @C(148).SEL);
+    SEL(G := vix_selectX5, IN0 := @C(148).SEL, IN1 := vir_X5, SEL => @C(143).SEL);
+    SEL(G := vix_selectX6, IN0 := @C(143).SEL, IN1 := vir_X6, SEL => @C(142).SEL);
+    SEL(G := vix_selectX7, IN0 := @C(142).SEL, IN1 := vir_X7, SEL => @C(149).SEL);
+    SEL(G := vix_selectX8, IN0 := @C(149).SEL, IN1 := vir_X8, SEL => @C(147).SEL);
+    SEL(G := vix_selectX9, IN0 := @C(147).SEL, IN1 := vir_X9, SEL => vor_Out);
+
+  *)
+
+  @VF(129) : @E(vir_X4), @R(0.0, 620.0, 160.0, 19.0);
+  @VF(132) : @E(vix_selectX3), @R(0.0, 410.0, 160.0, 19.0);
+  @VF(101) : @E(vix_selectX6), @R(0.0, 830.0, 160.0, 19.0);
+  @VF(134) : @E(vix_selectX1), @R(0.0, 130.0, 160.0, 19.0);
+  @VF(103) : @E(vir_X3), @R(0.0, 480.0, 160.0, 19.0);
+  @VF(136) : @E(vir_X8), @R(0.0, 1180.0, 160.0, 19.0);
+  @VF(105) : @E(vir_X1), @R(0.0, 200.0, 160.0, 19.0);
+  @VF(138) : @E(vir_X9), @R(0.0, 1320.0, 160.0, 19.0);
+  @VF(107) : @E(vir_X2), @R(0.0, 340.0, 160.0, 19.0);
+  @VF(140) : @E(vix_selectX4), @R(0.0, 550.0, 160.0, 19.0);
+  @VF(109) : @E(vix_selectX5), @R(0.0, 690.0, 160.0, 19.0);
+  @VF(111) : @E(vix_selectX7), @R(0.0, 970.0, 160.0, 19.0);
+  @VF(113) : @E(vir_X6), @R(0.0, 900.0, 160.0, 19.0);
+  @VF(115) : @E(vor_Out), @R(1740.0, 1250.0, 160.0, 19.0);
+  @VF(117) : @E(vir_default), @R(0.0, 60.0, 160.0, 19.0);
+  @VF(119) : @E(vix_selectX9), @R(0.0, 1250.0, 160.0, 19.0);
+  @VF(121) : @E(vir_X7), @R(0.0, 1040.0, 160.0, 19.0);
+  @VF(123) : @E(vir_X5), @R(0.0, 760.0, 160.0, 19.0);
+  @VF(125) : @E(vix_selectX2), @R(0.0, 270.0, 160.0, 19.0);
+  @VF(127) : @E(vix_selectX8), @R(0.0, 1110.0, 160.0, 19.0);
+  @C(144) : @F(SEL), @R(780.0, 130.0, 120.0, 58.0), REAL, @I(@N(G), @L(9.5)), @I(@N(IN0), @L(29.5)), @I(@N(IN1), @L(49.5)), @O(@N(SEL), @R(9.5));
+  @C(145) : @F(SEL), @R(780.0, 410.0, 120.0, 58.0), REAL, @I(@N(G), @L(9.5)), @I(@N(IN0), @L(29.5)), @I(@N(IN1), @L(49.5)), @O(@N(SEL), @R(9.5));
+  @C(146) : @F(SEL), @R(780.0, 270.0, 120.0, 58.0), REAL, @I(@N(G), @L(9.5)), @I(@N(IN0), @L(29.5)), @I(@N(IN1), @L(49.5)), @O(@N(SEL), @R(9.5));
+  @C(147) : @F(SEL), @R(780.0, 1110.0, 120.0, 58.0), REAL, @I(@N(G), @L(9.5)), @I(@N(IN0), @L(29.5)), @I(@N(IN1), @L(49.5)), @O(@N(SEL), @R(9.5));
+  @C(148) : @F(SEL), @R(780.0, 550.0, 120.0, 58.0), REAL, @I(@N(G), @L(9.5)), @I(@N(IN0), @L(29.5)), @I(@N(IN1), @L(49.5)), @O(@N(SEL), @R(9.5));
+  @C(149) : @F(SEL), @R(780.0, 970.0, 120.0, 58.0), REAL, @I(@N(G), @L(9.5)), @I(@N(IN0), @L(29.5)), @I(@N(IN1), @L(49.5)), @O(@N(SEL), @R(9.5));
+  @C(141) : @F(SEL), @R(770.0, 1250.0, 120.0, 58.0), REAL, @I(@N(G), @L(9.5)), @I(@N(IN0), @L(29.5)), @I(@N(IN1), @L(49.5)), @O(@N(SEL), @R(9.5));
+  @C(142) : @F(SEL), @R(770.0, 830.0, 120.0, 58.0), REAL, @I(@N(G), @L(9.5)), @I(@N(IN0), @L(29.5)), @I(@N(IN1), @L(49.5)), @O(@N(SEL), @R(9.5));
+  @C(143) : @F(SEL), @R(780.0, 690.0, 120.0, 58.0), REAL, @I(@N(G), @L(9.5)), @I(@N(IN0), @L(29.5)), @I(@N(IN1), @L(49.5)), @O(@N(SEL), @R(9.5));
+  @CF(128) : @R(0.0, 640.0, 358.0, 48.0), @T("value 4$R$Nsheet:$a0"), @S(129);
+  @CF(130) : @R(940.0, 70.0, 578.0, 288.0), @T("Select one of the given values $"default$", $"X1$" ...$" X9$" with $R$Nbinary signals $"selectX1$" ... $"selectX9$".$R$Nand output to $"X$".$R$N$R$NIf none of the signals $"selectX1$" ... $"selectX9$" is activ, $R$N$a0$a0output $"X$" will be overwritten with input value $"default$".$R$N$R$NIf exactly one of the signals $"selectX1$" ... $"selectX9$" is activ, $R$N$a0$a0output $"X$" will be overwritten with input value $"X1$" ... $"X9$".$R$N$R$NIf more than one of the signals $"selectX1$" ... $"selectX9$" are activ,$R$N$a0$a0the $"Xn$"-value with the highest index n will be selected.$R$Ne.g.: $R$N$"selectX2$" AND $"selectX4$" AND $"selectX7$" activ at the same time:$R$Noutput $"X$" will be overwritten with $"X7$"$R$N$R$N$R$N"), @POU;
+  @CF(131) : @R(0.0, 430.0, 358.0, 48.0), @T("select value X3$R$Nsheet:$a0"), @S(132);
+  @CF(100) : @R(0.0, 850.0, 358.0, 48.0), @T("select value X6$R$Nsheet:$a0"), @S(101);
+  @CF(133) : @R(0.0, 150.0, 358.0, 48.0), @T("select value X1$R$Nsheet:$a0"), @S(134);
+  @CF(102) : @R(0.0, 500.0, 358.0, 48.0), @T("value 3$R$Nsheet:$a0"), @S(103);
+  @CF(135) : @R(0.0, 1200.0, 358.0, 48.0), @T("value 8$R$Nsheet:$a0"), @S(136);
+  @CF(104) : @R(0.0, 220.0, 358.0, 48.0), @T("value 1$R$Nsheet:$a0"), @S(105);
+  @CF(137) : @R(0.0, 3960.0, 358.0, 48.0), @T("value 9$R$Nsheet:$a0"), @S(138);
+  @CF(106) : @R(0.0, 360.0, 358.0, 48.0), @T("value 2$R$Nsheet:$a0"), @S(107);
+  @CF(139) : @R(0.0, 570.0, 358.0, 48.0), @T("select value X4$R$Nsheet:$a0"), @S(140);
+  @CF(108) : @R(0.0, 710.0, 358.0, 48.0), @T("select value X5$R$Nsheet:$a0"), @S(109);
+  @CF(110) : @R(0.0, 990.0, 358.0, 48.0), @T("select value X7$R$Nsheet:$a0"), @S(111);
+  @CF(112) : @R(0.0, 920.0, 358.0, 48.0), @T("value 6$R$Nsheet:$a0"), @S(113);
+  @CF(114) : @R(1540.0, 1270.0, 358.0, 68.0), @T("actual value$R$Nsheet:$a0"), @S(115);
+  @CF(116) : @R(0.0, 80.0, 358.0, 48.0), @T("default$R$Nsheet:$a0"), @S(117);
+  @CF(118) : @R(0.0, 1270.0, 358.0, 48.0), @T("select value X9$R$Nsheet:$a0"), @S(119);
+  @CF(120) : @R(0.0, 1060.0, 358.0, 48.0), @T("value 7$R$Nsheet:$a0"), @S(121);
+  @CF(122) : @R(0.0, 780.0, 358.0, 48.0), @T("value 5$R$Nsheet:$a0"), @S(123);
+  @CF(124) : @R(0.0, 290.0, 358.0, 48.0), @T("select value X2$R$Nsheet:$a0"), @S(125);
+  @CF(126) : @R(0.0, 1130.0, 358.0, 48.0), @T("select value X8$R$Nsheet:$a0"), @S(127);
+
+  @G(151) :
+     @L(@C(141).SEL, @VF(115).i)
+    ;
+  @G(152) :
+     @L(@VF(134).o, @C(144).G)
+    ;
+  @G(153) :
+     @L(@VF(117).o, @C(144).IN0)
+    ;
+  @G(154) :
+     @L(@VF(105).o, @C(144).IN1)
+    ;
+  @G(155) :
+     @L(@VF(132).o, @C(145).G)
+    ;
+  @G(156) :
+     @L(@C(146).SEL, @C(145).IN0)
+    ;
+  @G(157) :
+     @L(@VF(103).o, @C(145).IN1)
+    ;
+  @G(158) :
+     @L(@VF(125).o, @C(146).G)
+    ;
+  @G(159) :
+     @L(@C(144).SEL, @C(146).IN0)
+    ;
+  @G(160) :
+     @L(@VF(107).o, @C(146).IN1)
+    ;
+  @G(161) :
+     @L(@VF(127).o, @C(147).G)
+    ;
+  @G(162) :
+     @L(@C(149).SEL, @C(147).IN0)
+    ;
+  @G(163) :
+     @L(@VF(136).o, @C(147).IN1)
+    ;
+  @G(164) :
+     @L(@VF(140).o, @C(148).G)
+    ;
+  @G(165) :
+     @L(@C(145).SEL, @C(148).IN0)
+    ;
+  @G(166) :
+     @L(@VF(129).o, @C(148).IN1)
+    ;
+  @G(167) :
+     @L(@VF(111).o, @C(149).G)
+    ;
+  @G(168) :
+     @L(@C(142).SEL, @C(149).IN0)
+    ;
+  @G(169) :
+     @L(@VF(121).o, @C(149).IN1)
+    ;
+  @G(170) :
+     @L(@VF(119).o, @C(141).G)
+    ;
+  @G(171) :
+     @L(@C(147).SEL, @C(141).IN0)
+    ;
+  @G(172) :
+     @L(@VF(138).o, @C(141).IN1)
+    ;
+  @G(173) :
+     @L(@VF(101).o, @C(142).G)
+    ;
+  @G(174) :
+     @L(@C(143).SEL, @C(142).IN0)
+    ;
+  @G(175) :
+     @L(@VF(113).o, @C(142).IN1)
+    ;
+  @G(176) :
+     @L(@VF(109).o, @C(143).G)
+    ;
+  @G(177) :
+     @L(@C(148).SEL, @C(143).IN0)
+    ;
+  @G(178) :
+     @L(@VF(123).o, @C(143).IN1)
+    ;
+
+  @PAGE(150) : @R(0.0, 2680.0, 1900.0, 1340.0), @LN("Selector 1 out of 6 values");
+END_FUNCTION_BLOCK
+END_NAMESPACE

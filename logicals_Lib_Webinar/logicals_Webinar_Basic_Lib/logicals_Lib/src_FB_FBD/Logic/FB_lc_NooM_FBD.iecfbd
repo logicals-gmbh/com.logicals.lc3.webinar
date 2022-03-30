@@ -1,0 +1,64 @@
+NAMESPACE com.logicals.Basic.Logic
+FUNCTION_BLOCK FB_lc_NooM_FBD
+  {
+    vix_req2oo6 {index := 1};
+    vix_req3oo6 {index := 2};
+    vix_req4oo6 {index := 3};
+    vix_req5oo6 {index := 4};
+    vix_req6oo6 {index := 5};
+    vix_a_rdy {index := 7};
+    vix_b_rdy {index := 8};
+    vix_c_rdy {index := 9};
+    vix_d_rdy {index := 10};
+    vix_e_rdy {index := 11};
+    vix_f_rdy {index := 12};
+    vit_sw_prio_time {index := 14};
+    vit_par_time {index := 15};
+    vox_req_a {index := 7};
+    vox_req_b {index := 8};
+    vox_req_c {index := 9};
+    vox_req_d {index := 10};
+    vox_req_e {index := 11};
+    vox_req_f {index := 12};
+  }
+
+  VAR
+    lx_reqManVisu : BOOL { description := "Manual from Visu"; };
+    lxarr_Ready : ARRAY[1..16] OF BOOL;
+    liarr_Prio : ARRAY[1..16] OF UINT;
+    lui_NoRdy : UINT { description := "No ready"; };
+    lui_NoRdyOld : UINT { description := "No ready old"; };
+  END_VAR
+  VAR_INPUT
+    vix_req1oo6 : BOOL { description := "request 1 out of 6"; };
+    vix_req2oo6 : BOOL { description := "request 2 out of 6"; };
+    vix_req3oo6 : BOOL { description := "request 3 out of 6"; };
+    vix_req4oo6 : BOOL { description := "request 4 out of 6"; };
+    vix_req5oo6 : BOOL { description := "request 5 out of 6"; };
+    vix_req6oo6 : BOOL { description := "request 6 out of 6"; };
+    vix_a_rdy : BOOL { description := "a ready for operation"; };
+    vix_b_rdy : BOOL { description := "b ready for operation"; };
+    vix_c_rdy : BOOL { description := "c ready for operation"; };
+    vix_d_rdy : BOOL { description := "d ready for operation"; };
+    vix_e_rdy : BOOL { description := "e ready for operation"; };
+    vix_f_rdy : BOOL { description := "f ready for operation"; };
+    vit_sw_prio_time : TIME { description := "delay to change internal priorities"; };
+    vit_par_time : TIME { description := "parallel operation time"; };
+  END_VAR
+  VAR_OUTPUT
+    vox_req_a : BOOL { description := "request a"; };
+    vox_req_b : BOOL { description := "request b"; };
+    vox_req_c : BOOL { description := "request c"; };
+    vox_req_d : BOOL { description := "request d"; };
+    vox_req_e : BOOL { description := "request e"; };
+    vox_req_f : BOOL { description := "request f"; };
+  END_VAR
+
+  @CF(100) : @R(370.0, 1350.0, 1158.0, 1318.0), @T("//CODE is working in CODESYS. Not testable inside this block in Logidoc. $R$N//Given here as $"additional information$"...$R$N$R$N$a0$a0$a0FOR ForCount:=1 TO 6 BY 1 DO$R$N$a0$a0$a0$a0$a0$a0IF (Ready[ForCount] = FALSE) THEN$R$N$a0$a0$a0$a0$a0$a0$a0$a0$a0Out[ForCount] := FALSE;$R$N$a0$a0$a0$a0$a0$a0END_IF;$R$N$a0$a0$a0END_FOR;$R$N$a0$a0$a0$a0$a0$R$N$a0$a0$a0Required:=0;$R$N$a0$a0$a0IF req1oo6 THEN$R$N$a0$a0$a0$a0$a0$a0Required:=1;$R$N$a0$a0$a0END_IF;$R$N$a0$a0$a0IF req2oo6 THEN $R$N$a0$a0$a0$a0$a0$a0Required:=2;$R$N$a0$a0$a0END_IF;$R$N$a0$a0$a0IF req3oo6 THEN $R$N$a0$a0$a0$a0$a0$a0Required:=3;$R$N$a0$a0$a0END_IF;$R$N$a0$a0$a0IF req4oo6 THEN $R$N$a0$a0$a0$a0$a0$a0Required:=4;$R$N$a0$a0$a0END_IF;$R$N$a0$a0$a0IF req5oo6 THEN $R$N$a0$a0$a0$a0$a0$a0Required:=5;$R$N$a0$a0$a0END_IF;$R$N$a0$a0$a0IF req6oo6 THEN $R$N$a0$a0$a0$a0$a0$a0Required :=6;$R$N$a0$a0$a0END_IF;$R$N$R$N$a0$a0$a0//internal instance of IEC-ON-Delay TON$R$N$a0$a0$a0Oscillator(IN := NOT Oscillator.Q, PT:= T#1s);$R$N$a0$a0$a0$R$N$a0$a0$a0IF Oscillator.Q = TRUE THEN$R$N$a0$a0$a0//internal ready-array$R$N$a0$a0$a0$a0$a0$a0Ready[1] := a_ready;$R$N$a0$a0$a0$a0$a0$a0Ready[2] := b_ready;$R$N$a0$a0$a0$a0$a0$a0Ready[3] := c_ready;$R$N$a0$a0$a0$a0$a0$a0Ready[4] := d_ready;$R$N$a0$a0$a0$a0$a0$a0Ready[5] := e_ready;$R$N$a0$a0$a0$a0$a0$a0Ready[6] := f_ready;$R$N$a0$a0$a0$a0$a0$a0OutCount := 0;$R$N$a0$a0$a0$a0$a0$a0ReadyCount := 0;$R$N$R$N$a0$a0$a0$a0$a0$a0$a0FOR ForCount:=1 TO 6 BY 1 DO$R$N$a0$a0$a0$a0$a0$a0$a0$a0$a0IF (Out[ForCount] = TRUE) THEN$R$N$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0OutCount := OutCount + 1;$R$N$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0OutOnTime[ForCount] := OutOnTime[ForCount] + 1;$R$N$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0OutOffTime[ForCount] := 0;$R$N$a0$a0$a0$a0$a0$a0$a0$a0$a0ELSIF (Ready[ForCount] = TRUE) THEN$R$N$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0OutOffTime[ForCount] := OutOffTime[ForCount] + 1;$R$N$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0OutOnTime[ForCount] := 0;$R$N$a0$a0$a0$a0$a0$a0$a0$a0$a0ELSIF (Ready[ForCount] = FALSE) THEN$R$N$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0OutOnTime[ForCount] := 0;$R$N$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0OutOffTime[ForCount] := 0;$R$N$a0$a0$a0$a0$a0$a0$a0$a0$a0END_IF;$R$N$R$N$a0$a0$a0$a0$a0$a0$a0$a0$a0IF (Ready[ForCount] = TRUE) THEN$R$N$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0ReadyCount := ReadyCount + 1;$R$N$a0$a0$a0$a0$a0$a0$a0$a0$a0END_IF;$R$N$a0$a0$a0$a0$a0$a0END_FOR;$R$N$R$N$R$N//CODE CONTINUES ON NEXT PAGE"), @POU;
+  @CF(101) : @R(370.0, 140.0, 1148.0, 718.0), @T("inputs:$R$Na_ready = a ready for operation$R$Nb_ready = b ready for operation$R$Nc_ready = c ready for operation$R$Nd_ready = d ready for operation$R$Ne_ready = e ready for operation$R$Nf_ready = f ready for operation$R$N$R$Nreq1oo6 = 1 of the $"ready-for-operation$"-valves/drives/parts/plants a/b/c/d/e/f should start.$R$Nreq2oo6 = 2 of the $"ready-for-operation$"-valves/drives/parts/plants a/b/c/d/e/f should start.$R$Nreq3oo6 = 3 of the $"ready-for-operation$"-valves/drives/parts/plants a/b/c/d/e/f should start.$R$Nreq4oo6 = 4 of the $"ready-for-operation$"-valves/drives/parts/plants a/b/c/d/e/f should start.$R$Nreq5oo6 = 5 of the $"ready-for-operation$"-valves/drives/parts/plants a/b/c/d/e/f should start.$R$Nreq6oo6 = 6 of the $"ready-for-operation$"-valves/drives/parts/plants a/b/c/d/e/f should start.$R$N$R$Nswitch_priority_time = delay between switching priority between all $"ready-for-operation$"-valves/drives/parts/plants a/b/c/d/e/f$R$Nparallel_time = parallel operation time of requested valves/drives/parts/plants a/b/c/d/e/f when switching priority in operation$R$N$R$Noutputs:$R$Nreq_a = start valve/drive/part/plant a$R$Nreq_b = start valve/drive/part/plant b$R$Nreq_c = start valve/drive/part/plant c $R$Nreq_d = start valve/drive/part/plant d$R$Nreq_e = start valve/drive/part/plant e$R$Nreq_f = start valve/drive/part/plant f$R$N$R$N$R$Ndescription:$R$NBLOCK SELECT1 1 TO 6 OUT OF UP TO 6 valves/drives/parts/plants. $R$NBased on internal $"Runtime-ON-calculation$"/$"Runtime-OFF-calculation$" and external $"ready$"-Signal.$R$Na,b,c,d,e,f = valves/drives/parts/plants$R$N$R$N$R$N"), @POU;
+  @CF(102) : @R(370.0, 2690.0, 1148.0, 1318.0), @T("//CODE CONTINUED FROM LAST PAGE$R$N$R$N$a0$a0$a0$a0$a0$a0CycleTimeCount := CycleTimeCount + 1;$R$N$a0$a0$a0$a0$a0$a0$R$N$a0$a0$a0$a0$a0$a0IF CycleTimeCount >= switch_priority_time THEN$R$N$a0$a0$a0$a0$a0$a0$a0$a0$a0CycleTimeCount := 0;$R$N$a0$a0$a0$a0$a0$a0$a0$a0$a0parallelFlag := TRUE;$R$N$a0$a0$a0$a0$a0$a0END_IF;$R$N$R$N$a0$a0$a0$a0$a0$a0IF ((parallelFlag = TRUE) AND (NOT req6oo6)) THEN$R$N$a0$a0$a0$a0$a0$a0$a0$a0$a0parallelTimeCount := parallelTimeCount + 1;$R$N$a0$a0$a0$a0$a0$a0$a0$a0$a0RequiredExt := Required + 1;$R$N$a0$a0$a0$a0$a0$a0ELSE$R$N$a0$a0$a0$a0$a0$a0$a0$a0$a0RequiredExt := Required;$R$N$a0$a0$a0$a0$a0$a0END_IF;$R$N$R$N$a0$a0$a0$a0$a0$a0IF (parallelTimeCount >= parallel_time) THEN$R$N$a0$a0$a0$a0$a0$a0$a0$a0$a0parallelTimeCount := 0;$R$N$a0$a0$a0$a0$a0$a0$a0$a0$a0parallelFlag := FALSE;$R$N$a0$a0$a0$a0$a0$a0END_IF;$R$N$R$N$a0$a0$a0$a0$a0$a0IF (ReadyCount > RequiredExt) THEN$R$N$a0$a0$a0$a0$a0$a0$a0$a0$a0WHILE (OutCount < RequiredExt) DO$R$N$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0OldValueTime := 0;$R$N$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0SearchRes := 1;$R$N$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0FOR ForCount:=1 TO 6 BY 1 DO$R$N$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0IF ((OutOffTime[ForCount] > OldValueTime) AND (Ready[ForCount] = TRUE) AND (Out[ForCount] = FALSE)) THEN$R$N$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0OldValueTime := OutOffTime[ForCount];$R$N$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0SearchRes := ForCount;$R$N$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0END_IF;$R$N$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0END_FOR;$R$N$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0IF (Ready[SearchRes] = TRUE) THEN$R$N$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0Out[SearchRes] := TRUE;$R$N$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0OutCount := OutCount + 1;$R$N$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0END_IF;$R$N$a0$a0$a0$a0$a0$a0$a0$a0$a0END_WHILE;$R$N$a0$a0$a0$a0$a0$a0ELSE$R$N$a0$a0$a0$a0$a0$a0$a0$a0$a0FOR ForCount:=1 TO 6 BY 1 DO$R$N$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0IF (Ready[ForCount] = TRUE) THEN$R$N$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0Out[ForCount] := TRUE;$R$N$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0END_IF;$R$N$a0$a0$a0$a0$a0$a0$a0$a0$a0END_FOR;$R$N$a0$a0$a0$a0$a0$a0END_IF;$R$N$R$N$a0$a0$a0$a0$a0$a0WHILE (OutCount > RequiredExt) DO$R$N$a0$a0$a0$a0$a0$a0$a0$a0$a0OldValueTime := 0;$R$N$a0$a0$a0$a0$a0$a0$a0$a0$a0SearchRes := 1;$R$N$a0$a0$a0$a0$a0$a0$a0$a0$a0FOR ForCount:=1 TO 6 BY 1 DO$R$N$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0IF ((OutOnTime[ForCount] > OldValueTime) AND (Ready[ForCount] = TRUE) AND (Out[ForCount] = TRUE)) THEN$R$N$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0OldValueTime := OutOnTime[ForCount];$R$N$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0SearchRes := ForCount;$R$N$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0$a0END_IF;$R$N$a0$a0$a0$a0$a0$a0$a0$a0$a0END_FOR;$R$N$a0$a0$a0$a0$a0$a0$a0$a0$a0Out[SearchRes] := FALSE;$R$N$a0$a0$a0$a0$a0$a0$a0$a0$a0OutCount := OutCount - 1;$R$N$a0$a0$a0$a0$a0$a0END_WHILE;$R$N$a0$a0$a0END_IF;$R$N$a0$a0$a0req_a := Out[1];$R$N$a0$a0$a0req_b := Out[2];$R$N$a0$a0$a0req_c := Out[3];$R$N$a0$a0$a0req_d := Out[4];$R$N$a0$a0$a0req_e := Out[5];$R$N$a0$a0$a0req_f := Out[6];"), @POU;
+
+  @PAGE(103) : @R(0.0, 0.0, 1900.0, 1340.0), @LN("select n out of m ");
+  @PAGE(104) : @R(0.0, 1340.0, 1900.0, 1340.0), @LN("example-Code for CODESYS");
+END_FUNCTION_BLOCK
+END_NAMESPACE

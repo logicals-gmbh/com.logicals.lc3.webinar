@@ -1,0 +1,14 @@
+{CustomImplementation}
+
+NAMESPACE com.logicals.Basic.Calc
+
+FUNCTION FUN_lc_Quad_C : INT
+ { ImplementationProperties(functionHasCFile;) }
+
+ VAR_INPUT 
+  vi_In1 : INT;
+ END_VAR
+
+END_FUNCTION
+
+END_NAMESPACE

@@ -1,0 +1,178 @@
+NAMESPACE com.logicals.Basic.OpHour
+
+USING  com.logicals.Basic.Change;
+
+/*
+ * Datatype fuer Betriebsstundenerfassung
+ */
+ TYPE 
+    /*
+     * Struktur fuer Betriebsstunden-Erfassung
+     * Wird zusammen mit GetTime erfasst!
+     * Datentyp DINT erforderlich
+     */	
+ 	DT_lc_OpHourGetTime : STRUCT
+ 		di_sec   : DINT;
+		di_min   : DINT;
+		di_hour  : DINT;
+		di_mday  : DINT;
+		di_mon   : DINT;
+		di_year  : DINT;
+		di_wday  : DINT;
+		di_yday  : DINT;
+		di_isdst : BOOL;
+ 	END_STRUCT;
+    /*
+     * Struktur fuer Zeit-Erfassung
+     * Wird zusammen mit GetTime erfasst!
+     * Datentyp UINT erforderlich
+     */	
+ 	DT_lc_OpHourDateTime : STRUCT
+ 		ui_sec   : UINT;
+		ui_min   : UINT;
+		ui_hour  : UINT;
+		ui_day   : UINT;
+		ui_mon   : UINT;
+		ui_year  : UINT;
+ 	END_STRUCT;
+    /*
+     * Struktur fuer Zeit-Erfassung
+     * Wird zusammen mit GetTime erfasst!
+     * Datentyp UDINT fuer AllSec erforderlich
+     */	
+ 	DT_lc_OpHourTime : STRUCT
+ 		udi_AllSec : UDINT;
+ 		ui_sec     : UINT;
+		ui_min     : UINT;
+		ui_hour    : UINT;
+		ui_day     : UINT;
+ 	END_STRUCT;
+ 
+ END_TYPE
+/*
+ * Converts an amount of seconds in UDINT to TIME
+ * Wandelt einen Zahlenwert/Sekunden in TIME um!
+ */
+FUNCTION FUN_lc_OpHourSecond_To_TIME_ST : TIME
+
+VAR_INPUT
+	viudi_In : UDINT;
+END_VAR
+
+FUN_lc_OpHourSecond_To_TIME_ST := TO_TIME(TO_DWORD(viudi_In));
+
+END_FUNCTION
+
+/*
+ * Calculate OpHour from second change
+ * Betriebsstunden erfassen aus Sekunden Change
+ */
+FUNCTION_BLOCK FB_lc_OpHourBySecChg_ST
+
+    VAR_INPUT
+      vistruc_OpHourGetTime : DT_lc_OpHourGetTime;
+      vix_LoadStartVal      : BOOL;
+      vix_OpHourCount       : BOOL;
+    END_VAR
+    
+    VAR_OUTPUT
+      vox_Err          : BOOL;
+      vox_ErrNo        : INT;
+      
+      voudi_ActAllSec  : UDINT; // No of Seconds
+
+      voui_ActSec      : UINT;  // Calculate OpHour (Seconds)
+      voui_ActMin      : UINT;  // Calculate OpHour (Minutes)
+      voui_ActHour     : UINT;  // Calculate OpHour (Hour)
+      voui_ActDay      : UINT;  // Calculate OpHour (Days)
+      
+      vot_ActTime      : TIME;  // No of Seconds as TIME
+    END_VAR
+
+    VAR
+      FB_SecChange : FB_lc_ChangeDINT_ST;
+      lx_SecChange : BOOL;
+    END_VAR 
+
+    VAR
+      /* Zaehler Sekunden */
+      FB_SecCTU : CTU;
+      /* Zaehler Minuten */
+      FB_MinCTU : CTU;
+      /* Zaehler Stunden */
+      FB_HourCTU : CTU;
+      /* Zaehler Tage */
+      FB_DayCTU : CTU;
+    END_VAR
+    
+    VAR
+     ludi_Day         : UDINT;
+     ludi_Hour        : UDINT;
+     ludi_Min         : UDINT;
+     ludi_Sec         : UDINT;
+
+     ludi_DivDay      : UDINT := 86400; //24 * 3600
+     ludi_DivHour     : UDINT := 3600;
+     ludi_DivMin      : UDINT := 60;
+
+     ludi_DivRestDay  : UDINT;  
+     ludi_DivRestHour : UDINT;  
+     ludi_DivRestMin  : UDINT;
+     ludi_DivRestSec  : UDINT;  
+    END_VAR
+    
+    FB_SecChange(vidi_In := vistruc_OpHourGetTime.di_sec,vox_Out => lx_SecChange);
+    
+    IF lx_SecChange = TRUE AND vix_OpHourCount = TRUE THEN
+     voudi_ActAllSec := voudi_ActAllSec + 1;
+    END_IF;
+    
+   /*
+    * Only internal for test, values will be overwrittem
+    * Nur intern zum Testen, Werte werden ueberschrieben
+    */
+    FB_SecCTU(CU := lx_SecChange AND vix_OpHourCount = TRUE, R := (FB_SecCTU.Q OR vix_LoadStartVal), PV:=59);
+    voui_ActSec := TO_UINT(FB_SecCTU.CV);
+    
+    FB_MinCTU(CU := FB_SecCTU.Q,R:=(FB_MinCTU.Q OR vix_LoadStartVal), PV:=59);
+    voui_ActMin := TO_UINT(FB_MinCTU.CV); 
+
+    FB_HourCTU(CU := FB_MinCTU.Q, R := (FB_HourCTU.Q OR vix_LoadStartVal),PV:=23);
+    voui_ActHour := TO_UINT(FB_HourCTU.CV); 
+
+    FB_DayCTU(CU := FB_HourCTU.Q, R := (FB_DayCTU.Q OR vix_LoadStartVal),PV:=INT#MAX); // 32767 Tage max.
+    voui_ActDay := TO_UINT(FB_DayCTU.CV); 
+ 
+   /*
+    * Convert no of seconds into days/hours/minutes/second
+    * Anzahl der Sekunden in Tage/Stunden/Minuten/Sekunden umwandeln
+    */
+    ludi_Day         := DIV(IN1 := voudi_ActAllSec,IN2:=ludi_DivDay);
+    ludi_DivRestDay  := MOD(IN1 := TO_UINT(voudi_ActAllSec),IN2:=ludi_DivDay);
+
+    ludi_Hour        := DIV(IN1 := voudi_ActAllSec,IN2:=ludi_DivHour);
+    ludi_DivRestHour := MOD(IN1 := TO_UINT(voudi_ActAllSec),IN2:=ludi_DivHour);
+
+    ludi_Min         := DIV(IN1 := ludi_DivRestHour,IN2:=ludi_DivMin);
+    ludi_DivRestMin  := MOD(IN1 := ludi_DivRestHour,IN2:=ludi_DivMin);
+
+    ludi_Sec         := ludi_DivRestMin;
+
+   /*
+    * Write values to the interface
+    * Ausgabe an VAR_OUTPUT
+    */
+    voui_ActDay  := TO_UINT(ludi_Day);
+    voui_ActHour := TO_UINT(ludi_Hour);
+    voui_ActMin  := TO_UINT(ludi_Min);
+    voui_ActSec  := TO_UINT(ludi_Sec);
+
+   /*
+    * Convert no of seconds into TIME
+    * Anzahl der Sekunden in TIME umwandeln
+    */
+    vot_ActTime := FUN_lc_OpHourSecond_To_TIME_ST(viudi_In := voudi_ActAllSec);
+    
+END_FUNCTION_BLOCK
+
+END_NAMESPACE

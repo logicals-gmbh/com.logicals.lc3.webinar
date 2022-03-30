@@ -1,0 +1,469 @@
+/*
+ * 
+ */
+NameSpace com.logicals.Basic.DateTime
+
+USING com.logicals.Basic.GetTime;
+USING com.logicals.Basic.OpHour;
+USING com.logicals.Basic.Calc;
+/*
+ * Erfassung Uhrzeit / Datum unter Linux
+ */
+ FUNCTION_BLOCK FB_lc_GetDateTime_Linux_ST
+ /*
+  * Uhrzeit Datum anzeigen
+  */
+  VAR_OUTPUT
+ 	vodi_sec   : DINT;
+	vodi_min   : DINT;
+	vodi_hour  : DINT;
+	vodi_mday  : DINT;
+	vodi_mon   : DINT;
+	vodi_year  : DINT;
+	vodi_wday  : DINT;
+	vodi_yday  : DINT;
+	vodi_isdst : BOOL;
+    /* Aktuelle Datum/Uhrzeit als DateTime */
+    vodt_ActDateTime : DT;
+
+    vostruc_BetrDateTime : DT_lc_OpHourGetTime;
+     
+  END_VAR
+
+  VAR
+     FB_InitRTrig : R_TRIG; 
+  END_VAR
+ 
+  VAR
+    /* Lokaler InitPuls im Baustein */
+     lx_CycleInit  : BOOL;
+    /* Lokaler Zyklustaktgeber */
+     lx_CyclePulse : BOOL;
+    /* Lokaler Zyklustaktzaehler */
+     li_CycleCount : INT; 
+  END_VAR
+
+ /*
+  * Lokaler InitPulse
+  */
+  FB_InitRTrig(CLK:= TRUE, Q => lx_CycleInit);
+
+  IF lx_CycleInit = TRUE THEN
+  END_IF;
+   
+ /*
+  * Wird der Baustein bearbeitet
+  */
+  lx_CyclePulse := NOT(lx_CyclePulse);
+  li_CycleCount := li_CycleCount + 1; 
+
+ /* 
+  *  Uhrzeit lesen
+  */
+  FUN_lc_GetTime_C(sec   => vodi_sec, 
+                   min   => vodi_min, 
+                   hour  => vodi_hour, 
+                   mday  => vodi_mday, 
+                   mon   => vodi_mon,  
+                   year  => vodi_year, 
+                   wday  => vodi_wday, 
+                   yday  => vodi_yday, 
+                   isdst => vodi_isdst);
+
+   vodt_ActDateTime := FUN_lc_CalcDT_ST(viui_Second := TO_UINT(vodi_sec),
+                                            viui_Minute := TO_UINT(vodi_min),
+                                            viui_Hour   := TO_UINT(vodi_hour),
+                                            viui_Day    := TO_UINT(vodi_mday),
+                                            viui_Month  := TO_UINT(vodi_mon),
+                                            viui_Year   := TO_UINT(vodi_year));
+
+  vostruc_BetrDateTime.di_sec    :=  vodi_sec;   
+  vostruc_BetrDateTime.di_min    :=  vodi_min;   
+  vostruc_BetrDateTime.di_hour   :=  vodi_hour;  
+  vostruc_BetrDateTime.di_mday   :=  vodi_mday;  
+  vostruc_BetrDateTime.di_mon    :=  vodi_mon;   
+  vostruc_BetrDateTime.di_year   :=  vodi_year;  
+  vostruc_BetrDateTime.di_wday   :=  vodi_wday;  
+  vostruc_BetrDateTime.di_yday   :=  vodi_yday;  
+  vostruc_BetrDateTime.di_isdst  :=  vodi_isdst;
+
+ END_FUNCTION_BLOCK
+ 
+ /*
+ * Erfassung Betriebsstunden fuer NTX86
+ * wird in PRG_BetrStd_NTX86
+ */
+ FUNCTION_BLOCK FB_lc_GetDateTime_NTX86_ST
+ 
+  VAR_OUTPUT
+ 
+ 	vodi_sec   : DINT;
+	vodi_min   : DINT;
+	vodi_hour  : DINT;
+	vodi_mday  : DINT;
+	vodi_mon   : DINT;
+	vodi_year  : DINT;
+	vodi_wday  : DINT;
+	vodi_yday  : DINT;
+	vodi_isdst : BOOL;
+    /* Aktuelle Datum/Uhrzeit als DatenTime */
+    vodt_ActDateTime : DT;
+ 
+    vostruc_BetrDateTime : DT_lc_OpHourGetTime;
+  END_VAR
+
+  VAR
+     FB_InitRTrig : R_TRIG; 
+  END_VAR
+ 
+  VAR
+    /* Lokaler InitPuls im Baustein */
+     lx_InitPulse  : BOOL;
+    /* Lokaler Zyklustaktgeber */
+     lx_CyclePulse : BOOL;
+    /* Lokaler Zyklustaktzaehler */
+     li_CycleCount : INT; 
+  END_VAR
+ /*
+  * Lokaler InitPulse
+  */
+  FB_InitRTrig(CLK:= TRUE, Q => lx_InitPulse);
+ /*
+  * Wird der Baustein bearbeitet
+  */
+  lx_CyclePulse := NOT(lx_CyclePulse);
+  li_CycleCount := li_CycleCount + 1; 
+
+  FUN_lc_GetTime_C(sec   => vodi_sec, 
+                   min   => vodi_min, 
+                   hour  => vodi_hour, 
+                   mday  => vodi_mday, 
+                   mon   => vodi_mon,  
+                   year  => vodi_year, 
+                   wday  => vodi_wday, 
+                   yday  => vodi_yday, 
+                   isdst => vodi_isdst);
+
+   vodt_ActDateTime := FUN_lc_CalcDT_ST(viui_Second := TO_UINT(vodi_sec),
+                                            viui_Minute := TO_UINT(vodi_min),
+                                            viui_Hour   := TO_UINT(vodi_hour),
+                                            viui_Day    := TO_UINT(vodi_mday),
+                                            viui_Month  := TO_UINT(vodi_mon),
+                                            viui_Year   := TO_UINT(vodi_year));
+  
+  vostruc_BetrDateTime.di_sec    :=  vodi_sec;   
+  vostruc_BetrDateTime.di_min    :=  vodi_min;   
+  vostruc_BetrDateTime.di_hour   :=  vodi_hour;  
+  vostruc_BetrDateTime.di_mday   :=  vodi_mday;  
+  vostruc_BetrDateTime.di_mon    :=  vodi_mon;   
+  vostruc_BetrDateTime.di_year   :=  vodi_year;  
+  vostruc_BetrDateTime.di_wday   :=  vodi_wday;  
+  vostruc_BetrDateTime.di_yday   :=  vodi_yday;  
+  vostruc_BetrDateTime.di_isdst  :=  vodi_isdst;
+
+ END_FUNCTION_BLOCK
+
+ /*
+ * Von: Samstag, 1. Januar 0001, 00:00:00 (an diesem Datum galt in Deutschland der julianische Kalender – Land wählen)
+ * Bis: Donnerstag, 6. August 2020, 00:00:00 (Gregorianischer Kalender)
+ * 
+ * Ergebnis: 737 644 Tage, 0 Stunden, 0 Minuten und 0 Sekunden
+ * Oder 2019 Jahre, 7 Monate, 5 Tage (exklusive Enddatum)
+ * 
+ * Oder 24235 Monate, 5 Tage (exklusive Enddatum)
+ * 
+ * Mit anderen Worten...
+ * 737 644 Tage, 0 Stunden, 0 Minuten und 0 Sekunden sind insgesamt
+ * 
+ * 63 732 441 600 Sekunden
+ * 1 062 207 360 Minuten
+ * 17 703 456 Stunden
+ * 737 644 Tage
+ * 105 377 Wochen und 5 Tage
+ * 
+ * https://www.timeanddate.de
+ */ 
+
+/*
+ * Von: Samstag, 1. Januar 0001, 00:00:00 (an diesem Datum galt in Deutschland der julianische Kalender – Land wählen)
+ * Bis: Donnerstag, 6. August 2020, 00:00:00 (Gregorianischer Kalender)
+ * 
+ * Ergebnis: 737 644 Tage, 0 Stunden, 0 Minuten und 0 Sekunden
+ * Oder 2019 Jahre, 7 Monate, 5 Tage (exklusive Enddatum)
+ * 
+ * Oder 24235 Monate, 5 Tage (exklusive Enddatum)
+ * 
+ * Mit anderen Worten...
+ * 737 644 Tage, 0 Stunden, 0 Minuten und 0 Sekunden sind insgesamt
+ * 
+ * 63 732 441 600 Sekunden
+ * 1 062 207 360 Minuten
+ * 17 703 456 Stunden
+ * 737 644 Tage
+ * 105 377 Wochen und 5 Tage
+ * 
+ * https://www.timeanddate.de
+ */ 
+
+
+/*
+ * Converts an amount of seconds in UDINT to TIME
+ * Wandelt einen Zahlenwert/Sekunden in TIME um!
+ */
+FUNCTION FUN_lc_ConvSec2TIME_ST : TIME
+
+VAR_INPUT
+	viudi_In : UDINT;
+END_VAR
+
+// HC_Second_To_TIME := TO_TIME(TO_DWORD(viudi_In * 1000));
+
+FUN_lc_ConvSec2TIME_ST := TO_TIME(TO_DWORD(viudi_In));
+
+END_FUNCTION
+
+/*
+* HC_Days_Delta calculates the days between two dates. The days are calculated date_2 - date_1.
+* Berechnet die Anzahl der Tage zwischen zwei Datum-Werte
+*/
+FUNCTION FUN_lc_CalcDaysDelta_ST : UDINT
+
+VAR_INPUT
+	vidate_Date1 : DATE;
+	vidate_Date2 : DATE;
+END_VAR
+
+IF vidate_Date1 > vidate_Date2 THEN
+	FUN_lc_CalcDaysDelta_ST := - TO_UDINT((TO_UDINT(vidate_Date1) - TO_UDINT(vidate_Date2)) / 86400);
+ELSE
+	FUN_lc_CalcDaysDelta_ST := TO_UDINT((TO_UDINT(vidate_Date2) - TO_UDINT(vidate_Date1)) / 86400);
+END_IF;
+
+END_FUNCTION
+
+/*
+ * HC_Leap_of_Date is true if current year is a leap year (Schaltjahr)
+ * Berechnet, ob das angegebene Jahr ein Schaltjahr ist
+ */
+FUNCTION FUN_lc_CalcLeapOfDATE_ST : BOOL
+
+VAR_INPUT
+	vidate_In : DATE;
+END_VAR
+
+FUN_lc_CalcLeapOfDATE_ST := SHL(((TO_UDINT(vidate_In) + 43200) / 31557600), 30) = 16#80000000;
+
+END_FUNCTION
+
+/*
+ * returns the total days of the year.
+ * the function returns 366 for leap years and 365 otherwise.
+ * the function works for dates from 1970 - 2099
+ *
+ * Berechnet die Anzahl der Tage eines Jahres / Schaltjahr = 366 Tage
+ */
+FUNCTION FUN_lc_CalcDaysInDATE_ST : UINT
+
+VAR_INPUT
+	vidate_In : DATE;
+END_VAR
+
+
+IF FUN_lc_CalcLeapOfDATE_ST(vidate_In) THEN
+	FUN_lc_CalcDaysInDATE_ST := 366;
+ELSE
+	FUN_lc_CalcDaysInDATE_ST := 365;
+END_IF;
+
+END_FUNCTION
+
+/*
+ * converts Structured date time (DT_HCBetrDateTime // SDT(OSCAT)) to TimeOfDay
+ * 
+ * Wandelt den HC_Datentyp fuer Datum/Uhrzeit in TOD um (TIME_OF_DAY)
+ */
+FUNCTION FUN_lc_ConvGetTime2TOD : TOD
+
+ VAR_INPUT
+	vistruc_In : DT_lc_OpHourGetTime; // HC_SDT;
+ END_VAR
+
+ FUN_lc_ConvGetTime2TOD := TO_TOD(TO_UDINT(vistruc_In.di_hour) * 3600000 + TO_UDINT(vistruc_In.di_min) * 60000 + TO_UDINT(vistruc_In.di_sec) * 1000); // + TO_UDINT(DTI.MS));
+
+END_FUNCTION
+
+/*
+ * creates a date output from year, month and day of month 
+ * 
+ * Wandelt die entsprechenden Werte in DATE um
+ */
+FUNCTION FUN_lc_ConvDate2DATE_ST : DATE
+
+VAR_INPUT
+	viui_Year   : UINT;
+	viui_Month  : UINT;
+	viui_Day    : UINT;
+END_VAR
+
+VAR
+	lui_Count : UINT;
+END_VAR
+
+IF viui_Month > 2 THEN
+	lui_Count := (viui_Month - 1) * 30;
+    IF viui_Month > 7 THEN 
+	     lui_Count := lui_Count + SHR(viui_Month - 3,1); 
+	    ELSE 
+	     lui_Count := lui_Count + SHR(viui_Month - 4,1); 
+	END_IF;
+   /*
+	* Test Schaltjahr
+	*/ 
+	IF SHL(viui_Year,14) = 0 THEN 
+	lui_Count := lui_Count + 1; 
+	END_IF;
+ELSE
+	lui_Count := (viui_Month - 1) * 31;
+END_IF;
+
+FUN_lc_ConvDate2DATE_ST := TO_DATE((TO_UDINT(lui_Count + viui_Day - 1) + SHR(TO_UDINT(viui_Year) * 1461 - 2878169, 2)) * 86400);
+
+END_FUNCTION
+
+/*
+ * Creates a Date_Time output from year, month and day of month, Hour, minute, second
+ * year must be in the form of 4 digits ie 2006 or 1977.
+ *
+ * Wandelt DT (DATE_AND_TIME) in entsprechende Werte um
+ */
+FUNCTION FUN_lc_CalcDT_ST : DT
+
+VAR_INPUT
+	viui_Year   : UINT;
+	viui_Month  : UINT;
+	viui_Day    : UINT;
+	viui_Hour   : UINT;
+	viui_Minute : UINT;
+	viui_Second : UINT;
+END_VAR
+
+FUN_lc_CalcDT_ST :=   TO_DT(TO_UDINT(FUN_lc_ConvDate2DATE_ST(viui_Year, viui_Month, viui_Day)) 
+                             + TO_UDINT(viui_Second) + TO_UDINT(viui_Minute) * 60 + TO_UDINT(viui_Hour) * 3600);
+
+END_FUNCTION
+
+/*
+ * Creates a Date output from year, month and day of month
+ * year must be in the form of 4 digits ie 2006 or 1977.
+ *
+ * Wandelt die Zahlenwerte in DATE um 
+ */
+FUNCTION FUN_lc_CalcDATE_ST : DATE
+
+VAR_INPUT
+	viui_Year   : UINT;
+	viui_Month  : UINT;
+	viui_Day    : UINT;
+	viui_Hour   : UINT;
+	viui_Minute : UINT;
+	viui_Second : UINT;
+END_VAR
+
+FUN_lc_CalcDATE_ST := TO_DATE(TO_UDINT(FUN_lc_ConvDate2DATE_ST(viui_Year, viui_Month, viui_Day)));
+	
+END_FUNCTION
+
+/*
+ * Checks for leap year
+ * 
+ * Berechnet aus der Jahreszahl ob es sich bei dem Jahr um ein Schaltjahr
+ * handelt
+ */
+FUNCTION FUN_lc_CalcLeapYear_ST : BOOL
+
+VAR_INPUT
+	viui_YearVal : UINT;
+END_VAR
+
+FUN_lc_CalcLeapYear_ST := SHL(viui_YearVal,14) = 0;
+
+(* this code was used prior to rev 1.1
+
+IF yr MOD 400 = 0 THEN leap_year := TRUE;
+ELSIF yr MOD 100 = 0 THEN leap_year := FALSE;
+ELSIF yr MOD 4 =0 THEN leap_year := TRUE;
+ELSE leap_year := FALSE;
+END_IF;
+
+*)
+END_FUNCTION
+
+/*
+ * Converts hour to TOD
+ * 
+ * Wandelt den Stundenwert des Tages in TOD um.
+ */
+FUNCTION FUN_lc_ConvHour2TOD_ST : TOD
+
+VAR_INPUT
+	vir_HourVal : REAL;
+END_VAR
+
+FUN_lc_ConvHour2TOD_ST := TO_TOD(TO_DWORD(vir_HourVal * 3600000));
+
+END_FUNCTION
+
+/*
+ * Converts Hour value to TIME
+ *
+ * Wandelt den Stundenwert in TIME um
+ */
+FUNCTION FUN_lc_ConvHour2TIME_ST : TIME
+
+VAR_INPUT
+	vir_HourVal : REAL;
+END_VAR
+
+FUN_lc_ConvHour2TIME_ST := TO_TIME(TO_DWORD(vir_HourVal * 3600000));
+
+END_FUNCTION
+
+/*
+ * Converts TOD to hour 
+ *
+ * Wandelt einen TOD in Stunden um
+ */
+FUNCTION FUN_lc_ConvTOD2Hour_ST : INT
+	VAR_INPUT
+		vitod_Val : TOD;
+	END_VAR
+	VAR
+		ldt_dateTime : DT;
+		lusi_hour    : USINT;
+	END_VAR
+
+   /*
+    * TimeOfDate in DateTime umwandeln
+    */
+	ldt_dateTime := TO_DT(vitod_Val);
+	
+	// YEAR: UINT;
+	// MONTH: USINT;
+	// DAY: USINT;
+	// HOUR: USINT;
+	// MINUTE: USINT;
+	// SECOND: USINT;
+	// MILLISECOND: UINT;
+
+   /*
+    * Aus DateTime die Stunden extrahieren
+    * SPLIT_DT kann auch: siehe oben!
+    */	
+	SPLIT_DT(IN := ldt_dateTime, HOUR => lusi_hour);
+	FUN_lc_ConvTOD2Hour_ST := TO_INT(lusi_hour);
+
+END_FUNCTION
+
+
+END_NAMESPACE
+ 

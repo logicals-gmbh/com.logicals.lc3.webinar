@@ -1,0 +1,139 @@
+ /*
+  * logi.cals GmbH
+  * A-3100 St. Poelten
+  * Europaplatz 7/1
+  * Tel.: 0043-5-77147
+  *
+  * logi.cals automation solutions & services GmbH
+  * D-40738 Langenfeld
+  * Postfach 1306
+  * Tel.: 0043-5-77147
+  * 
+  * Contact:
+  * dieter.goltz@logicals.com
+  * 
+  * History:
+  * Created:  
+  * DG 2022-03-01
+  * 
+  * Modified: 
+  * DG 2022-03-07 Test
+  * DG 2022-03-29 - In logi.cals_Webinar_Basic_lib uebernommen!
+  */ 
+
+ /*
+  * Description
+  * -----------
+  */
+
+ /* 
+  * Beschreibung
+  * ------------
+  * Das Programm PRG_lc_TestActuator1 testet den Aufruf und die Funktion von FB_lc_IDF_2DirVarSpeed1_OOP_ST
+  * Der Baustein schaltet ein IDF in 2 Drehrichtungen direkt OHNE STOP in der Drehrichtung um.
+  * Dazu muss der Antrieb mit der Methode M_On aktiviert SEIN!
+  * Der Eingang ManualLock sorgt dafuer, dass der Baustein NOT Enabled ist!
+  * Dieser Zustand wird als lx_IsLocked vom Baustein uebergeben!
+  */
+  
+USING com.logicals.Basic.Actuator;
+USING com.logicals.Basic.OOP.Actuator;
+  
+PROGRAM PRG_lc_TestActuator1_OOP_ST
+
+VAR
+  FB_IDF_2DirVarSpeed_OOP_ST    : FB_lc_IDF_2DirVarSpeed1_OOP_ST;
+END_VAR
+
+VAR
+  lx_On  : BOOL;
+  lx_Off : BOOL;
+  
+  lx_Fwd  : BOOL;
+  lx_Bwd  : BOOL;
+
+  lx_ManualLock : BOOL;
+
+  lx_Motor        : BOOL; // Rueckgabewert der Methode M-On
+
+  lx_MotorEnable      : BOOL;
+
+  lx_IsActivated : BOOL;
+  lx_IsLocked    : BOOL;
+  
+  li_SpeedVal    : INT;
+END_VAR
+
+VAR
+END_VAR
+
+VAR
+  li_CycleCount     : INT;
+  li_CycleCountInit : INT;
+  lx_CyclePulse     : BOOL;
+  lx_CycleInit      : BOOL;
+END_VAR
+
+li_CycleCount := li_CycleCount + 1;
+lx_CyclePulse := NOT(lx_CyclePulse);
+lx_CycleInit  := TRUE;
+
+IF lx_CycleInit = TRUE THEN
+  li_CycleCountInit := li_CycleCountInit + 1;
+END_IF;
+/*
+ * Aufruf der Methode M_On
+ */
+IF lx_On THEN
+ lx_Motor := FB_IDF_2DirVarSpeed_OOP_ST.M_On();
+END_IF;
+
+/*
+ * Aufruf der Methode M_Off
+ */
+IF lx_Off THEN
+ lx_Motor := FB_IDF_2DirVarSpeed_OOP_ST.M_Off();
+END_IF;
+
+/*
+ * Aufruf der Methode M_Forward
+ */
+IF lx_Fwd THEN
+ FB_IDF_2DirVarSpeed_OOP_ST.M_Forward(mii_SpeedSet := 2000);
+END_IF;
+
+/*
+ * Aufruf der Methode M_Backward
+ * Vorzeichenumkehr findet in der Methode statt!
+ */
+IF lx_Bwd THEN
+ FB_IDF_2DirVarSpeed_OOP_ST.M_Backward(mii_SpeedSet := 4000);
+END_IF;
+
+/*
+ * Anweisungsteil des Motorbausteins aufrufen!
+ * Abschalten von Speed/MotorEnable
+ */
+FB_IDF_2DirVarSpeed_OOP_ST(vix_Lock := lx_ManualLock);
+
+lx_MotorEnable := FB_IDF_2DirVarSpeed_OOP_ST.vox_Enable;
+li_SpeedVal    := FB_IDF_2DirVarSpeed_OOP_ST.voi_SpeedOut;
+
+/*
+ * Status des Motors 
+ */
+lx_IsLocked    := lx_ManualLock;
+lx_IsActivated := lx_MotorEnable;
+
+/* 
+ * Das Ruecksetzen sorgt fuer eine Abfrage der Rising_Edge von lx_On und lx_Off 
+ */
+lx_On  := FALSE;
+lx_Off := FALSE;
+
+/*
+ * Initialisierungsmerker
+ */
+lx_CycleInit  := FALSE;
+
+END_PROGRAM

@@ -1,0 +1,350 @@
+ /*
+  * logi.cals GmbH
+  * A-3100 St. Pölten
+  * Europaplatz 7/1
+  * Tel.: 0043-5-77147
+  *
+  * logi.cals automation solutions & services GmbH
+  * D-40738 Langenfeld
+  * Postfach 1306
+  * Tel.: 0049-2173-91910
+  * 
+  * Contact:
+  * dieter.goltz@logicals.com
+  * 
+  * History:
+  * Created:  
+  * DG 2015-12-28
+  * 
+  * Modified: 
+  * DG 2015-12-28
+  * 
+  * Description
+  * 
+  * 
+  * Beschreibung
+  * Ansteuerung von webSERVER
+  * 
+  */
+/*
+ * Datatype for logi.Library
+ */  
+TYPE
+	//
+	// Werte fuer einen Tag in logi.VIS
+	// 4 Messungen je Stunde
+	// 00 / 15 / 30 / 45
+	DT_lc_LogData : STRUCT
+	 VAL : ARRAY[0..94] OF REAL;
+	END_STRUCT;
+
+   DT_lc_LogValue : STRUCT
+       /* Anzahl der Messungen je Stunde */ 
+       /* Der Impulsgeber muss angepasst werden */
+       /* Der Wert des Zaehlers muss ebenfalls was angepasst */
+   	   LogValueArr : ARRAY[1..4] OF INT;
+    END_STRUCT; 
+       
+    DT_lc_LogHour : STRUCT
+       LogHourArr : ARRAY[1..24] OF DT_lc_LogValue;	              
+    END_STRUCT;
+    
+    DT_lc_LogDay : STRUCT
+    	LogDayArr : ARRAY[1..31] OF DT_lc_LogHour;
+    END_STRUCT;
+    
+    DT_lc_LogMonth : STRUCT
+    	LogMonthArr : ARRAY[1..12] OF DT_lc_LogDay;
+    END_STRUCT;
+    //
+    // Jahr ab 2015
+    //    
+    DT_lc_LogYear : STRUCT
+    	LogYearArr : ARRAY[2015..2099] OF DT_lc_LogMonth;
+    END_STRUCT;
+        
+END_TYPE
+
+
+FUNCTION_BLOCK FB_lc_LogWriteValueToYearTest
+   //
+   // Schreiben eines Wertes in die JahresStruktur
+   //
+   VAR_IN_OUT // Globale Uebergabewerte des Datenbaums
+
+       //   LogValue : LogValue;
+       //   LogHour  : LogHour;
+       //   LogDay   : LogDay;
+       //   LogMonth : LogMonth;
+       LogYear  : DT_lc_LogYear;
+   END_VAR
+   
+   VAR
+    //
+    // Lokale Variablen
+    //
+    Idx           : UINT;
+    
+    ValIdx        : UINT;
+    ValIdxMin     : UINT := 1;
+    ValIdxMax     : UINT := 4;
+
+    HourIdx       : UINT;
+    HourIdxMin    : UINT := 0;
+    HourIdxMax    : UINT := 23;
+
+    DayIdx        : UINT;
+    DayIdxMin     : UINT := 1;
+    DayIdxMax     : UINT := 31;
+
+    MonthIdx      : UINT;   
+    MonthIdxMin   : UINT := 1;
+    MonthIdxMax   : UINT := 12;
+    
+    lx_CyclePulse : BOOL;
+
+    LogValue      : DT_lc_LogValue;
+    LogHour       : DT_lc_LogHour;
+
+   END_VAR
+   
+   VAR
+    LogWriteValueToYear   : FB_lc_LogWriteValueToYear;
+    LogReadValueFromYear  : FB_lc_LogReadValueFromYear;
+   END_VAR
+   
+   lx_CyclePulse := NOT(lx_CyclePulse);
+   
+   FOR HourIdx := HourIdxMin TO HourIdxMax DO
+
+      FOR ValIdx := ValIdxMin TO ValIdxMax DO
+   
+         LogWriteValueToYear(LogYear          := LogYear, 
+         	                 vix_StartWrite   := TRUE,                  // lx_CyclePulse
+	                         vix_WriteByPulse := TRUE,                  // Wenn = FALSE, dann wird per internem R_TRIG geschrieben
+	                         vii_WriteValue   := TO_INT(ValIdx),        // Schreibwert
+                             vii_HourArrWrite := MUL(HourIdx,ValIdx),   // Elemente je Stunde - 1..6
+                             vii_HourWrite    := 0,                     // Stunde 0..23
+	                         vii_DayWrite     := 1,                     // Tag    1..31
+                             vii_MonthWrite   := 1,                     // Monat  1..12
+	                         vii_YearWrite    := 2016                   // Jahr   2015 ...
+                             );
+       
+      END_FOR;
+
+   END_FOR;
+   //
+   //
+   //
+   /*
+   FOR ValIdx := ValIdxMin TO ValIdxMax DO
+   
+      LogReadValueFromYear(LogYear         := LogYear, 
+      	                   vix_StartRead   := TRUE,           // lx_CyclePulse
+	                       vix_ReadByPulse := TRUE,           // Wenn = FALSE, dann wird per internem R_TRIG geschrieben
+	                       vii_HourArrRead := ValIdx,         // Schreibwert
+                           vii_HourRead    := 0,                // Stunde 0..23
+	                       vii_DayRead     := 1,                // Tag    1..31
+                           vii_MonthRead   := 1,                // Monat  1..12
+	                       vii_YearRead    := 2016,             // Jahr   2015 ...
+	                       voi_GetValue    => LogValue.LogValueArr[ValIdx]
+	                       );
+    
+   END_FOR;
+   */
+
+   /*
+   FOR HourIdx := HourIdxMin TO HourIdxMax DO
+
+      FOR ValIdx := ValIdxMin TO ValIdxMax DO
+   
+         LogReadValueFromYear(LogYear         := LogYear, 
+                              vix_StartRead   := TRUE,           // lx_CyclePulse
+	                          vix_ReadByPulse := TRUE,           // Wenn = FALSE, dann wird per internem R_TRIG geschrieben
+	                          vii_HourArrRead := ValIdx,         // Schreibwert
+                              vii_HourRead    := 0,              // Stunde 0..23
+	                          vii_DayRead     := 1,              // Tag    1..31
+                              vii_MonthRead   := 1,              // Monat  1..12
+	                          vii_YearRead    := 2016,           // Jahr   2015 ...
+	                          voi_GetValue    => LogHour.LogHourArr[HourIdx].LogValueArr[ValIdx]
+	                          );
+    
+      END_FOR;
+
+   END_FOR;
+   */
+
+END_FUNCTION_BLOCK
+
+
+FUNCTION_BLOCK FB_lc_LogReadValueFromYear
+
+   VAR_IN_OUT // Globale Uebergabewerte des Datenbaums
+
+     //	 LogValue : LogValue;
+     //   LogHour  : LogHour;
+     //   LogDay   : LogDay;
+     //   LogMonth : LogMonth;
+     LogYear  : DT_lc_LogYear;
+   END_VAR
+
+   VAR_INPUT
+	vix_StartRead   : BOOL;
+	vix_ReadByPulse : BOOL;     // Wenn = FALSE, dann wird per internem R_TRIG geschrieben
+   /*
+    * Die folgenden Variablen werden für die Eingabe der Position verwwendet.
+    */
+	vii_HourArrRead : UINT;     // Wert in der Stunde
+   /*
+    * Zeiger auf das Datenelement
+    */	
+	vii_HourRead  : UINT;
+	vii_DayRead   : UINT;
+	vii_MonthRead : UINT;
+	vii_YearRead  : UINT;
+   END_VAR
+
+   VAR_OUTPUT 
+	voi_GetValue : INT; // Diese Variable gibt den Datenwert an den Benutzer zurueck
+    vox_Err      : BOOL;
+    voi_ErrNo    : INT;
+   END_VAR
+
+   VAR
+    /*
+     * Lokale Variablen
+     */
+     lx_StartReadPulse : BOOL;
+   END_VAR
+
+   VAR
+    /*
+     * Lokale Baustein-Instanzen
+     */
+     StartReadR_TRIG : R_TRIG;
+   END_VAR
+
+   IF vix_ReadByPulse = FALSE THEN
+     StartReadR_TRIG(CLK := vix_StartRead, Q => lx_StartReadPulse); 
+    /*
+     * In der folgenden Bedingung wird die Verknüpfung zwischen Abfragen/Lesen/Ausgabe hergestellt.
+     */
+     If lx_StartReadPulse THEN 
+	   voi_GetValue:=LogYear.LogYearArr[vii_YearRead].LogMonthArr[vii_MonthRead].LogDayArr[vii_DayRead].LogHourArr[vii_HourRead].LogValueArr[vii_HourArrRead];
+     END_IF;
+    ELSE
+	 //
+	 // Direktes Lesen
+	 // ohne R_TRIG
+	 //
+	 voi_GetValue:=LogYear.LogYearArr[vii_YearRead].LogMonthArr[vii_MonthRead].LogDayArr[vii_DayRead].LogHourArr[vii_HourRead].LogValueArr[vii_HourArrRead];
+   END_IF;
+   (* revision history *)
+   // Created 
+   // 20151121 DG
+   //
+   // Modified 
+   // 20151121 DG
+END_FUNCTION_BLOCK
+
+
+FUNCTION_BLOCK FB_lc_LogWriteValueToYear
+   //
+   // Schreiben eines Wertes in die JahresStruktur
+   //
+   VAR_IN_OUT // Globale Uebergabewerte des Datenbaums
+
+       //   LogValue : LogValue;
+       //   LogHour  : LogHour;
+       //   LogDay   : LogDay;
+       //   LogMonth : LogMonth;
+       LogYear  : DT_lc_LogYear;
+   END_VAR
+
+   VAR_INPUT
+	 vix_StartWrite   : BOOL;    //
+	 vix_WriteByPulse : BOOL;    // Wenn = FALSE, dann wird per internem R_TRIG geschrieben
+    /*
+     * Die folgenden Variablen werden für die Eingabe der Position verwwendet.
+     */
+	 vii_WriteValue      : INT;  // Schreibwert
+    
+     vii_HourArrWrite	: UINT;  // Elemente je Stunde - 1..6
+    /*
+     * Zeiger auf das Datenelement
+     */     
+     vii_HourWrite       : UINT;  // Stunde 0..23
+	 vii_DayWrite        : UINT;  // Tag    1..31
+	 vii_MonthWrite      : UINT;  // Monat  1..12
+	 vii_YearWrite       : UINT;  // Jahr   2015 ...
+   END_VAR
+
+   VAR_OUTPUT 
+    Err   : BOOL;
+    ErrNo : INT;
+   END_VAR
+
+   VAR
+    /*
+     * Lokale Variablen
+     */
+     lx_StartWritePulse : BOOL;
+   END_VAR
+
+   VAR
+    /*
+     * Lokale Baustein-Instanzen
+     */
+     StartWriteR_TRIG : R_TRIG;
+   END_VAR
+
+   IF vix_WriteByPulse = FALSE THEN
+     /*
+      * Schreiben der Daten
+      */
+      StartWriteR_TRIG(CLK := vix_StartWrite, Q => lx_StartWritePulse); 
+   
+      If lx_StartWritePulse = TRUE THEN 
+        //
+        // Je Stunde sind verschiedene Array-Elemnet verfuegbar
+        // Wird im Datentyp festgelegt
+        //
+	    LogYear.LogYearArr[vii_YearWrite].LogMonthArr[vii_MonthWrite].LogDayArr[vii_DayWrite].LogHourArr[vii_HourWrite].LogValueArr[vii_HourArrWrite] := vii_WriteValue;
+      END_IF;
+     ELSE 
+        //
+        // Schreiben OHNE Pulse
+        // Kann in DO WHILE oder in FOR NEXT verwendet werden
+        //
+	    LogYear.LogYearArr[vii_YearWrite].LogMonthArr[vii_MonthWrite].LogDayArr[vii_DayWrite].LogHourArr[vii_HourWrite].LogValueArr[vii_HourArrWrite] := vii_WriteValue;
+   END_IF;
+
+   (* revision history *)
+   // Created 
+   // 20151121 DG
+   //
+   // Modified 
+   // 20151121 DG
+END_FUNCTION_BLOCK
+
+
+FUNCTION_BLOCK FB_lc_LogDataInitTest
+ VAR_IN_OUT
+  LogData : DT_lc_LogData;
+ END_VAR
+
+ VAR
+  IdxMin : UINT;
+  IdxMax : UINT;
+  Idx    : UINT;
+ END_VAR
+ 
+ IdxMin := 0;
+ IdxMax := 94;
+ 
+ FOR Idx := IdxMin TO IdxMax DO
+   LogData.VAL[Idx] := Idx;
+ END_FOR;
+  
+END_FUNCTION_BLOCK
+	

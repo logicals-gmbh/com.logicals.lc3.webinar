@@ -1,0 +1,14 @@
+PROGRAM PRG_lc_TestSelect1_FBD
+  VAR
+    com_logicals_Basic_Select_FB_lc_Select_FBD1 : com.logicals.Basic.Select.FB_lc_Select_FBD;
+  END_VAR
+
+  (*
+
+    // Network 1:
+    com_logicals_Basic_Select_FB_lc_Select_FBD1();
+
+  *)
+
+  @C(1) : @FB(com_logicals_Basic_Select_FB_lc_Select_FBD1), @R(730.0, 200.0, 280.0, 378.0), @I(@N(vir_default), @L(9.5)), @I(@N(vix_selectX1), @L(29.5)), @I(@N(vir_X1), @L(49.5)), @I(@N(vix_selectX2), @L(69.5)), @I(@N(vir_X2), @L(89.5)), @I(@N(vix_selectX3), @L(109.5)), @I(@N(vir_X3), @L(129.5)), @I(@N(vix_selectX4), @L(149.5)), @I(@N(vir_X4), @L(169.5)), @I(@N(vix_selectX5), @L(189.5)), @I(@N(vir_X5), @L(209.5)), @I(@N(vix_selectX6), @L(229.5)), @I(@N(vir_X6), @L(249.5)), @I(@N(vix_selectX7), @L(269.5)), @I(@N(vir_X7), @L(289.5)), @I(@N(vix_selectX8), @L(309.5)), @I(@N(vir_X8), @L(329.5)), @I(@N(vix_selectX9), @L(349.5)), @I(@N(vir_X9), @L(369.5)), @O(@N(vor_Out), @R(9.5));
+END_PROGRAM

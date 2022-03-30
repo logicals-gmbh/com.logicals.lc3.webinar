@@ -1,0 +1,57 @@
+NAMESPACE com.logicals.Basic.Timer
+/*
+ * Monoflop in ST
+ */
+FUNCTION_BLOCK FB_lc_MonoFlop_ST  {
+    width := 350;
+  }
+   /*
+    * Monoflop
+    */
+   VAR_INPUT
+    /* 
+     * Signal zur Triggerung des MonoFlops
+     */
+    vix_SetOut : BOOL;
+    /* 
+     * Soll das MonoFlop im TestMode betrieben werden
+     */
+    vix_TestMode : BOOL;
+    /* 
+     * Monoflop-Verzoegerungszeit
+     * wenn der Eingang nicht gesetzt wird, ist eine MonoflopZeit von T#1s vorgegeben
+     */
+     vit_PulseTime : TIME := T#1s;
+   END_VAR
+  
+   VAR_OUTPUT
+    /* AusgangsSignal des MonoFlops */
+    vox_Out : BOOL;
+   END_VAR
+
+   VAR
+    RS     : RS;
+    TON    : TON;
+    R_TRIG : R_TRIG;
+   END_VAR 
+
+   VAR
+    /* Lokales Testsignal */
+    lx_Test : BOOL;
+   END_VAR
+  /*
+   * Monoflop-Funktion
+   * vox_Out wird nach vit_PulseTime rueckgesetzt
+   */   
+   R_TRIG(CLK:=OR(AND(vix_SetOut,NOT(vix_TestMode)),lx_Test));
+  /*
+   * Setzen mit dem Eingangssignal
+   * Ruecksetzen nach Ablauf der PulseTime 
+   */
+   RS(S:=R_TRIG.Q,R1 := TON.Q);
+   vox_Out := RS.Q1;
+   TON(IN:=RS.Q1,PT := vit_PulseTime);
+
+END_FUNCTION_BLOCK
+
+END_NAMESPACE

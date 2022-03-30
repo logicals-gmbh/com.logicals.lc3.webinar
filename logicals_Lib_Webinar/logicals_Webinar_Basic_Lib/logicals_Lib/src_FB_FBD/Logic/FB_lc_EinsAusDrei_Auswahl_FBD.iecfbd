@@ -1,0 +1,88 @@
+NAMESPACE com.logicals.Basic.Logic
+FUNCTION_BLOCK FB_lc_EinsAusDrei_Auswahl_FBD
+  {
+    width := 350;
+    minWidth := 340;
+    maxWidth := 340;
+    height := 58;
+    minHeight := 58;
+    maxHeight := 58;
+  }
+
+  VAR_INPUT
+    vix_In1 : BOOL;
+    vix_In2 : BOOL;
+    vix_In3 : BOOL;
+  END_VAR
+  VAR_OUTPUT
+    vox_Out : BOOL;
+  END_VAR
+
+  (*
+
+    // Network 1:
+    AND(IN1 := vix_In1, IN2 := NOT vix_In2, IN3 := NOT vix_In3, AND => @C(7).AND);
+    AND(IN1 := NOT vix_In1, IN2 := vix_In2, IN3 := NOT vix_In3, AND => @C(16).AND);
+    AND(IN1 := NOT vix_In1, IN2 := NOT vix_In2, IN3 := vix_In3, AND => @C(23).AND);
+    OR(IN1 := @C(7).AND, IN2 := @C(16).AND, IN3 := @C(23).AND, OR => vox_Out);
+
+  *)
+
+  @CF(1) : @R(30.0, 460.0, 870.0, 100.0), @T("E:$Nlc_FB_EinsAusDreiAuswahl_FBD"), @POU;
+  @CF(2) : @R(1008.0, 462.6, 870.0, 100.0), @T("D:$Nlc_FB_EinsAusDreiAuswahl_FBD"), @POU;
+  @VF(3) : @E(vix_In1), @R(560.0, 630.0, 140.0, 19.0);
+  @VF(4) : @E(vix_In2), @R(560.0, 650.0, 140.0, 19.0);
+  @VF(5) : @E(vix_In3), @R(560.0, 670.0, 140.0, 19.0);
+  @VF(6) : @E(vox_Out), @R(1200.0, 630.0, 140.0, 19.0);
+  @C(7) : @F(AND), @R(880.0, 630.0, 40.0, 58.0), BOOL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5), @NEG), @I(@N(IN3), @L(49.5), @NEG), @O(@N(AND), @R(9.5));
+  @C(11) : @F(OR), @R(1090.0, 630.0, 40.0, 58.0), BOOL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @I(@N(IN3), @L(49.5)), @O(@N(OR), @R(9.5));
+  @VF(13) : @E(vix_In1), @R(560.0, 730.0, 140.0, 19.0);
+  @VF(14) : @E(vix_In2), @R(560.0, 750.0, 140.0, 19.0);
+  @VF(15) : @E(vix_In3), @R(560.0, 770.0, 140.0, 19.0);
+  @C(16) : @F(AND), @R(880.0, 730.0, 40.0, 58.0), BOOL, @I(@N(IN1), @L(9.5), @NEG), @I(@N(IN2), @L(29.5)), @I(@N(IN3), @L(49.5), @NEG), @O(@N(AND), @R(9.5));
+  @VF(20) : @E(vix_In1), @R(560.0, 830.0, 140.0, 19.0);
+  @VF(21) : @E(vix_In2), @R(560.0, 850.0, 140.0, 19.0);
+  @VF(22) : @E(vix_In3), @R(560.0, 870.0, 140.0, 19.0);
+  @C(23) : @F(AND), @R(880.0, 830.0, 40.0, 58.0), BOOL, @I(@N(IN1), @L(9.5), @NEG), @I(@N(IN2), @L(29.5), @NEG), @I(@N(IN3), @L(49.5)), @O(@N(AND), @R(9.5));
+
+  @G(8) :
+     @L(@VF(3).o, @C(7).IN1)
+    ;
+  @G(9) :
+     @L(@VF(4).o, @C(7).IN2)
+    ;
+  @G(10) :
+     @L(@VF(5).o, @C(7).IN3)
+    ;
+  @G(12) :
+     @L(@C(7).AND, @C(11).IN1)
+    ;
+  @G(17) :
+     @L(@VF(13).o, @C(16).IN1)
+    ;
+  @G(18) :
+     @L(@VF(14).o, @C(16).IN2)
+    ;
+  @G(19) :
+     @L(@VF(15).o, @C(16).IN3)
+    ;
+  @G(24) :
+     @L(@VF(20).o, @C(23).IN1)
+    ;
+  @G(25) :
+     @L(@VF(21).o, @C(23).IN2)
+    ;
+  @G(26) :
+     @L(@VF(22).o, @C(23).IN3)
+    ;
+  @G(27) :
+     @L(@C(16).AND, @C(11).IN2)
+    ;
+  @G(28) :
+     @L(@C(23).AND, @C(11).IN3)
+    ;
+  @G(29) :
+     @L(@C(11).OR, @VF(6).i)
+    ;
+END_FUNCTION_BLOCK
+END_NAMESPACE

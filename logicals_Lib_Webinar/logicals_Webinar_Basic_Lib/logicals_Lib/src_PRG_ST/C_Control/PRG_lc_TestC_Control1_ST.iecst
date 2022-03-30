@@ -1,0 +1,40 @@
+ /*
+  * logi.cals GmbH
+  * A-3100 St. Poelten
+  * Europaplatz 7/1
+  * Tel.: 0043-5-77147
+  *
+  * logi.cals automation solutions & services GmbH
+  * D-40738 Langenfeld
+  * Postfach 1306
+  * Tel.: 0043-5-77147
+  * 
+  * Contact:
+  * dieter.goltz@logicals.com
+  * 
+  * History:
+  * Created:  
+  * DG 2017-03-28
+  * 
+  * Modified: 
+  * DG 2017-03-28
+  * DG 2021-03-01
+  */ 
+
+ /*
+  * Description
+  * -----------
+  * Test Calc Blocks
+  */
+
+ /* 
+  * Beschreibung
+  * ------------
+  * Test Calc Blocks
+  */
+  
+USING com.logicals.Basic.Control;
+
+PROGRAM PRG_lc_TestC_Control1_ST
+
+END_PROGRAM

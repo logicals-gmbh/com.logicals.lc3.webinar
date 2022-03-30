@@ -1,0 +1,367 @@
+PROGRAM PRG_lc_TestMeasure1_FBD
+  USING com.logicals.Basic.Measure;
+  VAR
+    lr_MeaIn : REAL;
+    lr_MeaScaleHLM : REAL;
+    lr_MeaScaleLLM : REAL;
+    lr_MeaErrRep : REAL;
+    lx_MeaRelHHH : BOOL;
+    lr_MeaValHHH : REAL;
+    lt_MeaDelayHHH : TIME;
+    lx_MeaRelHH : BOOL;
+    lr_MeaValHH : REAL;
+    lt_MeaDelayHH : TIME;
+    lx_MeaRelH : BOOL;
+    lr_MeaValH : REAL;
+    lt_MeaDelayH : TIME;
+    lx_MeaRelL : BOOL;
+    lr_MeaValL : REAL;
+    lt_MeaDelayL : TIME;
+    lx_MeaRelLL : BOOL;
+    lr_MeaValLL : REAL;
+    lt_MeaDelayLL : TIME;
+    lx_MeaRelLLL : BOOL;
+    lr_MeaValLLL : REAL;
+    lt_MeaDelayLLL : TIME;
+    lr_MeaHystVal : REAL;
+    lr_MeaOutScaled : REAL;
+    lx_MeaErr : BOOL;
+    lx_MeaLimitHHH : BOOL;
+    lx_MeaLimitHH : BOOL;
+    lx_MeaLimitH : BOOL;
+    lx_MeaLimitL : BOOL;
+    lx_MeaLimitLL : BOOL;
+    lx_MeaLimitLLL : BOOL;
+    lx_MeaAlrResetHHH : BOOL;
+    lx_MeaAlrResetHH : BOOL;
+    lx_MeaAlrResetH : BOOL;
+    lx_MeaAlrResetL : BOOL;
+    lx_MeaAlrResetLL : BOOL;
+    lx_MeaAlrResetLLL : BOOL;
+  END_VAR
+  VAR
+    lr_MeaAlrIn : REAL;
+    lr_MeaAlrScaleHLM : REAL;
+    lr_MeaAlrScaleLLM : REAL;
+    lr_MeaAlrErrRep : REAL;
+    lx_MeaAlrRelHHH : BOOL;
+    lr_MeaAlrValHHH : REAL;
+    lt_MeaAlrDelayHHH : TIME;
+    lx_MeaAlrRelHH : BOOL;
+    lr_MeaAlrValHH : REAL;
+    lt_MeaAlrDelayHH : TIME;
+    lx_MeaAlrRelH : BOOL;
+    lr_MeaAlrValH : REAL;
+    lt_MeaAlrDelayH : TIME;
+    lx_MeaAlrRelL : BOOL;
+    lr_MeaAlrValL : REAL;
+    lt_MeaAlrDelayL : TIME;
+    lx_MeaAlrRelLL : BOOL;
+    lr_MeaAlrValLL : REAL;
+    lt_MeaAlrDelayLL : TIME;
+    lx_MeaAlrRelLLL : BOOL;
+    lr_MeaAlrValLLL : REAL;
+    lt_MeaAlrDelayLLL : TIME;
+    lr_MeaAlrHystVal : REAL;
+    lr_MeaAlrOutScaled : REAL;
+    lx_MeaAlrErr : BOOL;
+    lx_MeaAlrLimitHHH : BOOL;
+    lx_MeaAlrLimitHH : BOOL;
+    lx_MeaAlrLimitH : BOOL;
+    lx_MeaAlrLimitL : BOOL;
+    lx_MeaAlrLimitLL : BOOL;
+    lx_MeaAlrLimitLLL : BOOL;
+  END_VAR
+  VAR
+    FB_lc_Measure_FBD : com.logicals.Basic.Measure.FB_lc_Measure_FBD;
+    FB_lc_MeasureAlarm_FBD : com.logicals.Basic.Measure.FB_lc_MeasureAlarm_FBD;
+  END_VAR
+
+  (*
+
+    // Network 1:
+    FB_lc_Measure_FBD(vir_In := lr_MeaIn, vir_ScaleHLM := lr_MeaScaleHLM, vir_ScaleLLM := lr_MeaScaleLLM, vir_ErrRep := lr_MeaErrRep, vix_RelHHH := lx_MeaRelHHH, vir_ValHHH := lr_MeaValHHH, vit_DelayHHH := lt_MeaDelayHHH, vix_RelHH := lx_MeaRelHH, vir_ValHH := lr_MeaValHH, vit_DelayHH := lt_MeaDelayHH, vix_RelH := lx_MeaRelH, vir_ValH := lr_MeaValH, vit_DelayH := lt_MeaDelayH, vix_RelL := lx_MeaRelL, vir_ValL := lr_MeaValL, vit_DelayL := lt_MeaDelayL, vix_RelLL := lx_MeaRelLL, vir_ValLL := lr_MeaValLL, vit_DelayLL := lt_MeaDelayLL, vix_RelLLL := lx_MeaRelLLL, vir_ValLLL := lr_MeaValLLL, vit_DelayLLL := lt_MeaDelayLLL, vir_HystVal := lr_MeaHystVal, vor_OutScaled => lr_MeaOutScaled, vox_Err => lx_MeaErr, vox_LimitHHH => lx_MeaLimitHHH, vox_LimitHH => lx_MeaLimitHH, vox_LimitH => lx_MeaLimitH, vox_LimitL => lx_MeaLimitL, vox_LimitLL => lx_MeaLimitLL, vox_LimitLLL => lx_MeaLimitLLL);
+
+    // Network 2:
+    FB_lc_MeasureAlarm_FBD(vir_In := lr_MeaAlrIn, vir_ScaleHLM := lr_MeaAlrScaleHLM, vir_ScaleLLM := lr_MeaAlrScaleLLM, vir_ErrorReplace := lr_MeaAlrErrRep, vix_RelHHH := lx_MeaAlrRelHHH, vir_ValHHH := lr_MeaAlrValHHH, vit_DelayHHH := lt_MeaAlrDelayHHH, vix_ResetHHH := lx_MeaAlrResetHHH, vix_RelHH := lx_MeaAlrRelHH, vir_ValHH := lr_MeaAlrValHH, vit_DelayHH := lt_MeaAlrDelayHH, vix_ResetHH := lx_MeaAlrResetHH, vix_RelH := lx_MeaAlrRelH, vir_ValH := lr_MeaAlrValH, vit_DelayH := lt_MeaAlrDelayH, vix_ResetH := lx_MeaAlrResetH, vix_RelL := lx_MeaAlrRelL, vir_ValL := lr_MeaAlrValL, vit_DelayL := lt_MeaAlrDelayL, vix_ResetL := lx_MeaAlrResetL, vix_RelLL := lx_MeaAlrRelLL, vir_ValLL := lr_MeaAlrValLL, vit_DelayLL := lt_MeaAlrDelayLL, vix_ResetLL := lx_MeaAlrResetLL, vix_RelLLL := lx_MeaAlrRelLLL, vir_ValLLL := lr_MeaAlrValLLL, vit_DelayLLL := lt_MeaAlrDelayLLL, vix_ResetLLL := lx_MeaAlrResetLLL, vir_HystVal := lr_MeaAlrHystVal, vor_OutScaled => lr_MeaAlrOutScaled, vox_ErrorIn => lx_MeaAlrErr, vox_HHH => lx_MeaAlrLimitHHH, vox_HH => lx_MeaAlrLimitHH, vox_H => lx_MeaAlrLimitH, vox_L => lx_MeaAlrLimitL, vox_LL => lx_MeaAlrLimitLL, vox_LLL => lx_MeaAlrLimitLLL);
+
+  *)
+
+  @C(1) : @FB(FB_lc_Measure_FBD), @R(790.0, 160.0, 240.0, 628.0), @I(@N(vir_In), @L(9.5)), @I(@N(vir_ScaleHLM), @L(49.5)), @I(@N(vir_ScaleLLM), @L(69.5)), @I(@N(vir_ErrRep), @L(89.5)), @I(@N(vix_RelHHH), @L(129.5)), @I(@N(vir_ValHHH), @L(149.5)), @I(@N(vit_DelayHHH), @L(169.5)), @I(@N(vix_RelHH), @L(209.5)), @I(@N(vir_ValHH), @L(229.5)), @I(@N(vit_DelayHH), @L(249.5)), @I(@N(vix_RelH), @L(289.5)), @I(@N(vir_ValH), @L(309.5)), @I(@N(vit_DelayH), @L(329.5)), @I(@N(vix_RelL), @L(369.5)), @I(@N(vir_ValL), @L(389.5)), @I(@N(vit_DelayL), @L(409.5)), @I(@N(vix_RelLL), @L(449.5)), @I(@N(vir_ValLL), @L(469.5)), @I(@N(vit_DelayLL), @L(489.5)), @I(@N(vix_RelLLL), @L(529.5)), @I(@N(vir_ValLLL), @L(549.5)), @I(@N(vit_DelayLLL), @L(569.5)), @I(@N(vir_HystVal), @L(609.5)), @O(@N(vor_OutScaled), @R(9.5)), @O(@N(vox_Err), @R(69.5)), @O(@N(vox_LimitHHH), @R(149.5)), @O(@N(vox_LimitHH), @R(229.5)), @O(@N(vox_LimitH), @R(309.5)), @O(@N(vox_LimitL), @R(389.5)), @O(@N(vox_LimitLL), @R(469.5)), @O(@N(vox_LimitLLL), @R(549.5));
+  @CF(2) : @R(290.0, 30.0, 580.0, 99.0), @T("E:$NMeasure block for test!"), @POU;
+  @CF(3) : @R(280.0, 1380.0, 580.0, 99.0), @T("E:$NMeasure block alarm for test!"), @POU;
+  @C(4) : @FB(FB_lc_MeasureAlarm_FBD), @R(820.0, 1520.0, 240.0, 618.0), @I(@N(vir_In), @L(9.5)), @I(@N(vir_ScaleHLM), @L(49.5)), @I(@N(vir_ScaleLLM), @L(69.5)), @I(@N(vir_ErrorReplace), @L(89.5)), @I(@N(vix_RelHHH), @L(129.5)), @I(@N(vir_ValHHH), @L(149.5)), @I(@N(vit_DelayHHH), @L(169.5)), @I(@N(vix_ResetHHH), @L(189.5)), @I(@N(vix_RelHH), @L(209.5)), @I(@N(vir_ValHH), @L(229.5)), @I(@N(vit_DelayHH), @L(249.5)), @I(@N(vix_ResetHH), @L(269.5)), @I(@N(vix_RelH), @L(289.5)), @I(@N(vir_ValH), @L(309.5)), @I(@N(vit_DelayH), @L(329.5)), @I(@N(vix_ResetH), @L(349.5)), @I(@N(vix_RelL), @L(369.5)), @I(@N(vir_ValL), @L(389.5)), @I(@N(vit_DelayL), @L(409.5)), @I(@N(vix_ResetL), @L(429.5)), @I(@N(vix_RelLL), @L(449.5)), @I(@N(vir_ValLL), @L(469.5)), @I(@N(vit_DelayLL), @L(489.5)), @I(@N(vix_ResetLL), @L(509.5)), @I(@N(vix_RelLLL), @L(529.5)), @I(@N(vir_ValLLL), @L(549.5)), @I(@N(vit_DelayLLL), @L(569.5)), @I(@N(vix_ResetLLL), @L(589.5)), @I(@N(vir_HystVal), @L(609.5)), @O(@N(vor_OutScaled), @R(9.5)), @O(@N(vox_ErrorIn), @R(69.5)), @O(@N(vox_HHH), @R(149.5)), @O(@N(vox_HH), @R(229.5)), @O(@N(vox_H), @R(309.5)), @O(@N(vox_L), @R(389.5)), @O(@N(vox_LL), @R(469.5)), @O(@N(vox_LLL), @R(549.5));
+  @VF(5) : @E(lr_MeaIn), @R(580.0, 160.0, 140.0, 19.0);
+  @VF(6) : @E(lr_MeaScaleHLM), @R(580.0, 200.0, 140.0, 19.0);
+  @VF(7) : @E(lr_MeaScaleLLM), @R(580.0, 220.0, 140.0, 19.0);
+  @VF(8) : @E(lr_MeaErrRep), @R(580.0, 240.0, 140.0, 19.0);
+  @VF(9) : @E(lx_MeaRelHHH), @R(580.0, 280.0, 140.0, 19.0);
+  @VF(10) : @E(lr_MeaValHHH), @R(580.0, 300.0, 140.0, 19.0);
+  @VF(11) : @E(lt_MeaDelayHHH), @R(580.0, 320.0, 140.0, 19.0);
+  @VF(12) : @E(lx_MeaRelHH), @R(580.0, 360.0, 140.0, 19.0);
+  @VF(13) : @E(lr_MeaValHH), @R(580.0, 380.0, 140.0, 19.0);
+  @VF(14) : @E(lt_MeaDelayHH), @R(580.0, 400.0, 140.0, 19.0);
+  @VF(15) : @E(lx_MeaRelH), @R(580.0, 440.0, 140.0, 19.0);
+  @VF(16) : @E(lr_MeaValH), @R(580.0, 460.0, 140.0, 19.0);
+  @VF(17) : @E(lt_MeaDelayH), @R(580.0, 480.0, 140.0, 19.0);
+  @VF(18) : @E(lx_MeaRelL), @R(580.0, 520.0, 140.0, 19.0);
+  @VF(19) : @E(lr_MeaValL), @R(580.0, 540.0, 140.0, 19.0);
+  @VF(20) : @E(lt_MeaDelayL), @R(580.0, 560.0, 140.0, 19.0);
+  @VF(21) : @E(lx_MeaRelLL), @R(580.0, 600.0, 140.0, 19.0);
+  @VF(22) : @E(lr_MeaValLL), @R(580.0, 620.0, 140.0, 19.0);
+  @VF(23) : @E(lt_MeaDelayLL), @R(580.0, 640.0, 140.0, 19.0);
+  @VF(24) : @E(lx_MeaRelLLL), @R(580.0, 680.0, 140.0, 19.0);
+  @VF(25) : @E(lr_MeaValLLL), @R(580.0, 700.0, 140.0, 19.0);
+  @VF(26) : @E(lt_MeaDelayLLL), @R(580.0, 720.0, 140.0, 19.0);
+  @VF(27) : @E(lr_MeaHystVal), @R(580.0, 760.0, 140.0, 19.0);
+  @VF(28) : @E(lr_MeaOutScaled), @R(1140.0, 160.0, 140.0, 19.0);
+  @VF(29) : @E(lx_MeaErr), @R(1140.0, 220.0, 140.0, 19.0);
+  @VF(30) : @E(lx_MeaLimitHHH), @R(1140.0, 300.0, 140.0, 19.0);
+  @VF(31) : @E(lx_MeaLimitHH), @R(1140.0, 380.0, 140.0, 19.0);
+  @VF(32) : @E(lx_MeaLimitH), @R(1140.0, 460.0, 140.0, 19.0);
+  @VF(33) : @E(lx_MeaLimitL), @R(1140.0, 540.0, 140.0, 19.0);
+  @VF(34) : @E(lx_MeaLimitLL), @R(1140.0, 620.0, 140.0, 19.0);
+  @VF(35) : @E(lx_MeaLimitLLL), @R(1140.0, 700.0, 140.0, 19.0);
+  @VF(36) : @E(lr_MeaAlrIn), @R(580.0, 1520.0, 140.0, 19.0);
+  @VF(37) : @E(lr_MeaAlrScaleHLM), @R(580.0, 1560.0, 140.0, 19.0);
+  @VF(38) : @E(lr_MeaAlrScaleLLM), @R(580.0, 1580.0, 140.0, 19.0);
+  @VF(39) : @E(lr_MeaAlrErrRep), @R(580.0, 1600.0, 140.0, 19.0);
+  @VF(40) : @E(lx_MeaAlrRelHHH), @R(580.0, 1640.0, 140.0, 19.0);
+  @VF(41) : @E(lr_MeaAlrValHHH), @R(580.0, 1660.0, 140.0, 19.0);
+  @VF(42) : @E(lt_MeaAlrDelayHHH), @R(580.0, 1680.0, 140.0, 19.0);
+  @VF(43) : @E(lx_MeaAlrRelHH), @R(580.0, 1720.0, 140.0, 19.0);
+  @VF(44) : @E(lr_MeaAlrValHH), @R(580.0, 1740.0, 140.0, 19.0);
+  @VF(45) : @E(lt_MeaAlrDelayHH), @R(580.0, 1760.0, 140.0, 19.0);
+  @VF(46) : @E(lx_MeaAlrRelH), @R(580.0, 1800.0, 140.0, 19.0);
+  @VF(47) : @E(lr_MeaAlrValH), @R(580.0, 1820.0, 140.0, 19.0);
+  @VF(48) : @E(lt_MeaAlrDelayH), @R(580.0, 1840.0, 140.0, 19.0);
+  @VF(49) : @E(lx_MeaAlrRelL), @R(580.0, 1880.0, 140.0, 19.0);
+  @VF(50) : @E(lr_MeaAlrValL), @R(580.0, 1900.0, 140.0, 19.0);
+  @VF(51) : @E(lt_MeaAlrDelayL), @R(580.0, 1920.0, 140.0, 19.0);
+  @VF(52) : @E(lx_MeaAlrRelLL), @R(580.0, 1960.0, 140.0, 19.0);
+  @VF(53) : @E(lr_MeaAlrValLL), @R(580.0, 1980.0, 140.0, 19.0);
+  @VF(54) : @E(lt_MeaAlrDelayLL), @R(580.0, 2000.0, 140.0, 19.0);
+  @VF(55) : @E(lx_MeaAlrRelLLL), @R(580.0, 2040.0, 140.0, 19.0);
+  @VF(56) : @E(lr_MeaAlrValLLL), @R(580.0, 2060.0, 140.0, 19.0);
+  @VF(57) : @E(lt_MeaAlrDelayLLL), @R(580.0, 2080.0, 140.0, 19.0);
+  @VF(58) : @E(lr_MeaAlrHystVal), @R(580.0, 2120.0, 140.0, 19.0);
+  @VF(59) : @E(lr_MeaAlrOutScaled), @R(1180.0, 1520.0, 140.0, 19.0);
+  @VF(60) : @E(lx_MeaAlrErr), @R(1180.0, 1580.0, 140.0, 19.0);
+  @VF(61) : @E(lx_MeaAlrLimitHHH), @R(1180.0, 1660.0, 140.0, 19.0);
+  @VF(62) : @E(lx_MeaAlrLimitHH), @R(1180.0, 1740.0, 140.0, 19.0);
+  @VF(63) : @E(lx_MeaAlrLimitH), @R(1180.0, 1820.0, 140.0, 19.0);
+  @VF(64) : @E(lx_MeaAlrLimitL), @R(1180.0, 1900.0, 140.0, 19.0);
+  @VF(65) : @E(lx_MeaAlrLimitLL), @R(1180.0, 1980.0, 140.0, 19.0);
+  @VF(66) : @E(lx_MeaAlrLimitLLL), @R(1180.0, 2060.0, 140.0, 19.0);
+  @VF(129) : @E(lx_MeaAlrResetHH), @R(580.0, 1780.0, 140.0, 19.0);
+  @VF(131) : @E(lx_MeaAlrResetHHH), @R(580.0, 1700.0, 140.0, 19.0);
+  @VF(133) : @E(lx_MeaAlrResetH), @R(580.0, 1860.0, 140.0, 19.0);
+  @VF(135) : @E(lx_MeaAlrResetL), @R(580.0, 1940.0, 140.0, 19.0);
+  @VF(137) : @E(lx_MeaAlrResetLL), @R(580.0, 2020.0, 140.0, 19.0);
+  @VF(139) : @E(lx_MeaAlrResetLLL), @R(580.0, 2100.0, 140.0, 19.0);
+
+  @G(67) :
+     @L(@VF(5).o, @C(1).vir_In)
+    ;
+  @G(68) :
+     @L(@VF(6).o, @C(1).vir_ScaleHLM)
+    ;
+  @G(69) :
+     @L(@VF(7).o, @C(1).vir_ScaleLLM)
+    ;
+  @G(70) :
+     @L(@VF(8).o, @C(1).vir_ErrRep)
+    ;
+  @G(71) :
+     @L(@VF(9).o, @C(1).vix_RelHHH)
+    ;
+  @G(72) :
+     @L(@VF(10).o, @C(1).vir_ValHHH)
+    ;
+  @G(73) :
+     @L(@VF(11).o, @C(1).vit_DelayHHH)
+    ;
+  @G(74) :
+     @L(@VF(12).o, @C(1).vix_RelHH)
+    ;
+  @G(75) :
+     @L(@VF(13).o, @C(1).vir_ValHH)
+    ;
+  @G(76) :
+     @L(@VF(14).o, @C(1).vit_DelayHH)
+    ;
+  @G(77) :
+     @L(@VF(15).o, @C(1).vix_RelH)
+    ;
+  @G(78) :
+     @L(@VF(16).o, @C(1).vir_ValH)
+    ;
+  @G(79) :
+     @L(@VF(17).o, @C(1).vit_DelayH)
+    ;
+  @G(80) :
+     @L(@VF(18).o, @C(1).vix_RelL)
+    ;
+  @G(81) :
+     @L(@VF(19).o, @C(1).vir_ValL)
+    ;
+  @G(82) :
+     @L(@VF(20).o, @C(1).vit_DelayL)
+    ;
+  @G(83) :
+     @L(@VF(21).o, @C(1).vix_RelLL)
+    ;
+  @G(84) :
+     @L(@VF(22).o, @C(1).vir_ValLL)
+    ;
+  @G(85) :
+     @L(@VF(23).o, @C(1).vit_DelayLL)
+    ;
+  @G(86) :
+     @L(@VF(24).o, @C(1).vix_RelLLL)
+    ;
+  @G(87) :
+     @L(@C(1).vor_OutScaled, @VF(28).i)
+    ;
+  @G(88) :
+     @L(@C(1).vox_Err, @VF(29).i)
+    ;
+  @G(89) :
+     @L(@C(1).vox_LimitHHH, @VF(30).i)
+    ;
+  @G(90) :
+     @L(@C(1).vox_LimitHH, @VF(31).i)
+    ;
+  @G(91) :
+     @L(@C(1).vox_LimitH, @VF(32).i)
+    ;
+  @G(92) :
+     @L(@C(1).vox_LimitL, @VF(33).i)
+    ;
+  @G(93) :
+     @L(@C(1).vox_LimitLL, @VF(34).i)
+    ;
+  @G(94) :
+     @L(@C(1).vox_LimitLLL, @VF(35).i)
+    ;
+  @G(95) :
+     @L(@VF(25).o, @C(1).vir_ValLLL)
+    ;
+  @G(96) :
+     @L(@VF(26).o, @C(1).vit_DelayLLL)
+    ;
+  @G(97) :
+     @L(@VF(27).o, @C(1).vir_HystVal)
+    ;
+  @G(98) :
+     @L(@VF(36).o, @C(4).vir_In)
+    ;
+  @G(99) :
+     @L(@VF(37).o, @C(4).vir_ScaleHLM)
+    ;
+  @G(100) :
+     @L(@VF(38).o, @C(4).vir_ScaleLLM)
+    ;
+  @G(101) :
+     @L(@VF(39).o, @C(4).vir_ErrorReplace)
+    ;
+  @G(102) :
+     @L(@VF(40).o, @C(4).vix_RelHHH)
+    ;
+  @G(103) :
+     @L(@VF(41).o, @C(4).vir_ValHHH)
+    ;
+  @G(104) :
+     @L(@VF(42).o, @C(4).vit_DelayHHH)
+    ;
+  @G(105) :
+     @L(@VF(43).o, @C(4).vix_RelHH)
+    ;
+  @G(106) :
+     @L(@VF(44).o, @C(4).vir_ValHH)
+    ;
+  @G(107) :
+     @L(@VF(45).o, @C(4).vit_DelayHH)
+    ;
+  @G(108) :
+     @L(@VF(46).o, @C(4).vix_RelH)
+    ;
+  @G(109) :
+     @L(@VF(47).o, @C(4).vir_ValH)
+    ;
+  @G(110) :
+     @L(@VF(48).o, @C(4).vit_DelayH)
+    ;
+  @G(111) :
+     @L(@VF(49).o, @C(4).vix_RelL)
+    ;
+  @G(112) :
+     @L(@VF(50).o, @C(4).vir_ValL)
+    ;
+  @G(113) :
+     @L(@VF(51).o, @C(4).vit_DelayL)
+    ;
+  @G(114) :
+     @L(@VF(52).o, @C(4).vix_RelLL)
+    ;
+  @G(115) :
+     @L(@VF(53).o, @C(4).vir_ValLL)
+    ;
+  @G(116) :
+     @L(@VF(54).o, @C(4).vit_DelayLL)
+    ;
+  @G(117) :
+     @L(@VF(55).o, @C(4).vix_RelLLL)
+    ;
+  @G(118) :
+     @L(@VF(56).o, @C(4).vir_ValLLL)
+    ;
+  @G(119) :
+     @L(@VF(57).o, @C(4).vit_DelayLLL)
+    ;
+  @G(120) :
+     @L(@VF(58).o, @C(4).vir_HystVal)
+    ;
+  @G(121) :
+     @L(@C(4).vor_OutScaled, @VF(59).i)
+    ;
+  @G(122) :
+     @L(@C(4).vox_ErrorIn, @VF(60).i)
+    ;
+  @G(123) :
+     @L(@C(4).vox_HHH, @VF(61).i)
+    ;
+  @G(124) :
+     @L(@C(4).vox_HH, @VF(62).i)
+    ;
+  @G(125) :
+     @L(@C(4).vox_H, @VF(63).i)
+    ;
+  @G(126) :
+     @L(@C(4).vox_L, @VF(64).i)
+    ;
+  @G(127) :
+     @L(@C(4).vox_LL, @VF(65).i)
+    ;
+  @G(128) :
+     @L(@C(4).vox_LLL, @VF(66).i)
+    ;
+  @G(130) :
+     @L(@VF(129).o, @C(4).vix_ResetHH)
+    ;
+  @G(132) :
+     @L(@VF(131).o, @C(4).vix_ResetHHH)
+    ;
+  @G(134) :
+     @L(@VF(133).o, @C(4).vix_ResetH)
+    ;
+  @G(136) :
+     @L(@VF(135).o, @C(4).vix_ResetL)
+    ;
+  @G(138) :
+     @L(@VF(137).o, @C(4).vix_ResetLL)
+    ;
+  @G(140) :
+     @L(@VF(139).o, @C(4).vix_ResetLLL)
+    ;
+END_PROGRAM

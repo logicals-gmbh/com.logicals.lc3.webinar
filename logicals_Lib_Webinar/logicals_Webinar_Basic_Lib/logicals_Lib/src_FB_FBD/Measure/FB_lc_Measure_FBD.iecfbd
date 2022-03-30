@@ -1,0 +1,604 @@
+NAMESPACE com.logicals.Basic.Measure
+FUNCTION_BLOCK FB_lc_Measure_FBD
+  {
+    vir_In {index := 0};
+    vir_ScaleHLM {loc := "left", index := 2};
+    vir_ScaleLLM {loc := "left", index := 3};
+    vir_ErrRep {loc := "left", index := 4};
+    vix_RelHHH {loc := "left", index := 6};
+    vir_ValHHH {loc := "left", index := 7};
+    vit_DelayHHH {loc := "left", index := 8};
+    vix_RelHH {loc := "left", index := 10};
+    vir_ValHH {loc := "left", index := 11};
+    vit_DelayHH {loc := "left", index := 12};
+    vix_RelH {loc := "left", index := 14};
+    vir_ValH {loc := "left", index := 15};
+    vit_DelayH {loc := "left", index := 16};
+    vix_RelL {loc := "left", index := 18};
+    vir_ValL {loc := "left", index := 19};
+    vit_DelayL {loc := "left", index := 20};
+    vix_RelLL {loc := "left", index := 22};
+    vir_ValLL {loc := "left", index := 23};
+    vit_DelayLL {loc := "left", index := 24};
+    vix_RelLLL {loc := "left", index := 26};
+    vir_ValLLL {loc := "left", index := 27};
+    vit_DelayLLL {loc := "left", index := 28};
+    vir_HystVal {loc := "left", index := 30};
+    vor_OutScaled {index := 0};
+    vox_Err {loc := "right", index := 3};
+    vox_LimitHHH {loc := "right", index := 7};
+    vox_LimitHH {loc := "right", index := 11};
+    vox_LimitH {loc := "right", index := 15};
+    vox_LimitL {loc := "right", index := 19};
+    vox_LimitLL {loc := "right", index := 23};
+    vox_LimitLLL {loc := "right", index := 27};
+    altName := "";
+    instanceName := {position := "manual", x := 0, y := 640, width := 280, height := 19, alignment := "center"};
+    width := 240;
+    height := 638;
+    inputValueFieldAreaWidth := 360;
+    outputValueFieldAreaWidth := 360;
+    minWidth := 240;
+    maxWidth := 240;
+    minHeight := 618;
+    maxHeight := 638;
+  }
+
+  VAR
+    TON0 : TON;
+    RS0 : RS;
+    TON1 : TON;
+    TON2 : TON;
+    RS1 : RS;
+    TON3 : TON;
+    RS2 : RS;
+    RS3 : RS;
+    RS4 : RS;
+    TON4 : TON;
+    TON5 : TON;
+    TON6 : TON;
+    RS5 : RS;
+  END_VAR
+  VAR_INPUT
+    vir_In : REAL { description := "analog input "; };
+    vir_ScaleHLM : REAL { description := "analog input scaling high limit"; };
+    vir_ScaleLLM : REAL { description := "analog input scaling low limit"; };
+    vir_ErrRep : REAL { description := "analog error replacement value"; };
+    vix_RelHHH : BOOL { description := "release for limit HHH"; };
+    vir_ValHHH : REAL { description := "value for limit HHH"; };
+    vit_DelayHHH : TIME { description := "delay for limit HHH"; };
+    vix_RelHH : BOOL { description := "release for limit HH"; };
+    vir_ValHH : REAL { description := "value for limit HH"; };
+    vit_DelayHH : TIME { description := "delay for limit HH"; };
+    vix_RelH : BOOL { description := "release for limit H"; };
+    vir_ValH : REAL { description := "value for limit H"; };
+    vit_DelayH : TIME { description := "delay for limit H"; };
+    vix_RelL : BOOL { description := "release for limit L"; };
+    vir_ValL : REAL { description := "value for limit L"; };
+    vit_DelayL : TIME { description := "delay for limit L"; };
+    vix_RelLL : BOOL { description := "release for limit LL"; };
+    vir_ValLL : REAL { description := "value for limit LL"; };
+    vit_DelayLL : TIME { description := "delay for limit LL"; };
+    vix_RelLLL : BOOL { description := "release for limit LLL"; };
+    vir_ValLLL : REAL { description := "value for limit LLL"; };
+    vit_DelayLLL : TIME { description := "delay for limit LLL"; };
+    vir_HystVal : REAL { description := "hysteresis for all values"; };
+  END_VAR
+  VAR_OUTPUT
+    vor_OutScaled : REAL { description := "analog value scaled between HLM & LLM"; };
+    vox_Err : BOOL { description := "analog value error (out of range or broken wire)"; };
+    vox_LimitHHH : BOOL { description := "scaled analog value > value HHH"; };
+    vox_LimitHH : BOOL { description := "scaled analog value > value HH"; };
+    vox_LimitH : BOOL { description := "scaled analog value > value H"; };
+    vox_LimitL : BOOL { description := "scaled analog value < value L"; };
+    vox_LimitLL : BOOL { description := "scaled analog value < value LL"; };
+    vox_LimitLLL : BOOL { description := "scaled analog value < value LLL"; };
+  END_VAR
+
+  (*
+
+    // Network 1:
+    GT(IN1 := vir_In, IN2 := 28500.0, GT => @C(205).GT);
+    LT(IN1 := vir_In, IN2 := -552.0, LT => @C(220).LT);
+    OR(IN1 := @C(205).GT, IN2 := @C(220).LT, OR => @C(208).OR);
+    TON0(IN := @C(208).OR, PT := T#3s, Q => vox_Err);
+    MUL(IN1 := vir_In, IN2 := 0.00003617, MUL => @C(189).MUL);
+    ADD(IN1 := @C(189).MUL, IN2 := 0.0, ADD => @C(209).ADD);
+    SUB(IN1 := vir_ScaleHLM, IN2 := vir_ScaleLLM, SUB => @C(222).SUB);
+    MUL(IN1 := @C(222).SUB, IN2 := 1.0, MUL => @C(210).MUL);
+    MUL(IN1 := @C(209).ADD, IN2 := @C(210).MUL, MUL => @C(198).MUL);
+    ADD(IN1 := @C(198).MUL, IN2 := vir_ScaleLLM, ADD => @C(197).ADD);
+    SEL(G := TON0.Q, IN0 := @C(197).ADD, IN1 := vir_ErrRep, SEL => @C(223).SEL);
+    LIMIT(MN := vir_ScaleLLM, IN := @C(223).SEL, MX := vir_ScaleHLM, LIMIT => vor_OutScaled);
+
+    // Network 2:
+    GE(IN1 := vor_OutScaled, IN2 := vir_ValHHH, GE => @C(192).GE);
+    SUB(IN1 := vir_ValHHH, IN2 := vir_HystVal, SUB => @C(215).SUB);
+    LT(IN1 := vor_OutScaled, IN2 := @C(215).SUB, LT => @C(193).LT);
+    RS0(S := @C(192).GE, R1 := @C(193).LT);
+    AND(IN1 := RS0.Q1, IN2 := vix_RelHHH, AND => @C(206).AND);
+    TON1(IN := @C(206).AND, PT := vit_DelayHHH, Q => vox_LimitHHH);
+    GE(IN1 := vor_OutScaled, IN2 := vir_ValHH, GE => @C(200).GE);
+    SUB(IN1 := vir_ValHH, IN2 := vir_HystVal, SUB => @C(213).SUB);
+    LT(IN1 := vor_OutScaled, IN2 := @C(213).SUB, LT => @C(212).LT);
+    RS1(S := @C(200).GE, R1 := @C(212).LT);
+    AND(IN1 := RS1.Q1, IN2 := vix_RelHH, AND => @C(190).AND);
+    TON2(IN := @C(190).AND, PT := vit_DelayHH, Q => vox_LimitHH);
+    GE(IN1 := vor_OutScaled, IN2 := vir_ValH, GE => @C(195).GE);
+    SUB(IN1 := vir_ValH, IN2 := vir_HystVal, SUB => @C(217).SUB);
+    LT(IN1 := vor_OutScaled, IN2 := @C(217).SUB, LT => @C(196).LT);
+    RS2(S := @C(195).GE, R1 := @C(196).LT);
+    AND(IN1 := RS2.Q1, IN2 := vix_RelH, AND => @C(204).AND);
+    TON3(IN := @C(204).AND, PT := vit_DelayH, Q => vox_LimitH);
+
+    // Network 3:
+    LE(IN1 := vor_OutScaled, IN2 := vir_ValLLL, LE => @C(185).LE);
+    ADD(IN1 := vir_ValLLL, IN2 := vir_HystVal, ADD => @C(207).ADD);
+    GT(IN1 := vor_OutScaled, IN2 := @C(207).ADD, GT => @C(219).GT);
+    RS5(S := @C(185).LE, R1 := @C(219).GT);
+    AND(IN1 := RS5.Q1, IN2 := vix_RelLLL, AND => @C(216).AND);
+    TON6(IN := @C(216).AND, PT := vit_DelayLLL, Q => vox_LimitLLL);
+    LE(IN1 := vor_OutScaled, IN2 := vir_ValLL, LE => @C(202).LE);
+    ADD(IN1 := vir_ValLL, IN2 := vir_HystVal, ADD => @C(214).ADD);
+    GT(IN1 := vor_OutScaled, IN2 := @C(214).ADD, GT => @C(203).GT);
+    RS3(S := @C(202).LE, R1 := @C(203).GT);
+    AND(IN1 := RS3.Q1, IN2 := vix_RelLL, AND => @C(211).AND);
+    TON4(IN := @C(211).AND, PT := vit_DelayLL, Q => vox_LimitLL);
+    LE(IN1 := vor_OutScaled, IN2 := vir_ValL, LE => @C(187).LE);
+    ADD(IN1 := vir_ValL, IN2 := vir_HystVal, ADD => @C(199).ADD);
+    GT(IN1 := vor_OutScaled, IN2 := @C(199).ADD, GT => @C(188).GT);
+    RS4(S := @C(187).LE, R1 := @C(188).GT);
+    AND(IN1 := RS4.Q1, IN2 := vix_RelL, AND => @C(184).AND);
+    TON5(IN := @C(184).AND, PT := vit_DelayL, Q => vox_LimitL);
+
+  *)
+
+  @VF(128) : @E(vit_DelayHHH), @R(0.0, 1730.0, 160.0, 19.0);
+  @VF(130) : @E(vir_ScaleLLM), @R(0.0, 610.0, 160.0, 19.0);
+  @VF(132) : @E(vir_ValL), @R(0.0, 3520.0, 160.0, 19.0);
+  @VF(134) : @E(vit_DelayL), @R(0.0, 3680.0, 160.0, 19.0);
+  @VF(136) : @E(vox_Err), @R(1740.0, 120.0, 160.0, 19.0);
+  @VF(138) : @E(vir_ValH), @R(0.0, 2180.0, 160.0, 19.0);
+  @VF(140) : @E(vox_LimitL), @R(1740.0, 3500.0, 160.0, 19.0);
+  @VF(142) : @E(vor_OutScaled), @R(0.0, 2710.0, 160.0, 19.0);
+  @VF(144) : @E(vox_LimitLL), @R(1740.0, 3200.0, 160.0, 19.0);
+  @VF(146) : @E(vox_LimitH), @R(1740.0, 2160.0, 160.0, 19.0);
+  @VF(148) : @E(vir_ValLL), @R(0.0, 3220.0, 160.0, 19.0);
+  @VF(150) : @E(vir_ValHH), @R(0.0, 1880.0, 160.0, 19.0);
+  @VF(152) : @E(vox_LimitHHH), @R(1740.0, 1550.0, 160.0, 19.0);
+  @VF(154) : @E(vox_LimitLLL), @R(1740.0, 2890.0, 160.0, 19.0);
+  @VF(156) : @E(vix_RelLLL), @R(0.0, 3000.0, 160.0, 19.0);
+  @VF(158) : @E(vir_ScaleHLM), @R(0.0, 390.0, 160.0, 19.0);
+  @VF(160) : @E(vit_DelayLLL), @R(0.0, 3070.0, 160.0, 19.0);
+  @VF(162) : @E(vix_RelHH), @R(0.0, 1970.0, 160.0, 19.0);
+  @VF(164) : @E(vor_OutScaled), @R(1740.0, 700.0, 160.0, 19.0);
+  @VF(101) : @E(vit_DelayH), @R(0.0, 2340.0, 160.0, 19.0);
+  @VF(167) : @E(vir_ErrRep), @R(0.0, 810.0, 180.0, 19.0);
+  @VF(103) : @E(vox_LimitHH), @R(1740.0, 1860.0, 160.0, 19.0);
+  @VF(169) : @E(vix_RelL), @R(0.0, 3610.0, 160.0, 19.0);
+  @VF(105) : @E(vir_In), @R(0.0, 120.0, 160.0, 19.0);
+  @VF(107) : @E(vix_RelH), @R(0.0, 2270.0, 160.0, 19.0);
+  @VF(172) : @E(-552.0), @R(460.0, 190.0, 100.0, 19.0), REAL;
+  @VF(109) : @E(vir_HystVal), @R(0.0, 2780.0, 160.0, 19.0);
+  @VF(173) : @E(28500.0), @R(460.0, 140.0, 100.0, 19.0), REAL;
+  @VF(111) : @E(vir_HystVal), @R(0.0, 1440.0, 160.0, 19.0);
+  @VF(113) : @E(vir_ValLLL), @R(0.0, 2910.0, 160.0, 19.0);
+  @VF(115) : @E(vit_DelayLL), @R(0.0, 3380.0, 160.0, 19.0);
+  @VF(179) : @E(0.00003617), @R(400.0, 340.0, 160.0, 19.0), REAL;
+  @VF(180) : @E(0.0), @R(630.0, 340.0, 100.0, 19.0), REAL;
+  @VF(117) : @E(vor_OutScaled), @R(0.0, 1370.0, 160.0, 19.0);
+  @VF(181) : @E(1.0), @R(630.0, 410.0, 100.0, 19.0), REAL;
+  @VF(182) : @E(T#3s), @R(800.0, 140.0, 100.0, 19.0);
+  @VF(119) : @E(vit_DelayHH), @R(0.0, 2040.0, 160.0, 19.0);
+  @VF(121) : @E(vir_ValHHH), @R(0.0, 1570.0, 160.0, 19.0);
+  @VF(123) : @E(vix_RelHHH), @R(0.0, 1660.0, 160.0, 19.0);
+  @VF(126) : @E(vix_RelLL), @R(0.0, 3310.0, 160.0, 19.0);
+  @C(192) : @F(GE), @R(690.0, 1550.0, 40.0, 38.0), REAL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(GE), @R(9.5));
+  @C(193) : @F(LT), @R(690.0, 1600.0, 40.0, 38.0), REAL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(LT), @R(9.5));
+  @C(194) : @FB(RS2), @R(800.0, 2160.0, 80.0, 38.0), @I(@N(S), @L(9.5)), @I(@N(R1), @L(29.5)), @O(@N(Q1), @R(9.5));
+  @C(195) : @F(GE), @R(690.0, 2160.0, 40.0, 38.0), REAL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(GE), @R(9.5));
+  @C(196) : @F(LT), @R(690.0, 2210.0, 40.0, 38.0), REAL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(LT), @R(9.5));
+  @C(197) : @F(ADD), @R(970.0, 320.0, 40.0, 38.0), REAL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(ADD), @R(9.5));
+  @C(198) : @F(MUL), @R(860.0, 320.0, 40.0, 38.0), REAL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(MUL), @R(9.5));
+  @C(199) : @F(ADD), @R(580.0, 3570.0, 40.0, 38.0), REAL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(ADD), @R(9.5));
+  @C(200) : @F(GE), @R(690.0, 1860.0, 40.0, 38.0), REAL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(GE), @R(9.5));
+  @C(201) : @FB(RS3), @R(800.0, 3200.0, 80.0, 38.0), @I(@N(S), @L(9.5)), @I(@N(R1), @L(29.5)), @O(@N(Q1), @R(9.5));
+  @C(202) : @F(LE), @R(690.0, 3200.0, 40.0, 38.0), REAL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(LE), @R(9.5));
+  @C(203) : @F(GT), @R(690.0, 3250.0, 40.0, 38.0), REAL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(GT), @R(9.5));
+  @C(204) : @F(AND), @R(960.0, 2160.0, 40.0, 38.0), BOOL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(AND), @R(9.5));
+  @C(205) : @F(GT), @R(570.0, 120.0, 40.0, 38.0), REAL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(GT), @R(9.5));
+  @C(206) : @F(AND), @R(960.0, 1550.0, 40.0, 38.0), BOOL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(AND), @R(9.5));
+  @C(207) : @F(ADD), @R(580.0, 2960.0, 40.0, 38.0), REAL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(ADD), @R(9.5));
+  @C(208) : @F(OR), @R(740.0, 120.0, 40.0, 38.0), BOOL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(OR), @R(9.5));
+  @C(209) : @F(ADD), @R(740.0, 320.0, 40.0, 38.0), REAL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(ADD), @R(9.5));
+  @C(210) : @F(MUL), @R(740.0, 390.0, 40.0, 38.0), REAL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(MUL), @R(9.5));
+  @C(211) : @F(AND), @R(960.0, 3200.0, 40.0, 38.0), BOOL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(AND), @R(9.5));
+  @C(212) : @F(LT), @R(690.0, 1910.0, 40.0, 38.0), REAL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(LT), @R(9.5));
+  @C(213) : @F(SUB), @R(580.0, 1930.0, 40.0, 38.0), REAL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(SUB), @R(9.5));
+  @C(214) : @F(ADD), @R(580.0, 3270.0, 40.0, 38.0), REAL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(ADD), @R(9.5));
+  @C(215) : @F(SUB), @R(580.0, 1620.0, 40.0, 38.0), REAL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(SUB), @R(9.5));
+  @C(216) : @F(AND), @R(960.0, 2890.0, 40.0, 38.0), BOOL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(AND), @R(9.5));
+  @C(217) : @F(SUB), @R(580.0, 2230.0, 40.0, 38.0), REAL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(SUB), @R(9.5));
+  @C(218) : @FB(RS5), @R(800.0, 2890.0, 80.0, 38.0), @I(@N(S), @L(9.5)), @I(@N(R1), @L(29.5)), @O(@N(Q1), @R(9.5));
+  @C(219) : @F(GT), @R(690.0, 2940.0, 40.0, 38.0), REAL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(GT), @R(9.5));
+  @C(220) : @F(LT), @R(570.0, 170.0, 40.0, 38.0), REAL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(LT), @R(9.5));
+  @C(221) : @FB(RS1), @R(800.0, 1860.0, 80.0, 38.0), @I(@N(S), @L(9.5)), @I(@N(R1), @L(29.5)), @O(@N(Q1), @R(9.5));
+  @C(222) : @F(SUB), @R(570.0, 390.0, 40.0, 38.0), REAL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(SUB), @R(9.5));
+  @C(223) : @F(SEL), @R(1070.0, 300.0, 120.0, 58.0), REAL, @I(@N(G), @L(9.5)), @I(@N(IN0), @L(29.5)), @I(@N(IN1), @L(49.5)), @O(@N(SEL), @R(9.5));
+  @C(170) : @FB(TON0), @R(920.0, 120.0, 100.0, 38.0), @I(@N(IN), @L(9.5)), @I(@N(PT), @L(29.5)), @O(@N(Q), @R(9.5)), @O(@N(ET), @R(29.5));
+  @C(171) : @F(LIMIT), @R(1320.0, 700.0, 120.0, 58.0), REAL, @I(@N(MN), @L(9.5)), @I(@N(IN), @L(29.5)), @I(@N(MX), @L(49.5)), @O(@N(LIMIT), @R(9.5));
+  @C(174) : @FB(TON2), @R(1130.0, 1860.0, 100.0, 38.0), @I(@N(IN), @L(9.5)), @I(@N(PT), @L(29.5)), @O(@N(Q), @R(9.5)), @O(@N(ET), @R(29.5));
+  @C(175) : @FB(TON4), @R(1130.0, 3200.0, 100.0, 38.0), @I(@N(IN), @L(9.5)), @I(@N(PT), @L(29.5)), @O(@N(Q), @R(9.5)), @O(@N(ET), @R(29.5));
+  @C(176) : @FB(TON3), @R(1130.0, 2160.0, 100.0, 38.0), @I(@N(IN), @L(9.5)), @I(@N(PT), @L(29.5)), @O(@N(Q), @R(9.5)), @O(@N(ET), @R(29.5));
+  @C(177) : @FB(TON1), @R(1130.0, 1550.0, 100.0, 38.0), @I(@N(IN), @L(9.5)), @I(@N(PT), @L(29.5)), @O(@N(Q), @R(9.5)), @O(@N(ET), @R(29.5));
+  @C(178) : @FB(TON5), @R(1130.0, 3500.0, 100.0, 38.0), @I(@N(IN), @L(9.5)), @I(@N(PT), @L(29.5)), @O(@N(Q), @R(9.5)), @O(@N(ET), @R(29.5));
+  @C(183) : @FB(TON6), @R(1130.0, 2890.0, 100.0, 38.0), @I(@N(IN), @L(9.5)), @I(@N(PT), @L(29.5)), @O(@N(Q), @R(9.5)), @O(@N(ET), @R(29.5));
+  @C(184) : @F(AND), @R(960.0, 3500.0, 40.0, 38.0), BOOL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(AND), @R(9.5));
+  @C(185) : @F(LE), @R(690.0, 2890.0, 40.0, 38.0), REAL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(LE), @R(9.5));
+  @C(186) : @FB(RS4), @R(800.0, 3500.0, 80.0, 38.0), @I(@N(S), @L(9.5)), @I(@N(R1), @L(29.5)), @O(@N(Q1), @R(9.5));
+  @C(187) : @F(LE), @R(690.0, 3500.0, 40.0, 38.0), REAL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(LE), @R(9.5));
+  @C(188) : @F(GT), @R(690.0, 3550.0, 40.0, 38.0), REAL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(GT), @R(9.5));
+  @C(189) : @F(MUL), @R(570.0, 320.0, 40.0, 38.0), REAL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(MUL), @R(9.5));
+  @C(190) : @F(AND), @R(960.0, 1860.0, 40.0, 38.0), BOOL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(AND), @R(9.5));
+  @C(191) : @FB(RS0), @R(800.0, 1550.0, 80.0, 38.0), @I(@N(S), @L(9.5)), @I(@N(R1), @L(29.5)), @O(@N(Q1), @R(9.5));
+  @CF(129) : @R(0.0, 630.0, 358.0, 98.0), @T("analog input scaling low limit$R$Nsheet:$a0"), @S(130);
+  @CF(131) : @R(0.0, 3540.0, 358.0, 48.0), @T("value for limit L$R$Nsheet:$a0"), @S(132);
+  @CF(133) : @R(0.0, 3700.0, 358.0, 48.0), @T("delay for limit L$R$Nsheet:$a0"), @S(134);
+  @CF(135) : @R(1540.0, 140.0, 358.0, 48.0), @T("analog value error (out of range or broken wire)$R$Nsheet:$a0"), @S(136);
+  @CF(137) : @R(0.0, 2200.0, 358.0, 48.0), @T("value for limit H$R$Nsheet:$a0"), @S(138);
+  @CF(139) : @R(1540.0, 3520.0, 358.0, 48.0), @T("scaled analog value < value L$R$Nsheet:$a0"), @S(140);
+  @CF(141) : @R(0.0, 2730.0, 358.0, 48.0), @T("analog value scaled between HLM & LLM$R$Nsheet:$a0"), @S(142);
+  @CF(143) : @R(1540.0, 3220.0, 358.0, 48.0), @T("scaled analog value < value LL$R$Nsheet:$a0"), @S(144);
+  @CF(145) : @R(1540.0, 2180.0, 358.0, 48.0), @T("scaled analog value > value H$R$Nsheet:$a0"), @S(146);
+  @CF(147) : @R(0.0, 3240.0, 358.0, 48.0), @T("value for limit LL$R$Nsheet:$a0"), @S(148);
+  @CF(149) : @R(0.0, 1900.0, 358.0, 48.0), @T("value for limit HH$R$Nsheet:$a0"), @S(150);
+  @CF(151) : @R(1540.0, 1570.0, 358.0, 48.0), @T("scaled analog value > value HHH$R$Nsheet:$a0"), @S(152);
+  @CF(153) : @R(1540.0, 2910.0, 358.0, 48.0), @T("scaled analog value < value LLL$R$Nsheet:$a0"), @S(154);
+  @CF(155) : @R(0.0, 3020.0, 358.0, 48.0), @T("release for limit LLL$R$Nsheet:$a0"), @S(156);
+  @CF(157) : @R(0.0, 410.0, 358.0, 78.0), @T("analog input scaling high limit$R$Nsheet:$a0"), @S(158);
+  @CF(159) : @R(0.0, 3090.0, 358.0, 48.0), @T("delay for limit LLL$R$Nsheet:$a0"), @S(160);
+  @CF(161) : @R(0.0, 1990.0, 358.0, 48.0), @T("release for limit HH$R$Nsheet:$a0"), @S(162);
+  @CF(163) : @R(1540.0, 720.0, 358.0, 178.0), @T("analog value scaled between HLM & LLM$R$Nsheet:$a0"), @S(164);
+  @CF(100) : @R(0.0, 2360.0, 358.0, 48.0), @T("delay for limit H$R$Nsheet:$a0"), @S(101);
+  @CF(165) : @R(460.0, 220.0, 378.0, 38.0), @T("limits for detection of analog error according to analog hardware"), @POU;
+  @CF(166) : @R(0.0, 830.0, 358.0, 48.0), @T("analog error replacement value$R$Nsheet:$a0"), @S(167);
+  @CF(102) : @R(1540.0, 1880.0, 358.0, 48.0), @T("scaled analog value > value HH$R$Nsheet:$a0"), @S(103);
+  @CF(168) : @R(0.0, 3630.0, 358.0, 48.0), @T("release for limit L$R$Nsheet:$a0"), @S(169);
+  @CF(104) : @R(0.0, 140.0, 358.0, 48.0), @T("analog input $R$Nsheet:$a0"), @S(105);
+  @CF(106) : @R(0.0, 2290.0, 358.0, 48.0), @T("release for limit H$R$Nsheet:$a0"), @S(107);
+  @CF(108) : @R(0.0, 2800.0, 358.0, 48.0), @T("hysteresis for all values$R$Nsheet:$a0"), @S(109);
+  @CF(110) : @R(0.0, 1460.0, 358.0, 48.0), @T("hysteresis for all values$R$Nsheet:$a0"), @S(111);
+  @CF(112) : @R(0.0, 2930.0, 358.0, 48.0), @T("value for limit LLL$R$Nsheet:$a0"), @S(113);
+  @CF(114) : @R(0.0, 3400.0, 358.0, 48.0), @T("delay for limit LL$R$Nsheet:$a0"), @S(115);
+  @CF(116) : @R(0.0, 1390.0, 358.0, 48.0), @T("analog value scaled between HLM & LLM$R$Nsheet:$a0"), @S(117);
+  @CF(118) : @R(0.0, 2060.0, 358.0, 48.0), @T("delay for limit HH$R$Nsheet:$a0"), @S(119);
+  @CF(120) : @R(0.0, 1590.0, 358.0, 48.0), @T("value for limit HHH$R$Nsheet:$a0"), @S(121);
+  @CF(122) : @R(0.0, 1680.0, 358.0, 48.0), @T("release for limit HHH$R$Nsheet:$a0"), @S(123);
+  @CF(124) : @R(460.0, 450.0, 378.0, 18.0), @T("scaling according to analog hardware"), @POU;
+  @CF(125) : @R(0.0, 3330.0, 358.0, 48.0), @T("release for limit LL$R$Nsheet:$a0"), @S(126);
+  @CF(127) : @R(0.0, 1750.0, 358.0, 48.0), @T("delay for limit HHH$R$Nsheet:$a0"), @S(128);
+  @CP(228) : 1030.0, 129.5;
+  @CP(237) : 680.0, 1559.5;
+  @CP(240) : 680.0, 1609.5;
+  @CP(244) : 680.0, 1869.5;
+  @CP(245) : 680.0, 1919.5;
+  @CP(246) : 680.0, 2169.5;
+  @CP(239) : 570.0, 1579.5;
+  @CP(248) : 570.0, 2189.5;
+  @CP(252) : 410.0, 619.5;
+  @CP(253) : 410.0, 479.5;
+  @CP(257) : 570.0, 3529.5;
+  @CP(259) : 560.0, 2989.5;
+  @CP(260) : 560.0, 3299.5;
+  @CP(262) : 570.0, 1889.5;
+  @CP(266) : 680.0, 2899.5;
+  @CP(267) : 680.0, 2949.5;
+  @CP(268) : 680.0, 3209.5;
+  @CP(271) : 680.0, 3259.5;
+  @CP(326) : 680.0, 3509.5;
+  @CP(270) : 570.0, 3229.5;
+  @CP(276) : 400.0, 129.5;
+  @CP(299) : 400.0, 179.5;
+  @CP(281) : 570.0, 2919.5;
+  @CP(292) : 560.0, 1649.5;
+  @CP(293) : 560.0, 1959.5;
+  @CP(304) : 380.0, 399.5;
+
+  @G(227) :
+     @L(@C(170).Q, @CP(228)),
+     @L(@CP(228), @VF(136).i),
+     @L(@CP(228), @C(223).G)
+    ;
+  @G(229) :
+     @L(@C(178).Q, @VF(140).i)
+    ;
+  @G(230) :
+     @L(@C(175).Q, @VF(144).i)
+    ;
+  @G(231) :
+     @L(@C(176).Q, @VF(146).i)
+    ;
+  @G(232) :
+     @L(@C(177).Q, @VF(152).i)
+    ;
+  @G(233) :
+     @L(@C(183).Q, @VF(154).i)
+    ;
+  @G(234) :
+     @L(@C(171).LIMIT, @VF(164).i)
+    ;
+  @G(235) :
+     @L(@C(174).Q, @VF(103).i)
+    ;
+  @G(236) :
+     @L(@VF(117).o, @CP(237)),
+     @L(@CP(237), @C(192).IN1),
+     @L(@CP(237), @CP(240)),
+     @L(@CP(240), @C(193).IN1),
+     @L(@CP(240), @CP(244)),
+     @L(@CP(244), @CP(245)),
+     @L(@CP(245), @CP(246)),
+     @L(@CP(246), @C(195).IN1),
+     @L(@CP(246), @C(196).IN1),
+     @L(@CP(244), @C(200).IN1),
+     @L(@CP(245), @C(212).IN1)
+    ;
+  @G(238) :
+     @L(@VF(121).o, @CP(239)),
+     @L(@CP(239), @C(192).IN2),
+     @L(@CP(239), @C(215).IN1)
+    ;
+  @G(241) :
+     @L(@C(215).SUB, @C(193).IN2)
+    ;
+  @G(242) :
+     @L(@C(195).GE, @C(194).S)
+    ;
+  @G(243) :
+     @L(@C(196).LT, @C(194).R1)
+    ;
+  @G(247) :
+     @L(@VF(138).o, @CP(248)),
+     @L(@CP(248), @C(195).IN2),
+     @L(@CP(248), @C(217).IN1)
+    ;
+  @G(249) :
+     @L(@C(217).SUB, @C(196).IN2)
+    ;
+  @G(250) :
+     @L(@C(198).MUL, @C(197).IN1)
+    ;
+  @G(251) :
+     @L(@VF(130).o, @CP(252)),
+     @L(@CP(252), @CP(253)),
+     @L(@CP(253), @C(197).IN2),
+     @L(@CP(253), @C(222).IN2),
+     @L(@CP(252), @C(171).MN)
+    ;
+  @G(254) :
+     @L(@C(209).ADD, @C(198).IN1)
+    ;
+  @G(255) :
+     @L(@C(210).MUL, @C(198).IN2)
+    ;
+  @G(256) :
+     @L(@VF(132).o, @CP(257)),
+     @L(@CP(257), @C(199).IN1),
+     @L(@CP(257), @C(187).IN2)
+    ;
+  @G(258) :
+     @L(@VF(109).o, @CP(259)),
+     @L(@CP(259), @CP(260)),
+     @L(@CP(260), @C(199).IN2),
+     @L(@CP(259), @C(207).IN2),
+     @L(@CP(260), @C(214).IN2)
+    ;
+  @G(261) :
+     @L(@VF(150).o, @CP(262)),
+     @L(@CP(262), @C(200).IN2),
+     @L(@CP(262), @C(213).IN1)
+    ;
+  @G(263) :
+     @L(@C(202).LE, @C(201).S)
+    ;
+  @G(264) :
+     @L(@C(203).GT, @C(201).R1)
+    ;
+  @G(265) :
+     @L(@VF(142).o, @CP(266)),
+     @L(@CP(266), @CP(267)),
+     @L(@CP(267), @CP(268)),
+     @L(@CP(268), @C(202).IN1),
+     @L(@CP(268), @CP(271)),
+     @L(@CP(271), @C(203).IN1),
+     @L(@CP(267), @C(219).IN1),
+     @L(@CP(266), @C(185).IN1),
+     @L(@CP(271), @CP(326)),
+     @L(@CP(326), @C(187).IN1),
+     @L(@CP(326), @C(188).IN1)
+    ;
+  @G(269) :
+     @L(@VF(148).o, @CP(270)),
+     @L(@CP(270), @C(202).IN2),
+     @L(@CP(270), @C(214).IN1)
+    ;
+  @G(272) :
+     @L(@C(214).ADD, @C(203).IN2)
+    ;
+  @G(273) :
+     @L(@C(194).Q1, @C(204).IN1)
+    ;
+  @G(274) :
+     @L(@VF(107).o, @C(204).IN2)
+    ;
+  @G(275) :
+     @L(@VF(105).o, @CP(276)),
+     @L(@CP(276), @C(205).IN1),
+     @L(@CP(276), @CP(299)),
+     @L(@CP(299), @C(220).IN1),
+     @L(@CP(299), @C(189).IN1)
+    ;
+  @G(277) :
+     @L(@VF(173).o, @C(205).IN2)
+    ;
+  @G(278) :
+     @L(@C(191).Q1, @C(206).IN1)
+    ;
+  @G(279) :
+     @L(@VF(123).o, @C(206).IN2)
+    ;
+  @G(280) :
+     @L(@VF(113).o, @CP(281)),
+     @L(@CP(281), @C(207).IN1),
+     @L(@CP(281), @C(185).IN2)
+    ;
+  @G(282) :
+     @L(@C(205).GT, @C(208).IN1)
+    ;
+  @G(283) :
+     @L(@C(220).LT, @C(208).IN2)
+    ;
+  @G(284) :
+     @L(@C(189).MUL, @C(209).IN1)
+    ;
+  @G(285) :
+     @L(@VF(180).o, @C(209).IN2)
+    ;
+  @G(286) :
+     @L(@C(222).SUB, @C(210).IN1)
+    ;
+  @G(287) :
+     @L(@VF(181).o, @C(210).IN2)
+    ;
+  @G(288) :
+     @L(@C(201).Q1, @C(211).IN1)
+    ;
+  @G(289) :
+     @L(@VF(126).o, @C(211).IN2)
+    ;
+  @G(290) :
+     @L(@C(213).SUB, @C(212).IN2)
+    ;
+  @G(291) :
+     @L(@VF(111).o, @CP(292)),
+     @L(@CP(292), @CP(293)),
+     @L(@CP(293), @C(213).IN2),
+     @L(@CP(292), @C(215).IN2),
+     @L(@CP(293), @C(217).IN2)
+    ;
+  @G(294) :
+     @L(@C(218).Q1, @C(216).IN1)
+    ;
+  @G(295) :
+     @L(@VF(156).o, @C(216).IN2)
+    ;
+  @G(296) :
+     @L(@C(185).LE, @C(218).S)
+    ;
+  @G(297) :
+     @L(@C(219).GT, @C(218).R1)
+    ;
+  @G(298) :
+     @L(@C(207).ADD, @C(219).IN2)
+    ;
+  @G(300) :
+     @L(@VF(172).o, @C(220).IN2)
+    ;
+  @G(301) :
+     @L(@C(200).GE, @C(221).S)
+    ;
+  @G(302) :
+     @L(@C(212).LT, @C(221).R1)
+    ;
+  @G(303) :
+     @L(@VF(158).o, @CP(304)),
+     @L(@CP(304), @C(222).IN1),
+     @L(@CP(304), @C(171).MX)
+    ;
+  @G(305) :
+     @L(@C(197).ADD, @C(223).IN0)
+    ;
+  @G(306) :
+     @L(@VF(167).o, @C(223).IN1)
+    ;
+  @G(307) :
+     @L(@C(208).OR, @C(170).IN)
+    ;
+  @G(308) :
+     @L(@VF(182).o, @C(170).PT)
+    ;
+  @G(309) :
+     @L(@C(223).SEL, @C(171).IN)
+    ;
+  @G(310) :
+     @L(@C(190).AND, @C(174).IN)
+    ;
+  @G(311) :
+     @L(@VF(119).o, @C(174).PT)
+    ;
+  @G(312) :
+     @L(@C(211).AND, @C(175).IN)
+    ;
+  @G(313) :
+     @L(@VF(115).o, @C(175).PT)
+    ;
+  @G(314) :
+     @L(@C(204).AND, @C(176).IN)
+    ;
+  @G(315) :
+     @L(@VF(101).o, @C(176).PT)
+    ;
+  @G(316) :
+     @L(@C(206).AND, @C(177).IN)
+    ;
+  @G(317) :
+     @L(@VF(128).o, @C(177).PT)
+    ;
+  @G(318) :
+     @L(@C(184).AND, @C(178).IN)
+    ;
+  @G(319) :
+     @L(@VF(134).o, @C(178).PT)
+    ;
+  @G(320) :
+     @L(@C(216).AND, @C(183).IN)
+    ;
+  @G(321) :
+     @L(@VF(160).o, @C(183).PT)
+    ;
+  @G(322) :
+     @L(@C(186).Q1, @C(184).IN1)
+    ;
+  @G(323) :
+     @L(@VF(169).o, @C(184).IN2)
+    ;
+  @G(324) :
+     @L(@C(187).LE, @C(186).S)
+    ;
+  @G(325) :
+     @L(@C(188).GT, @C(186).R1)
+    ;
+  @G(327) :
+     @L(@C(199).ADD, @C(188).IN2)
+    ;
+  @G(328) :
+     @L(@VF(179).o, @C(189).IN2)
+    ;
+  @G(329) :
+     @L(@C(221).Q1, @C(190).IN1)
+    ;
+  @G(330) :
+     @L(@VF(162).o, @C(190).IN2)
+    ;
+  @G(331) :
+     @L(@C(192).GE, @C(191).S)
+    ;
+  @G(332) :
+     @L(@C(193).LT, @C(191).R1)
+    ;
+
+  @PAGE(224) : @R(0.0, 0.0, 1900.0, 1340.0), @LN("analog scaling, error replace value");
+  @PAGE(225) : @R(0.0, 1340.0, 1900.0, 1340.0), @LN("high limits ");
+  @PAGE(226) : @R(0.0, 2680.0, 1900.0, 1340.0), @LN("low limits");
+END_FUNCTION_BLOCK
+END_NAMESPACE

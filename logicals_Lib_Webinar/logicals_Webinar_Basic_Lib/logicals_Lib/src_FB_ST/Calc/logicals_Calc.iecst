@@ -1,0 +1,106 @@
+ /* -----------------------------------------
+ * logicals_Lib
+ * 2014-12-19 DG
+ * -----------------------------------------
+ * logi.cals GmbH
+ * A-3100 St. Poelten
+ * Europaplatz 7/1
+ * Tel.: 0043-5-77147
+ *
+ * logi.cals automation solutions & services GmbH
+ * D-40738 Langenfeld
+ * Postfach 1306
+ * Tel.: 0043-5-77147
+ * 
+ * Contact:
+ * dieter.goltz@logicals.com
+ * 
+ * History:
+ * 
+ * Created: 
+ * DG 2021-08-01
+ *
+ * Modified:
+ * 2021-08-01 - DG Erstellt 
+ *
+ */
+ NAMESPACE com.logicals.Basic.Calc
+ 
+  /*
+   * Oberflaeche berechnen / Surface calculation
+   * PI * D²/4
+   */
+   FUNCTION_BLOCK FB_lc_Surface_ST
+    VAR_INPUT
+     vir_Diameter : REAL; // in m
+    END_VAR
+    VAR_OUTPUT
+     vor_Surface : REAL; // in m²
+    END_VAR
+    
+    VAR
+     lr_Pi : REAL;
+    END_VAR
+    VAR
+     /* Lokaler InitMerker */
+      lx_CycleInit         : BOOL;
+     /* Lokaler Zyklustaktgeber */
+      lx_CyclePulse        : BOOL;
+     /* Lokaler Zyklustaktzaehler */
+      li_CycleCount        : INT; 
+     /* Lokaler InitZyklustaktzaehler */
+      li_CycleCountInitVal : INT;
+     END_VAR
+
+     VAR
+      FB_InitR_Trig : R_TRIG;
+     END_VAR
+
+    /*
+     * Lokaler InitPulse
+     */
+     FB_InitR_Trig(CLK:= TRUE, Q => lx_CycleInit);
+
+     If lx_CycleInit = TRUE THEN
+      li_CycleCountInitVal := li_CycleCountInitVal + 1;
+      lr_Pi := 22/7;
+     END_IF;
+
+     lx_CyclePulse := NOT(lx_CyclePulse);
+     li_CycleCount := li_CycleCount + 1;    
+
+     vor_Surface := (lr_pi * EXPT(vir_Diameter,2) / 4); 
+    
+   END_FUNCTION_BLOCK
+
+  /*
+   * Volumen eines einfachen Tanks berechnen / Calculate the volume of a tank
+   * Volume = Surface * Height = Pi*D²/4 * Height!
+   * Benutzt FB_lc_Surface_ST
+   */   
+   FUNCTION_BLOCK FB_lc_VolumeTank_ST
+   
+     VAR_INPUT
+       vir_LevelHeight : REAL; // In Meter
+       vir_Diameter    : REAL; // In Meter
+     END_VAR
+     
+     VAR_OUTPUT
+       vor_VolTank : REAL;    // in m³
+     END_VAR
+     
+     VAR
+      FB_lc_Surface : FB_lc_Surface_ST;
+     END_VAR
+     
+     VAR
+      lr_Surface : REAL;
+     END_VAR
+     
+     FB_lc_Surface(vir_Diameter := vir_Diameter, vor_Surface => lr_Surface);
+     vor_VolTank := lr_Surface * vir_LevelHeight;
+     
+   END_FUNCTION_BLOCK
+
+   END_NAMESPACE
+   

@@ -1,0 +1,149 @@
+NAMESPACE com.logicals.Basic.Flash
+FUNCTION_BLOCK FB_lc_Flash2_FBD
+  {
+    vix_SelPar {loc := "left", index := 4};
+    vot_OnTime {loc := "right", index := 1};
+    height := 138;
+    width := 260;
+    minWidth := 260;
+    minHeight := 138;
+    maxWidth := 260;
+    maxHeight := 138;
+  }
+
+  VAR
+    TON1 : TON;
+    TON : TON;
+    lx_Out : BOOL;
+    TON2 : TON;
+    lx_ToOut : BOOL := TRUE;
+    lit_OnTimePar : TIME;
+    lit_OnTime : TIME;
+    lit_OffTime : TIME;
+    lit_OffTimePar : TIME;
+  END_VAR
+  VAR_INPUT
+    vix_Start : BOOL;
+    vit_OnTime : TIME := T#1s;
+    vit_OffTime : TIME := T#1s;
+    vix_SelPar : BOOL;
+  END_VAR
+  VAR_OUTPUT
+    vox_Out : BOOL;
+    vot_OnTime : TIME;
+    vot_OffTime : TIME;
+  END_VAR
+
+  (*
+
+    // Network 1:
+    SEL(G := vix_SelPar, IN0 := vit_OnTime, IN1 := lit_OnTimePar, SEL => lit_OnTime);
+    vot_OnTime := lit_OnTime;
+    SEL(G := vix_SelPar, IN0 := vit_OffTime, IN1 := lit_OffTimePar, SEL => lit_OffTime);
+    vot_OffTime := lit_OffTime;
+
+    // Network 2:
+    TON2(IN := TON1.Q, PT := lit_OffTime);
+    NOT(IN := TON2.Q, NOT => @C(9).NOT);
+    AND(IN1 := vix_Start, IN2 := @C(9).NOT, AND => @C(8).AND);
+    TON1(IN := @C(8).AND, PT := lit_OnTime, Q => lx_Out);
+
+    // Network 3:
+    MOVE(EN := lx_ToOut, IN := lx_Out, MOVE => vox_Out);
+
+  *)
+
+  @VF(1) : @E(vix_Start), @R(490.0, 330.0, 140.0, 19.0);
+  @VF(2) : @E(lit_OnTime), @R(490.0, 390.0, 140.0, 19.0);
+  @C(3) : @FB(TON1), @R(950.0, 370.0, 100.0, 38.0), BOOL, @I(@N(IN), @L(9.5)), @I(@N(PT), @L(29.5)), @O(@N(Q), @R(9.5)), @O(@N(ET), @R(29.5));
+  @VF(5) : @E(lit_OffTime), @R(490.0, 500.0, 140.0, 19.0);
+  @C(9) : @F(NOT), @R(690.0, 350.0, 60.0, 18.5), BOOL, @I(@N(IN), @L(9.5)), @O(@N(NOT), @R(9.5));
+  @C(8) : @F(AND), @R(820.0, 330.0, 40.0, 38.0), BOOL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @I(@N(IN3), @L(49.5)), @I(@N(IN4), @L(69.5)), @I(@N(IN5), @L(89.5)), @I(@N(IN6), @L(109.5)), @I(@N(IN7), @L(129.5)), @I(@N(IN8), @L(149.5)), @I(@N(IN9), @L(169.5)), @I(@N(IN10), @L(189.5)), @I(@N(IN11), @L(209.5)), @I(@N(IN12), @L(229.5)), @I(@N(IN13), @L(249.5)), @I(@N(IN14), @L(269.5)), @I(@N(IN15), @L(289.5)), @I(@N(IN16), @L(309.5)), @O(@N(AND), @R(9.5));
+  @VF(15) : @E(lx_Out), @R(1230.0, 370.0, 140.0, 19.0);
+  @VF(20) : @E(lx_Out), @R(740.0, 560.0, 140.0, 19.0);
+  @VF(21) : @E(vox_Out), @R(1230.0, 560.0, 140.0, 19.0);
+  @C(6) : @FB(TON2), @R(950.0, 480.0, 100.0, 38.0), BOOL, @I(@N(IN), @L(9.5)), @I(@N(PT), @L(29.5)), @O(@N(Q), @R(9.5)), @O(@N(ET), @R(29.5));
+  @C(7) : @F(MOVE), @R(980.0, 540.0, 60.0, 38.5), BOOL, @I(@N(EN), @L(9.5)), @I(@N(IN), @L(29.5)), @O(@N(ENO), @R(9.5)), @O(@N(MOVE), @R(29.5));
+  @VF(24) : @E(lx_ToOut), @R(490.0, 540.0, 140.0, 19.0);
+  @CF(14) : @R(410.0, 20.0, 500.0, 99.0), @T("D:$NFlash-Block mit einstellbarer On und OffTime.$NUmschaltung zwischen externen oder internen Sollwerten (vix_SelPar)!"), @POU;
+  @CF(19) : @R(930.0, 20.0, 480.0, 99.0), @T("D:$NFlash-Block with variable On- and OffTime.$NSwitch between externel and internal parameter (vix_SelPar)!"), @POU;
+  @VF(26) : @E(vix_SelPar), @R(490.0, 160.0, 140.0, 19.0);
+  @C(27) : @F(SEL), @R(760.0, 160.0, 120.0, 58.0), TIME, @I(@N(G), @L(9.5)), @I(@N(IN0), @L(29.5)), @I(@N(IN1), @L(49.5)), @O(@N(SEL), @R(9.5));
+  @VF(29) : @E(lit_OnTime), @R(1060.0, 160.0, 140.0, 19.0);
+  @VF(31) : @E(lit_OnTimePar), @R(490.0, 200.0, 140.0, 19.0);
+  @VF(33) : @E(vit_OnTime), @R(490.0, 180.0, 140.0, 19.0);
+  @C(35) : @F(SEL), @R(760.0, 230.0, 120.0, 58.0), TIME, @I(@N(G), @L(9.5)), @I(@N(IN0), @L(29.5)), @I(@N(IN1), @L(49.5)), @O(@N(SEL), @R(9.5));
+  @VF(36) : @E(lit_OffTime), @R(1060.0, 230.0, 140.0, 19.0);
+  @VF(39) : @E(lit_OffTimePar), @R(490.0, 270.0, 140.0, 19.0);
+  @VF(41) : @E(vit_OffTime), @R(490.0, 250.0, 140.0, 19.0);
+  @VF(43) : @E(vot_OnTime), @R(1230.0, 160.0, 140.0, 19.0);
+  @VF(45) : @E(vot_OffTime), @R(1230.0, 230.0, 140.0, 19.0);
+  @OLT(47) : @R(270.0, 200.0, 80.0, 19.0), @S(31);
+  @OLT(48) : @R(270.0, 270.0, 80.0, 19.0), @S(39);
+  @OLT(49) : @R(270.0, 160.0, 80.0, 19.0), @S(26);
+  @CP(17) : 1140.0, 380.0;
+  @CP(38) : 709.5, 169.5;
+
+  @G(4) :
+     @L(@VF(2).o, @C(3).PT)
+    ;
+  @G(10) :
+     @L(@VF(1).o, @C(8).IN1)
+    ;
+  @G(11) :
+     @L(@C(9).NOT, @C(8).IN2)
+    ;
+  @G(12) :
+     @L(@C(8).AND, @C(3).IN)
+    ;
+  @G(16) :
+     @L(@CP(17), @C(6).IN),
+     @L(@C(3).Q, @CP(17)),
+     @L(@CP(17), @VF(15).i)
+    ;
+  @G(13) :
+     @L(@VF(5).o, @C(6).PT)
+    ;
+  @G(18) :
+     @L(@C(6).Q, @C(9).IN)
+    ;
+  @G(22) :
+     @L(@VF(20).o, @C(7).IN)
+    ;
+  @G(23) :
+     @L(@C(7).MOVE, @VF(21).i)
+    ;
+  @G(25) :
+     @L(@VF(24).o, @C(7).EN)
+    ;
+  @G(28) :
+     @L(@VF(26).o, @CP(38)),
+     @L(@CP(38), @C(27).G),
+     @L(@CP(38), @C(35).G)
+    ;
+  @G(30) :
+     @L(@C(27).SEL, @VF(29).i)
+    ;
+  @G(32) :
+     @L(@VF(31).o, @C(27).IN1)
+    ;
+  @G(34) :
+     @L(@VF(33).o, @C(27).IN0)
+    ;
+  @G(37) :
+     @L(@C(35).SEL, @VF(36).i)
+    ;
+  @G(40) :
+     @L(@VF(39).o, @C(35).IN1)
+    ;
+  @G(42) :
+     @L(@VF(41).o, @C(35).IN0)
+    ;
+  @G(44) :
+     @L(@VF(29).o, @VF(43).i)
+    ;
+  @G(46) :
+     @L(@VF(36).o, @VF(45).i)
+    ;
+END_FUNCTION_BLOCK
+END_NAMESPACE

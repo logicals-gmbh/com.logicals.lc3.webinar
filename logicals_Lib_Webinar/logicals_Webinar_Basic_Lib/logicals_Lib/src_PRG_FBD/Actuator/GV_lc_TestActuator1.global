@@ -1,0 +1,10 @@
+GLOBALS GV_lc_TestActuator1
+	VAR_GLOBAL
+    gx_MotorLeft : BOOL;
+    gx_StartLeft : BOOL;
+    gx_MotorRight : BOOL;
+    gx_MotorStop : BOOL;
+    gx_StartRight : BOOL;
+    gx_LightBarrier1 : BOOL;
+	END_VAR
+END_GLOBALS

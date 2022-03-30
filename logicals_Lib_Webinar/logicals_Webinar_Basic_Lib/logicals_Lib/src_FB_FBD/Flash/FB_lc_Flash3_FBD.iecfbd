@@ -1,0 +1,106 @@
+NAMESPACE com.logicals.Basic.Flash
+FUNCTION_BLOCK FB_lc_Flash3_FBD
+  {
+    vot_OnTime {loc := "right", index := 1};
+    height := 138;
+    width := 260;
+  }
+
+  VAR
+    TON1 : TON;
+    TON : TON;
+    lx_Out : BOOL;
+    TON2 : TON;
+    lx_ToOut : BOOL := TRUE;
+    l_OnOffTimePar : DT_lc_OnOffTime;
+  END_VAR
+  VAR_INPUT
+    vix_Start : BOOL;
+  END_VAR
+  VAR_OUTPUT
+    vox_Out : BOOL;
+    vot_OnTime : TIME;
+    vot_OffTime : TIME;
+  END_VAR
+
+  (*
+
+    // Network 1:
+    vot_OnTime := l_OnOffTimePar.OnTime;
+
+    // Network 2:
+    vot_OffTime := l_OnOffTimePar.OffTime;
+
+    // Network 3:
+    TON2(IN := TON1.Q, PT := l_OnOffTimePar.OffTime);
+    NOT(IN := TON2.Q, NOT => @C(9).NOT);
+    AND(IN1 := vix_Start, IN2 := @C(9).NOT, AND => @C(8).AND);
+    TON1(IN := @C(8).AND, PT := l_OnOffTimePar.OnTime, Q => lx_Out);
+
+    // Network 4:
+    MOVE(EN := lx_ToOut, IN := lx_Out, MOVE => vox_Out);
+
+  *)
+
+  @VF(1) : @E(vix_Start), @R(490.0, 330.0, 140.0, 19.0);
+  @C(3) : @FB(TON1), @R(950.0, 370.0, 100.0, 38.0), BOOL, @I(@N(IN), @L(9.5)), @I(@N(PT), @L(29.5)), @O(@N(Q), @R(9.5)), @O(@N(ET), @R(29.5));
+  @C(9) : @F(NOT), @R(690.0, 350.0, 60.0, 18.5), BOOL, @I(@N(IN), @L(9.5)), @O(@N(NOT), @R(9.5));
+  @C(8) : @F(AND), @R(820.0, 330.0, 40.0, 38.0), BOOL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @I(@N(IN3), @L(49.5)), @I(@N(IN4), @L(69.5)), @I(@N(IN5), @L(89.5)), @I(@N(IN6), @L(109.5)), @I(@N(IN7), @L(129.5)), @I(@N(IN8), @L(149.5)), @I(@N(IN9), @L(169.5)), @I(@N(IN10), @L(189.5)), @I(@N(IN11), @L(209.5)), @I(@N(IN12), @L(229.5)), @I(@N(IN13), @L(249.5)), @I(@N(IN14), @L(269.5)), @I(@N(IN15), @L(289.5)), @I(@N(IN16), @L(309.5)), @O(@N(AND), @R(9.5));
+  @VF(15) : @E(lx_Out), @R(1260.0, 370.0, 140.0, 19.0);
+  @VF(20) : @E(lx_Out), @R(740.0, 560.0, 140.0, 19.0);
+  @VF(21) : @E(vox_Out), @R(1260.0, 560.0, 140.0, 19.0);
+  @C(6) : @FB(TON2), @R(950.0, 480.0, 100.0, 38.0), BOOL, @I(@N(IN), @L(9.5)), @I(@N(PT), @L(29.5)), @O(@N(Q), @R(9.5)), @O(@N(ET), @R(29.5));
+  @C(7) : @F(MOVE), @R(980.0, 540.0, 60.0, 38.5), BOOL, @I(@N(EN), @L(9.5)), @I(@N(IN), @L(29.5)), @O(@N(ENO), @R(9.5)), @O(@N(MOVE), @R(29.5));
+  @VF(24) : @E(lx_ToOut), @R(490.0, 540.0, 140.0, 19.0);
+  @CF(14) : @R(360.0, 20.0, 530.0, 99.0), @T("D:$NFlash-Block mit einstellbarer On und OffTime.$NInitialisierung beim Aufruf!"), @POU;
+  @CF(19) : @R(900.0, 20.0, 510.0, 99.0), @T("D:$NFlash-Block with variable On- and OffTime.$NInitialization by instance call!"), @POU;
+  @VF(43) : @E(vot_OnTime), @R(1260.0, 200.0, 140.0, 19.0);
+  @VF(45) : @E(vot_OffTime), @R(1260.0, 230.0, 140.0, 19.0);
+  @VF(50) : @E(l_OnOffTimePar.OnTime), @R(370.0, 390.0, 260.0, 19.0);
+  @VF(4) : @E(l_OnOffTimePar.OffTime), @R(370.0, 500.0, 260.0, 19.0);
+  @VF(13) : @E(l_OnOffTimePar.OnTime), @R(360.0, 200.0, 260.0, 19.0);
+  @VF(27) : @E(l_OnOffTimePar.OffTime), @R(360.0, 230.0, 260.0, 19.0);
+  @CF(29) : @R(560.0, 140.0, 700.0, 39.0), @T("Einstellwerte ausgeben!"), @POU;
+  @CF(86) : @R(670.0, 180.0, 490.0, 19.0), @T("(l_OnOffTimePar := (OnTime := T#1s, OffTime := T#1s))"), @POU;
+  @CP(17) : 1140.0, 380.0;
+
+  @G(10) :
+     @L(@VF(1).o, @C(8).IN1)
+    ;
+  @G(11) :
+     @L(@C(9).NOT, @C(8).IN2)
+    ;
+  @G(12) :
+     @L(@C(8).AND, @C(3).IN)
+    ;
+  @G(16) :
+     @L(@CP(17), @C(6).IN),
+     @L(@C(3).Q, @CP(17)),
+     @L(@CP(17), @VF(15).i)
+    ;
+  @G(18) :
+     @L(@C(6).Q, @C(9).IN)
+    ;
+  @G(22) :
+     @L(@VF(20).o, @C(7).IN)
+    ;
+  @G(23) :
+     @L(@C(7).MOVE, @VF(21).i)
+    ;
+  @G(25) :
+     @L(@VF(24).o, @C(7).EN)
+    ;
+  @G(2) :
+     @L(@VF(50).o, @C(3).PT)
+    ;
+  @G(5) :
+     @L(@VF(4).o, @C(6).PT)
+    ;
+  @G(26) :
+     @L(@VF(13).o, @VF(43).i)
+    ;
+  @G(28) :
+     @L(@VF(27).o, @VF(45).i)
+    ;
+END_FUNCTION_BLOCK
+END_NAMESPACE

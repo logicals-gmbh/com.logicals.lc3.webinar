@@ -1,0 +1,82 @@
+NAMESPACE com.logicals.Basic.Logic
+FUNCTION_BLOCK FB_lc_ToggleSw_FBD
+  VAR
+    R_TRIG : R_TRIG;
+    RS : RS;
+  END_VAR
+  VAR_INPUT
+    vix_Set : BOOL;
+    vix_Trg : BOOL;
+    vix_Reset : BOOL;
+  END_VAR
+  VAR_OUTPUT
+    vox_Out : BOOL;
+  END_VAR
+
+  (*
+
+    // Network 1:
+    R_TRIG(CLK := vix_Trg);
+    AND(IN1 := NOT vox_Out, IN2 := R_TRIG.Q, AND => @C(117).AND);
+    OR(IN1 := vix_Set, IN2 := @C(117).AND, OR => @C(113).OR);
+    AND(IN1 := R_TRIG.Q, IN2 := vox_Out, AND => @C(116).AND);
+    OR(IN1 := @C(116).AND, IN2 := vix_Reset, OR => @C(114).OR);
+    RS(S := @C(113).OR, R1 := @C(114).OR, Q1 => vox_Out);
+
+  *)
+
+  @C(115) : @FB(R_TRIG), @R(680.0, 660.0, 140.0, 18.0), @I(@N(CLK), @L(9.5)), @O(@N(Q), @R(9.5));
+  @C(111) : @FB(RS), @R(1060.0, 640.0, 80.0, 38.0), @I(@N(S), @L(9.5)), @I(@N(R1), @L(29.5)), @O(@N(Q1), @R(9.5));
+  @C(116) : @F(AND), @R(890.0, 660.0, 40.0, 38.0), BOOL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(AND), @R(9.5));
+  @C(114) : @F(OR), @R(980.0, 660.0, 40.0, 38.0), BOOL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(OR), @R(9.5));
+  @C(117) : @F(AND), @R(890.0, 620.0, 40.0, 38.0), BOOL, @I(@N(IN1), @L(9.5), @NEG), @I(@N(IN2), @L(29.5)), @O(@N(AND), @R(9.5));
+  @C(113) : @F(OR), @R(980.0, 600.0, 40.0, 38.0), BOOL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(OR), @R(9.5));
+  @VF(105) : @E(vox_Out), @R(1800.0, 640.0, 100.0, 19.0);
+  @VF(112) : @E(vox_Out), @R(680.0, 620.0, 140.0, 19.0);
+  @VF(101) : @E(vix_Set), @R(0.0, 600.0, 100.0, 19.0);
+  @VF(109) : @E(vix_Trg), @R(0.0, 660.0, 100.0, 19.0);
+  @VF(107) : @E(vix_Reset), @R(0.0, 720.0, 100.0, 19.0);
+  @CF(100) : @R(130.0, 620.0, 298.0, 18.0), @T("%l"), @S(101);
+  @CF(108) : @R(130.0, 680.0, 298.0, 18.0), @T("%l"), @S(109);
+  @CF(106) : @R(130.0, 740.0, 298.0, 18.0), @T("%l"), @S(107);
+  @CF(102) : @R(190.0, 80.0, 728.0, 228.0), @T("E:$R$N$R$NToggle Flipflop Switch$R$N$R$NTrg-input: at 0/1-edge toggle flipflop state$R$NRes-input: at 1-signal reset flipflop (priority)$R$NSet-input: at 1-signal set flipflop$R$N$R$NY-output: $a0actual toggle flipflop state"), @POU;
+  @CF(103) : @R(980.0, 80.0, 728.0, 228.0), @T("D:$R$N$R$NToggle Flipflop Schalter$R$N$R$NTrg-Eing.: bei 0/1-Flanke Flipflop umschalten$R$NRes-Eing.: bei 1-Signal Flipflop r$fccksetzen (Priorit$e4t)$R$NSet-Eing.: bei 1-Signal Flipflop setzen$R$N$R$NY-Ausgang: aktueller Toggle Flipflop Zustand"), @POU;
+  @CP(127) : 870.0, 669.5;
+  @CP(129) : 850.0, 629.5;
+
+  @G(123) :
+     @L(@VF(107).o, @C(114).IN2)
+    ;
+  @G(122) :
+     @L(@C(116).AND, @C(114).IN1)
+    ;
+  @G(126) :
+     @L(@C(115).Q, @CP(127)),
+     @L(@CP(127), @C(116).IN1),
+     @L(@CP(127), @C(117).IN2)
+    ;
+  @G(132) :
+     @L(@C(114).OR, @C(111).R1)
+    ;
+  @G(119) :
+     @L(@C(111).Q1, @VF(105).i)
+    ;
+  @G(130) :
+     @L(@C(113).OR, @C(111).S)
+    ;
+  @G(121) :
+     @L(@C(117).AND, @C(113).IN2)
+    ;
+  @G(128) :
+     @L(@VF(112).o, @CP(129)),
+     @L(@CP(129), @C(116).IN2),
+     @L(@CP(129), @C(117).IN1)
+    ;
+  @G(120) :
+     @L(@VF(101).o, @C(113).IN1)
+    ;
+  @G(125) :
+     @L(@VF(109).o, @C(115).CLK)
+    ;
+END_FUNCTION_BLOCK
+END_NAMESPACE

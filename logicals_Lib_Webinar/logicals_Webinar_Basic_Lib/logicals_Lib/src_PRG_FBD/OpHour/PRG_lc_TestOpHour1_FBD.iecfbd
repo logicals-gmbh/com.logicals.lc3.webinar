@@ -1,0 +1,277 @@
+PROGRAM PRG_lc_TestOpHour1_FBD
+  
+  USING com.logicals.Basic.OpHour;
+  USING com.logicals.Basic.Trace;
+  USING com.logicals.Basic.GetTime;
+  
+  VAR
+    FB_OpHourBySecChg : FB_lc_OpHourBySecChg_ST;
+    lstruc_OpHourGetTime : DT_lc_OpHourGetTime;
+    ludi_OpHourActAllSec : UDINT;
+    lui_OpHourActSec : UINT;
+    lui_OpHourActMin : UINT;
+    lui_OpHourActHour : UINT;
+    com_logicals_Basic_Count_FB_lc_CntMsg_ST1 : com.logicals.Basic.Count.FB_lc_CntMsg_ST;
+    com_logicals_Basic_Count_FB_lc_CntMsg_ST2 : com.logicals.Basic.Count.FB_lc_CntMsg_ST;
+    com_logicals_Basic_Count_FB_lc_CntMsg_ST3 : com.logicals.Basic.Count.FB_lc_CntMsg_ST;
+    com_logicals_Basic_Count_FB_lc_CntMsg_ST4 : com.logicals.Basic.Count.FB_lc_CntMsg_ST;
+    lt_ActTime : TIME;
+    lstr_PRGName : STRING[35] := 'PRG_lc_TestOpHour1_FBD Init!';
+    lui_OpHourActDay : UINT;
+  END_VAR
+  VAR
+    lx_RTSInit : BOOL;
+    lx_RTSShutDown : BOOL;
+    lx_RTSRun : BOOL;
+    lx_RTSTerm : BOOL;
+    lui_RTSInitCycle : UINT;
+    lui_RTSShutDownCycle : UINT;
+    lui_RTSRunCycle : UINT;
+    lui_RTSTermCycle : UINT;
+  END_VAR
+  VAR
+    FB_InitPulseR_Trig : R_TRIG;
+  END_VAR
+  VAR
+    HCTrace : FB_lc_Trace_ST;
+  END_VAR
+  VAR
+    lx_CycleInit : BOOL;
+    lx_CyclePulse : BOOL;
+    li_CycleCount : INT;
+    li_CycleCountInitVal : INT;
+  END_VAR
+
+  (*
+
+    // Network 1:
+    FB_InitPulseR_Trig(CLK := TRUE, Q => lx_CycleInit);
+
+    // Network 2:
+    NOT(IN := lx_CyclePulse, NOT => lx_CyclePulse);
+
+    // Network 3:
+    ADD(IN1 := li_CycleCount, IN2 := 1, ADD => li_CycleCount);
+
+    // Network 4:
+    HCTrace(EN := lx_CycleInit, vistr_TraceText := lstr_PRGName, viui_TraceLevel := 5);
+
+    // Network 5:
+    RTSCycleInfo(Init => lx_RTSInit, Run => lx_RTSRun, Shutdown => lx_RTSShutDown, Term => lx_RTSTerm);
+
+    // Network 6:
+    com_logicals_Basic_Count_FB_lc_CntMsg_ST1(vix_Cnt := lx_RTSInit, voui_CntVal => lui_RTSInitCycle);
+    TO_INT(IN := lui_RTSInitCycle, TO_INT => li_CycleCountInitVal);
+
+    // Network 7:
+    com_logicals_Basic_Count_FB_lc_CntMsg_ST2(vix_Cnt := lx_RTSRun, voui_CntVal => lui_RTSRunCycle);
+
+    // Network 8:
+    com_logicals_Basic_Count_FB_lc_CntMsg_ST3(vix_Cnt := lx_RTSShutDown, voui_CntVal => lui_RTSShutDownCycle);
+
+    // Network 9:
+    com_logicals_Basic_Count_FB_lc_CntMsg_ST4(vix_Cnt := lx_RTSTerm, voui_CntVal => lui_RTSTermCycle);
+
+    // Network 10:
+    com.logicals.Basic.GetTime.FUN_lc_GetTime_C(sec => lstruc_OpHourGetTime.di_sec, min => lstruc_OpHourGetTime.di_min, hour => lstruc_OpHourGetTime.di_hour, mday => lstruc_OpHourGetTime.di_mday, mon => lstruc_OpHourGetTime.di_mon, year => lstruc_OpHourGetTime.di_year, wday => lstruc_OpHourGetTime.di_wday, yday => lstruc_OpHourGetTime.di_yday, isdst => lstruc_OpHourGetTime.di_isdst);
+
+    // Network 11:
+    FB_OpHourBySecChg(vistruc_OpHourGetTime := lstruc_OpHourGetTime, vix_LoadStartVal := FALSE, vix_OpHourCount := TRUE, voudi_ActAllSec => ludi_OpHourActAllSec, voui_ActSec => lui_OpHourActSec, voui_ActMin => lui_OpHourActMin, voui_ActHour => lui_OpHourActHour, voui_ActDay => lui_OpHourActDay, vot_ActTime => lt_ActTime);
+
+  *)
+
+  @CF(2) : @R(700.0, 90.0, 580.0, 99.0), @T("E:$NOpHour block for test!"), @POU;
+  @VF(1) : @E(li_CycleCount), @R(710.0, 320.0, 140.0, 19.0);
+  @C(3) : @F(ADD), @R(970.0, 320.0, 40.0, 38.0), INT, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(ADD), @R(9.5));
+  @VF(4) : @E(li_CycleCount), @R(1130.0, 320.0, 140.0, 19.0);
+  @VF(5) : @E(1), @R(710.0, 340.0, 140.0, 19.0), INT;
+  @VF(9) : @E(lx_CyclePulse), @R(1130.0, 270.0, 140.0, 19.0);
+  @C(10) : @F(NOT), @R(960.0, 270.0, 60.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(NOT), @R(9.5));
+  @VF(11) : @E(lx_CyclePulse), @R(710.0, 270.0, 140.0, 19.0);
+  @C(14) : @FB(FB_InitPulseR_Trig), @R(960.0, 220.0, 140.0, 18.0), @I(@N(CLK), @L(9.5)), @O(@N(Q), @R(9.5));
+  @VF(15) : @E(TRUE), @R(710.0, 220.0, 140.0, 19.0);
+  @VF(17) : @E(lx_CycleInit), @R(1140.0, 220.0, 140.0, 19.0);
+  @VF(19) : @E(lx_CycleInit), @R(710.0, 380.0, 140.0, 19.0);
+  @C(20) : @FB(HCTrace), @R(970.0, 380.0, 200.0, 78.0), @I(@N(EN), @L(9.5)), @I(@N(vistr_TraceText), @L(29.5)), @I(@N(viui_TraceLevel), @L(49.5)), @O(@N(ENO), @R(9.5));
+  @VF(22) : @E(5), @R(710.0, 420.0, 140.0, 19.0), UINT;
+  @C(26) : @F(RTSCycleInfo), @R(720.0, 510.0, 120.0, 78.0), @O(@N(Init), @R(9.5)), @O(@N(Run), @R(29.5)), @O(@N(Shutdown), @R(49.5)), @O(@N(Term), @R(69.5));
+  @VF(27) : @E(lx_RTSInit), @R(970.0, 510.0, 140.0, 19.0);
+  @VF(28) : @E(lx_RTSShutDown), @R(970.0, 550.0, 140.0, 19.0);
+  @VF(29) : @E(lx_RTSRun), @R(970.0, 530.0, 140.0, 19.0);
+  @VF(30) : @E(lx_RTSTerm), @R(970.0, 570.0, 140.0, 19.0);
+  @C(35) : @FB(com_logicals_Basic_Count_FB_lc_CntMsg_ST1), @R(850.0, 630.0, 260.0, 58.0), @I(@N(vix_Cnt), @L(9.5)), @O(@N(voui_CntVal), @R(9.5)), @O(@N(voui_ErrNo), @R(29.5)), @O(@N(vox_Err), @R(49.5));
+  @VF(36) : @E(lx_RTSInit), @R(630.0, 630.0, 140.0, 19.0);
+  @VF(37) : @E(lx_RTSShutDown), @R(630.0, 770.0, 140.0, 19.0);
+  @VF(38) : @E(lx_RTSRun), @R(630.0, 700.0, 140.0, 19.0);
+  @VF(39) : @E(lx_RTSTerm), @R(630.0, 840.0, 140.0, 19.0);
+  @C(41) : @FB(com_logicals_Basic_Count_FB_lc_CntMsg_ST2), @R(850.0, 700.0, 260.0, 58.0), @I(@N(vix_Cnt), @L(9.5)), @O(@N(voui_CntVal), @R(9.5)), @O(@N(voui_ErrNo), @R(29.5)), @O(@N(vox_Err), @R(49.5));
+  @C(43) : @FB(com_logicals_Basic_Count_FB_lc_CntMsg_ST3), @R(850.0, 770.0, 260.0, 58.0), @I(@N(vix_Cnt), @L(9.5)), @O(@N(voui_CntVal), @R(9.5)), @O(@N(voui_ErrNo), @R(29.5)), @O(@N(vox_Err), @R(49.5));
+  @C(45) : @FB(com_logicals_Basic_Count_FB_lc_CntMsg_ST4), @R(850.0, 840.0, 260.0, 58.0), @I(@N(vix_Cnt), @L(9.5)), @O(@N(voui_CntVal), @R(9.5)), @O(@N(voui_ErrNo), @R(29.5)), @O(@N(vox_Err), @R(49.5));
+  @VF(47) : @E(lui_RTSInitCycle), @R(1150.0, 630.0, 170.0, 19.0);
+  @VF(48) : @E(lui_RTSShutDownCycle), @R(1160.0, 770.0, 140.0, 19.0);
+  @VF(49) : @E(lui_RTSRunCycle), @R(1150.0, 700.0, 140.0, 19.0);
+  @VF(50) : @E(lui_RTSTermCycle), @R(1160.0, 840.0, 140.0, 19.0);
+  @C(55) : @F(com.logicals.Basic.GetTime.FUN_lc_GetTime_C), @R(600.0, 950.0, 160.0, 198.0), @O(@N(FUN_lc_GetTime_C), @R(9.5)), @O(@N(sec), @R(29.5)), @O(@N(min), @R(49.5)), @O(@N(hour), @R(69.5)), @O(@N(mday), @R(89.5)), @O(@N(mon), @R(109.5)), @O(@N(year), @R(129.5)), @O(@N(wday), @R(149.5)), @O(@N(yday), @R(169.5)), @O(@N(isdst), @R(189.5));
+  @VF(57) : @E(FALSE), @R(430.0, 1400.0, 140.0, 19.0);
+  @VF(59) : @E(TRUE), @R(430.0, 1420.0, 140.0, 19.0);
+  @VF(61) : @E(lstruc_OpHourGetTime), @R(320.0, 1380.0, 250.0, 19.0);
+  @VF(63) : @E(lui_OpHourActSec), @R(1040.0, 1440.0, 200.0, 19.0);
+  @VF(64) : @E(lui_OpHourActMin), @R(1040.0, 1460.0, 200.0, 19.0);
+  @VF(65) : @E(lui_OpHourActHour), @R(1040.0, 1480.0, 200.0, 19.0);
+  @VF(70) : @E(ludi_OpHourActAllSec), @R(1040.0, 1420.0, 200.0, 19.0);
+  @VF(74) : @E(lt_ActTime), @R(1040.0, 1520.0, 200.0, 19.0);
+  @VF(69) : @E(lstruc_OpHourGetTime.di_sec), @R(850.0, 970.0, 250.0, 19.0);
+  @VF(71) : @E(lstruc_OpHourGetTime.di_min), @R(850.0, 990.0, 250.0, 19.0);
+  @VF(72) : @E(lstruc_OpHourGetTime.di_hour), @R(850.0, 1010.0, 250.0, 19.0);
+  @VF(76) : @E(lstruc_OpHourGetTime.di_mday), @R(850.0, 1030.0, 250.0, 19.0);
+  @VF(77) : @E(lstruc_OpHourGetTime.di_mon), @R(850.0, 1050.0, 250.0, 19.0);
+  @VF(78) : @E(lstruc_OpHourGetTime.di_year), @R(850.0, 1070.0, 250.0, 19.0);
+  @VF(79) : @E(lstruc_OpHourGetTime.di_wday), @R(850.0, 1090.0, 250.0, 19.0);
+  @VF(80) : @E(lstruc_OpHourGetTime.di_yday), @R(850.0, 1110.0, 250.0, 19.0);
+  @VF(81) : @E(lstruc_OpHourGetTime.di_isdst), @R(850.0, 1130.0, 250.0, 19.0);
+  @VF(91) : @E(li_CycleCountInitVal), @R(1550.0, 630.0, 280.0, 19.0);
+  @C(92) : @F(TO_INT), @R(1380.0, 630.0, 120.0, 18.0), UINT, @I(@N(IN), @L(9.5)), @O(@N(TO_INT), @R(9.5));
+  @VF(95) : @E(lstr_PRGName), @R(710.0, 400.0, 140.0, 19.0);
+  @OLT(25) : @R(1150.0, 610.0, 80.0, 19.0), @S(47);
+  @OLT(96) : @R(1150.0, 680.0, 80.0, 19.0), @S(49);
+  @OLT(97) : @R(1160.0, 750.0, 80.0, 19.0), @S(48);
+  @OLT(98) : @R(1160.0, 820.0, 80.0, 19.0), @S(50);
+  @OLT(99) : @R(1140.0, 950.0, 80.0, 19.0), @S(69);
+  @OLT(100) : @R(1140.0, 970.0, 80.0, 19.0), @S(71);
+  @OLT(101) : @R(1140.0, 990.0, 80.0, 19.0), @S(72);
+  @OLT(102) : @R(1140.0, 1010.0, 80.0, 19.0), @S(76);
+  @OLT(103) : @R(1140.0, 1030.0, 80.0, 19.0), @S(77);
+  @OLT(104) : @R(1140.0, 1050.0, 80.0, 19.0), @S(78);
+  @OLT(105) : @R(1140.0, 1070.0, 80.0, 19.0), @S(79);
+  @OLT(106) : @R(1140.0, 1090.0, 80.0, 19.0), @S(80);
+  @OLT(107) : @R(1140.0, 1110.0, 80.0, 19.0), @S(81);
+  @C(56) : @FB(FB_OpHourBySecChg), @R(590.0, 1380.0, 370.0, 158.0), @I(@N(vistruc_OpHourGetTime), @L(9.5)), @I(@N(vix_LoadStartVal), @L(29.5)), @I(@N(vix_OpHourCount), @L(49.5)), @O(@N(vox_Err), @R(9.5)), @O(@N(vox_ErrNo), @R(29.5)), @O(@N(voudi_ActAllSec), @R(49.5)), @O(@N(voui_ActSec), @R(69.5)), @O(@N(voui_ActMin), @R(89.5)), @O(@N(voui_ActHour), @R(109.5)), @O(@N(voui_ActDay), @R(129.5)), @O(@N(vot_ActTime), @R(149.5));
+  @VF(108) : @E(lui_OpHourActDay), @R(1040.0, 1500.0, 200.0, 19.0);
+
+  @G(6) :
+     @L(@VF(1).o, @C(3).IN1)
+    ;
+  @G(7) :
+     @L(@VF(5).o, @C(3).IN2)
+    ;
+  @G(8) :
+     @L(@C(3).ADD, @VF(4).i)
+    ;
+  @G(12) :
+     @L(@VF(11).o, @C(10).IN)
+    ;
+  @G(13) :
+     @L(@C(10).NOT, @VF(9).i)
+    ;
+  @G(16) :
+     @L(@VF(15).o, @C(14).CLK)
+    ;
+  @G(18) :
+     @L(@C(14).Q, @VF(17).i)
+    ;
+  @G(21) :
+     @L(@VF(19).o, @C(20).EN)
+    ;
+  @G(23) :
+     @L(@VF(22).o, @C(20).viui_TraceLevel)
+    ;
+  @G(31) :
+     @L(@C(26).Init, @VF(27).i)
+    ;
+  @G(32) :
+     @L(@C(26).Run, @VF(29).i)
+    ;
+  @G(33) :
+     @L(@C(26).Shutdown, @VF(28).i)
+    ;
+  @G(34) :
+     @L(@C(26).Term, @VF(30).i)
+    ;
+  @G(40) :
+     @L(@VF(36).o, @C(35).vix_Cnt)
+    ;
+  @G(42) :
+     @L(@VF(38).o, @C(41).vix_Cnt)
+    ;
+  @G(44) :
+     @L(@VF(37).o, @C(43).vix_Cnt)
+    ;
+  @G(46) :
+     @L(@VF(39).o, @C(45).vix_Cnt)
+    ;
+  @G(51) :
+     @L(@C(35).voui_CntVal, @VF(47).i)
+    ;
+  @G(52) :
+     @L(@C(41).voui_CntVal, @VF(49).i)
+    ;
+  @G(53) :
+     @L(@C(43).voui_CntVal, @VF(48).i)
+    ;
+  @G(54) :
+     @L(@C(45).voui_CntVal, @VF(50).i)
+    ;
+  @G(58) :
+     @L(@VF(57).o, @C(56).vix_LoadStartVal)
+    ;
+  @G(60) :
+     @L(@VF(59).o, @C(56).vix_OpHourCount)
+    ;
+  @G(62) :
+     @L(@VF(61).o, @C(56).vistruc_OpHourGetTime)
+    ;
+  @G(66) :
+     @L(@C(56).voui_ActHour, @VF(65).i)
+    ;
+  @G(67) :
+     @L(@C(56).voui_ActMin, @VF(64).i)
+    ;
+  @G(68) :
+     @L(@C(56).voui_ActSec, @VF(63).i)
+    ;
+  @G(73) :
+     @L(@C(56).voudi_ActAllSec, @VF(70).i)
+    ;
+  @G(75) :
+     @L(@C(56).vot_ActTime, @VF(74).i)
+    ;
+  @G(82) :
+     @L(@C(55).sec, @VF(69).i)
+    ;
+  @G(83) :
+     @L(@C(55).min, @VF(71).i)
+    ;
+  @G(84) :
+     @L(@C(55).hour, @VF(72).i)
+    ;
+  @G(85) :
+     @L(@C(55).mday, @VF(76).i)
+    ;
+  @G(86) :
+     @L(@C(55).mon, @VF(77).i)
+    ;
+  @G(87) :
+     @L(@C(55).year, @VF(78).i)
+    ;
+  @G(88) :
+     @L(@C(55).wday, @VF(79).i)
+    ;
+  @G(89) :
+     @L(@C(55).yday, @VF(80).i)
+    ;
+  @G(90) :
+     @L(@C(55).isdst, @VF(81).i)
+    ;
+  @G(93) :
+     @L(@VF(47).o, @C(92).IN)
+    ;
+  @G(94) :
+     @L(@C(92).TO_INT, @VF(91).i)
+    ;
+  @G(24) :
+     @L(@VF(95).o, @C(20).vistr_TraceText)
+    ;
+  @G(109) :
+     @L(@C(56).voui_ActDay, @VF(108).i)
+    ;
+END_PROGRAM

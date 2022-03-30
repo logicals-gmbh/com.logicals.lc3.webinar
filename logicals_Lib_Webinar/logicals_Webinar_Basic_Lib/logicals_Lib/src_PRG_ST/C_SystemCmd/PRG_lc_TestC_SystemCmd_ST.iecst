@@ -1,0 +1,90 @@
+/*
+  * logi.cals GmbH
+  * A-3100 St. Poelten
+  * Europaplatz 7/1
+  * Tel.: 0043-5-77147
+  *
+  * logi.cals automation solutions & services GmbH
+  * D-40738 Langenfeld
+  * Postfach 1306
+  * Tel.: 0043-5-77147
+  * 
+  * Contact:
+  * dieter.goltz@logicals.com
+  * 
+  * History:
+  * Created:  
+  * DG 2017-03-28
+  * 
+  * Modified: 
+  * DG 2017-03-28
+  * DG 2021-03-01
+  */ 
+
+ /*
+  * Description
+  * -----------
+  * Test SystemCmd
+  */
+
+ /* 
+  * Beschreibung
+  * ------------
+  * Test SystemCmd
+  */
+  
+USING com.logicals.Basic.System;
+
+PROGRAM PRG_lc_TestC_SystemCmd_ST
+
+    VAR
+     lx_TestSystemCmd : BOOL;
+     lstr_Cmd         : STRING[30] := 'Start';
+     lstr_CmdVal      : STRING[255];
+    END_VAR
+
+   /*
+    * 
+    */
+    VAR
+       FB_SystemCmdR_TRIG : R_TRIG;
+       FB_lc_SystemCmd_C  : FB_lc_SystemCmd_C;
+    END_VAR      
+
+   /*
+    * Initialisierungsmerker
+    */
+    VAR
+       FB_InitR_TRIG : R_TRIG;
+    END_VAR      
+  
+   /*
+    * Wird der Baustein bearbeitet
+    */
+    VAR
+       lx_CycleInit  : BOOL;
+       lx_CyclePulse : BOOL;
+       li_CycleCount : INT;
+   END_VAR
+
+  /*
+   * Lokaler InitPulse
+   */
+   FB_InitR_TRIG(CLK:= TRUE, Q => lx_CycleInit);
+  
+  /*
+   * Wird der Baustein bearbeitet
+   */
+   lx_CyclePulse := NOT(lx_CyclePulse);
+   li_CycleCount := li_CycleCount + 1;
+
+   FB_SystemCmdR_TRIG(CLK := lx_TestSystemCmd);
+
+   IF lx_TestSystemCmd = TRUE THEN
+     FB_lc_SystemCmd_C(EN              := FB_SystemCmdR_TRIG.Q,
+     	                vistr_SysCmd   := 'Start',
+     	                vostr_SysCmdVal => lstr_CmdVal
+     );
+   END_IF;
+ 
+END_PROGRAM

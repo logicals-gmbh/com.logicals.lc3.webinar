@@ -1,0 +1,41 @@
+NAMESPACE com.logicals.Basic.Logic
+FUNCTION_BLOCK FB_lc_Toggle1_FBD
+  VAR
+    R_TRIG1 : R_TRIG;
+  END_VAR
+  VAR_INPUT
+    vix_In : BOOL;
+  END_VAR
+  VAR_OUTPUT
+    vox_Out : BOOL;
+  END_VAR
+
+  (*
+
+    // Network 1:
+    R_TRIG1(CLK := vix_In);
+    XOR(IN1 := R_TRIG1.Q, IN2 := vox_Out, XOR => vox_Out);
+
+  *)
+
+  @VF(1) : @E(vix_In), @R(170.0, 100.0, 140.0, 19.0);
+  @VF(2) : @E(vox_Out), @R(720.0, 100.0, 140.0, 19.0);
+  @C(3) : @FB(R_TRIG1), @R(360.0, 100.0, 140.0, 18.5), @I(@N(CLK), @L(9.5)), @O(@N(Q), @R(9.5));
+  @C(5) : @F(XOR), @R(580.0, 100.0, 50.0, 38.0), BOOL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(XOR), @R(9.5));
+  @VF(8) : @E(vox_Out), @R(360.0, 120.0, 140.0, 19.0);
+  @CF(10) : @R(170.0, 30.0, 690.0, 50.0), @T("Toggle 1"), @POU;
+
+  @G(4) :
+     @L(@VF(1).o, @C(3).CLK)
+    ;
+  @G(6) :
+     @L(@C(3).Q, @C(5).IN1)
+    ;
+  @G(7) :
+     @L(@C(5).XOR, @VF(2).i)
+    ;
+  @G(9) :
+     @L(@VF(8).o, @C(5).IN2)
+    ;
+END_FUNCTION_BLOCK
+END_NAMESPACE

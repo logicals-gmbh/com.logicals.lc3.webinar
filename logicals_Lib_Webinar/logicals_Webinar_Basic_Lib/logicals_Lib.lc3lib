@@ -1,0 +1,535 @@
+/*
+ * logi.CAD 3 Library logicals_Lib_Webinar
+ * 
+ * Created:
+ * 20220226 _ DG Created Version 0.0.1
+ *
+ * New Name com.logi.cals.Webinar.Basic
+ * 
+ */
+ 
+ /*
+  * logicals-Library for Webinar
+  */
+LIBRARY com.logicals.Webinar.Basic
+  
+  VERSION     := 0.0.2-SNAPSHOT;
+  VENDOR      := "logi.cals (c) GmbH";
+  SUMMARY     := "logi.cals Aplication Lib / With Namespaces / Source Git-User-Dir";
+  COPYRIGHT   := "(c) logi.cals GmbH 2021";
+  DISPLAYNAME := "logicals_Webinar_Basic_Lib";
+
+ /*
+  * logi.cals_Lib
+  */      
+  FOLDER "logicals_Lib"
+  /*
+   * Blocks in C
+   */
+   FOLDER "src_C_ByteArrFromStr"
+       IEC := com.logicals.Basic.Convert.FUN_lc_ByteArrFromStr_C;
+   END_FOLDER 
+
+   FOLDER "src_C_Control"
+       IEC := com.logicals.Basic.Control.FB_lc_Control_C;
+   END_FOLDER 
+
+   FOLDER "src_C_GetTime"
+       IEC := com.logicals.Basic.GetTime.FUN_lc_GetTime_C;
+       // FILE := "..\..\src_C_GetTime\src-code\lcfu___COM.LOGICALS.BASIC.GETTIME.GETTIME.c";
+       // FILE := "../../src_C_GetTime/src-code/lcfu___COM.LOGICALS.BASIC.GETTIME.GETTIME.h";
+   END_FOLDER 
+
+   FOLDER "src_C_Quad"
+       IEC := com.logicals.Basic.Calc.FUN_lc_Quad_C;
+   END_FOLDER 
+
+   FOLDER "src_C_Read_Localtime"
+       IEC := com.logicals.Basic.DateTime.FUN_lc_Read_Localtime_C;
+   END_FOLDER 
+
+   FOLDER "src_C_RebootOS"
+       IEC := com.logicals.Basic.System.FUN_lc_RebootOS_C;
+   END_FOLDER 
+
+   FOLDER "src_C_StrFromByteArr"
+       IEC := com.logicals.Basic.Convert.FUN_lc_StrFromByteArr_C;
+   END_FOLDER 
+
+   FOLDER "src_C_Write_Localtime"
+       IEC := com.logicals.Basic.DateTime.FUN_lc_Write_Localtime_C;
+   END_FOLDER 
+
+  /*
+   * DT
+   */
+   FOLDER "src_DT"
+    /*
+     * Actuator in ST
+     */
+     FOLDER "Flash"
+      IEC := com.logicals.Basic.Flash.DT_lc_OnOffTime;
+     END_FOLDER 
+
+   END_FOLDER 
+
+  /*
+   * Blocks in FBD
+   */
+   FOLDER "src_FB_FBD"
+    /*
+     * Actuator in FBD
+     */
+     FOLDER "Actuator"
+       IEC := com.logicals.Basic.Actuator.FB_lc_Motor1R_FBD;
+       IEC := com.logicals.Basic.Actuator.FB_lc_Motor2R_Stop_FBD;
+     END_FOLDER
+    /*
+     * ActuatorSim in FBD
+     */            
+     FOLDER "Actuator_Sim"
+     END_FOLDER
+    /*
+     * Calc in FBD
+     */     
+     FOLDER "Calc"
+        IEC := com.logicals.Basic.Calc.FB_lc_Polygon_FBD;
+     END_FOLDER
+    /*
+     * Control in FBD
+     */     
+     FOLDER "Control"
+       IEC := com.logicals.Basic.Control.FB_lc_TestControl_FBD;
+     END_FOLDER
+    /*
+     * Convert in FBD
+     */     
+     FOLDER "Convert"
+       IEC := com.logicals.Basic.Convert.FB_lc_ByteNotNull_FBD;
+       IEC := com.logicals.Basic.Convert.FB_lc_ChrToByte_FBD;
+       IEC := com.logicals.Basic.Convert.FB_lc_RealTo12Byte_FBD;
+       IEC := com.logicals.Basic.Convert.FB_lc_StrTo10Byte_FBD;
+       IEC := com.logicals.Basic.Convert.FB_lc_TimeToDays_FBD;
+     END_FOLDER
+    /*
+     * Count in FBD
+     */     
+     FOLDER "Count"
+       IEC := com.logicals.Basic.Count.FB_lc_IncUDINT_FBD;
+       IEC := com.logicals.Basic.Count.FB_lc_IncUINT_FBD;
+
+       IEC := com.logicals.Basic.Count.FB_lc_DecUDINT_FBD;
+       IEC := com.logicals.Basic.Count.FB_lc_DecUINT_FBD;
+     END_FOLDER
+    /*
+     * Flash in FBD
+     */     
+     FOLDER "Flash"
+       IEC := com.logicals.Basic.Flash.FB_lc_Flash_2Hz_FBD;
+       IEC := com.logicals.Basic.Flash.FB_lc_Flash_4Hz_FBD;
+       IEC := com.logicals.Basic.Flash.FB_lc_Flash_FBD;
+       IEC := com.logicals.Basic.Flash.FB_lc_Flash2_FBD;
+       IEC := com.logicals.Basic.Flash.FB_lc_Flash3_FBD;      
+     END_FOLDER
+    /*
+     * Logic in FBD
+     */     
+     FOLDER "Logic"
+        IEC := com.logicals.Basic.Logic.FB_lc_EinsAusDrei_Auswahl_FBD;        
+        IEC := com.logicals.Basic.Logic.FB_lc_EinsAusDrei_Auswahl2_FBD;
+        IEC := com.logicals.Basic.Logic.FB_lc_Toggle1_FBD;        
+        IEC := com.logicals.Basic.Logic.FB_lc_ToggleSw_FBD;        
+
+        IEC := com.logicals.Basic.Logic.FB_lc_ModeSelect_FBD;        
+
+        IEC := com.logicals.Basic.Logic.FB_lc_NooM_FBD;        
+     END_FOLDER
+    /*
+     * Measure in FBD
+     */       
+     FOLDER "Measure"
+         IEC := com.logicals.Basic.Measure.FB_lc_Measure_FBD;
+         IEC := com.logicals.Basic.Measure.FB_lc_MeasureAlarm_FBD;
+     END_FOLDER
+    /*
+     * RangeCheck in FBD
+     */     
+     FOLDER "RangeCheck"
+         IEC := com.logicals.Basic.RangeCheck.FB_lc_4LimMon_FBD;
+         IEC := com.logicals.Basic.RangeCheck.FB_lc_RangeCheck_FBD;
+
+         IEC := com.logicals.Basic.RangeCheck.FB_lc_RangeCheckDINT_FBD;
+         IEC := com.logicals.Basic.RangeCheck.FB_lc_RangeCheckDWORD_FBD;
+         IEC := com.logicals.Basic.RangeCheck.FB_lc_RangeCheckINT_FBD;
+         IEC := com.logicals.Basic.RangeCheck.FB_lc_RangeCheckREAL_FBD;
+         IEC := com.logicals.Basic.RangeCheck.FB_lc_RangeCheckUINT_FBD;
+         IEC := com.logicals.Basic.RangeCheck.FB_lc_RangeCheckWORD_FBD;
+     END_FOLDER
+    /*
+     * Select in FBD
+     */     
+     FOLDER "Select"
+         IEC := com.logicals.Basic.Select.FB_lc_Select_FBD;
+     END_FOLDER
+    /*
+     * Sequence in FBD
+     */     
+     FOLDER "Sequence"
+        IEC := com.logicals.Basic.Sequence.FB_lc_Sequence_FBD;
+     END_FOLDER
+    /*
+     * SigGen in FBD
+     */     
+     FOLDER "SigGen"
+         IEC := com.logicals.Basic.SigGen.FB_lc_RampUpDn_FBD;
+     END_FOLDER
+
+   END_FOLDER
+
+  /*
+   * Blocks in FBD mit Interface Deployment
+   */
+   FOLDER "src_FB_FBD_If_Deploy"
+
+     FOLDER "Actuator"
+     END_FOLDER
+   END_FOLDER
+  
+  /*
+   * Blocks OOP in ST
+   */
+   FOLDER "src_FB_OOP_ST"
+     FOLDER "Actuator"
+         IEC := com.logicals.Basic.OOP.Actuator.FB_lc_IDF_2DirVarSpeed1_OOP_ST;
+         IEC := com.logicals.Basic.OOP.Actuator.FB_lc_IDF_2DirVarSpeed2_OOP_ST;
+         IEC := com.logicals.Basic.OOP.Actuator.FB_lc_IDF_2DirVarSpeed3_OOP_ST;     
+     END_FOLDER
+   END_FOLDER
+
+  /*
+   * Blocks in FBD OpenAutomationLib
+   * Prof. Seitz, Uni Mannheimm
+   */
+   FOLDER "src_FB_OpAut"
+
+     FOLDER "Control"
+         IEC := com.logicals.OpAut.Control.FB_OpAut_TYP_I_ST;
+         IEC := com.logicals.OpAut.Control.FB_OpAut_TYP_D_ST;
+         IEC := com.logicals.OpAut.Control.FB_OpAut_TYP_PID_FBD;
+     END_FOLDER
+   END_FOLDER
+
+  /*
+   * Blocks in ST
+   */
+   FOLDER "src_FB_ST"
+    /*
+     * Actuator in ST
+     */
+     FOLDER "Actuator"
+       IEC := com.logicals.Basic.Actuator.FB_lc_Motor2R_STOP_FB_ST, DEPLOY:=SOURCE; // Default
+       IEC := com.logicals.Basic.Actuator.FB_lc_Motor2R_STOP_ST;
+       IEC := com.logicals.Basic.Actuator.FB_lc_Motor2R_ST;
+       IEC := com.logicals.Basic.Actuator.FB_lc_Motor1R_ST;
+     END_FOLDER
+    /*
+     * Actuator in ST
+     */       
+     FOLDER "Actuator_Sim"
+       IEC := com.logicals.Basic.Actuator_Sim.FB_lc_Motor2R_FB_Sim_ST;
+     END_FOLDER
+    /*
+     * Auxiliary in ST
+     */
+     FOLDER "Auxiliary"
+       IEC := com.logicals.Basic.Auxiliary.FB_lc_OpHour_ST;    
+       IEC := com.logicals.Basic.Auxiliary.FB_lc_MonoFlop_ST;    
+     END_FOLDER
+    /*
+     * Calc in ST
+     */     
+     FOLDER "Calc"
+       IEC := com.logicals.Basic.Calc.FB_lc_Surface_ST;    
+       IEC := com.logicals.Basic.Calc.FB_lc_VolumeTank_ST;    
+     END_FOLDER
+    /*
+     * Change in ST
+     */
+     FOLDER "Change"
+       IEC := com.logicals.Basic.Change.FB_lc_ChangeBOOL_ST;
+       IEC := com.logicals.Basic.Change.FB_lc_ChangeBYTE_ST;
+       IEC := com.logicals.Basic.Change.FB_lc_ChangeDINT_ST;
+       IEC := com.logicals.Basic.Change.FB_lc_ChangeINT_ST;
+       IEC := com.logicals.Basic.Change.FB_lc_ChangeUINT_ST;
+       IEC := com.logicals.Basic.Change.FB_lc_ChangeUDINT_ST;
+     END_FOLDER
+    /*
+     * Control in ST
+     */
+     FOLDER "Control"
+       IEC := com.logicals.Basic.Control.FB_lc_Cntrl_PIDT1_ST;  
+       IEC := com.logicals.Basic.Control.FB_lc_Cntrl_Scale_ST;  
+     END_FOLDER
+    /*
+     * Convert in ST
+     */
+     FOLDER "Convert"
+       IEC := com.logicals.Basic.Convert.FB_lc_Conv16Bit2Word_ST;
+       IEC := com.logicals.Basic.Convert.FB_lc_Conv1Byte2Bit_ST;
+       IEC := com.logicals.Basic.Convert.FB_lc_Conv1Word2Bit_ST;
+       IEC := com.logicals.Basic.Convert.FB_lc_Conv2Byte2Int_ST;
+       IEC := com.logicals.Basic.Convert.FB_lc_Conv8Bit2Byte_ST;
+       IEC := com.logicals.Basic.Convert.FB_lc_ConvInt2Byte_ST;
+       IEC := com.logicals.Basic.Convert.FB_lc_ConvRealTo12Byte_ST;
+       IEC := com.logicals.Basic.Convert.FB_lc_ConvRealTo2Int_ST;       
+       
+       IEC := com.logicals.Basic.Convert.FUN_lc_ConvByte2Str_ST;
+       IEC := com.logicals.Basic.Convert.FUN_lc_ConvStr2BYTE_ST;
+       IEC := com.logicals.Basic.Convert.FUN_lc_ConvStr2Usint_ST;
+     END_FOLDER
+    /*
+     * Count in ST
+     */
+     FOLDER "Count"
+       IEC := com.logicals.Basic.Count.FB_lc_CntFromZero_ST;
+       IEC := com.logicals.Basic.Count.FB_lc_CntMsg_ST;
+       
+       IEC := com.logicals.Basic.Count.FB_lc_INCVAL_INT_ST;
+       IEC := com.logicals.Basic.Count.FB_lc_DECVAL_INT_ST;
+
+       IEC := com.logicals.Basic.Count.FUN_lc_INC_INT_ST;
+       IEC := com.logicals.Basic.Count.FUN_lc_DEC_INT_ST;
+     END_FOLDER
+
+     FOLDER "DateTime"
+       IEC := com.logicals.Basic.DateTime.FB_lc_GetDateTime_Linux_ST;
+       IEC := com.logicals.Basic.DateTime.FB_lc_GetDateTime_NTX86_ST;
+       
+       IEC := com.logicals.Basic.DateTime.FUN_lc_CalcDATE_ST;
+       IEC := com.logicals.Basic.DateTime.FUN_lc_CalcDaysDelta_ST;
+       IEC := com.logicals.Basic.DateTime.FUN_lc_CalcDaysInDATE_ST;
+       IEC := com.logicals.Basic.DateTime.FUN_lc_CalcDT_ST;
+       IEC := com.logicals.Basic.DateTime.FUN_lc_CalcLeapOfDATE_ST;
+       IEC := com.logicals.Basic.DateTime.FUN_lc_CalcLeapYear_ST;
+       IEC := com.logicals.Basic.DateTime.FUN_lc_ConvDate2DATE_ST;
+       IEC := com.logicals.Basic.DateTime.FUN_lc_ConvGetTime2TOD;
+       IEC := com.logicals.Basic.DateTime.FUN_lc_ConvHour2TIME_ST;
+       IEC := com.logicals.Basic.DateTime.FUN_lc_ConvHour2TOD_ST;
+       IEC := com.logicals.Basic.DateTime.FUN_lc_ConvSec2TIME_ST;
+       IEC := com.logicals.Basic.DateTime.FUN_lc_ConvTOD2Hour_ST;
+     END_FOLDER
+
+     FOLDER "Flash"
+       IEC := com.logicals.Basic.Flash.FB_lc_Flash_ST;    
+     END_FOLDER
+
+     FOLDER "General"
+    
+     END_FOLDER
+
+     FOLDER "Hyst"
+       IEC := com.logicals.Basic.Hyst.FB_lc_HystINT_ST;    
+       IEC := com.logicals.Basic.Hyst.FB_lc_HystUINT_ST;    
+       IEC := com.logicals.Basic.Hyst.FB_lc_HystDINT_ST;    
+     END_FOLDER
+
+     FOLDER "Logic"
+       IEC := com.logicals.Basic.Logic.FB_lc_Toggle_ST;
+       IEC := com.logicals.Basic.Logic.FB_lc_ElTako_ST;
+     END_FOLDER
+
+     FOLDER "OpHour"
+       IEC := com.logicals.Basic.OpHour.DT_lc_OpHourDateTime;
+       IEC := com.logicals.Basic.OpHour.DT_lc_OpHourGetTime;
+       IEC := com.logicals.Basic.OpHour.DT_lc_OpHourTime;
+
+       IEC := com.logicals.Basic.OpHour.FB_lc_OpHourBySecChg_ST;
+
+       IEC := com.logicals.Basic.OpHour.FUN_lc_OpHourSecond_To_TIME_ST;
+     END_FOLDER
+
+     FOLDER "Scale"
+       IEC := com.logicals.Basic.Scale.DT_lc_AnalogScaleIn;    
+       IEC := com.logicals.Basic.Scale.DT_lc_AnalogScaleOut;    
+
+       IEC := com.logicals.Basic.Scale.FB_lc_AnalogAlarmCheckAbs_ST;    
+       IEC := com.logicals.Basic.Scale.FB_lc_AnalogScaleAbsSimple_ST;
+     END_FOLDER
+     
+     FOLDER "ShiftSteps"
+       IEC := com.logicals.Basic.ShiftSteps.FB_lc_Shift4Steps_ST;
+       IEC := com.logicals.Basic.ShiftSteps.FB_lc_Shift8Steps_ST;
+       IEC := com.logicals.Basic.ShiftSteps.FB_lc_Shift16Steps_ST;
+
+       IEC := com.logicals.Basic.ShiftSteps.DT_lc_StepAliveOut;
+       IEC := com.logicals.Basic.ShiftSteps.DT_lc_StepAliveState;
+     END_FOLDER
+
+     FOLDER "SigGen"
+       IEC := com.logicals.Basic.SigGen.FB_lc_GenSinCosSig_ST;
+       IEC := com.logicals.Basic.SigGen.FB_lc_GenTriangleSig_ST;
+     END_FOLDER
+
+     FOLDER "StringFind"
+       IEC := com.logicals.Basic.StringFind.FB_lc_FindCharInSTRING_ST;
+       IEC := com.logicals.Basic.StringFind.FB_lc_FindValByCharInSTRING_ST;
+     END_FOLDER
+
+     FOLDER "Timer"
+       IEC := com.logicals.Basic.Timer.FB_lc_MonoFlop_ST;
+     END_FOLDER
+
+     FOLDER "Trace"
+       IEC := com.logicals.Basic.Trace.FB_lc_Trace_ST;
+       IEC := com.logicals.Basic.Trace.FB_lc_TraceFirstCycles_ST;
+     END_FOLDER
+
+   END_FOLDER
+
+  /*
+   * Blocks in FBD mit Object Deployment
+   */
+   FOLDER "src_FB_ST_If_Deploy"
+
+     FOLDER "Actuator"
+     END_FOLDER
+   END_FOLDER
+
+  /*
+   * ----------------------------------------------------
+   * Test PRG for blocks in ST
+   * ----------------------------------------------------
+   */
+  /*
+   * Test PRG for blocks in FBD
+   */
+   FOLDER "src_PRG_FBD"
+
+      FOLDER "Actuator"
+        /*
+         * Fuer Globale VAR als Textdatei (nicht im Model von logi.CAD3)
+         */ 
+//         FILE := "GV_lc_TestActuator1.txt", SOURCEPATH := "logicals_Lib\logicals_Lib\src_PRG_FBD\Actuator";
+         IEC := PRG_lc_TestActuator1_FBD;
+      END_FOLDER
+
+      FOLDER "Calc"
+         IEC := PRG_lc_TestCalc1_FBD;
+      END_FOLDER
+      
+      FOLDER "Control"
+        /*
+         * Fuer Globale VAR als Textdatei (nicht im Model von logi.CAD3)
+         */ 
+//         FILE := "GV_lc_TestControl1.txt", SOURCEPATH := "logicals_Lib\logicals_Lib\src_PRG_FBD\Control";
+         IEC := PRG_lc_TestControl1_FBD;
+      END_FOLDER
+      
+      FOLDER "Convert"
+         IEC := PRG_lc_TestConvert1_FBD;
+      END_FOLDER
+
+      FOLDER "OpHour"
+         IEC := PRG_lc_TestOpHour1_FBD;
+     END_FOLDER
+      
+      FOLDER "Flash"
+         IEC := PRG_lc_TestFlash1_FBD;
+      END_FOLDER
+
+      FOLDER "Logic"
+         IEC := PRG_lc_TestLogic1_FBD;
+      END_FOLDER
+
+      FOLDER "Measure"
+         IEC := PRG_lc_TestMeasure1_FBD;
+      END_FOLDER
+
+      FOLDER "RangeCheck"
+         IEC := PRG_lc_TestRangeCheck1_FBD;
+      END_FOLDER
+      FOLDER "Select"
+         IEC := PRG_lc_TestSelect1_FBD;
+      END_FOLDER
+      FOLDER "Sequence"
+         IEC := PRG_lc_TestSequence1_FBD;
+      END_FOLDER
+      FOLDER "SigGen"
+         IEC := PRG_lc_TestSigGen1_FBD;
+      END_FOLDER
+   END_FOLDER
+
+  /*
+   * Test PRG for OOP blocks in ST
+   */
+   FOLDER "src_PRG_OOP_ST"
+     /*
+      * Actuator
+      */ 
+      FOLDER "Actuator"
+         IEC := PRG_lc_TestActuator1_OOP_ST;
+         IEC := PRG_lc_TestActuator2_OOP_ST;
+         IEC := PRG_lc_TestActuator3_OOP_ST;
+      END_FOLDER
+   END_FOLDER
+
+  /*
+   * Test PRG for blocks for simulation in ST
+   */
+   FOLDER "src_PRG_Sim_ST"
+     /*
+      * Simulation Actuator
+      */ 
+      FOLDER "Actuator_Sim"
+         IEC := PRG_lc_TestActuator1_Sim_ST;
+      END_FOLDER
+   END_FOLDER
+  /*
+   * Test PRG for blocks in ST
+   */
+   FOLDER "src_PRG_ST"
+      FOLDER "Actuator"
+         IEC := PRG_lc_TestActuator1_ST;
+      END_FOLDER
+
+      FOLDER "C_ByteArrFromStr"
+         IEC := PRG_lc_TestC_ByteArrFromStr1_ST;
+      END_FOLDER
+
+      FOLDER "C_Control"
+         IEC := PRG_lc_TestC_Control1_ST;
+      END_FOLDER
+
+      FOLDER "C_GetTime"
+         IEC := PRG_lc_TestC_GetTime1_ST;
+      END_FOLDER
+
+      FOLDER "Calc"
+         IEC := PRG_lc_TestCalc1_ST;
+         IEC := PRG_lc_TestCalc2_ST;
+      END_FOLDER
+
+      FOLDER "Convert"
+         IEC := PRG_lc_TestConvert1_ST;
+      END_FOLDER
+
+      FOLDER "OpHour"
+         IEC := PRG_lc_TestOpHour1_ST;
+      END_FOLDER
+
+      FOLDER "Flash"
+      END_FOLDER
+
+      FOLDER "Logic"
+      END_FOLDER
+
+      FOLDER "RangeCheck"
+      END_FOLDER
+
+      FOLDER "Sequence"
+      END_FOLDER
+   END_FOLDER
+   
+  END_FOLDER
+
+END_LIBRARY

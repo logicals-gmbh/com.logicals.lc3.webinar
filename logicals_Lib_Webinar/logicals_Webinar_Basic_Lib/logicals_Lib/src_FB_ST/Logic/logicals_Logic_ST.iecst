@@ -1,0 +1,100 @@
+NAMESPACE com.logicals.Basic.Logic
+
+FUNCTION_BLOCK FB_lc_1oo3_ST
+  
+  VAR_INPUT
+    vix_In1 : BOOL;
+    vix_In2 : BOOL;
+    vix_In3 : BOOL;
+  END_VAR
+  
+  VAR_OUTPUT
+   vox_Out : BOOL;
+  END_VAR
+  
+  VAR
+   lx_Var_AND1  : BOOL;
+   lx_Var_AND2 : BOOL;
+   lx_Var_AND3 : BOOL;
+  END_VAR
+
+  // Network 1:
+  lx_Var_AND1 := AND(IN1 := vix_In1, IN2 := NOT vix_In2, IN3 := NOT vix_In3);
+  lx_Var_AND2 := AND(IN1 := NOT vix_In1, IN2 := vix_In2, IN3 := NOT vix_In3);
+  lx_Var_AND3 := AND(IN1 := NOT vix_In1, IN2 := NOT vix_In2, IN3 := vix_In3);
+  vox_Out := OR(IN1 := lx_Var_AND1, IN2 := lx_Var_AND2, IN3 := lx_Var_AND3);
+    
+END_FUNCTION_BLOCK
+
+ /*
+  * Toogle per Eingang
+  */
+FUNCTION_BLOCK FB_lc_Toggle_ST
+  /*
+   * Toggle
+   */
+  VAR_INPUT
+    /* Ein-Aus-Signal von SPS-Programm */
+    vix_In : BOOL;
+  END_VAR
+  
+  VAR_OUTPUT
+    /* Ein-Aus-Signal als Status Toggle */
+    vox_Out : BOOL;
+  END_VAR
+  /*
+   * Baustein-Instanzen
+   */  
+  VAR
+    R_TRIG : R_TRIG;
+  END_VAR
+
+  VAR
+   
+  END_VAR
+
+/*
+ * SPS-Programmteil
+ */
+ R_TRIG(CLK:=vix_In);
+ vox_Out:=XOR(R_TRIG.Q,vox_Out);  
+ 
+END_FUNCTION_BLOCK
+
+ /*
+  * ElTako
+  * Toogle per Eingang
+  */
+FUNCTION_BLOCK FB_lc_ElTako_ST
+  /*
+   * Simulation eines ElTako-Relais
+   */
+  VAR_INPUT
+    /* Ein-Aus-Signal von SPS-Programm */
+    vix_In : BOOL;
+  END_VAR
+  
+  VAR_OUTPUT
+    /* Ein-Aus-Signal als Status ElTako */
+    vox_Out : BOOL;
+  END_VAR
+  /*
+   * Baustein-Instanzen
+   */  
+  VAR
+    R_TRIG : R_TRIG;
+  END_VAR
+
+  VAR
+   
+  END_VAR
+/*
+ * SPS-Programmteil
+ */
+ R_TRIG(CLK:=vix_In);
+ vox_Out:=XOR(R_TRIG.Q,vox_Out);  
+ 
+END_FUNCTION_BLOCK
+
+END_NAMESPACE
+

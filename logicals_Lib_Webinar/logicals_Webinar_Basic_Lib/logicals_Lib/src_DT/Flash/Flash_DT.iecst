@@ -1,0 +1,14 @@
+NAMESPACE com.logicals.Basic.Flash
+
+/*
+ * Datentyp fuer OnOffTime
+ */
+TYPE
+	DT_lc_OnOffTime : STRUCT
+		OnTime  : TIME := T#1s;
+		OffTime : TIME := T#1s;
+	END_STRUCT;
+
+END_TYPE
+
+END_NAMESPACE

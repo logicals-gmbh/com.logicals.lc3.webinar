@@ -1,0 +1,734 @@
+/*
+  * logi.cals GmbH
+  * A-3100 St. Poelten
+  * Europaplatz 7/1
+  * Tel.: 0043-5-77147
+  *
+  * logi.cals automation solutions & services GmbH
+  * D-40738 Langenfeld
+  * Postfach 1306
+  * Tel.: 0049-2173-91910
+  * 
+  * Contact:
+  * dieter.goltz@logicals.com
+  * 
+  * History:
+  * Created: 
+  * DG 2015-08-24
+  * 
+  * Modified:
+  * DG 2015-08-25
+  * DG 2015-09-09
+  * DG 2015-10-03
+  * DG 2015-10-15
+  * DG 2015-12-15
+  * DG 2017-03-22
+  */ 
+  
+ /*
+  * Description
+  * MQTT Global DataTypes
+  */
+   
+ /* 
+  * Beschreibung
+  * MQTT Global DataTypes
+  *
+  * MQTT           - Datentyp fuer MQTT Publish und Subscribe 
+  *
+  */
+Namespace com.logicals.Basic.MQTT
+
+USING com.logicals.Basic.Convert;
+
+ Type
+  
+  DT_lc_MQTT : STRUCT
+     //     
+     // Fuer Subsribe - Holen von Broker
+     // Fuer Publish - Senden an den Broker
+     //
+     IoImage     : ARRAY[0..1023] OF BYTE;
+     IoImageLen  : DINT := 0;
+     IoImageSize : DINT := 1024;   
+     //
+     // Datum und Uhrzeit
+     // zur Zeit- und Datumssynchronisation zwischen den Stationen
+     //
+     Second    : BYTE;
+     Minute    : BYTE;
+     Hour      : BYTE;
+     Day       : BYTE;
+     Month     : BYTE;
+     YearLByte : BYTE;
+     YearHByte : BYTE;
+
+     //
+     // Die "letzte" Adresse der IP-SendeAdresse
+     // 
+     IPVal1 : BYTE;
+     IPVal2 : BYTE;
+     IPVal3 : BYTE;
+     //
+     // LifeTick SendeMessage
+     //
+     CntMessage     : BYTE;
+     
+     Data01         : BYTE;
+     Data02         : BYTE;
+     Data03         : BYTE;
+     Data04         : BYTE;
+     Data05         : BYTE;
+     Data06         : BYTE;
+     Data07         : BYTE;
+     Data08         : BYTE;
+     Data09         : BYTE;
+     Data10         : BYTE;
+     Data11         : BYTE;
+     Data12         : BYTE;
+     Data13         : BYTE;
+     Data14         : BYTE;
+     Data15         : BYTE;
+     Data16         : BYTE;
+     Data17         : BYTE;
+     Data18         : BYTE;
+     Data19         : BYTE;
+     Data20         : BYTE;
+     Data21         : BYTE;
+     Data22         : BYTE;
+     Data23         : BYTE;
+     Data24         : BYTE;
+     Data25         : BYTE;
+     Data26         : BYTE;
+     Data27         : BYTE;
+     Data28         : BYTE;
+     Data29         : BYTE;
+     Data30         : BYTE;
+     Data31         : BYTE;
+     Data32         : BYTE;
+
+     MsgLengthByte1 : BYTE;
+     MsgLengthByte2 : BYTE;
+   
+    END_STRUCT;
+	
+	DT_lc_MQTTPublishState : STRUCT
+         clientid          : STRING[24];     // Laenge beachten
+         topic             : STRING[24];     // Laenge beachten
+         ch                : DINT := -1;
+         cnt               : DINT := 0;
+         rc                : DINT := -1;
+         state             : SINT := -1;
+         subscribed        : BOOL := FALSE;
+         message_received  : BOOL := FALSE;
+         msgcount          : INT;
+    END_STRUCT;
+	
+	DT_lc_MQTTSubscribeState : STRUCT	
+         clientid          : STRING[24];     // Laenge beachten
+         topic             : STRING[24];     // Laenge beachten
+         ch                : DINT := -1;
+         cnt               : DINT := 0;
+         rc                : DINT := -1;
+         state             : SINT := -1;
+         subscribed        : BOOL := FALSE;
+         message_received  : BOOL := FALSE;
+         msgcount          : INT;
+   	END_STRUCT;
+ 
+END_Type
+
+/*
+ * MQTT_Publish
+ * Publish Daten an MQTT
+ */    
+FUNCTION_BLOCK FB_lc_MQTT_Publish
+   /*
+    * Publish MQTT Message an den Broker (Senden)
+    */
+   VAR_INPUT
+          vistruc_MQTT             : DT_lc_MQTT;
+   END_VAR
+  /*
+   * Eingabedaten fuer MQTT Publish
+   */ 
+   VAR_INPUT
+         vistr_BrokerAddress      : STRING[64];        //
+         vistr_BrokerClientId     : STRING[64];        // 
+         vistr_BrokerPublishTopic : STRING[64];
+         //
+         // Die Sende IPAdresse
+         //
+         vistr_IPAddr : STRING[25];
+         //
+         // Das InitSignal
+         //
+         vix_Init : BOOL;          
+         //
+         // Variable die benutzt wird um lokale Daten als Testdaten zu schicken
+         // oder die Daten die als VAR_IN_OUT uebergeben werden
+         //
+         vix_PublishLocalData : BOOL;
+    END_VAR
+    
+    VAR_OUTPUT
+         vox_PublishOK        : BOOL;
+         vodi_PublishLifeTick : DINT;
+         
+         vostruc_MQTTPublishState : DT_lc_MQTTPublishState;
+    END_VAR
+    
+    VAR   
+        lstruc_MQTT             : DT_lc_MQTT;
+
+
+        larr_ioImageLocal    : ARRAY[0..1023] OF BYTE;
+        ldi_ioImageLocalLen  : DINT := 1024;
+        
+        ldi_ch : DINT    := -1;
+        ldi_cnt : DINT   := 0;
+        ldi_rc : DINT    := -1;
+        lsi_state : SINT := -1;
+    
+        ldi_cntPublishconnect : DINT := 0;
+        ldi_cntSndMessage     : DINT := 0;
+        //
+        // Die letzen Byte der Subscriber IP Adresse
+        lsi_IPVal1 : USINT;
+        lsi_IPVal2 : USINT;
+        lsi_IPVal3 : USINT;
+         
+        lstr_IPVal     : STRING[3];
+        lstr_IPValTest : STRING[1];
+         
+        lui_Idx      : UINT;
+         
+        lx_CycleInit : BOOL;
+        
+        RTS_MQTT_RC  : MQTT_RC;
+            
+    END_VAR
+    
+    VAR
+     //
+     // Lokale BausteinInstanzen Start
+     //
+     InitPulseR_TRIG : R_TRIG;
+     ConvMsgLength   : FB_lc_ConvInt2Byte_ST; 
+     //
+     // Lokale BausteinInstanzen Ende
+     //    
+   END_VAR;
+        
+    InitPulseR_TRIG(CLK := TRUE, Q => lx_CycleInit);
+    
+    ENO := TRUE;
+
+   /*
+    * Externer Init oder Interner Init
+    */ 
+    IF vix_Init OR lx_CycleInit THEN
+     // Aus der IPAddr die drei Byte f�r ie IO-Daten berechnen
+     lstr_IPVal := Right(IN := vistr_IPAddr, L := 3);
+     
+     lstr_IPValTest := MID(IN:= lstr_IPVal, L := 1, P := 1);
+     lsi_IPVal1 := FUN_lc_ConvStr2Usint_ST(lstr_IPValTest);
+
+     lstr_IPValTest := MID(IN:= lstr_IPVal, L := 1, P := 2);
+     lsi_IPVal2 := FUN_lc_ConvStr2Usint_ST(lstr_IPValTest);
+
+     lstr_IPValTest := MID(IN:= lstr_IPVal, L := 1, P := 3);
+     lsi_IPVal3 := FUN_lc_ConvStr2Usint_ST(lstr_IPValTest);     
+     
+     lstruc_MQTT.IPVal1 := TO_BYTE(lsi_IPVal1);
+     lstruc_MQTT.IPVal2 := TO_BYTE(lsi_IPVal2);
+     lstruc_MQTT.IPVal3 := TO_BYTE(lsi_IPVal3);
+     
+    END_IF;
+    
+    lstruc_MQTT := vistruc_MQTT;
+        
+    lsi_state := MQTT_GetState(ch := ldi_ch, 
+    	                       rc => ldi_rc, 
+    	                       ENO => ENO);
+
+   // OK                          := 0
+   // ERROR                       := 1
+   // ERROR_MEM_ALLOC             := 2
+   // ERROR_CONNECT               := 3
+   // ERROR_CH_INVALID            := 4
+   // ERROR_OUT_OF_CLIENTS        := 5
+   // ERROR_OUT_OF_CB             := 6
+   // ERROR_INVALID_MUTEX         := 7
+   // ERROR_NO_MSG_RECEIVED       := 8
+   // ERROR_NO_MSG_PUBLISHED      := 9
+   // ERROR_MSG_TRUNCATED         := 10
+   // ERROR_CH_INVALID_STATE      := 11
+   // ERROR_CANNOT_DISCONNECT     := 12
+   // ERROR_AUTHENTICATION_FAILED := 13
+   // ERROR_SSL_NOT_SUPPORTED     := 14
+
+    /* make sure MQTT connection is established and messages are received */
+    IF lsi_state <> 5 /* connecting */ AND lsi_state <> 6 /* connected */ THEN
+        
+        ldi_cntPublishconnect := ldi_cntPublishconnect +1;
+        
+        ldi_ch := MQTT_Connect(address := vistr_BrokerAddress, 
+         	                   clientId := vistr_BrokerClientId, 
+         	                   rc => ldi_rc, 
+         	                   ENO => ENO);
+     //
+     // Keine Connection fuer Publish
+     //   
+     vox_PublishOK        := FALSE;
+     vodi_PublishLifeTick := 0;
+    END_IF;
+
+    IF ENO AND lsi_state = 6 /* connected */ THEN       
+        
+        ldi_cntSndMessage := ldi_cntSndMessage +1;
+
+        vodi_PublishLifeTick := ldi_cntSndMessage;
+        vox_PublishOK        := TRUE;
+        //
+        // Die ersten drei Byte sind die Endziffern der SendeIP-Adresse
+        //
+        IF vix_PublishLocalData = TRUE THEN
+         larr_ioImageLocal[0]  := TO_BYTE(lsi_IPVal1);
+         larr_ioImageLocal[1]  := TO_BYTE(lsi_IPVal2);
+         larr_ioImageLocal[2]  := TO_BYTE(lsi_IPVal3);
+         larr_ioImageLocal[3]  := TO_BYTE(ldi_cntSndMessage);
+        ELSE
+         //
+         // Die Werte verschicken
+         // Hier muss ein Baustein her, der die Wandlung vornimmt
+         //        
+         lui_Idx := 0;
+         larr_ioImageLocal[lui_Idx]  := vistruc_MQTT.IPVal1; // 0
+         lui_Idx := lui_Idx + 1;
+         larr_ioImageLocal[lui_Idx]  := vistruc_MQTT.IPVal2; // 1
+         lui_Idx := lui_Idx + 1;
+         larr_ioImageLocal[lui_Idx]  := vistruc_MQTT.IPVal3; // 2
+
+         lui_Idx := lui_Idx + 1;
+         larr_ioImageLocal[lui_Idx]  := TO_BYTE(ldi_cntSndMessage); // 3
+
+         lui_Idx := lui_Idx + 1;
+         larr_ioImageLocal[lui_Idx]  := vistruc_MQTT.Second;  // 4
+         lui_Idx := lui_Idx + 1;
+         larr_ioImageLocal[lui_Idx]  := vistruc_MQTT.Minute;  // 5
+         lui_Idx := lui_Idx + 1;
+         larr_ioImageLocal[lui_Idx]  := vistruc_MQTT.Hour;    // 6
+         lui_Idx := lui_Idx + 1;
+         larr_ioImageLocal[lui_Idx]  := vistruc_MQTT.Day;
+         lui_Idx := lui_Idx + 1;
+         larr_ioImageLocal[lui_Idx]  := vistruc_MQTT.Month;
+         lui_Idx := lui_Idx + 1;
+         larr_ioImageLocal[lui_Idx]  := vistruc_MQTT.YearLByte;
+         lui_Idx := lui_Idx + 1;
+         larr_ioImageLocal[lui_Idx]  := vistruc_MQTT.YearLByte;
+         //
+         // Ab hier Nutzdaten einfuegen
+         // Derzeit 32 Byte
+         lui_Idx := lui_Idx + 1;
+         larr_ioImageLocal[lui_Idx]  := vistruc_MQTT.Data01;
+         lui_Idx := lui_Idx + 1;
+         larr_ioImageLocal[lui_Idx]  := vistruc_MQTT.Data02;
+         lui_Idx := lui_Idx + 1;
+         larr_ioImageLocal[lui_Idx]  := vistruc_MQTT.Data03;
+         lui_Idx := lui_Idx + 1;
+         larr_ioImageLocal[lui_Idx]  := vistruc_MQTT.Data04;
+         lui_Idx := lui_Idx + 1;
+         larr_ioImageLocal[lui_Idx]  := vistruc_MQTT.Data05;
+         lui_Idx := lui_Idx + 1;
+         larr_ioImageLocal[lui_Idx]  := vistruc_MQTT.Data06;
+         lui_Idx := lui_Idx + 1;
+         larr_ioImageLocal[lui_Idx]  := vistruc_MQTT.Data07;
+         lui_Idx := lui_Idx + 1;
+         larr_ioImageLocal[lui_Idx]  := vistruc_MQTT.Data08;
+         lui_Idx := lui_Idx + 1;
+         larr_ioImageLocal[lui_Idx]  := vistruc_MQTT.Data09;
+         lui_Idx := lui_Idx + 1;
+         larr_ioImageLocal[lui_Idx]  := vistruc_MQTT.Data10;
+         lui_Idx := lui_Idx + 1;
+         larr_ioImageLocal[lui_Idx]  := vistruc_MQTT.Data11;
+         lui_Idx := lui_Idx + 1;
+         larr_ioImageLocal[lui_Idx]  := vistruc_MQTT.Data12;
+         lui_Idx := lui_Idx + 1;
+         larr_ioImageLocal[lui_Idx]  := vistruc_MQTT.Data13;
+         lui_Idx := lui_Idx + 1;
+         larr_ioImageLocal[lui_Idx]  := vistruc_MQTT.Data13;
+         lui_Idx := lui_Idx + 1;
+         larr_ioImageLocal[lui_Idx]  := vistruc_MQTT.Data14;
+         lui_Idx := lui_Idx + 1;
+         larr_ioImageLocal[lui_Idx]  := vistruc_MQTT.Data15;
+         lui_Idx := lui_Idx + 1;
+         larr_ioImageLocal[lui_Idx]  := vistruc_MQTT.Data16;
+         lui_Idx := lui_Idx + 1;
+         larr_ioImageLocal[lui_Idx]  := vistruc_MQTT.Data17;
+         lui_Idx := lui_Idx + 1;
+         larr_ioImageLocal[lui_Idx]  := vistruc_MQTT.Data18;
+         lui_Idx := lui_Idx + 1;
+         larr_ioImageLocal[lui_Idx]  := vistruc_MQTT.Data19;
+         lui_Idx := lui_Idx + 1;
+         larr_ioImageLocal[lui_Idx]  := vistruc_MQTT.Data20;
+         lui_Idx := lui_Idx + 1;
+         larr_ioImageLocal[lui_Idx]  := vistruc_MQTT.Data21;
+         lui_Idx := lui_Idx + 1;
+         larr_ioImageLocal[lui_Idx]  := vistruc_MQTT.Data22;
+         lui_Idx := lui_Idx + 1;
+         larr_ioImageLocal[lui_Idx]  := vistruc_MQTT.Data23;
+         lui_Idx := lui_Idx + 1;
+         larr_ioImageLocal[lui_Idx]  := vistruc_MQTT.Data24;
+         lui_Idx := lui_Idx + 1;
+         larr_ioImageLocal[lui_Idx]  := vistruc_MQTT.Data25;
+         lui_Idx := lui_Idx + 1;
+         larr_ioImageLocal[lui_Idx]  := vistruc_MQTT.Data26;
+         lui_Idx := lui_Idx + 1;
+         larr_ioImageLocal[lui_Idx]  := vistruc_MQTT.Data27;
+         lui_Idx := lui_Idx + 1;
+         larr_ioImageLocal[lui_Idx]  := vistruc_MQTT.Data28;
+         lui_Idx := lui_Idx + 1;
+         larr_ioImageLocal[lui_Idx]  := vistruc_MQTT.Data29;
+         lui_Idx := lui_Idx + 1;
+         larr_ioImageLocal[lui_Idx]  := vistruc_MQTT.Data30;
+         lui_Idx := lui_Idx + 1;
+         larr_ioImageLocal[lui_Idx]  := vistruc_MQTT.Data31;
+         lui_Idx := lui_Idx + 1;
+         larr_ioImageLocal[lui_Idx]  := vistruc_MQTT.Data32;
+         //
+         // DiagnoseInfo fuer Laenge der Msg
+         // max. 1024 Byte
+         // Zunaechst Reset, dann berechnen und zuweisen
+         lui_Idx := lui_Idx + 1;
+         lui_Idx := lui_Idx + 1;
+
+        END_IF; 
+        /* send updated io image to remote */
+        MQTT_Publish(ch      := ldi_ch, 
+                     topic   := vistr_BrokerPublishTopic,
+                     payload := REF(larr_ioImageLocal[0]),
+                     len     := ldi_ioImageLocalLen,
+                     rc      => ldi_rc);
+    END_IF;
+    
+    vostruc_MQTTPublishState.ch       := ldi_ch;
+    vostruc_MQTTPublishState.rc       := ldi_rc;
+    vostruc_MQTTPublishState.state    := lsi_state;    
+    vostruc_MQTTPublishState.cnt      := ldi_cnt;
+    vostruc_MQTTPublishState.message_received := vox_PublishOK;
+    vostruc_MQTTPublishState.msgcount := TO_INT(ldi_cntSndMessage);
+
+    vostruc_MQTTPublishState.topic    := vistr_BrokerPublishTopic;
+    vostruc_MQTTPublishState.clientid := vistr_BrokerClientId;
+
+END_FUNCTION_BLOCK
+/*
+ * MQTT_Subscribe
+ * Daten subscribe an MQTT
+ */
+FUNCTION_BLOCK FB_lc_MQTT_Subscribe
+   /*
+    * Subscribe MQTT Message vom MQTT Broker (Empfangen)
+    */    
+   VAR_INPUT
+         vistr_BrokerAddress        : STRING[64]; 
+         vistr_BrokerClientId       : STRING[64];
+         vistr_BrokerSubscribeTopic : STRING[64];
+   END_VAR
+
+   /*
+    * Die MQTT-Daten zurueckgeben 
+    */
+   VAR_OUTPUT
+          vostruc_MQTT               : DT_lc_MQTT;                        // Zu uebertragende Daten
+   END_VAR
+    
+   VAR_OUTPUT
+         vostr_BrokerSubscribeTopicOut : STRING[64];
+        /*
+         * Subscribe Verbindung OK
+         */ 
+         vox_SubscribeOK       : BOOL;
+        /* 
+         *  Life Tick fuer Subscribe Ok
+         */
+         vodi_SubscribeLifeTick : DINT;
+         vodi_RemoteLifeTick    : DINT;
+        /* 
+         *  Die letzen Byte der Subscribe IP Adresse
+         */
+         vousi_IPVal1 : USINT;
+         vousi_IPVal2 : USINT;
+         vousi_IPVal3 : USINT;
+
+         voarr_ImageRemote    : ARRAY[0..1023] OF BYTE;
+         vodi_ImageRemoteLen  : DINT := 0;
+         vodi_ImageRemoteSize : DINT := 1024;
+
+         vostruc_MQTTSubscribeState : DT_lc_MQTTSubscribeState;          // Status der Verbindung
+
+   END_VAR
+   
+   VAR
+        lstruc_MQTT : DT_lc_MQTT;
+        
+        ldi_ch    : DINT  := -1;
+        ldi_cnt   : DINT  := 0;
+        ldi_rc    : DINT  := -1;
+        lsi_state : SINT  := -1;
+
+        larr_ioImageRemote    : ARRAY[0..1023] OF BYTE;
+        ldi_ioImageRemoteLen  : DINT := 0;
+        ldi_ioImageRemoteSize : DINT := 1024;
+    
+        ldi_cntSubscribeconnect : DINT := 0;
+        ldi_cntRcvMessage       : DINT := 0;
+        
+        lx_Subscribed       : BOOL;
+        lx_Message_Received : BOOL;
+
+        lui_Idx : UINT;
+
+        lx_InitPulse : BOOL;
+
+        /* constants */
+        RTSS_MQTT_OK : DINT := 0;
+
+        /* MQTT Fehler DatenTyp */
+        RTSS_MQTT_RC : MQTT_RC;            
+   END_VAR
+   
+   VAR
+    //
+    // Lokale BausteinInstanzen Start
+    //
+    InitPulseR_TRIG : R_TRIG;
+    ConvMsgLength   : FB_lc_ConvInt2Byte_ST;
+    //
+    // Lokale BausteinInstanzen Ende
+    //    
+   END_VAR
+   
+   ENO := TRUE;
+
+   InitPulseR_TRIG(CLK := TRUE, Q => lx_InitPulse);
+      
+   lsi_state := MQTT_GetState(ch := ldi_ch, 
+   	                          rc => ldi_rc, 
+   	                          ENO => ENO);
+
+   // OK                          := 0
+   // ERROR                       := 1
+   // ERROR_MEM_ALLOC             := 2
+   // ERROR_CONNECT               := 3
+   // ERROR_CH_INVALID            := 4
+   // ERROR_OUT_OF_CLIENTS        := 5
+   // ERROR_OUT_OF_CB             := 6
+   // ERROR_INVALID_MUTEX         := 7
+   // ERROR_NO_MSG_RECEIVED       := 8
+   // ERROR_NO_MSG_PUBLISHED      := 9
+   // ERROR_MSG_TRUNCATED         := 10
+   // ERROR_CH_INVALID_STATE      := 11
+   // ERROR_CANNOT_DISCONNECT     := 12
+   // ERROR_AUTHENTICATION_FAILED := 13
+   // ERROR_SSL_NOT_SUPPORTED     := 14
+
+   IF lsi_state <> 5 /* connecting */ AND lsi_state <> 6 /* connected */ THEN
+	 
+	 /* 
+	  * Beim Broker anmelden
+	  */ 
+	  ldi_ch := MQTT_Connect(address  := vistr_BrokerAddress, 
+	  	                     clientId := vistr_BrokerClientId, 
+	  	                     rc       => ldi_rc, 
+	  	                     ENO      => ENO);
+    END_IF;
+
+    IF lsi_state = 6 /* connected */ THEN
+
+  	/* 
+  	 * connect to topic in case connection has been established
+  	 */
+	 IF NOT(lx_Subscribed) THEN
+		MQTT_Subscribe(ch    := ldi_ch, 
+			           topic := vistr_BrokerSubscribeTopic, 
+			           rc    => ldi_rc);
+		
+		lx_Subscribed := ldi_rc = RTSS_MQTT_OK;
+		
+	 END_IF;
+	 
+	 IF lx_Subscribed THEN
+		/* if subscribed, obtain only the latest message */
+		
+		ldi_cntSubscribeconnect := ldi_cntSubscribeconnect + 1;
+		
+		lx_Message_Received := FALSE;
+
+		REPEAT
+			vostr_BrokerSubscribeTopicOut := MQTT_Receive(ch          := ldi_ch, 
+                                                          payload     := REF(larr_ioImageRemote[0]), 
+                                                          payload_len := ldi_ioImageRemoteSize, 
+                                                          len         => ldi_ioImageRemoteLen, 
+                                                          // topic       => vostr_BrokerSubscribeTopicOut, 
+                                                          rc          => ldi_rc);
+
+			IF ldi_rc <> RTSS_MQTT_OK THEN
+			    vox_SubscribeOK := FALSE;
+				EXIT;
+			END_IF;
+            
+            ldi_cntRcvMessage      := ldi_cntRcvMessage + 1;
+			vodi_SubscribeLifeTick := ldi_cntRcvMessage;
+
+			lx_Message_Received    := TRUE;
+           /*
+            * Ausgabe der Daten auch an VAR_OUTPUT des Bausteins
+            */
+            voarr_ImageRemote    := larr_ioImageRemote;
+            vodi_ImageRemoteLen  := ldi_ioImageRemoteLen;
+            vodi_ImageRemoteSize := ldi_ioImageRemoteSize;
+			//
+			// Die ersten drei Byte sind die letzten Ziffern der SendeIP-Adresse
+			// 
+            lui_Idx := 0;
+            vostruc_MQTT.IPVal1 := larr_ioImageRemote[lui_Idx];
+            vousi_IPVal1      := TO_USINT(larr_ioImageRemote[lui_Idx]);
+            lui_Idx := lui_Idx + 1;
+            vostruc_MQTT.IPVal2 := larr_ioImageRemote[lui_Idx];
+            vousi_IPVal2      := TO_USINT(larr_ioImageRemote[lui_Idx]);
+            lui_Idx := lui_Idx + 1;
+            vostruc_MQTT.IPVal3 := larr_ioImageRemote[lui_Idx];
+            vousi_IPVal3      := TO_USINT(larr_ioImageRemote[lui_Idx]);
+            
+			// LifeTick der Message!
+            lui_Idx := lui_Idx + 1;
+            larr_ioImageRemote[lui_Idx] := TO_BYTE(ldi_cntRcvMessage);
+			vostruc_MQTT.CntMessage := larr_ioImageRemote[lui_Idx];
+
+            lui_Idx := lui_Idx + 1;
+            vostruc_MQTT.Second := larr_ioImageRemote[lui_Idx];
+            lui_Idx := lui_Idx + 1;
+            vostruc_MQTT.Minute := larr_ioImageRemote[lui_Idx];
+            lui_Idx := lui_Idx + 1;
+            vostruc_MQTT.Hour :=  larr_ioImageRemote[lui_Idx];
+            lui_Idx := lui_Idx + 1;
+            vostruc_MQTT.Day := larr_ioImageRemote[lui_Idx];
+            lui_Idx := lui_Idx + 1;
+            vostruc_MQTT.Month := larr_ioImageRemote[lui_Idx];
+            lui_Idx := lui_Idx + 1;
+            vostruc_MQTT.YearLByte := larr_ioImageRemote[lui_Idx];
+            lui_Idx := lui_Idx + 1;
+            vostruc_MQTT.YearLByte := larr_ioImageRemote[lui_Idx];
+            //
+            // Nutzdaten
+            lui_Idx := lui_Idx + 1;
+            vostruc_MQTT.Data01 := larr_ioImageRemote[lui_Idx];
+            lui_Idx := lui_Idx + 1;
+            vostruc_MQTT.Data02 := larr_ioImageRemote[lui_Idx];
+            lui_Idx := lui_Idx + 1;
+            vostruc_MQTT.Data03 := larr_ioImageRemote[lui_Idx];
+            lui_Idx := lui_Idx + 1;
+            vostruc_MQTT.Data04 := larr_ioImageRemote[lui_Idx];
+            lui_Idx := lui_Idx + 1;
+            vostruc_MQTT.Data05 := larr_ioImageRemote[lui_Idx];
+            lui_Idx := lui_Idx + 1;
+            vostruc_MQTT.Data06 := larr_ioImageRemote[lui_Idx];
+            lui_Idx := lui_Idx + 1;
+            vostruc_MQTT.Data07 := larr_ioImageRemote[lui_Idx];
+            lui_Idx := lui_Idx + 1;
+            vostruc_MQTT.Data08 := larr_ioImageRemote[lui_Idx];
+            lui_Idx := lui_Idx + 1;
+            vostruc_MQTT.Data09 := larr_ioImageRemote[lui_Idx];
+            lui_Idx := lui_Idx + 1;
+            vostruc_MQTT.Data10 := larr_ioImageRemote[lui_Idx];
+            lui_Idx := lui_Idx + 1;
+            vostruc_MQTT.Data11 := larr_ioImageRemote[lui_Idx];
+            lui_Idx := lui_Idx + 1;
+            vostruc_MQTT.Data12 := larr_ioImageRemote[lui_Idx];
+            lui_Idx := lui_Idx + 1;
+            vostruc_MQTT.Data13 := larr_ioImageRemote[lui_Idx];
+            lui_Idx := lui_Idx + 1;
+            vostruc_MQTT.Data14 := larr_ioImageRemote[lui_Idx];
+            lui_Idx := lui_Idx + 1;
+            vostruc_MQTT.Data15 := larr_ioImageRemote[lui_Idx];
+            lui_Idx := lui_Idx + 1;
+            vostruc_MQTT.Data16 := larr_ioImageRemote[lui_Idx];
+            lui_Idx := lui_Idx + 1;
+            vostruc_MQTT.Data17 := larr_ioImageRemote[lui_Idx];
+            lui_Idx := lui_Idx + 1;
+            vostruc_MQTT.Data18 := larr_ioImageRemote[lui_Idx];
+            lui_Idx := lui_Idx + 1;
+            vostruc_MQTT.Data19 := larr_ioImageRemote[lui_Idx];
+            lui_Idx := lui_Idx + 1;
+            vostruc_MQTT.Data20 := larr_ioImageRemote[lui_Idx];
+            lui_Idx := lui_Idx + 1;
+            vostruc_MQTT.Data21 := larr_ioImageRemote[lui_Idx];
+            lui_Idx := lui_Idx + 1;
+            vostruc_MQTT.Data22 := larr_ioImageRemote[lui_Idx];
+            lui_Idx := lui_Idx + 1;
+            vostruc_MQTT.Data23 := larr_ioImageRemote[lui_Idx];
+            lui_Idx := lui_Idx + 1;
+            vostruc_MQTT.Data24 := larr_ioImageRemote[lui_Idx];
+            lui_Idx := lui_Idx + 1;
+            vostruc_MQTT.Data25 := larr_ioImageRemote[lui_Idx];
+            lui_Idx := lui_Idx + 1;
+            vostruc_MQTT.Data26 := larr_ioImageRemote[lui_Idx];
+            lui_Idx := lui_Idx + 1;
+            vostruc_MQTT.Data27 := larr_ioImageRemote[lui_Idx];
+            lui_Idx := lui_Idx + 1;
+            vostruc_MQTT.Data28 := larr_ioImageRemote[lui_Idx];
+            lui_Idx := lui_Idx + 1;
+            vostruc_MQTT.Data29 := larr_ioImageRemote[lui_Idx];
+            lui_Idx := lui_Idx + 1;
+            vostruc_MQTT.Data30 := larr_ioImageRemote[lui_Idx];
+            lui_Idx := lui_Idx + 1;
+            vostruc_MQTT.Data31 := larr_ioImageRemote[lui_Idx];
+            lui_Idx := lui_Idx + 1;
+            vostruc_MQTT.Data32 := larr_ioImageRemote[lui_Idx];
+
+            //
+            // Effektive MsgLaenge ermitteln, zuweisen und mit uebertragen
+            lui_Idx := lui_Idx + 1;
+            vostruc_MQTT.MsgLengthByte1 := 0;
+            lui_Idx := lui_Idx + 1;
+            vostruc_MQTT.MsgLengthByte2 := 0;
+            //
+            // Idx in Byte wandeln
+            //
+            ConvMsgLength(vii_IN := TO_INT(lui_Idx), 
+            	          vob_LByte => vostruc_MQTT.MsgLengthByte1, 
+            	          vob_HByte => vostruc_MQTT.MsgLengthByte2);
+            
+		UNTIL TRUE
+		END_REPEAT;
+		
+	  END_IF;
+      //
+      // Subscribe ist OK gelaufen
+      //     
+      vox_SubscribeOK := TRUE;
+     ELSE
+     
+     /* if connection has been lost, subscription has been canceled as well */
+     ldi_cntRcvMessage := 0;
+	 lx_Subscribed     := FALSE;
+	 vox_SubscribeOK   := FALSE;
+	 
+    END_IF;
+
+    vostruc_MQTTSubscribeState.ch         := ldi_ch;
+    vostruc_MQTTSubscribeState.rc         := ldi_rc;
+    vostruc_MQTTSubscribeState.state      := lsi_state;    
+    vostruc_MQTTSubscribeState.cnt        := ldi_cnt;
+    vostruc_MQTTSubscribeState.message_received := vox_SubscribeOK;
+    vostruc_MQTTSubscribeState.msgcount   := TO_INT(ldi_cntRcvMessage);
+    vostruc_MQTTSubscribeState.subscribed := vox_SubscribeOK;
+    
+    vostruc_MQTTSubscribeState.topic    := vistr_BrokerSubscribeTopic;
+    vostruc_MQTTSubscribeState.clientid := vistr_BrokerClientId;
+    
+END_FUNCTION_BLOCK
+
+END_NAMESPACE

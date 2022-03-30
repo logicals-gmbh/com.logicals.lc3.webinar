@@ -1,0 +1,11 @@
+{CustomImplementation}
+
+NAMESPACE com.logicals.Basic.System
+
+FUNCTION FUN_lc_RebootOS_C
+{ ImplementationProperties(functionHasCFile;) }
+
+
+END_FUNCTION
+
+END_NAMESPACE

@@ -1,0 +1,1134 @@
+ /*
+  * logi.cals GmbH
+  * A-3100 St. Poelten
+  * Europaplatz 7/1
+  * Tel.: 0043-5-77147
+  *
+  * logi.cals automation solutions & services GmbH
+  * D-40738 Langenfeld
+  * Postfach 1306
+  * Tel.: 0049-2173-91910
+  * 
+  * Contact:
+  * dieter.goltz@logicals.com
+  * 
+  * History:
+  * Created:  
+  * DG 2017-03-28
+  */
+   
+ /* 
+  * Modified: 
+  * DG 2017-03-28
+  * DG 2021-03-17
+  */ 
+  
+ /* 
+  * Description
+  * Convert blocks
+  */
+   
+ /* 
+  * Beschreibung
+  * Konvertierungsbausteine
+  */
+
+NAMESPACE com.logicals.Basic.Convert
+
+/*
+ * Wandelt Real in 2 INT um
+ * Wert vor dem Komma
+ * Wert nach dem Komma
+ *
+ * (Funktioniert NOCHT nicht!)
+ * Nachkommastelle wird NOCH nicht richtig umgewandelt!
+ * Es muss noch irgendwie die auf den Wert der Nachkommastelle referenziert werden!
+ * Millionstel, ..
+ */
+FUNCTION_BLOCK FB_lc_ConvRealTo2Int_ST
+ VAR_INPUT 
+  vir_Val : REAL;
+ END_VAR
+
+ VAR_OUTPUT
+   vodi_HVal   : DINT; // Vorkommawert
+   vodi_LVal   : DINT; // Nachkommawert
+ END_VAR
+ 
+ VAR_OUTPUT
+   vox_Sign    : BOOL;   // Vorzeichen
+   vox_Mill    : BOOL;   // 1000-Millionen
+   vox_00Thous : BOOL;   // 100-Millionen 
+   vox_0Thous  : BOOL;   // 10-Millionen  
+   vox_Thous   : BOOL;   // Millionen     
+   vox_Hun     : BOOL;   // HunderTausend 
+   vox_Ten     : BOOL;   // ZehnTausend   
+   vox_DSingle : BOOL;   // Tausend       
+   vox_DSing   : BOOL;   // Hundert          
+   vox_DTen    : BOOL;   // Zehn       
+   vox_DHun    : BOOL;   // Eins
+
+   vox_Dot     : BOOL;   // Dezimalpunkt
+ END_VAR
+
+ VAR
+  lr_TempVal1 : REAL;
+  lr_TempVal2 : REAL;
+ END_VAR
+ 
+ VAR
+  ldi_HVal : DINT;
+  ldi_LVal : DINT;
+ END_VAR
+
+ VAR
+  lr_Mill    : REAL := 1000000000.0;  // 1000-Millionen
+  lr_00Thous : REAL := 100000000.0;   // 100-Millionen
+  lr_0Thous  : REAL := 10000000.0;    // 10-Millionen
+  lr_Thous   : REAL := 1000000.0;     // Millionen
+  lr_Hun     : REAL := 100000.0;      // HunderTausend
+  lr_Ten     : REAL := 10000.0;       // ZehnTausend
+  lr_DSingle : REAL := 1000.0;        // Tausend
+  lr_DSing   : REAL := 100.0;         // Hundert
+  lr_DTen    : REAL := 10.0;          // Zehn 
+  lr_DHun    : REAL := 1.0;           // Eins 
+ END_VAR
+ 
+ VAR
+  li_CycleCount     : INT;
+  li_CycleCountInit : INT;
+  lx_CyclePulse     : BOOL;
+  lx_CycleInit      : BOOL;
+ END_VAR
+
+ li_CycleCount := li_CycleCount + 1;
+ lx_CyclePulse := NOT(lx_CyclePulse);
+ lx_CycleInit  := TRUE;
+
+ IF lx_CycleInit = TRUE THEN
+  li_CycleCountInit := li_CycleCountInit + 1;
+ /*
+  * Die Kleinstwerte berechnen! 
+  */
+  lr_Mill    := 1.0/1000000000.0;  // 1000-Millionen
+  lr_00Thous := 1.0/100000000.0;   // 100-Millionen
+  lr_0Thous  := 1.0/10000000.0;    // 10-Millionen
+  lr_Thous   := 1.0/1000000.0;     // Millionen
+  lr_Hun     := 1.0/100000.0;      // HunderTausend
+  lr_Ten     := 1.0/10000.0;       // ZehnTausend
+  lr_DSingle := 1.0/1000.0;        // Tausend
+  lr_DSing   := 1.0/100.0;         // Hundert
+  lr_DTen    := 1.0/10.0;          // Zehn 
+  lr_DHun    := 1.0/1.0;           // Eins  
+ END_IF;
+
+ vox_Sign    := FALSE;   // Vorzeichen
+ vox_Mill    := FALSE;   // 1000-Millionen
+ vox_00Thous := FALSE;   // 100-Millionen 
+ vox_0Thous  := FALSE;   // 10-Millionen  
+ vox_Thous   := FALSE;   // Millionen     
+ vox_Hun     := FALSE;   // HunderTausend 
+ vox_Ten     := FALSE;   // ZehnTausend   
+ vox_DSingle := FALSE;   // Tausend       
+ vox_DSing   := FALSE;   // Hundert          
+ vox_DTen    := FALSE;   // Zehn       
+ vox_DHun    := FALSE;   // Eins
+
+ IF vir_Val >= 0.0 THEN
+  vox_Sign := TRUE;
+ ELSE
+  vox_Sign := FALSE;
+ END_IF;
+ 
+ ldi_HVal    := TO_DINT(vir_Val);
+ lr_TempVal1 := TO_REAL(ldi_HVal);
+/*
+ * Wenn der Eingangswert positiv ist
+ */ 
+ IF vox_Sign = TRUE THEN
+   lr_TempVal2 := vir_Val - ABS(lr_TempVal1);
+  ELSE
+   lr_TempVal2 := vir_Val + ABS(lr_TempVal1);
+ END_IF; 
+
+ ldi_LVal    := TO_DINT(lr_TempVal2);
+
+ IF lr_tempVal2 >= lr_Mill AND lr_tempVal2 < lr_00Thous THEN
+  vox_Mill := TRUE;
+ END_IF; 
+ IF lr_tempVal2 >= lr_00Thous AND lr_tempVal2 < lr_0Thous THEN
+  vox_00Thous := TRUE;
+ END_IF; 
+ IF lr_tempVal2 >= lr_0Thous AND lr_tempVal2 < lr_Thous THEN
+  vox_0Thous := TRUE;
+ END_IF; 
+ IF lr_tempVal2 >= lr_Thous AND lr_tempVal2 < lr_Hun THEN
+  vox_Thous := TRUE;
+ END_IF; 
+ IF lr_tempVal2 >= lr_Hun AND lr_tempVal2 < lr_Ten THEN
+  vox_Hun := TRUE;
+ END_IF; 
+ IF lr_tempVal2 >= lr_Ten AND lr_tempVal2 < lr_DSingle THEN
+  vox_Ten := TRUE;
+ END_IF; 
+ IF lr_tempVal2 >= lr_DSingle AND lr_tempVal2 < lr_DSing THEN
+  vox_DSingle := TRUE;
+ END_IF; 
+ IF lr_tempVal2 >= lr_DSing AND lr_tempVal2 < lr_DTen THEN
+  vox_DSing := TRUE;
+ END_IF; 
+ IF lr_tempVal2 >= lr_DSing AND lr_tempVal2 < lr_DTen THEN
+  vox_DTen := TRUE;
+ END_IF; 
+ IF lr_tempVal2 >= lr_DTen AND lr_tempVal2 < lr_DHun THEN
+  vox_DHun := TRUE;
+ END_IF; 
+ 
+ vodi_HVal := ldi_HVal; // Vorkommawert
+ vodi_LVal := ldi_LVal; // Nachkommawert
+
+ lx_CycleInit  := FALSE;
+
+END_FUNCTION_BLOCK
+/*
+ * Wandelt Real in 12 Byte um
+ * Auch als FBD-verfuegbar
+ */
+FUNCTION_BLOCK FB_lc_ConvRealTo12Byte_ST  {
+    vox_ValMaxErr {index := 16};
+    vox_ValMinErr {index := 17};
+    voui_ErrNo {index := 14};
+    vox_Err {index := 13};
+    width := 210;
+    height := 368;
+    minWidth := 200;
+    maxWidth := 200;
+    minHeight := 358;
+    maxHeight := 358;
+  }
+
+  VAR_INPUT
+    vir_In : REAL := 0.0;
+  END_VAR
+
+  VAR_OUTPUT
+    vox_Err       : BOOL;
+    voui_ErrNo    : INT;
+    vox_ValMaxErr : BOOL; 
+    vox_ValMinErr : BOOL; 
+  END_VAR
+
+  VAR_OUTPUT
+    vob_Sign    : BYTE := 43;
+    vob_Mill    : BYTE := 48;
+    vob_00Thous : BYTE := 48;
+    vob_0Thous  : BYTE := 48;
+    vob_Thous   : BYTE := 48;
+    vob_Hun     : BYTE := 48;
+    vob_Ten     : BYTE := 48;
+    vob_Single  : BYTE := 48;
+    vob_Dot     : BYTE := 46;
+    vob_DSing   : BYTE := 48;
+    vob_DTen    : BYTE := 48;
+    vob_DHund   : BYTE := 48;
+  END_VAR
+
+  VAR
+    lr_ValMax : REAL :=  2147483.0;
+    lr_ValMin : REAL := -2147483.0;
+  END_VAR
+
+  VAR
+   lx_GE_Out       : BOOL;
+   lr_ABS_Out      : REAL;
+   lr_MUL_Out      : REAL;
+   ldi_TO_DINT_Out : DINT;
+   ldi_DIV0_Out    : DINT;
+
+   ldi_DIV1_Out    : DINT;
+   ldi_ADD1_Out    : DINT;
+   ldi_MOD1_Out    : DINT;
+   
+   ldi_MOD2_Out    : DINT;
+   ldi_DIV2_Out    : DINT;
+   ldi_ADD2_Out    : DINT;
+
+   ldi_MOD3_Out    : DINT;
+   ldi_DIV3_Out    : DINT;
+   ldi_ADD3_Out    : DINT;
+
+   ldi_MOD4_Out    : DINT;
+   ldi_DIV4_Out    : DINT;
+   ldi_ADD4_Out    : DINT;
+
+   ldi_MOD5_Out    : DINT;
+   ldi_DIV5_Out    : DINT;
+   ldi_ADD5_Out    : DINT;
+
+   ldi_MOD6_Out    : DINT;
+   ldi_DIV6_Out    : DINT;
+   ldi_ADD6_Out    : DINT;
+
+   ldi_MOD7_Out    : DINT;
+   ldi_DIV7_Out    : DINT;
+   ldi_ADD7_Out    : DINT;
+
+   ldi_MOD8_Out    : DINT;
+   ldi_DIV8_Out    : DINT;
+   ldi_ADD8_Out    : DINT;
+
+   ldi_MOD9_Out    : DINT;
+   ldi_ADD9_Out    : DINT;
+
+   ldi_ADD10_Out    : DINT;
+  END_VAR
+
+  VAR
+   ldi_Mill    : DINT := 1000000000;
+   ldi_00Thous : DINT := 100000000;
+   ldi_0Thous  : DINT := 10000000;
+   ldi_Thous   : DINT := 1000000;
+   ldi_Hun     : DINT := 100000;
+   ldi_Ten     : DINT := 10000;
+   ldi_DSingle : DINT := 1000;
+   ldi_DSing   : DINT := 100;
+   ldi_DTen    : DINT := 10;
+   ldi_DHun    : DINT := 1;
+  END_VAR
+
+  /*
+   * Error Flags rucksetzen
+   */
+   vox_Err       := FALSE ;
+   voui_ErrNo    := 0;
+
+  /*
+   * Grenzen ueberwachen!
+   */
+    vox_ValMaxErr := GT(IN1 := vir_In, IN2 := lr_ValMax);
+    vox_ValMinErr := LT(IN1 := vir_In, IN2 := lr_ValMin);
+
+    IF vox_ValMaxErr = TRUE THEN
+      vox_Err       := TRUE ;
+      voui_ErrNo    := 1;
+    END_IF;
+
+    IF vox_ValMinErr = TRUE THEN
+      vox_Err       := TRUE ;
+      voui_ErrNo    := 2;
+    END_IF;
+  
+    IF vox_ValMaxErr = FALSE AND vox_ValMinErr = FALSE THEN
+ 
+     lx_GE_Out       := GE(IN1 := vir_In, IN2 := 0.0);
+     vob_Sign        := SEL(G := lx_GE_Out, IN0 := 45, IN1 := 43);
+ 
+     lr_ABS_Out      := ABS(IN := vir_In);
+     lr_MUL_Out      := MUL(IN1 := lr_ABS_Out, IN2 := 1000.0);
+     ldi_TO_DINT_Out := TO_DINT(IN := lr_MUL_Out);
+ 
+     ldi_DIV0_Out := DIV(IN1 := ldi_TO_DINT_Out, IN2 := 1000000000);
+     ldi_ADD1_Out := ADD(IN1 := ldi_DIV0_Out, IN2 := 48);
+     vob_Mill     := TO_BYTE(IN := ldi_ADD1_Out);
+     
+     ldi_MOD1_Out := MOD(IN1 := ldi_TO_DINT_Out, IN2 := 1000000000);
+ 
+     ldi_DIV1_Out := DIV(IN1 := ldi_MOD1_Out, IN2 := 100000000);
+     ldi_ADD2_Out := ADD(IN1 := ldi_DIV1_Out, IN2 := 48);
+     vob_00Thous  := TO_BYTE(IN := ldi_ADD2_Out);
+ 
+     ldi_MOD2_Out := MOD(IN1 := ldi_MOD1_Out, IN2 := 100000000);
+ 
+     ldi_DIV2_Out := DIV(IN1 := ldi_MOD2_Out, IN2 := 10000000);
+     ldi_ADD3_Out := ADD(IN1 := ldi_DIV2_Out, IN2 := 48);
+     vob_0Thous   := TO_BYTE(IN := ldi_ADD3_Out);
+ 
+     ldi_MOD3_Out := MOD(IN1 := ldi_MOD2_Out, IN2 := 10000000);
+     ldi_DIV3_Out := DIV(IN1 := ldi_MOD3_Out, IN2 := 1000000);
+     ldi_MOD4_Out := MOD(IN1 := ldi_MOD3_Out, IN2 := 1000000);
+     ldi_ADD4_Out := ADD(IN1 := ldi_DIV3_Out, IN2 := 48);
+     vob_Thous    := TO_BYTE(IN := ldi_ADD4_Out);
+ 
+     ldi_DIV4_Out := DIV(IN1 := ldi_MOD4_Out, IN2 := 100000);
+     ldi_MOD5_Out := MOD(IN1 := ldi_MOD4_Out, IN2 := 100000);
+     ldi_ADD5_Out := ADD(IN1 := ldi_DIV4_Out, IN2 := 48);
+     vob_Hun      := TO_BYTE(IN   := ldi_ADD5_Out);
+     
+     ldi_DIV5_Out := DIV(IN1 := ldi_MOD5_Out, IN2 := 10000);
+     ldi_MOD6_Out := MOD(IN1 := ldi_MOD5_Out, IN2 := 10000);
+     ldi_ADD6_Out := ADD(IN1 := ldi_DIV5_Out, IN2 := 48);
+     vob_Ten      := TO_BYTE(IN := ldi_ADD6_Out);
+     
+     ldi_DIV6_Out := DIV(IN1 := ldi_MOD6_Out, IN2 := 1000);
+     ldi_ADD7_Out := ADD(IN1 := ldi_DIV6_Out, IN2 := 48);
+     vob_Single   := TO_BYTE(IN := ldi_ADD7_Out);
+ 
+     ldi_MOD7_Out := MOD(IN1 := ldi_MOD6_Out, IN2 := 1000);
+     ldi_DIV7_Out := DIV(IN1 := ldi_MOD7_Out, IN2 := 100);
+     ldi_ADD8_Out := ADD(IN1 := ldi_DIV7_Out, IN2 := 48);
+     vob_DSing    := TO_BYTE(IN := ldi_ADD8_Out);
+ 
+     ldi_MOD8_Out := MOD(IN1 := ldi_MOD7_Out, IN2 := 100);
+     ldi_DIV8_Out := DIV(IN1 := ldi_MOD8_Out, IN2 := 10);
+     ldi_ADD9_Out := ADD(IN1 := ldi_DIV8_Out, IN2 := 48);
+     vob_DTen     := TO_BYTE(IN := ldi_ADD9_Out);
+     
+     ldi_MOD9_Out  := MOD(IN1 := ldi_MOD8_Out, IN2 := 10);
+     ldi_ADD10_Out := ADD(IN1 := ldi_MOD9_Out, IN2 := 48);
+     vob_DHund     := TO_BYTE(IN := ldi_ADD10_Out);
+ 
+     vob_Dot := 46;
+
+    ELSE
+    /*
+     * Wenn Fehler, dann Initwerte der Ausgaenge setzen!
+     */
+     vob_Sign    := 43;
+     vob_Mill    := 48;
+     vob_00Thous := 48;
+     vob_0Thous  := 48;
+     vob_Thous   := 48;
+     vob_Hun     := 48;
+     vob_Ten     := 48;
+     vob_Single  := 48;
+     vob_Dot     := 46;
+     vob_DSing   := 48;
+     vob_DTen    := 48;
+     vob_DHund   := 48;
+    END_IF;
+    
+END_FUNCTION_BLOCK
+
+/*
+ * Ein STRING[1] (ASCII-Zeichen) wird in seinen BYTE-Wert gewandelt
+ * Diese Funktion kann nicht mit TO_BYTE aus einer STRING-Variablen ersetzt werden!
+ */
+FUNCTION FUN_lc_ConvStr2BYTE_ST : BYTE  {
+    width := 240;
+    minWidth := 240;
+    maxWidth := 240;
+    maxHeight := 78;
+    minHeight := 78;
+    height := 78;
+  }
+
+// -----------------------------------------------------------------------
+// ASCII-Zeichentabelle, hexadezimale Nummerierung
+// Code	…0	…1	…2	…3	…4	…5	…6	…7	…8	…9	…A	…B	…C	…D	…E	…F
+// 0…	NUL	SOH	STX	ETX	EOT	ENQ	ACK	BEL	BS	HT	LF	VT	FF	CR	SO	SI
+// 1…	DLE	DC1	DC2	DC3	DC4	NAK	SYN	ETB	CAN	EM	SUB	ESC	FS	GS	RS	US
+// 2…	SP	!	"	#	$	%	&	'	(	)	*	+	,	-	.	/
+// 3…	0	1	2	3	4	5	6	7	8	9	:	;	<	=	>	?
+// 4…	@	A	B	C	D	E	F	G	H	I	J	K	L	M	N	O
+// 5…	P	Q	R	S	T	U	V	W	X	Y	Z	[	\	]	^	_
+// 6…	`	a	b	c	d	e	f	g	h	i	j	k	l	m	n	o
+// 7…	p	q	r	s	t	u	v	w	x	y	z	{	|	}	~	DEL 
+// ------------------------------------------------------------------------
+ VAR_INPUT
+  vistr_In          : STRING[1];
+  vix_Set2UpperCase : BOOL := TRUE;
+ END_VAR
+
+ VAR
+  listr_IN          : STRING[1];
+ END_VAR
+ 
+ FUN_lc_ConvStr2BYTE_ST := 16#FF;
+  
+ IF vix_Set2UpperCase = TRUE THEN
+  listr_IN := vistr_In; // Upper Case fuer Bchstaben OR 16#20; 
+ ELSE
+  listr_IN := vistr_In;
+ END_IF;
+ 
+ IF vistr_In = '0' THEN FUN_lc_ConvStr2BYTE_ST := 16#30; END_IF;
+ IF vistr_In = '1' THEN FUN_lc_ConvStr2BYTE_ST := 16#31; END_IF;
+ IF vistr_In = '2' THEN FUN_lc_ConvStr2BYTE_ST := 16#32; END_IF;
+ IF vistr_In = '3' THEN FUN_lc_ConvStr2BYTE_ST := 16#33; END_IF;
+ IF vistr_In = '4' THEN FUN_lc_ConvStr2BYTE_ST := 16#34; END_IF;
+ IF vistr_In = '5' THEN FUN_lc_ConvStr2BYTE_ST := 16#35; END_IF;
+ IF vistr_In = '6' THEN FUN_lc_ConvStr2BYTE_ST := 16#36; END_IF;
+ IF vistr_In = '7' THEN FUN_lc_ConvStr2BYTE_ST := 16#37; END_IF;
+ IF vistr_In = '8' THEN FUN_lc_ConvStr2BYTE_ST := 16#38; END_IF;
+ IF vistr_In = '9' THEN FUN_lc_ConvStr2BYTE_ST := 16#39; END_IF;
+ 
+ IF vistr_In = 'A' THEN FUN_lc_ConvStr2BYTE_ST := 16#41; END_IF;
+ IF vistr_In = 'B' THEN FUN_lc_ConvStr2BYTE_ST := 16#42; END_IF;
+ IF vistr_In = 'C' THEN FUN_lc_ConvStr2BYTE_ST := 16#43; END_IF;
+ IF vistr_In = 'D' THEN FUN_lc_ConvStr2BYTE_ST := 16#44; END_IF;
+ IF vistr_In = 'E' THEN FUN_lc_ConvStr2BYTE_ST := 16#45; END_IF;
+ IF vistr_In = 'F' THEN FUN_lc_ConvStr2BYTE_ST := 16#46; END_IF;
+ IF vistr_In = 'G' THEN FUN_lc_ConvStr2BYTE_ST := 16#47; END_IF;
+ IF vistr_In = 'H' THEN FUN_lc_ConvStr2BYTE_ST := 16#48; END_IF;
+ IF vistr_In = 'I' THEN FUN_lc_ConvStr2BYTE_ST := 16#49; END_IF;
+ IF vistr_In = 'J' THEN FUN_lc_ConvStr2BYTE_ST := 16#4A; END_IF;
+ IF vistr_In = 'K' THEN FUN_lc_ConvStr2BYTE_ST := 16#4B; END_IF;
+ IF vistr_In = 'L' THEN FUN_lc_ConvStr2BYTE_ST := 16#4C; END_IF;
+ IF vistr_In = 'M' THEN FUN_lc_ConvStr2BYTE_ST := 16#4D; END_IF;
+ IF vistr_In = 'N' THEN FUN_lc_ConvStr2BYTE_ST := 16#4E; END_IF;
+ IF vistr_In = 'O' THEN FUN_lc_ConvStr2BYTE_ST := 16#4F; END_IF;
+ IF vistr_In = 'P' THEN FUN_lc_ConvStr2BYTE_ST := 16#50; END_IF;
+ IF vistr_In = 'Q' THEN FUN_lc_ConvStr2BYTE_ST := 16#51; END_IF;
+ IF vistr_In = 'R' THEN FUN_lc_ConvStr2BYTE_ST := 16#52; END_IF;
+ IF vistr_In = 'S' THEN FUN_lc_ConvStr2BYTE_ST := 16#53; END_IF;
+ IF vistr_In = 'T' THEN FUN_lc_ConvStr2BYTE_ST := 16#54; END_IF;
+ IF vistr_In = 'U' THEN FUN_lc_ConvStr2BYTE_ST := 16#55; END_IF;
+ IF vistr_In = 'V' THEN FUN_lc_ConvStr2BYTE_ST := 16#56; END_IF;
+ IF vistr_In = 'W' THEN FUN_lc_ConvStr2BYTE_ST := 16#57; END_IF;
+ IF vistr_In = 'X' THEN FUN_lc_ConvStr2BYTE_ST := 16#58; END_IF;
+ IF vistr_In = 'Y' THEN FUN_lc_ConvStr2BYTE_ST := 16#59; END_IF;
+ IF vistr_In = 'Z' THEN FUN_lc_ConvStr2BYTE_ST := 16#5A; END_IF;
+
+ IF vistr_In = 'a' THEN FUN_lc_ConvStr2BYTE_ST := 16#61; END_IF;
+ IF vistr_In = 'b' THEN FUN_lc_ConvStr2BYTE_ST := 16#62; END_IF;
+ IF vistr_In = 'c' THEN FUN_lc_ConvStr2BYTE_ST := 16#63; END_IF;
+ IF vistr_In = 'd' THEN FUN_lc_ConvStr2BYTE_ST := 16#64; END_IF;
+ IF vistr_In = 'e' THEN FUN_lc_ConvStr2BYTE_ST := 16#65; END_IF;
+ IF vistr_In = 'f' THEN FUN_lc_ConvStr2BYTE_ST := 16#66; END_IF;
+ IF vistr_In = 'g' THEN FUN_lc_ConvStr2BYTE_ST := 16#67; END_IF;
+ IF vistr_In = 'h' THEN FUN_lc_ConvStr2BYTE_ST := 16#68; END_IF;
+ IF vistr_In = 'i' THEN FUN_lc_ConvStr2BYTE_ST := 16#69; END_IF;
+ IF vistr_In = 'j' THEN FUN_lc_ConvStr2BYTE_ST := 16#6A; END_IF;
+ IF vistr_In = 'k' THEN FUN_lc_ConvStr2BYTE_ST := 16#6B; END_IF;
+ IF vistr_In = 'l' THEN FUN_lc_ConvStr2BYTE_ST := 16#6C; END_IF;
+ IF vistr_In = 'm' THEN FUN_lc_ConvStr2BYTE_ST := 16#6D; END_IF;
+ IF vistr_In = 'n' THEN FUN_lc_ConvStr2BYTE_ST := 16#6E; END_IF;
+ IF vistr_In = 'o' THEN FUN_lc_ConvStr2BYTE_ST := 16#6F; END_IF;
+ IF vistr_In = 'p' THEN FUN_lc_ConvStr2BYTE_ST := 16#70; END_IF;
+ IF vistr_In = 'q' THEN FUN_lc_ConvStr2BYTE_ST := 16#71; END_IF;
+ IF vistr_In = 'r' THEN FUN_lc_ConvStr2BYTE_ST := 16#72; END_IF;
+ IF vistr_In = 's' THEN FUN_lc_ConvStr2BYTE_ST := 16#73; END_IF;
+ IF vistr_In = 't' THEN FUN_lc_ConvStr2BYTE_ST := 16#74; END_IF;
+ IF vistr_In = 'u' THEN FUN_lc_ConvStr2BYTE_ST := 16#75; END_IF;
+ IF vistr_In = 'v' THEN FUN_lc_ConvStr2BYTE_ST := 16#76; END_IF;
+ IF vistr_In = 'w' THEN FUN_lc_ConvStr2BYTE_ST := 16#77; END_IF;
+ IF vistr_In = 'x' THEN FUN_lc_ConvStr2BYTE_ST := 16#78; END_IF;
+ IF vistr_In = 'y' THEN FUN_lc_ConvStr2BYTE_ST := 16#79; END_IF;
+ IF vistr_In = 'z' THEN FUN_lc_ConvStr2BYTE_ST := 16#7A; END_IF;
+
+ IF vistr_In = '/' THEN FUN_lc_ConvStr2BYTE_ST := 16#2F; END_IF;
+
+END_FUNCTION
+
+/*
+ * Ein ByteWert wird in das zugehoerenden ASCII-Zeichen umgewandelt
+ * 
+ * Diese Funktion kann nicht mit TO_STRING ersetzt werden!
+ */
+FUNCTION FUN_lc_ConvByte2Str_ST : STRING[1]  {
+    width := 220;
+    minWidth := 220;
+    maxWidth := 220;
+    maxHeight := 78;
+    minHeight := 78;
+    height := 78;
+  }
+
+// -----------------------------------------------------------------------
+// ASCII-Zeichentabelle, hexadezimale Nummerierung
+// Code	…0	…1	…2	…3	…4	…5	…6	…7	…8	…9	…A	…B	…C	…D	…E	…F
+// 0…	NUL	SOH	STX	ETX	EOT	ENQ	ACK	BEL	BS	HT	LF	VT	FF	CR	SO	SI
+// 1…	DLE	DC1	DC2	DC3	DC4	NAK	SYN	ETB	CAN	EM	SUB	ESC	FS	GS	RS	US
+// 2…	SP	!	"	#	$	%	&	'	(	)	*	+	,	-	.	/
+// 3…	0	1	2	3	4	5	6	7	8	9	:	;	<	=	>	?
+// 4…	@	A	B	C	D	E	F	G	H	I	J	K	L	M	N	O
+// 5…	P	Q	R	S	T	U	V	W	X	Y	Z	[	\	]	^	_
+// 6…	`	a	b	c	d	e	f	g	h	i	j	k	l	m	n	o
+// 7…	p	q	r	s	t	u	v	w	x	y	z	{	|	}	~	DEL 
+// ------------------------------------------------------------------------
+ VAR_INPUT
+  vb_In             : BYTE;
+  vix_Set2UpperCase : BOOL := TRUE;
+ END_VAR
+
+ VAR
+  lb_In             : BYTE;
+ END_VAR
+ 
+ FUN_lc_ConvByte2Str_ST := '';
+ 
+ IF vix_Set2UpperCase = TRUE THEN
+  lb_In := vb_In; // Upper Case fuer Bchstaben OR 16#20; 
+ ELSE
+  lb_In := vb_In;
+ END_IF;
+ 
+ IF vb_In = 16#30 THEN FUN_lc_ConvByte2Str_ST := '0'; END_IF;
+ IF vb_In = 16#31 THEN FUN_lc_ConvByte2Str_ST := '1'; END_IF;
+ IF vb_In = 16#32 THEN FUN_lc_ConvByte2Str_ST := '2'; END_IF;
+ IF vb_In = 16#33 THEN FUN_lc_ConvByte2Str_ST := '3'; END_IF;
+ IF vb_In = 16#34 THEN FUN_lc_ConvByte2Str_ST := '4'; END_IF;
+ IF vb_In = 16#35 THEN FUN_lc_ConvByte2Str_ST := '5'; END_IF;
+ IF vb_In = 16#36 THEN FUN_lc_ConvByte2Str_ST := '6'; END_IF;
+ IF vb_In = 16#37 THEN FUN_lc_ConvByte2Str_ST := '7'; END_IF;
+ IF vb_In = 16#38 THEN FUN_lc_ConvByte2Str_ST := '8'; END_IF;
+ IF vb_In = 16#39 THEN FUN_lc_ConvByte2Str_ST := '9'; END_IF;
+                                                 
+ IF vb_In = 16#41 THEN FUN_lc_ConvByte2Str_ST := 'A'; END_IF;
+ IF vb_In = 16#42 THEN FUN_lc_ConvByte2Str_ST := 'B'; END_IF;
+ IF vb_In = 16#43 THEN FUN_lc_ConvByte2Str_ST := 'C'; END_IF;
+ IF vb_In = 16#44 THEN FUN_lc_ConvByte2Str_ST := 'D'; END_IF;
+ IF vb_In = 16#45 THEN FUN_lc_ConvByte2Str_ST := 'E'; END_IF;
+ IF vb_In = 16#46 THEN FUN_lc_ConvByte2Str_ST := 'F'; END_IF;
+ IF vb_In = 16#47 THEN FUN_lc_ConvByte2Str_ST := 'G'; END_IF;
+ IF vb_In = 16#48 THEN FUN_lc_ConvByte2Str_ST := 'H'; END_IF;
+ IF vb_In = 16#49 THEN FUN_lc_ConvByte2Str_ST := 'I'; END_IF;
+ IF vb_In = 16#4A THEN FUN_lc_ConvByte2Str_ST := 'J'; END_IF;
+ IF vb_In = 16#4B THEN FUN_lc_ConvByte2Str_ST := 'K'; END_IF;
+ IF vb_In = 16#4C THEN FUN_lc_ConvByte2Str_ST := 'L'; END_IF;
+ IF vb_In = 16#4D THEN FUN_lc_ConvByte2Str_ST := 'M'; END_IF;
+ IF vb_In = 16#4E THEN FUN_lc_ConvByte2Str_ST := 'N'; END_IF;
+ IF vb_In = 16#4F THEN FUN_lc_ConvByte2Str_ST := 'O'; END_IF;
+ IF vb_In = 16#50 THEN FUN_lc_ConvByte2Str_ST := 'P'; END_IF;
+ IF vb_In = 16#51 THEN FUN_lc_ConvByte2Str_ST := 'Q'; END_IF;
+ IF vb_In = 16#52 THEN FUN_lc_ConvByte2Str_ST := 'R'; END_IF;
+ IF vb_In = 16#53 THEN FUN_lc_ConvByte2Str_ST := 'S'; END_IF;
+ IF vb_In = 16#54 THEN FUN_lc_ConvByte2Str_ST := 'T'; END_IF;
+ IF vb_In = 16#55 THEN FUN_lc_ConvByte2Str_ST := 'U'; END_IF;
+ IF vb_In = 16#56 THEN FUN_lc_ConvByte2Str_ST := 'V'; END_IF;
+ IF vb_In = 16#57 THEN FUN_lc_ConvByte2Str_ST := 'W'; END_IF;
+ IF vb_In = 16#58 THEN FUN_lc_ConvByte2Str_ST := 'X'; END_IF;
+ IF vb_In = 16#59 THEN FUN_lc_ConvByte2Str_ST := 'Y'; END_IF;
+ IF vb_In = 16#5A THEN FUN_lc_ConvByte2Str_ST := 'Z'; END_IF;
+                                                 
+ IF vb_In = 16#61 THEN FUN_lc_ConvByte2Str_ST := 'a'; END_IF;
+ IF vb_In = 16#62 THEN FUN_lc_ConvByte2Str_ST := 'b'; END_IF;
+ IF vb_In = 16#63 THEN FUN_lc_ConvByte2Str_ST := 'c'; END_IF;
+ IF vb_In = 16#64 THEN FUN_lc_ConvByte2Str_ST := 'd'; END_IF;
+ IF vb_In = 16#65 THEN FUN_lc_ConvByte2Str_ST := 'e'; END_IF;
+ IF vb_In = 16#66 THEN FUN_lc_ConvByte2Str_ST := 'f'; END_IF;
+ IF vb_In = 16#67 THEN FUN_lc_ConvByte2Str_ST := 'g'; END_IF;
+ IF vb_In = 16#68 THEN FUN_lc_ConvByte2Str_ST := 'h'; END_IF;
+ IF vb_In = 16#69 THEN FUN_lc_ConvByte2Str_ST := 'i'; END_IF;
+ IF vb_In = 16#6A THEN FUN_lc_ConvByte2Str_ST := 'j'; END_IF;
+ IF vb_In = 16#6B THEN FUN_lc_ConvByte2Str_ST := 'k'; END_IF;
+ IF vb_In = 16#6C THEN FUN_lc_ConvByte2Str_ST := 'l'; END_IF;
+ IF vb_In = 16#6D THEN FUN_lc_ConvByte2Str_ST := 'm'; END_IF;
+ IF vb_In = 16#6E THEN FUN_lc_ConvByte2Str_ST := 'n'; END_IF;
+ IF vb_In = 16#6F THEN FUN_lc_ConvByte2Str_ST := 'o'; END_IF;
+ IF vb_In = 16#70 THEN FUN_lc_ConvByte2Str_ST := 'p'; END_IF;
+ IF vb_In = 16#71 THEN FUN_lc_ConvByte2Str_ST := 'q'; END_IF;
+ IF vb_In = 16#72 THEN FUN_lc_ConvByte2Str_ST := 'r'; END_IF;
+ IF vb_In = 16#73 THEN FUN_lc_ConvByte2Str_ST := 's'; END_IF;
+ IF vb_In = 16#74 THEN FUN_lc_ConvByte2Str_ST := 't'; END_IF;
+ IF vb_In = 16#75 THEN FUN_lc_ConvByte2Str_ST := 'u'; END_IF;
+ IF vb_In = 16#76 THEN FUN_lc_ConvByte2Str_ST := 'v'; END_IF;
+ IF vb_In = 16#77 THEN FUN_lc_ConvByte2Str_ST := 'w'; END_IF;
+ IF vb_In = 16#78 THEN FUN_lc_ConvByte2Str_ST := 'x'; END_IF;
+ IF vb_In = 16#79 THEN FUN_lc_ConvByte2Str_ST := 'y'; END_IF;
+ IF vb_In = 16#7A THEN FUN_lc_ConvByte2Str_ST := 'z'; END_IF;
+                                                 
+ IF vb_In = 16#2F THEN FUN_lc_ConvByte2Str_ST := '/'; END_IF;
+
+END_FUNCTION
+
+/*
+ * Convertiert einen String in 2 USINT
+ */
+FUNCTION FUN_lc_ConvStr2Usint_ST : USINT  {
+    width := 260;
+    minWidth := 260;
+    maxWidth := 260;
+    height := 58;
+    minHeight := 58;
+    maxHeight := 58;
+  }
+
+ VAR_INPUT
+  vistr_In : STRING[1];
+ END_VAR
+ 
+ FUN_lc_ConvStr2Usint_ST := 255;
+ 
+ IF vistr_In = '0' THEN FUN_lc_ConvStr2Usint_ST := 0; END_IF;
+ IF vistr_In = '1' THEN FUN_lc_ConvStr2Usint_ST := 1; END_IF;
+ IF vistr_In = '2' THEN FUN_lc_ConvStr2Usint_ST := 2; END_IF;
+ IF vistr_In = '3' THEN FUN_lc_ConvStr2Usint_ST := 3; END_IF;
+ IF vistr_In = '4' THEN FUN_lc_ConvStr2Usint_ST := 4; END_IF;
+ IF vistr_In = '5' THEN FUN_lc_ConvStr2Usint_ST := 5; END_IF;
+ IF vistr_In = '6' THEN FUN_lc_ConvStr2Usint_ST := 6; END_IF;
+ IF vistr_In = '7' THEN FUN_lc_ConvStr2Usint_ST := 7; END_IF;
+ IF vistr_In = '8' THEN FUN_lc_ConvStr2Usint_ST := 8; END_IF;
+ IF vistr_In = '9' THEN FUN_lc_ConvStr2Usint_ST := 9; END_IF;
+ 
+END_FUNCTION
+
+FUNCTION_BLOCK FB_lc_Conv8Bit2Byte_ST  {
+    width := 140;
+    minWidth := 140;
+    maxWidth := 140;
+    height := 158;
+    minHeight := 158;
+    maxHeight := 158;
+  }
+ //
+ // 8 BOOL in ein Byte packen
+ //
+ VAR_INPUT
+  vix_In0 : BOOL;
+  vix_In1 : BOOL;
+  vix_In2 : BOOL;
+  vix_In3 : BOOL;
+  vix_In4 : BOOL;
+  vix_In5 : BOOL;
+  vix_In6 : BOOL;
+  vix_In7 : BOOL;
+ END_VAR
+ 
+ VAR_OUTPUT
+  vob_Out : BYTE;
+ END_VAR 
+ 
+ VAR
+  lb_TempVar : BYTE; 
+ END_VAR
+ 
+ lb_TempVar := 0;
+  
+ IF vix_In0 = TRUE THEN
+  lb_TempVar := BIT_SET(IN := lb_TempVar,N := 0);
+ ELSE
+  lb_TempVar := BIT_CLR(IN := lb_TempVar,N := 0);
+ END_IF;
+ IF vix_In1 = TRUE THEN
+  lb_TempVar := BIT_SET(IN := lb_TempVar,N := 1);
+ ELSE
+  lb_TempVar := BIT_CLR(IN := lb_TempVar,N := 1);
+ END_IF;
+ IF vix_In2 = TRUE THEN
+  lb_TempVar := BIT_SET(IN := lb_TempVar,N := 2);
+ ELSE
+  lb_TempVar := BIT_CLR(IN := lb_TempVar,N := 2);
+ END_IF;
+ IF vix_In3 = TRUE THEN
+  lb_TempVar := BIT_SET(IN := lb_TempVar,N := 3);
+ ELSE
+  lb_TempVar := BIT_CLR(IN := lb_TempVar,N := 3);
+ END_IF;
+ IF vix_In4 = TRUE THEN
+  lb_TempVar := BIT_SET(IN := lb_TempVar,N := 4);
+ ELSE
+  lb_TempVar := BIT_CLR(IN := lb_TempVar,N := 4);
+ END_IF;
+ IF vix_In5 = TRUE THEN
+  lb_TempVar := BIT_SET(IN := lb_TempVar,N := 5);
+ ELSE
+  lb_TempVar := BIT_CLR(IN := lb_TempVar,N := 5);
+ END_IF;
+ IF vix_In6 = TRUE THEN
+  lb_TempVar := BIT_SET(IN := lb_TempVar,N := 6);
+ ELSE
+  lb_TempVar := BIT_CLR(IN := lb_TempVar,N := 6);
+ END_IF;
+ IF vix_In7 = TRUE THEN
+  lb_TempVar := BIT_SET(IN := lb_TempVar,N := 7);
+ ELSE
+  lb_TempVar := BIT_CLR(IN := lb_TempVar,N := 7);
+ END_IF;
+ 
+ vob_Out := lb_TempVar;
+  
+END_FUNCTION_BLOCK
+
+/*
+ * Convert 16 Bit to one Word (Pack)
+ */
+FUNCTION_BLOCK FB_lc_Conv16Bit2Word_ST  {
+    width := 140;
+    minWidth := 140;
+    maxWidth := 140;
+    height := 278;
+    minHeight := 278;
+    maxHeight := 278;
+  }
+ //
+ // 16 BOOL in ein WORD packen
+ //
+ VAR_INPUT
+  vix_In0  : BOOL;
+  vix_In1  : BOOL;
+  vix_In2  : BOOL;
+  vix_In3  : BOOL;
+  vix_In4  : BOOL;
+  vix_In5  : BOOL;
+  vix_In6  : BOOL;
+  vix_In7  : BOOL;
+  vix_In8  : BOOL;
+  vix_In9  : BOOL;
+  vix_In10 : BOOL;
+  vix_In11 : BOOL;
+  vix_In12 : BOOL;
+  vix_In13 : BOOL;
+  vix_In14 : BOOL;
+  vix_In15 : BOOL;
+ END_VAR
+ 
+ VAR_OUTPUT
+  vow_Out : WORD;
+ END_VAR 
+ 
+ VAR
+  lw_TempVar : WORD; 
+ END_VAR
+ 
+ lw_TempVar := 0;
+  
+ IF vix_In0 = TRUE THEN
+  lw_TempVar := BIT_SET(IN := lw_TempVar,N := 0);
+ ELSE
+  lw_TempVar := BIT_CLR(IN := lw_TempVar,N := 0);
+ END_IF;
+ IF vix_In1 = TRUE THEN
+  lw_TempVar := BIT_SET(IN := lw_TempVar,N := 1);
+ ELSE
+  lw_TempVar := BIT_CLR(IN := lw_TempVar,N := 1);
+ END_IF;
+ IF vix_In2 = TRUE THEN
+  lw_TempVar := BIT_SET(IN := lw_TempVar,N := 2);
+ ELSE
+  lw_TempVar := BIT_CLR(IN := lw_TempVar,N := 2);
+ END_IF;
+ IF vix_In3 = TRUE THEN
+  lw_TempVar := BIT_SET(IN := lw_TempVar,N := 3);
+ ELSE
+  lw_TempVar := BIT_CLR(IN := lw_TempVar,N := 3);
+ END_IF;
+ IF vix_In4 = TRUE THEN
+  lw_TempVar := BIT_SET(IN := lw_TempVar,N := 4);
+ ELSE
+  lw_TempVar := BIT_CLR(IN := lw_TempVar,N := 4);
+ END_IF;
+ IF vix_In5 = TRUE THEN
+  lw_TempVar := BIT_SET(IN := lw_TempVar,N := 5);
+ ELSE
+  lw_TempVar := BIT_CLR(IN := lw_TempVar,N := 5);
+ END_IF;
+ IF vix_In6 = TRUE THEN
+  lw_TempVar := BIT_SET(IN := lw_TempVar,N := 6);
+ ELSE
+  lw_TempVar := BIT_CLR(IN := lw_TempVar,N := 6);
+ END_IF;
+ IF vix_In7 = TRUE THEN
+  lw_TempVar := BIT_SET(IN := lw_TempVar,N := 7);
+ ELSE
+  lw_TempVar := BIT_CLR(IN := lw_TempVar,N := 7);
+ END_IF;
+ IF vix_In8 = TRUE THEN
+  lw_TempVar := BIT_SET(IN := lw_TempVar,N := 8);
+ ELSE
+  lw_TempVar := BIT_CLR(IN := lw_TempVar,N := 8);
+ END_IF;
+ IF vix_In9 = TRUE THEN
+  lw_TempVar := BIT_SET(IN := lw_TempVar,N := 9);
+ ELSE
+  lw_TempVar := BIT_CLR(IN := lw_TempVar,N := 9);
+ END_IF;
+ IF vix_In10 = TRUE THEN
+  lw_TempVar := BIT_SET(IN := lw_TempVar,N := 10);
+ ELSE
+  lw_TempVar := BIT_CLR(IN := lw_TempVar,N := 10);
+ END_IF;
+ IF vix_In11 = TRUE THEN
+  lw_TempVar := BIT_SET(IN := lw_TempVar,N := 11);
+ ELSE
+  lw_TempVar := BIT_CLR(IN := lw_TempVar,N := 11);
+ END_IF;
+ IF vix_In12 = TRUE THEN
+  lw_TempVar := BIT_SET(IN := lw_TempVar,N := 12);
+ ELSE
+  lw_TempVar := BIT_CLR(IN := lw_TempVar,N := 12);
+ END_IF;
+ IF vix_In13 = TRUE THEN
+  lw_TempVar := BIT_SET(IN := lw_TempVar,N := 13);
+ ELSE
+  lw_TempVar := BIT_CLR(IN := lw_TempVar,N := 13);
+ END_IF;
+ IF vix_In14 = TRUE THEN
+  lw_TempVar := BIT_SET(IN := lw_TempVar,N := 14);
+ ELSE
+  lw_TempVar := BIT_CLR(IN := lw_TempVar,N := 14);
+ END_IF;
+ IF vix_In15 = TRUE THEN
+  lw_TempVar := BIT_SET(IN := lw_TempVar,N := 15);
+ ELSE
+  lw_TempVar := BIT_CLR(IN := lw_TempVar,N := 15);
+ END_IF;
+  
+ vow_Out := lw_TempVar;
+  
+END_FUNCTION_BLOCK
+
+/*
+ * Convert one Word to 16 Bit
+ */
+FUNCTION_BLOCK FB_lc_Conv1Word2Bit_ST  {
+    width := 150;
+    minWidth := 140;
+    maxWidth := 140;
+    height := 318;
+    minHeight := 318;
+    maxHeight := 318;
+  }
+ //
+ // Word in 16 BOOL
+ //
+ VAR_INPUT
+  viw_In : WORD; 
+ END_VAR
+ 
+ VAR_OUTPUT
+  vox_Out0  : BOOL;
+  vox_Out1  : BOOL;
+  vox_Out2  : BOOL;
+  vox_Out3  : BOOL;
+  vox_Out4  : BOOL;
+  vox_Out5  : BOOL;
+  vox_Out6  : BOOL;
+  vox_Out7  : BOOL;
+  vox_Out8  : BOOL;
+  vox_Out9  : BOOL;
+  vox_Out10 : BOOL;
+  vox_Out11 : BOOL;
+  vox_Out12 : BOOL;
+  vox_Out13 : BOOL;
+  vox_Out14 : BOOL;
+  vox_Out15 : BOOL;
+ END_VAR
+    
+ IF BIT_TST(viw_In,0) = TRUE THEN
+  vox_Out0 := TRUE;
+ ELSE
+  vox_Out0 := FALSE;
+ END_IF;
+ IF BIT_TST(viw_In,1) = TRUE THEN
+  vox_Out1 := TRUE;
+ ELSE
+  vox_Out1 := FALSE;
+ END_IF;
+ IF BIT_TST(viw_In,2) = TRUE THEN
+  vox_Out2 := TRUE;
+ ELSE
+  vox_Out2 := FALSE;
+ END_IF;
+ IF BIT_TST(viw_In,3) = TRUE THEN
+  vox_Out3 := TRUE;
+ ELSE
+  vox_Out3 := FALSE;
+ END_IF;
+ IF BIT_TST(viw_In,4) = TRUE THEN
+  vox_Out4 := TRUE;
+ ELSE
+  vox_Out4 := FALSE;
+ END_IF;
+ IF BIT_TST(viw_In,5) = TRUE THEN
+  vox_Out5 := TRUE;
+ ELSE
+  vox_Out5 := FALSE;
+ END_IF;
+ IF BIT_TST(viw_In,6) = TRUE THEN
+  vox_Out6 := TRUE;
+ ELSE
+  vox_Out6 := FALSE;
+ END_IF;
+ IF BIT_TST(viw_In,7) = TRUE THEN
+  vox_Out7 := TRUE;
+ ELSE
+  vox_Out7 := FALSE;
+ END_IF;
+ IF BIT_TST(viw_In,8) = TRUE THEN
+  vox_Out8 := TRUE;
+ ELSE
+  vox_Out8 := FALSE;
+ END_IF;
+ IF BIT_TST(viw_In,9) = TRUE THEN
+  vox_Out9 := TRUE;
+ ELSE
+  vox_Out9 := FALSE;
+ END_IF;
+ IF BIT_TST(viw_In,10) = TRUE THEN
+  vox_Out10 := TRUE;
+ ELSE
+  vox_Out10 := FALSE;
+ END_IF;
+ IF BIT_TST(viw_In,11) = TRUE THEN
+  vox_Out11 := TRUE;
+ ELSE
+  vox_Out11 := FALSE;
+ END_IF;
+ IF BIT_TST(viw_In,12) = TRUE THEN
+  vox_Out12 := TRUE;
+ ELSE
+  vox_Out12 := FALSE;
+ END_IF;
+ IF BIT_TST(viw_In,13) = TRUE THEN
+  vox_Out13 := TRUE;
+ ELSE
+  vox_Out13 := FALSE;
+ END_IF;
+ IF BIT_TST(viw_In,14) = TRUE THEN
+  vox_Out14 := TRUE;
+ ELSE
+  vox_Out14 := FALSE;
+ END_IF;
+ IF BIT_TST(viw_In,15) = TRUE THEN
+  vox_Out15 := TRUE;
+ ELSE
+  vox_Out15 := FALSE;
+ END_IF;
+  
+END_FUNCTION_BLOCK
+
+/*
+ * Convert one Byte to 8 Bit
+ */
+FUNCTION_BLOCK FB_lc_Conv1Byte2Bit_ST  {
+    width := 140;
+    minWidth := 140;
+    maxWidth := 140;
+    height := 158;
+    minHeight := 158;
+    maxHeight := 158;
+  }
+ //
+ // Ein Byte in 8 BOOL zerlegen
+ //
+ VAR_INPUT
+  vib_In : BYTE;
+ END_VAR
+
+ VAR_OUTPUT
+  vox_Out0 : BOOL;
+  vox_Out1 : BOOL;
+  vox_Out2 : BOOL;
+  vox_Out3 : BOOL;
+  vox_Out4 : BOOL;
+  vox_Out5 : BOOL;
+  vox_Out6 : BOOL;
+  vox_Out7 : BOOL;
+ END_VAR
+  
+ IF BIT_TST(IN := vib_In, N:=0) = TRUE THEN
+  vox_Out0 := TRUE;
+ ELSE
+  vox_Out0 := FALSE;
+ END_IF;
+
+ IF BIT_TST(IN := vib_In, N:=1) = TRUE THEN
+  vox_Out1 := TRUE;
+ ELSE
+  vox_Out1 := FALSE;
+ END_IF;
+
+ IF BIT_TST(IN := vib_In, N:=2) = TRUE THEN
+  vox_Out2 := TRUE;
+ ELSE
+  vox_Out2 := FALSE;
+ END_IF;
+
+ IF BIT_TST(IN := vib_In, N:=3) = TRUE THEN
+  vox_Out3 := TRUE;
+ ELSE
+  vox_Out3 := FALSE;
+ END_IF;
+
+ IF BIT_TST(IN := vib_In, N:=4) = TRUE THEN
+  vox_Out4 := TRUE;
+ ELSE
+  vox_Out4 := FALSE;
+ END_IF;
+
+ IF BIT_TST(IN := vib_In, N:=5) = TRUE THEN
+  vox_Out5 := TRUE;
+ ELSE
+  vox_Out5 := FALSE;
+ END_IF;
+
+ IF BIT_TST(IN := vib_In, N:=6) = TRUE THEN
+  vox_Out6 := TRUE;
+ ELSE
+  vox_Out6 := FALSE;
+ END_IF;
+
+ IF BIT_TST(IN := vib_In, N:=7) = TRUE THEN
+  vox_Out7 := TRUE;
+ ELSE
+  vox_Out7 := FALSE;
+ END_IF;
+ 
+END_FUNCTION_BLOCK
+
+/*
+ * Wandlung von 2 Byte nach INT
+ */
+FUNCTION_BLOCK FB_lc_Conv2Byte2Int_ST  {
+    height := 88;
+    width := 140;
+    minWidth := 140;
+    maxWidth := 140;
+    minHeight := 78;
+    maxHeight := 78;
+  }
+  //
+  // Wandlung von 2 Byte nach INT
+  //
+  VAR_INPUT
+   vib_LByte : BYTE;
+   vib_HByte : BYTE;
+  END_VAR
+  
+  VAR_OUTPUT
+   voi_OUT: INT;
+  END_VAR
+  
+  VAR
+   lw_InLowWrd  : WORD;
+   lw_InHighWrd : WORD;
+   lw_InWrd     : WORD;
+  END_VAR
+  
+  lw_InLowWrd  := TO_WORD(vib_LByte);
+  lw_InHighWrd := ROL(In:=vib_HByte, N:=8);
+  lw_InWrd     := OR(lw_InLowWrd, lw_InHighWrd);			        
+  voi_OUT      := TO_INT(lw_InWrd);  
+
+END_FUNCTION_BLOCK
+
+/*
+ * Wandlung von INT nach 2 Byte
+ */
+FUNCTION_BLOCK FB_lc_ConvInt2Byte_ST  {
+    width := 140;
+    minWidth := 140;
+    maxWidth := 140;
+    maxHeight := 78;
+    minHeight := 78;
+    height := 78;
+  }
+  //
+  // Wandlung von INT nach 2 Byte
+  //
+  VAR_INPUT
+   vii_IN: INT;
+  END_VAR
+  
+  VAR_OUTPUT
+   vob_LByte : BYTE;
+   vob_HByte : BYTE;
+  END_VAR
+  
+  VAR
+   lw_OutWrd      : WORD;
+   lw_OutLowByte  : BYTE;
+   lw_OutHighByte : BYTE;
+  END_VAR
+
+  lw_OutWrd      := TO_WORD(vii_IN);
+  lw_OutLowByte  := TO_BYTE(lw_OutWrd);
+  lw_OutHighByte := TO_BYTE(ROR(In:=lw_OutWrd, N:=8));
+
+  vob_LByte := lw_OutLowByte;
+  vob_HByte := lw_OutHighByte;
+
+END_FUNCTION_BLOCK
+
+END_NAMESPACE

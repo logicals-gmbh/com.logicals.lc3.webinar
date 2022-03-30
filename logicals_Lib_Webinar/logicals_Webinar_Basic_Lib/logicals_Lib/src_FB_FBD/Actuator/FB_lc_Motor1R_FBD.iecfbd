@@ -1,0 +1,80 @@
+NAMESPACE com.logicals.Basic.Actuator
+FUNCTION_BLOCK FB_lc_Motor1R_FBD
+  {
+    height := 168;
+    width := 180;
+  }
+
+  VAR
+    RS1 : RS;
+    R_TRIG1 : R_TRIG;
+  END_VAR
+  VAR_INPUT
+    vix_Start : BOOL;
+    vix_Stop : BOOL;
+  END_VAR
+  VAR_OUTPUT
+    vox_Motor : BOOL;
+    vox_Err : BOOL;
+    voi_ErrNo : INT;
+  END_VAR
+
+  (*
+
+    // Network 1:
+    AND(IN1 := vix_Start, IN2 := vix_Stop, AND => (@C(8).AND, vox_Err));
+    MOVE(EN := @C(8).AND, IN := 1, MOVE => voi_ErrNo);
+
+    // Network 2:
+    R_TRIG1(CLK := vix_Start);
+    RS1(S := R_TRIG1.Q, R1 := vix_Stop, Q1 => vox_Motor);
+
+  *)
+
+  @VF(1) : @E(vix_Start), @R(520.0, 330.0, 140.0, 19.0);
+  @VF(3) : @E(vix_Stop), @R(520.0, 380.0, 140.0, 19.0);
+  @VF(4) : @E(vox_Motor), @R(1240.0, 330.0, 140.0, 19.0);
+  @C(7) : @FB(RS1), @R(1030.0, 330.0, 80.0, 38.0), @I(@N(S), @L(9.5)), @I(@N(R1), @L(29.5)), @O(@N(Q1), @R(9.5));
+  @C(9) : @FB(R_TRIG1), @R(830.0, 330.0, 140.0, 18.0), @I(@N(CLK), @L(9.5)), @O(@N(Q), @R(9.5));
+  @CF(31) : @R(40.0, 20.0, 850.0, 99.0), @T("Motorbaustein. $NEin/Aus Funktion."), @POU;
+  @CF(32) : @R(980.0, 20.0, 850.0, 99.0), @T("Motorblock. $NOn/Off function.."), @POU;
+  @VF(5) : @E(vix_Start), @R(520.0, 170.0, 140.0, 19.0);
+  @VF(6) : @E(vix_Stop), @R(520.0, 190.0, 140.0, 19.0);
+  @C(8) : @F(AND), @R(740.0, 170.0, 40.0, 38.0), BOOL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(AND), @R(9.5));
+  @VF(13) : @E(vox_Err), @R(1020.0, 170.0, 140.0, 19.0);
+  @C(16) : @F(MOVE), @R(840.0, 230.0, 60.0, 38.0), INT, @I(@N(EN), @L(9.5)), @I(@N(IN), @L(29.5)), @O(@N(ENO), @R(9.5)), @O(@N(MOVE), @R(29.5));
+  @VF(19) : @E(1), @R(520.0, 250.0, 140.0, 19.0), INT;
+  @VF(21) : @E(voi_ErrNo), @R(1020.0, 250.0, 140.0, 19.0);
+  @CP(18) : 809.5, 179.5;
+
+  @G(12) :
+     @L(@C(9).Q, @C(7).S)
+    ;
+  @G(15) :
+     @L(@C(7).Q1, @VF(4).i)
+    ;
+  @G(17) :
+     @L(@VF(3).o, @C(7).R1)
+    ;
+  @G(2) :
+     @L(@VF(1).o, @C(9).CLK)
+    ;
+  @G(10) :
+     @L(@VF(5).o, @C(8).IN1)
+    ;
+  @G(11) :
+     @L(@VF(6).o, @C(8).IN2)
+    ;
+  @G(14) :
+     @L(@C(8).AND, @CP(18)),
+     @L(@CP(18), @VF(13).i),
+     @L(@CP(18), @C(16).EN)
+    ;
+  @G(20) :
+     @L(@VF(19).o, @C(16).IN)
+    ;
+  @G(22) :
+     @L(@C(16).MOVE, @VF(21).i)
+    ;
+END_FUNCTION_BLOCK
+END_NAMESPACE

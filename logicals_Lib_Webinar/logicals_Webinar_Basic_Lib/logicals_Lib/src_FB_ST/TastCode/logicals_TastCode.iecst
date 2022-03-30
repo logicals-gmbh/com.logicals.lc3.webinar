@@ -1,0 +1,365 @@
+NAMESPACE com.logicals.Basic.TastCode
+
+TYPE
+/*
+ * DatenType um eine 1x12 Tastatur zu lesen!
+ */
+ DT_lc_TastCode : STRUCT
+  Tast_0 : BOOL;
+  Tast_1 : BOOL;
+  Tast_2 : BOOL;
+  Tast_3 : BOOL;
+  Tast_4 : BOOL;
+  Tast_5 : BOOL;
+  Tast_6 : BOOL;
+  Tast_7 : BOOL;
+  Tast_8 : BOOL;
+  Tast_9 : BOOL;
+  Tast_Asterik : BOOL;
+  Tast_Hash : BOOL;
+ END_STRUCT;
+END_TYPE
+
+
+
+FUNCTION_BLOCK FB_lc_CheckForEightTastCode_ST
+  /*
+   * Aus einer 12*1 Tastatur den Code erkennen!
+   */
+  VAR_INPUT
+    vistruc_TastCode : DT_lc_TastCode;
+  END_VAR
+  
+  VAR_OUTPUT
+    voui_ErrNo               : UINT;
+
+    vousi_ErsteEingabe_Val   : USINT;
+    vousi_ZweiteEingabe_Val  : USINT;
+    vousi_DritteEingabe_Val  : USINT;
+    vousi_VierteEingabe_Val  : USINT;
+    vousi_FuenfteEingabe_Val : USINT;
+    vousi_SechsteEingabe_Val : USINT;
+    vousi_SiebteEingabe_Val  : USINT;
+    vousi_AchteEingabe_Val   : USINT;
+
+    vow_InVal   : DWORD;
+    voi_KeyCode : INT;
+    voi_Idx     : INT;
+    voi_Val     : INT;
+  END_VAR
+  
+  VAR
+    EingabeZaehler : CTU;
+    R_TRIG_ClearOut : R_TRIG;
+
+    Tast_0_R_TRIG : R_TRIG;
+    Tast_1_R_TRIG : R_TRIG;
+    Tast_2_R_TRIG : R_TRIG;
+    Tast_3_R_TRIG : R_TRIG;
+    Tast_4_R_TRIG : R_TRIG;
+    Tast_5_R_TRIG : R_TRIG;
+    Tast_6_R_TRIG : R_TRIG;
+    Tast_7_R_TRIG : R_TRIG;
+    Tast_8_R_TRIG : R_TRIG;
+    Tast_9_R_TRIG : R_TRIG;
+    Tast_Hash_R_TRIG : R_TRIG;
+    Tast_Asterik_R_TRIG : R_TRIG;
+    
+    ErsteEingabe_R_TRIG   : R_TRIG;
+    ZweiteEingabe_R_TRIG  : R_TRIG;
+    DritteEingabe_R_TRIG  : R_TRIG;
+    VierteEingabe_R_TRIG  : R_TRIG;
+    FuenfteEingabe_R_TRIG : R_TRIG;
+    SechsteEingabe_R_TRIG : R_TRIG;
+    SiebteEingabe_R_TRIG  : R_TRIG;
+    AchteEingabe_R_TRIG   : R_TRIG;
+    
+  END_VAR
+  
+  VAR    
+    lx_TasteBetaetigt      : BOOL;
+    lx_EingabeZaehlerReset : BOOL;
+    
+    lx_ErsteEingabe   : BOOL;
+    lx_ZweiteEingabe  : BOOL;
+    lx_DritteEingabe  : BOOL;
+    lx_VierteEingabe  : BOOL;
+    lx_FuenfteEingabe : BOOL;
+    lx_SechsteEingabe : BOOL;
+    lx_SiebteEingabe  : BOOL;
+    lx_AchteEingabe   : BOOL;
+    
+    li_EingabeVal : INT;
+    
+    lx_ClearPulse : BOOL;
+    
+  END_VAR
+  
+
+  /*
+   * ST-Code
+   */
+   R_TRIG_ClearOut(CLK:=vistruc_TastCode.Tast_Hash,Q => lx_ClearPulse);
+  /*
+   * Mit der Taste # alles loeschen
+   */
+   IF lx_ClearPulse THEN
+     voui_ErrNo:=0;
+     vousi_ErsteEingabe_Val:=0;
+     vousi_ZweiteEingabe_Val:=0;
+     vousi_DritteEingabe_Val:=0;
+     vousi_VierteEingabe_Val:=0;
+     vousi_FuenfteEingabe_Val:=0;
+     vousi_SechsteEingabe_Val:=0;
+     vousi_SiebteEingabe_Val:=0;
+     vousi_AchteEingabe_Val:=0;
+     vow_InVal:=16#00;
+     voi_KeyCode:=0;
+    END_IF;
+ 
+    Tast_0_R_TRIG(CLK:=vistruc_TastCode.Tast_0);
+    Tast_1_R_TRIG(CLK:=vistruc_TastCode.Tast_1);
+    Tast_2_R_TRIG(CLK:=vistruc_TastCode.Tast_2);
+    Tast_3_R_TRIG(CLK:=vistruc_TastCode.Tast_3);
+    Tast_4_R_TRIG(CLK:=vistruc_TastCode.Tast_4);
+    Tast_5_R_TRIG(CLK:=vistruc_TastCode.Tast_5);
+    Tast_6_R_TRIG(CLK:=vistruc_TastCode.Tast_6);
+    Tast_7_R_TRIG(CLK:=vistruc_TastCode.Tast_7);
+    Tast_8_R_TRIG(CLK:=vistruc_TastCode.Tast_8);
+    Tast_9_R_TRIG(CLK:=vistruc_TastCode.Tast_9);
+    Tast_Hash_R_TRIG(CLK:=vistruc_TastCode.Tast_Hash);
+    Tast_Asterik_R_TRIG(CLK:=vistruc_TastCode.Tast_Asterik);
+
+    lx_TasteBetaetigt:=OR(Tast_0_R_TRIG.Q
+                      ,Tast_1_R_TRIG.Q
+ 	                  ,Tast_2_R_TRIG.Q
+                      ,Tast_3_R_TRIG.Q
+ 	                  ,Tast_4_R_TRIG.Q
+ 	                  ,Tast_5_R_TRIG.Q
+                      ,Tast_6_R_TRIG.Q
+                      ,Tast_7_R_TRIG.Q
+ 	                  ,Tast_8_R_TRIG.Q
+ 	                  ,Tast_9_R_TRIG.Q
+ 	                  ,Tast_Asterik_R_TRIG.Q
+ 	                  ,Tast_Hash_R_TRIG.Q);
+
+   voi_Val:=MOVE(EN:=Tast_Hash_R_TRIG.Q,IN:=0);
+   voi_Val:=MOVE(EN:=Tast_0_R_TRIG.Q,IN:=0);
+   voi_Val:=MOVE(EN:=Tast_1_R_TRIG.Q,IN:=1);
+   voi_Val:=MOVE(EN:=Tast_2_R_TRIG.Q,IN:=2);
+   voi_Val:=MOVE(EN:=Tast_3_R_TRIG.Q,IN:=3);
+   voi_Val:=MOVE(EN:=Tast_4_R_TRIG.Q,IN:=4);
+   voi_Val:=MOVE(EN:=Tast_5_R_TRIG.Q,IN:=5);
+   voi_Val:=MOVE(EN:=Tast_6_R_TRIG.Q,IN:=6);
+   voi_Val:=MOVE(EN:=Tast_7_R_TRIG.Q,IN:=7);
+   voi_Val:=MOVE(EN:=Tast_8_R_TRIG.Q,IN:=8);
+   voi_Val:=MOVE(EN:=Tast_9_R_TRIG.Q,IN:=9);
+  /*
+   * Die Anzahl der TastenDruck-Ereignisse zaehlen 
+   */
+   EingabeZaehler(CU:=lx_TasteBetaetigt,R:=lx_EingabeZaehlerReset,PV:=9);
+   voi_Idx:=EingabeZaehler.CV;
+   lx_EingabeZaehlerReset:=OR(EingabeZaehler.Q,vistruc_TastCode.Tast_Hash);
+
+   lx_ErsteEingabe:=EQ(voi_Idx,1);
+   ErsteEingabe_R_TRIG(CLK:=lx_ErsteEingabe);
+   vousi_ErsteEingabe_Val:=MOVE(EN:=ErsteEingabe_R_TRIG.Q,IN:=To_USINT(voi_Val));
+ 
+   lx_ZweiteEingabe:=EQ(voi_Idx,2);
+   ZweiteEingabe_R_TRIG(CLK:=lx_ZweiteEingabe);
+   vousi_ZweiteEingabe_Val:=MOVE(EN:=ZweiteEingabe_R_TRIG.Q,IN:=To_USINT(voi_Val));
+
+   lx_DritteEingabe:=EQ(voi_Idx,3);
+   DritteEingabe_R_TRIG(CLK:=lx_DritteEingabe);
+   vousi_DritteEingabe_Val:=MOVE(EN:=DritteEingabe_R_TRIG.Q,IN:=To_USINT(voi_Val));
+
+   lx_VierteEingabe:=EQ(voi_Idx,4);
+   VierteEingabe_R_TRIG(CLK:=lx_VierteEingabe);
+   vousi_VierteEingabe_Val:=MOVE(EN:=VierteEingabe_R_TRIG.Q,IN:=To_USINT(voi_Val));
+
+   lx_FuenfteEingabe:=EQ(voi_Idx,5);
+   FuenfteEingabe_R_TRIG(CLK:=lx_FuenfteEingabe);
+   vousi_FuenfteEingabe_Val:=MOVE(EN:=FuenfteEingabe_R_TRIG.Q,IN:=To_USINT(voi_Val));
+
+   lx_SechsteEingabe:=EQ(voi_Idx,6);
+   SechsteEingabe_R_TRIG(CLK:=lx_SechsteEingabe);
+   vousi_SechsteEingabe_Val:=MOVE(EN:=SechsteEingabe_R_TRIG.Q,IN:=To_USINT(voi_Val));
+
+   lx_SiebteEingabe:=EQ(voi_Idx,7);
+   SiebteEingabe_R_TRIG(CLK:=lx_SiebteEingabe);
+   vousi_SiebteEingabe_Val:=MOVE(EN:=SiebteEingabe_R_TRIG.Q,IN:=To_USINT(voi_Val));
+
+   lx_AchteEingabe:=EQ(voi_Idx,8);
+   AchteEingabe_R_TRIG(CLK:=lx_AchteEingabe);
+   vousi_AchteEingabe_Val:=MOVE(EN:=AchteEingabe_R_TRIG.Q,IN:=To_USINT(voi_Val));
+
+ //  EingabeVal:=ADD(EN:=Tast_Asterik_R_TRIG.Q
+ //                 ,IN1:=MUL(EN:=Tast_Asterik_R_TRIG.Q,IN1:=To_INT(ErsteEingabe_Val),IN2:=1000)
+ //	                ,IN2:=MUL(EN:=Tast_Asterik_R_TRIG.Q,IN1:=To_INT(ZweiteEingabe_Val),IN2:=100)
+ //	                ,IN3:=MUL(EN:=Tast_Asterik_R_TRIG.Q,IN1:=To_INT(DritteEingabe_Val),IN2:=10)
+ // 	            ,IN4:=To_INT(VierteEingabe_Val));
+
+   vow_InVal:=MOVE(EN:=Tast_Asterik_R_TRIG.Q,IN:=To_DWORD(li_EingabeVal));
+   voi_KeyCode:=MOVE(EN:=Tast_Asterik_R_TRIG.Q,IN:=li_EingabeVal);
+
+END_FUNCTION_BLOCK
+
+/*
+ * Eingabe mit 4-Nummern von 12*1-Tastatur
+ */
+FUNCTION_BLOCK FB_lc_CheckForFourTastCode_ST
+  /*
+   * Aus einer 12*1 Tastatur den Code erkennen!
+   */
+  VAR_INPUT
+    vistruc_TastCode : DT_lc_TastCode;
+  END_VAR
+  
+  VAR_OUTPUT
+    voui_ErrNo                 : UINT;
+    vousi_ErsteEingabe_Val  : USINT;
+    vousi_ZweiteEingabe_Val : USINT;
+    vousi_DritteEingabe_Val : USINT;
+    vousi_VierteEingabe_Val : USINT;
+    
+    vow_InVal   : DWORD;
+    voi_KeyCode : INT;
+    voi_Idx     : INT;
+    voi_Val     : INT;
+  END_VAR
+  
+  VAR
+   /*
+    * Baustein-Instanzen
+    */
+    EingabeZaehler : CTU;
+    R_TRIG_ClearOut : R_TRIG;
+
+    Tast_0_R_TRIG : R_TRIG;
+    Tast_1_R_TRIG : R_TRIG;
+    Tast_2_R_TRIG : R_TRIG;
+    Tast_3_R_TRIG : R_TRIG;
+    Tast_4_R_TRIG : R_TRIG;
+    Tast_5_R_TRIG : R_TRIG;
+    Tast_6_R_TRIG : R_TRIG;
+    Tast_7_R_TRIG : R_TRIG;
+    Tast_8_R_TRIG : R_TRIG;
+    Tast_9_R_TRIG : R_TRIG;
+    Tast_Hash_R_TRIG : R_TRIG;
+    Tast_Asterik_R_TRIG : R_TRIG;
+    
+    ErsteEingabe_R_TRIG : R_TRIG;
+    ZweiteEingabe_R_TRIG : R_TRIG;
+    DritteEingabe_R_TRIG : R_TRIG;
+    VierteEingabe_R_TRIG : R_TRIG;
+    
+  END_VAR
+  
+  VAR    
+    lx_TasteBetaetigt      : BOOL;
+    lx_EingabeZaehlerReset : BOOL;
+    
+    lx_ErsteEingabe  : BOOL;
+    lx_ZweiteEingabe : BOOL;
+    lx_DritteEingabe : BOOL;
+    lx_VierteEingabe : BOOL;
+    
+    li_EingabeVal    : INT;
+    
+    lx_ClearPulse    : BOOL;
+    
+  END_VAR
+  
+
+  /*
+   * ST-Code
+   */
+   R_TRIG_ClearOut(CLK:=vistruc_TastCode.Tast_Hash,Q => lx_ClearPulse);
+  /*
+   * Mit der Taste # alles loeschen
+   */
+   IF lx_ClearPulse THEN
+     voui_ErrNo:=0;
+     vousi_ErsteEingabe_Val:=0;
+     vousi_ZweiteEingabe_Val:=0;
+     vousi_DritteEingabe_Val:=0;
+     vousi_VierteEingabe_Val:=0;
+     vow_InVal:=16#00;
+     voi_KeyCode:=0;
+    END_IF;
+ 
+    Tast_0_R_TRIG(CLK:=vistruc_TastCode.Tast_0);
+    Tast_1_R_TRIG(CLK:=vistruc_TastCode.Tast_1);
+    Tast_2_R_TRIG(CLK:=vistruc_TastCode.Tast_2);
+    Tast_3_R_TRIG(CLK:=vistruc_TastCode.Tast_3);
+    Tast_4_R_TRIG(CLK:=vistruc_TastCode.Tast_4);
+    Tast_5_R_TRIG(CLK:=vistruc_TastCode.Tast_5);
+    Tast_6_R_TRIG(CLK:=vistruc_TastCode.Tast_6);
+    Tast_7_R_TRIG(CLK:=vistruc_TastCode.Tast_7);
+    Tast_8_R_TRIG(CLK:=vistruc_TastCode.Tast_8);
+    Tast_9_R_TRIG(CLK:=vistruc_TastCode.Tast_9);
+    Tast_Hash_R_TRIG(CLK:=vistruc_TastCode.Tast_Hash);
+    Tast_Asterik_R_TRIG(CLK:=vistruc_TastCode.Tast_Asterik);
+
+   lx_TasteBetaetigt:=OR(Tast_0_R_TRIG.Q
+                     ,Tast_1_R_TRIG.Q
+ 	                 ,Tast_2_R_TRIG.Q
+                     ,Tast_3_R_TRIG.Q
+ 	                 ,Tast_4_R_TRIG.Q
+ 	                 ,Tast_5_R_TRIG.Q
+                     ,Tast_6_R_TRIG.Q
+                     ,Tast_7_R_TRIG.Q
+ 	                 ,Tast_8_R_TRIG.Q
+ 	                 ,Tast_9_R_TRIG.Q
+ 	                 ,Tast_Asterik_R_TRIG.Q
+                     ,Tast_Hash_R_TRIG.Q);
+
+   voi_Val:=MOVE(EN:=Tast_Hash_R_TRIG.Q,IN:=0);
+   voi_Val:=MOVE(EN:=Tast_0_R_TRIG.Q,IN:=0);
+   voi_Val:=MOVE(EN:=Tast_1_R_TRIG.Q,IN:=1);
+   voi_Val:=MOVE(EN:=Tast_2_R_TRIG.Q,IN:=2);
+   voi_Val:=MOVE(EN:=Tast_3_R_TRIG.Q,IN:=3);
+   voi_Val:=MOVE(EN:=Tast_4_R_TRIG.Q,IN:=4);
+   voi_Val:=MOVE(EN:=Tast_5_R_TRIG.Q,IN:=5);
+   voi_Val:=MOVE(EN:=Tast_6_R_TRIG.Q,IN:=6);
+   voi_Val:=MOVE(EN:=Tast_7_R_TRIG.Q,IN:=7);
+   voi_Val:=MOVE(EN:=Tast_8_R_TRIG.Q,IN:=8);
+   voi_Val:=MOVE(EN:=Tast_9_R_TRIG.Q,IN:=9);
+  /*
+   * Die Anzahl der TastenDruck-Ereignisse zaeheln 
+   */
+   EingabeZaehler(CU:=lx_TasteBetaetigt,R:=lx_EingabeZaehlerReset,PV:=5);
+   voi_Idx:=EingabeZaehler.CV;
+   lx_EingabeZaehlerReset:=OR(EingabeZaehler.Q,vistruc_TastCode.Tast_Hash);
+
+   lx_ErsteEingabe:=EQ(voi_Idx,1);
+   ErsteEingabe_R_TRIG(CLK:=lx_ErsteEingabe);
+   vousi_ErsteEingabe_Val:=MOVE(EN:=ErsteEingabe_R_TRIG.Q,IN:=To_USINT(voi_Val));
+ 
+   lx_ZweiteEingabe:=EQ(voi_Idx,2);
+   ZweiteEingabe_R_TRIG(CLK:=lx_ZweiteEingabe);
+   vousi_ZweiteEingabe_Val:=MOVE(EN:=ZweiteEingabe_R_TRIG.Q,IN:=To_USINT(voi_Val));
+
+   lx_DritteEingabe:=EQ(voi_Idx,3);
+   DritteEingabe_R_TRIG(CLK:=lx_DritteEingabe);
+   vousi_DritteEingabe_Val:=MOVE(EN:=DritteEingabe_R_TRIG.Q,IN:=To_USINT(voi_Val));
+
+   lx_VierteEingabe:=EQ(voi_Idx,4);
+   VierteEingabe_R_TRIG(CLK:=lx_VierteEingabe);
+   vousi_VierteEingabe_Val:=MOVE(EN:=VierteEingabe_R_TRIG.Q,IN:=To_USINT(voi_Val));
+
+ //  EingabeVal:=ADD(EN:=Tast_Asterik_R_TRIG.Q
+ //                 ,IN1:=MUL(EN:=Tast_Asterik_R_TRIG.Q,IN1:=To_INT(ErsteEingabe_Val),IN2:=1000)
+ //	                ,IN2:=MUL(EN:=Tast_Asterik_R_TRIG.Q,IN1:=To_INT(ZweiteEingabe_Val),IN2:=100)
+ //	                ,IN3:=MUL(EN:=Tast_Asterik_R_TRIG.Q,IN1:=To_INT(DritteEingabe_Val),IN2:=10)
+ // 	            ,IN4:=To_INT(VierteEingabe_Val));
+
+   vow_InVal:=MOVE(EN:=Tast_Asterik_R_TRIG.Q,IN:=To_DWORD(li_EingabeVal));
+   voi_KeyCode:=MOVE(EN:=Tast_Asterik_R_TRIG.Q,IN:=li_EingabeVal);
+  /*
+   * Ende CheckForTast 
+   */
+END_FUNCTION_BLOCK
+
+END_NAMESPACE
+
