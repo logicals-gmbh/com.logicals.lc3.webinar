@@ -13,7 +13,7 @@
   */
 LIBRARY com.logicals.Webinar.Basic
   
-  VERSION     := 0.0.2-SNAPSHOT;
+  VERSION     := 0.0.3-SNAPSHOT;
   VENDOR      := "logi.cals (c) GmbH";
   SUMMARY     := "logi.cals Aplication Lib / With Namespaces / Source Git-User-Dir";
   COPYRIGHT   := "(c) logi.cals GmbH 2021";
@@ -135,8 +135,9 @@ LIBRARY com.logicals.Webinar.Basic
      * Logic in FBD
      */     
      FOLDER "Logic"
-        IEC := com.logicals.Basic.Logic.FB_lc_EinsAusDrei_Auswahl_FBD;        
+        IEC := com.logicals.Basic.Logic.FB_lc_EinsAusDrei_Auswahl_FBD;
         IEC := com.logicals.Basic.Logic.FB_lc_EinsAusDrei_Auswahl2_FBD;
+        IEC := com.logicals.Basic.Logic.FB_lc_EinsAusDrei_Auswahl3_FBD;
         IEC := com.logicals.Basic.Logic.FB_lc_Toggle1_FBD;        
         IEC := com.logicals.Basic.Logic.FB_lc_ToggleSw_FBD;        
 

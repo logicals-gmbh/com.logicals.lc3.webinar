@@ -6,7 +6,7 @@ PROGRAM PRG_lc_TestLogic1_FBD
     lx_In3 : BOOL;
     lx_EinsAusDrei_Out : BOOL;
     lx_EinsAusDrei2_Out : BOOL;
-    FB_lc_EinsAusDrei_Auswahl_FBD : FB_lc_EinsAusDrei_Auswahl_FBD;
+    FB_lc_EinsAusDrei_Auswahl_FBD : FB_lc_EinsAusDrei_Auswahl3_FBD;
     FB_lc_EinsAusDrei_Auswahl2_FBD : FB_lc_EinsAusDrei_Auswahl2_FBD;
     FB_lc_ToggleSw_FBD : com.logicals.Basic.Logic.FB_lc_ToggleSw_FBD;
     FB_lc_Toggle1_FBD : com.logicals.Basic.Logic.FB_lc_Toggle1_FBD;

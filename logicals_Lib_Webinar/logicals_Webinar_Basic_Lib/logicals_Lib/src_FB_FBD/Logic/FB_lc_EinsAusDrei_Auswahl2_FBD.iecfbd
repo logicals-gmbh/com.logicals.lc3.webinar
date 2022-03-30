@@ -2,7 +2,7 @@ NAMESPACE com.logicals.Basic.Logic
 FUNCTION_BLOCK FB_lc_EinsAusDrei_Auswahl2_FBD
   {
     height := 50;
-    width := 300;
+    width := 370;
   }
 
   VAR_INPUT
