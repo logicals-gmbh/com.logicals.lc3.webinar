@@ -1,0 +1,28 @@
+NAMESPACE logicals.web.standard
+NAMESPACE numeric
+
+/*
+ * Function block wrapper for IEC 61131-3 ADD<br>
+ * IN1 =  1st value (USINT)<br>
+ * IN2 =  2nd value (USINT)<br>
+ * IN3 =  3rd value (USINT)<br>
+ * IN4 =  4th value (USINT)<br>
+ * OUT = Sum of all input values (USINT)<br>
+ */
+FUNCTION_BLOCK wADD_USINT_4
+	{ vNameAlignment:="center"; altName:="+"; bgColor:="Plum"; width:=40; hideIONames; }
+	VAR_INPUT
+		IN1 : USINT;
+		IN2 : USINT;
+		IN3 : USINT;
+		IN4 : USINT;
+	END_VAR
+	VAR_OUTPUT
+		OUT : USINT;
+	END_VAR
+
+	OUT := ADD(IN1:=IN1, IN2:=IN2, IN3:=IN3, IN4:=IN4, ENO=>ENO);
+END_FUNCTION_BLOCK
+
+END_NAMESPACE
+END_NAMESPACE

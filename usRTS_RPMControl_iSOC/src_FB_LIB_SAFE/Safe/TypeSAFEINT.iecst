@@ -1,0 +1,9 @@
+{ CustomImplementation }
+
+NAMESPACE logicals.web.standard.safe
+
+TYPE
+	SAFEINT : INT := 0;
+END_TYPE
+
+END_NAMESPACE

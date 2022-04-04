@@ -1,0 +1,22 @@
+NAMESPACE logicals.web.standard
+NAMESPACE convert
+
+/*
+ * Function block wrapper for IEC 61131-3 TO_UDINT<br>
+ * IN =  input value (UINT)<br>
+ * OUT = IN (UDINT)<br>
+ */
+FUNCTION_BLOCK wUINT_TO_UDINT
+	{ vNameAlignment:="center"; altName:="UINT_TO_UDINT"; bgColor:="Plum"; width:=140; hideIONames; }
+	VAR_INPUT
+		IN : UINT;
+	END_VAR
+	VAR_OUTPUT
+		OUT: UDINT;
+	END_VAR
+
+	OUT := TO_UDINT(IN:=IN, ENO=>ENO);
+END_FUNCTION_BLOCK
+
+END_NAMESPACE
+END_NAMESPACE

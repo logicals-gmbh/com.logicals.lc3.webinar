@@ -1,0 +1,98 @@
+/*
+ * GV fuer RPMControl
+ */
+GLOBALS GV_RPMControl
+	VAR_GLOBAL
+    gudi_CycleCountAppLogic : UDINT;
+    gudi_CycleCountAppLoop  : UDINT;
+    gudi_CycleCountAppTimer : UDINT;
+    gudi_CycleCountAppIO    : UDINT;
+
+    gr_Manual     : REAL;
+    gx_ModeManual : BOOL;
+    
+    gx_SetControlPar : BOOL;
+    gx_SetControlParState : UINT;
+
+    gx_ModeRPM0 : BOOL;
+    gx_ModeRPM1 : BOOL;
+    gx_ModeRPM2 : BOOL;
+    gx_ModeRPM3 : BOOL;
+    gx_ModeRPM4 : BOOL;
+    
+    gx_ModeRamp_V : BOOL;
+    gx_RPM0_V : BOOL;
+    gx_RPM1_V : BOOL;
+    gx_RPM2_V : BOOL;
+    gx_RPM3_V : BOOL;
+    gx_RPM4_V : BOOL;
+    gx_ResetRPM_V : BOOL;
+
+    gx_RPM0 : BOOL;
+    gx_RPM1 : BOOL;
+    gx_RPM2 : BOOL;
+    gx_RPM3 : BOOL;
+    gx_RPM4 : BOOL;
+    gx_ResetRPM : BOOL;
+
+    gr_RPMSetVal : REAL;
+    gr_RPMActVal : REAL;
+    gr_RPMDevVal : REAL;
+
+    gstruc_Action : DT_Action;
+
+    gr_PV : REAL;
+    gr_SP : REAL;
+    gr_Y : REAL;
+    gr_PV_Scale : REAL;
+    gr_SP_Scale : REAL;
+    gr_Y_Scale : REAL;
+
+    gr_PID_TI : REAL;
+    gr_PID_Kv : REAL;
+    gr_PID_T1 : REAL;
+    gr_PID_Lvu : REAL;
+    gr_PID_Lvd : REAL;
+    gr_PID_Kp : REAL;
+    gx_PID_Lu : BOOL;
+    gx_PID_Ld : BOOL;
+    gr_PID_Out : REAL;
+    gr_PID_P : REAL;
+    gr_PID_I : REAL;
+    gr_PID_D : REAL;
+    gx_PID_Auto : BOOL;
+    gr_PID_YManual : REAL;
+    gr_PID_Set_TI : REAL;
+    gr_PID_Set_Kv : REAL;
+    gr_PID_Set_T1 : REAL;
+    gr_PID_Set_Lvu : REAL;
+    gr_PID_Set_Lvd : REAL;
+    gr_PID_Set_Kp : REAL;
+
+    gx_Ramp_Auto : BOOL;
+    gui_Ramp_XSumChg : UINT;
+    gr_Ramp_OPC : USINT;
+    gr_Ramp_Y : REAL;
+    gr_Ramp_SV : REAL;
+    gr_Ramp_XSum : REAL;
+    gr_Ramp_SpdUp : REAL;
+    gr_Ramp_SpdDn : REAL;
+    gr_Ramp_UpMax : REAL;
+    gr_Ramp_DnMax : REAL;
+    gx_Ramp_Stp : BOOL;
+    gx_Ramp_QU : BOOL;
+    gx_Ramp_QE : BOOL;
+    gx_Ramp_QL : BOOL;
+    gr_Ramp_In : REAL;
+    gx_Ramp_St : WORD;
+    gx_Ramp_Exc : USINT;
+    gr_Ramp_Set_OPC : USINT;
+    gr_Ramp_Set_SV : REAL;
+    gr_Ramp_Set_SpdUp : REAL;
+    gr_Ramp_Set_SpdDn : REAL;
+    gr_Ramp_Set_UpMax : REAL;
+    gr_Ramp_Set_DnMax : REAL;
+    gx_Ramp_Set_Stp : BOOL;
+		
+	END_VAR
+END_GLOBALS

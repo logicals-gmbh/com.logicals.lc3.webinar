@@ -1,0 +1,24 @@
+NAMESPACE logicals.web.standard
+NAMESPACE numeric
+
+/*
+ * Function block wrapper for IEC 61131-3 DIV<br>
+ * IN1 =  1st value (REAL)<br>
+ * IN2 =  2nd value (REAL)<br>
+ * OUT = quotient of IN1 divided by IN2 (REAL)<br>
+ */
+FUNCTION_BLOCK wDIV_REAL
+	{ vNameAlignment:="center"; altName:="/"; bgColor:="Orange"; width:=40; hideIONames; }
+	VAR_INPUT
+		IN1 : REAL;
+		IN2 : REAL;
+	END_VAR
+	VAR_OUTPUT
+		OUT : REAL;
+	END_VAR
+
+	OUT := DIV(IN1:=IN1, IN2:=IN2, ENO=>ENO);
+END_FUNCTION_BLOCK
+
+END_NAMESPACE
+END_NAMESPACE

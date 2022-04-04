@@ -1,0 +1,24 @@
+NAMESPACE logicals.web.standard
+NAMESPACE numeric
+
+/*
+ * Function block wrapper for IEC 61131-3 MUL<br>
+ * IN1 =  1st value (DINT)<br>
+ * IN2 =  2nd value (DINT)<br>
+ * OUT = Product of multiplication of all inputs (DINT)<br>
+ */
+FUNCTION_BLOCK wMUL_DINT_2
+	{ vNameAlignment:="center"; altName:="*"; bgColor:="LightPink"; width:=40; hideIONames; }
+	VAR_INPUT
+		IN1 : DINT;
+		IN2 : DINT;
+	END_VAR
+	VAR_OUTPUT
+		OUT : DINT;
+	END_VAR
+
+	OUT := MUL(IN1:=IN1, IN2:=IN2, ENO=>ENO);
+END_FUNCTION_BLOCK
+
+END_NAMESPACE
+END_NAMESPACE

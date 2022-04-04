@@ -1,0 +1,197 @@
+PROGRAM PRG_AppLogic_FBD
+  VAR
+    lui_CycleCount : UINT;
+    lx_CyclePulse : BOOL;
+    R_TRIG1 : R_TRIG;
+    lx_CycleInit : BOOL;
+    com_logicals_Basic_Flash_FB_lc_Flash_2Hz_FBD1 : com.logicals.Basic.Flash.FB_lc_Flash_2Hz_FBD;
+    lx_Flash_2Hz : BOOL;
+    lx_Error : BOOL;
+    FB_NotAusCat11 : FB_NotAusCat1;
+    lx_NotHalt : BOOL;
+    lx_Quit : BOOL;
+    lx_Bremse : BOOL;
+    lx_Antrieb : BOOL;
+  END_VAR
+  VAR_INPUT
+    vix_Quit : BOOL;
+  END_VAR
+  VAR_EXTERNAL
+    gx_ModeRPM0 : BOOL;
+    gx_ModeRPM1 : BOOL;
+    gx_ModeRPM2 : BOOL;
+    gx_ModeRPM3 : BOOL;
+    gx_ModeRPM4 : BOOL;
+    gudi_CycleCountAppLogic : UDINT;
+    gudi_CycleCountAppLoop : UDINT;
+    gudi_CycleCountAppTimer : UDINT;
+    gx_ResetRPM : BOOL;
+    gx_RPM0 : BOOL;
+    gx_RPM1 : BOOL;
+  END_VAR
+
+  (*
+
+    // Network 1:
+    ADD(IN1 := lui_CycleCount, IN2 := 1, ADD => lui_CycleCount);
+
+    // Network 2:
+    ADD(IN1 := gudi_CycleCountAppLogic, IN2 := 1, ADD => gudi_CycleCountAppLogic);
+
+    // Network 3:
+    NOT(IN := lx_CyclePulse, NOT => lx_CyclePulse);
+
+    // Network 4:
+    R_TRIG1(CLK := TRUE, Q => lx_CycleInit);
+
+    // Network 5:
+    com_logicals_Basic_Flash_FB_lc_Flash_2Hz_FBD1(vox_Out => lx_Flash_2Hz);
+
+    // Network 6:
+    AND(IN1 := gx_ModeRPM0, IN2 := gx_ModeRPM1, IN3 := gx_ModeRPM2, IN4 := gx_ModeRPM3, IN5 := gx_ModeRPM4, AND => lx_Error);
+
+    // Network 7:
+    lx_NotHalt := gx_ModeRPM0;
+    lx_Quit := gx_ModeRPM4;
+    FB_NotAusCat11(vix_NotHalt := lx_NotHalt, vix_Quit := lx_Quit, vox_Bremse => lx_Bremse, vox_Antrieb => lx_Antrieb);
+    gx_RPM0 := lx_Bremse;
+    gx_RPM1 := lx_Antrieb;
+
+  *)
+
+  @CF(62) : @R(410.0, 20.0, 810.0, 99.0), @T("IO-Test-Programm iSOC300 Steuerung$NCreated: 2021-11-02 DG"), @POU;
+  @CF(65) : @R(420.0, 720.0, 800.0, 49.0), @T("Digitale Eingaenge 0..7 werden in PRG_AppLoop-Zyklus gelesen und auf die GVs geschrieben!$NDie Betriebsarten werden ebenfalls dort gebildet!"), @POU;
+  @CF(66) : @R(420.0, 1050.0, 790.0, 69.0), @T("Digitale Ausgaenge werden von PRG_AppLoop-Zyklus geschrieben!"), @POU;
+  @CF(68) : @R(420.0, 1170.0, 790.0, 29.0), @T("Die beiden Analogeeingaenge lesen wird im PRG_AppLoop_FBD gelesen!"), @POU;
+  @VF(190) : @E(lui_CycleCount), @R(480.0, 220.0, 140.0, 19.0);
+  @C(191) : @F(ADD), @R(810.0, 220.0, 40.0, 38.0), UINT, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(ADD), @R(9.5));
+  @VF(192) : @E(1), @R(480.0, 240.0, 140.0, 19.0), UINT;
+  @VF(198) : @E(lui_CycleCount), @R(1010.0, 220.0, 140.0, 19.0);
+  @VF(204) : @E(lx_CyclePulse), @R(480.0, 520.0, 140.0, 19.0);
+  @C(205) : @F(NOT), @R(670.0, 520.0, 60.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(NOT), @R(9.5));
+  @VF(207) : @E(lx_CyclePulse), @R(1010.0, 520.0, 140.0, 19.0);
+  @C(209) : @FB(R_TRIG1), @R(670.0, 560.0, 140.0, 18.0), @I(@N(CLK), @L(9.5)), @O(@N(Q), @R(9.5));
+  @VF(210) : @E(TRUE), @R(480.0, 560.0, 140.0, 19.0);
+  @VF(212) : @E(lx_CycleInit), @R(1010.0, 560.0, 140.0, 19.0);
+  @C(245) : @FB(com_logicals_Basic_Flash_FB_lc_Flash_2Hz_FBD1), @R(570.0, 630.0, 260.0, 58.0), @O(@N(vox_Out), @R(9.5));
+  @VF(246) : @E(lx_Flash_2Hz), @R(1010.0, 630.0, 140.0, 19.0);
+  @CF(1) : @R(410.0, 140.0, 810.0, 49.0), @T("Lokale Hilfsvariablen fuer PRG_AppLogic_FBD"), @POU;
+  @VF(184) : @E(gx_ModeRPM0), @R(860.0, 840.0, 140.0, 19.0);
+  @VF(2) : @E(gx_ModeRPM1), @R(860.0, 880.0, 140.0, 19.0);
+  @VF(3) : @E(gx_ModeRPM2), @R(860.0, 920.0, 140.0, 19.0);
+  @VF(4) : @E(gx_ModeRPM3), @R(860.0, 960.0, 140.0, 19.0);
+  @VF(499) : @E(gx_ModeRPM4), @R(860.0, 1000.0, 140.0, 19.0);
+  @CF(418) : @R(590.0, 840.0, 200.0, 19.0), @T("0%"), @POU;
+  @CF(417) : @R(590.0, 880.0, 200.0, 19.0), @T("35%"), @POU;
+  @CF(103) : @R(590.0, 790.0, 400.0, 39.0), @T("SP-Point per Schalter einstellbar in PRG_AppLoop_FBD"), @POU;
+  @CF(416) : @R(590.0, 920.0, 200.0, 19.0), @T("70%"), @POU;
+  @CF(415) : @R(590.0, 960.0, 200.0, 19.0), @T("Poti"), @POU;
+  @CF(414) : @R(590.0, 1000.0, 200.0, 19.0), @T("SFC aus AppLogic"), @POU;
+  @VF(441) : @E(gudi_CycleCountAppLogic), @R(1010.0, 300.0, 250.0, 19.0);
+  @VF(442) : @E(gudi_CycleCountAppLoop), @R(1010.0, 340.0, 250.0, 19.0);
+  @VF(443) : @E(gudi_CycleCountAppTimer), @R(1010.0, 380.0, 250.0, 19.0);
+  @OLT(445) : @R(1180.0, 320.0, 80.0, 19.0), @S(442);
+  @OLT(446) : @R(1180.0, 280.0, 80.0, 19.0), @S(441);
+  @OLT(444) : @R(1180.0, 360.0, 80.0, 19.0), @S(443);
+  @VF(6) : @E(gx_ModeRPM1), @R(550.0, 1510.0, 140.0, 19.0);
+  @VF(7) : @E(gx_ModeRPM0), @R(550.0, 1490.0, 140.0, 19.0);
+  @VF(8) : @E(gx_ModeRPM2), @R(550.0, 1530.0, 140.0, 19.0);
+  @VF(9) : @E(gx_ModeRPM3), @R(550.0, 1550.0, 140.0, 19.0);
+  @VF(10) : @E(gx_ModeRPM4), @R(550.0, 1570.0, 140.0, 19.0);
+  @C(11) : @F(AND), @R(790.0, 1490.0, 40.0, 98.0), BOOL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @I(@N(IN3), @L(49.5)), @I(@N(IN4), @L(69.5)), @I(@N(IN5), @L(89.5)), @O(@N(AND), @R(9.5));
+  @VF(17) : @E(lx_Error), @R(910.0, 1490.0, 140.0, 19.0);
+  @C(5) : @F(ADD), @R(810.0, 300.0, 40.0, 38.0), UDINT, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(ADD), @R(9.5));
+  @VF(19) : @E(1), @R(590.0, 320.0, 140.0, 19.0), UDINT;
+  @VF(21) : @E(gudi_CycleCountAppLogic), @R(480.0, 300.0, 250.0, 19.0);
+  @CF(24) : @R(420.0, 1440.0, 790.0, 29.0), @T("Betriebsarten werden in PRG_AppLoop_FBD gebildet!"), @POU;
+  @C(25) : @FB(FB_NotAusCat11), instanceNameVisible, @R(670.0, 1800.0, 290.0, 78.0), @I(@N(vix_NotHalt), @L(9.5)), @I(@N(vix_Quit), @L(29.5)), @I(@N(vit_VerzZeit1), @L(49.5)), @I(@N(vit_VerzZeit2), @L(69.5)), @O(@N(vox_Bremse), @R(9.5)), @O(@N(vox_Antrieb), @R(29.5));
+  @VF(26) : @E(lx_NotHalt), @R(470.0, 1800.0, 140.0, 19.0);
+  @VF(27) : @E(lx_Quit), @R(470.0, 1820.0, 140.0, 19.0);
+  @VF(28) : @E(lx_Bremse), @R(1040.0, 1800.0, 140.0, 19.0);
+  @VF(29) : @E(lx_Antrieb), @R(1040.0, 1820.0, 140.0, 19.0);
+  @OLT(30) : @R(260.0, 1740.0, 80.0, 19.0), @S(26);
+  @OLT(31) : @R(260.0, 1760.0, 80.0, 19.0), @S(27);
+  @VF(36) : @E(gx_ModeRPM0), @R(260.0, 1800.0, 140.0, 19.0);
+  @VF(326) : @E(gx_RPM0), @R(1240.0, 1800.0, 140.0, 19.0);
+  @VF(327) : @E(gx_RPM1), @R(1240.0, 1820.0, 140.0, 19.0);
+  @OLT(41) : @R(1040.0, 1840.0, 80.0, 19.0), @S(29);
+  @OLT(42) : @R(1040.0, 1780.0, 80.0, 19.0), @S(28);
+  @CF(43) : @R(420.0, 1730.0, 790.0, 29.0), @T("Not-Aus-Kategorie 1"), @POU;
+  @VF(978) : @E(gx_ModeRPM4), @R(260.0, 1820.0, 140.0, 19.0);
+
+  @G(199) :
+     @L(@VF(190).o, @C(191).IN1)
+    ;
+  @G(200) :
+     @L(@VF(192).o, @C(191).IN2)
+    ;
+  @G(203) :
+     @L(@C(191).ADD, @VF(198).i)
+    ;
+  @G(206) :
+     @L(@VF(204).o, @C(205).IN)
+    ;
+  @G(208) :
+     @L(@C(205).NOT, @VF(207).i)
+    ;
+  @G(211) :
+     @L(@VF(210).o, @C(209).CLK)
+    ;
+  @G(213) :
+     @L(@C(209).Q, @VF(212).i)
+    ;
+  @G(247) :
+     @L(@C(245).vox_Out, @VF(246).i)
+    ;
+  @G(12) :
+     @L(@VF(7).o, @C(11).IN1)
+    ;
+  @G(13) :
+     @L(@VF(6).o, @C(11).IN2)
+    ;
+  @G(14) :
+     @L(@VF(8).o, @C(11).IN3)
+    ;
+  @G(15) :
+     @L(@VF(9).o, @C(11).IN4)
+    ;
+  @G(16) :
+     @L(@VF(10).o, @C(11).IN5)
+    ;
+  @G(18) :
+     @L(@C(11).AND, @VF(17).i)
+    ;
+  @G(20) :
+     @L(@VF(19).o, @C(5).IN2)
+    ;
+  @G(22) :
+     @L(@VF(21).o, @C(5).IN1)
+    ;
+  @G(23) :
+     @L(@C(5).ADD, @VF(441).i)
+    ;
+  @G(32) :
+     @L(@VF(26).o, @C(25).vix_NotHalt)
+    ;
+  @G(33) :
+     @L(@VF(27).o, @C(25).vix_Quit)
+    ;
+  @G(34) :
+     @L(@C(25).vox_Bremse, @VF(28).i)
+    ;
+  @G(35) :
+     @L(@C(25).vox_Antrieb, @VF(29).i)
+    ;
+  @G(37) :
+     @L(@VF(36).o, @VF(26).i)
+    ;
+  @G(39) :
+     @L(@VF(28).o, @VF(326).i)
+    ;
+  @G(40) :
+     @L(@VF(29).o, @VF(327).i)
+    ;
+  @G(38) :
+     @L(@VF(978).o, @VF(27).i)
+    ;
+END_PROGRAM

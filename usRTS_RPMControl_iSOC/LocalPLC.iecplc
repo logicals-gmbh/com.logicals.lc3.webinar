@@ -1,0 +1,29 @@
+/*
+ * This is a template for a new PLC object
+ */
+
+{
+	CHANNEL LocalPLC_Channel
+		TCP
+			ADDRESS := 127.0.0.1;
+			PORT    := 1534;
+		END_TCP
+	END_CHANNEL
+}
+
+CONFIGURATION LocalPLC
+	RESOURCE LocalPLC ON BuiltInPlc { ON_CHANNEL := LocalPLC_Channel }
+
+		{ INCLUDE_GLOBALS GV_RPMControl_SetVal_iSOC }
+		{ INCLUDE_GLOBALS GV_RPMControl }
+
+		TASK TSKMain(INTERVAL := TIME#200ms, PRIORITY := 38229); 
+
+//		PROGRAM INST_NotAus_Test WITH TSKMain : PRG_NotAus_Test;
+		
+//		PROGRAM INST_AppTest_FBD WITH TSKMain : PRG_AppTest_FBD;
+
+		PROGRAM INST_AppTimer_FBD WITH TSKMain : PRG_AppTimer_FBD;
+
+	END_RESOURCE
+END_CONFIGURATION

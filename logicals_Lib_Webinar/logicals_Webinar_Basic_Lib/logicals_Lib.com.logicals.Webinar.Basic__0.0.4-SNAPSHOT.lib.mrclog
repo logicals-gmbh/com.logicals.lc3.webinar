@@ -1,20 +1,20 @@
 {
   "report": {
-    "object": "../../logi.cals_Webinar/20220330_GITSupport/Webinar-Repo/com.logicals.lc3.webinar/logicals_Lib_Webinar/logicals_Webinar_Basic_Lib/logicals_Lib.com.logicals.Webinar.Basic__0.0.4-SNAPSHOT",
-    "date": "2022-03-30",
-    "time": "11:00:44",
+    "object": "/logicals_Lib_Webinar/logicals_Webinar_Basic_Lib/logicals_Lib.com.logicals.Webinar.Basic__0.0.4-SNAPSHOT",
+    "date": "2022-04-01",
+    "time": "11:11:53",
     "startedBy": "user",
     "userName": "diete",
     "nrOfErrors": 0,
     "nrOfWarnings": 0,
     "nrOfInfos": 0,
     "rules": {
-      "com.logicals.mrc.rules.ModelRuleForbiddenOutputAssignment": {
-        "groupId": "Iec61131_Usage",
-        "name": "Zuweisungen auf Ausgangsvariablen eines Funktionsbausteins außerhalb von Funktionsbausteinen sind nicht erlaubt.",
-        "description": "Diese Modellregel prüft, ob Zuweisungen auf Ausgangsvariablen eines Funktionsbausteins außerhalb von Funktionsbausteinen vorhanden sind. Solche Zuweisungen werden gemeldet.\n",
-        "severity": "ERROR",
-        "activeState": true,
+      "com.logicals.mrc.rules.ModelRuleSinglePouPerResource": {
+        "groupId": "Iec61131_Design",
+        "name": "ST-Objekte dürfen auf oberster Ebene nur ein Element enthalten.",
+        "description": "Diese Modellregel prüft, ob ST-Objekte auf oberster Ebene mehrere Elemente enthalten. Solche ST-Objekte werden gemeldet.",
+        "severity": "WARNING",
+        "activeState": false,
         "occurrences": []
       },
       "com.logicals.mrc.rules.ModelRuleNoNegatedIOs": {
@@ -33,26 +33,18 @@
         "activeState": true,
         "occurrences": []
       },
-      "com.logicals.mrc.rules.ModelRuleSinglePouPerResource": {
-        "groupId": "Iec61131_Design",
-        "name": "ST-Objekte dürfen auf oberster Ebene nur ein Element enthalten.",
-        "description": "Diese Modellregel prüft, ob ST-Objekte auf oberster Ebene mehrere Elemente enthalten. Solche ST-Objekte werden gemeldet.",
-        "severity": "WARNING",
-        "activeState": false,
+      "com.logicals.mrc.rules.ModelRuleForbiddenOutputAssignment": {
+        "groupId": "Iec61131_Usage",
+        "name": "Zuweisungen auf Ausgangsvariablen eines Funktionsbausteins außerhalb von Funktionsbausteinen sind nicht erlaubt.",
+        "description": "Diese Modellregel prüft, ob Zuweisungen auf Ausgangsvariablen eines Funktionsbausteins außerhalb von Funktionsbausteinen vorhanden sind. Solche Zuweisungen werden gemeldet.\n",
+        "severity": "ERROR",
+        "activeState": true,
         "occurrences": []
       },
       "com.logicals.mrc.rules.ModelRuleForbiddenDatatypes": {
         "groupId": "Iec61131_Design",
         "name": "Verbotene elementare Datentypen dürfen nicht verwendet werden.",
         "description": "Diese Modellregel prüft, ob verbotene Datentypen verwendet werden. Die Verwendungen solcher Datentypen werden als verboten gemeldet.",
-        "severity": "WARNING",
-        "activeState": false,
-        "occurrences": []
-      },
-      "com.logicals.mrc.rules.ModelRuleObjectNameConformity": {
-        "groupId": "Iec61131_Design",
-        "name": "Für Projekte/Ordner/Objekte dürfen nur Bezeichner laut Vorgaben verwendet werden.",
-        "description": "Diese Modellregel prüft, ob die Namen von Projekten/Ordnern/Objekte den Vorgaben entsprechen. Informieren Sie sich in der Benutzerdokumention über diese Vorgaben.",
         "severity": "WARNING",
         "activeState": false,
         "occurrences": []
@@ -65,10 +57,18 @@
         "activeState": true,
         "occurrences": []
       },
+      "com.logicals.mrc.rules.ModelRuleObjectNameConformity": {
+        "groupId": "Iec61131_Design",
+        "name": "Für Projekte/Ordner/Objekte dürfen nur Bezeichner laut Vorgaben verwendet werden.",
+        "description": "Diese Modellregel prüft, ob die Namen von Projekten/Ordnern/Objekte den Vorgaben entsprechen. Informieren Sie sich in der Benutzerdokumention über diese Vorgaben.",
+        "severity": "WARNING",
+        "activeState": false,
+        "occurrences": []
+      },
       "com.logicals.mrc.rules.ModelRuleForbiddenInputAssignment": {
         "groupId": "Iec61131_Usage",
         "name": "Zuweisungen auf Eingangsvariablen innerhalb der POE sind nicht erlaubt.",
-        "description": "Diese Modellregel prüft, ob Zuweisungen auf Eingangsvariablen innerhalb von Funktionsbausteinen vorhanden sind. Solche Zuweisungen werden gemeldet. Ausgenommen davon sind Zuweisungen auf Referenz-Variablen innerhalb von Funktionsbausteinen, da diese immer erlaubt sind.\nZuweisungen auf Eingangsvariablen innerhalb von Funktionen sind grundsätzlich nie erlaubt. Ausgenommen sind wieder Zuweisungen auf Referenz-Variablen, da diese auch innerhalb von Funktionen immer erlaubt sind.",
+        "description": "Diese Modellregel prüft, ob Zuweisungen auf Eingangsvariablen innerhalb von Programmen und/oder Funktionsbausteinen vorhanden sind. Solche Zuweisungen werden gemeldet.\nZuweisungen auf Eingangsvariablen innerhalb von Funktionen sind ohnehin nicht möglich und werden von der Validierung nicht gemeldet. ",
         "severity": "ERROR",
         "activeState": true,
         "occurrences": []
@@ -79,14 +79,6 @@
         "description": "Diese Modellregel prüft, ob Linien verwendet werden, die von rechts nach links führen. Solche Linien werden gemeldet.\nHinweis: Verbindungen mit Hilfe von Konnektoren und Fortsetzungen werden von dieser Regel nicht geprüft.",
         "severity": "WARNING",
         "activeState": false,
-        "occurrences": []
-      },
-      "com.logicals.iec.fbd.validation.ModelRuleDirectLinesAcrossPages": {
-        "groupId": "Iec61131_Design",
-        "name": "Direkte Linien über Seiten hinweg dürfen nicht verwendet werden.",
-        "description": "Diese Modellregel prüft, ob direkte Linien über Seiten hinweg vorhanden sind. Solche Linien werden gemeldet.",
-        "severity": "WARNING",
-        "activeState": true,
         "occurrences": []
       },
       "com.logicals.iec.st.validation.namespace.PouNamespaceValidator": {
@@ -129,6 +121,14 @@
         "activeState": true,
         "occurrences": []
       },
+      "com.logicals.iec.fbd.validation.ModelRuleDiagonalLines": {
+        "groupId": "Iec61131_Design",
+        "name": "Direkte Linien dürfen nicht verwendet werden.",
+        "description": "Diese Modellregel prüft, ob direkte Linien verwendet werden. Solche Linien werden gemeldet.",
+        "severity": "WARNING",
+        "activeState": true,
+        "occurrences": []
+      },
       "com.logicals.iec.st.validation.namespace.UniqueFolderNameWithNamespaceValidator": {
         "groupId": "Iec61131_Design",
         "name": "Namespace-Ordner müssen einen eindeutigen Bezeichner besitzen.",
@@ -137,19 +137,19 @@
         "activeState": true,
         "occurrences": []
       },
+      "com.logicals.mrc.rules.ModelRuleForbiddenAccessOfLocalVariable": {
+        "groupId": "Iec61131_Usage",
+        "name": "Zuweisungen auf oder von lokalen Variablen eines Funktionsbausteins außerhalb von Funktionsbausteinen sind nicht erlaubt.",
+        "description": "Diese Modellregel prüft, ob Zuweisungen auf oder von lokalen Variablen (\u003d VAR) eines Funktionsbausteins außerhalb von Funktionsbausteinen vorhanden sind. Solche Zuweisungen werden gemeldet. Zuweisungen auf oder von lokalen Variablen (\u003d VAR) einer Funktion oder eines Programms sind außerhalb ohnehin nicht möglich und werden von der Validierung nicht gemeldet.",
+        "severity": "ERROR",
+        "activeState": true,
+        "occurrences": []
+      },
       "com.logicals.mrc.rules.ModelRuleConnectorMustHaveSource": {
         "groupId": "Iec61131_Design",
         "name": "Ein Konnektor muss mit einem Ursprung verbunden sein.",
         "description": "Diese Modellregel prüft, ob ein Konnektor mit einem Ursprung verbunden ist. Falls nicht, wird der Konnektor gemeldet.",
         "severity": "ERROR",
-        "activeState": true,
-        "occurrences": []
-      },
-      "com.logicals.iec.fbd.validation.ModelRuleDirectLines": {
-        "groupId": "Iec61131_Design",
-        "name": "Direkte Linien auf derselben Seite dürfen nicht verwendet werden.",
-        "description": "Diese Modellregel prüft, ob direkte Linien auf derselben Seite vorhanden sind.",
-        "severity": "WARNING",
         "activeState": true,
         "occurrences": []
       },
@@ -163,5 +163,5 @@
       }
     }
   },
-  "signature": "d54cdbba"
+  "signature": "db5d1c26"
 }

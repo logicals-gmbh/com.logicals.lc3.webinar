@@ -1,5 +1,7 @@
 PROGRAM PRG_lc_TestMeasure1_FBD
+  
   USING com.logicals.Basic.Measure;
+  
   VAR
     lr_MeaIn : REAL;
     lr_MeaScaleHLM : REAL;
@@ -73,8 +75,8 @@ PROGRAM PRG_lc_TestMeasure1_FBD
     lx_MeaAlrLimitLLL : BOOL;
   END_VAR
   VAR
-    FB_lc_Measure_FBD : com.logicals.Basic.Measure.FB_lc_Measure_FBD;
-    FB_lc_MeasureAlarm_FBD : com.logicals.Basic.Measure.FB_lc_MeasureAlarm_FBD;
+    FB_lc_Measure_FBD : FB_lc_Measure_FBD;
+    FB_lc_MeasureAlarm_FBD : FB_lc_MeasureAlarm_FBD;
   END_VAR
 
   (*

@@ -1,0 +1,22 @@
+NAMESPACE logicals.web.standard
+NAMESPACE convert
+
+/*
+ * Function block wrapper for IEC 61131-3 TO_LINT<br>
+ * IN =  input value (LREAL)<br>
+ * OUT = IN (LINT)<br>
+ */
+FUNCTION_BLOCK wTRUNC_LREAL_TO_LINT
+	{ vNameAlignment:="center"; altName:="TRUNC_LREAL_TO_LINT"; bgColor:="LightPink"; width:=180; hideIONames; }
+	VAR_INPUT
+		IN : LREAL;
+	END_VAR
+	VAR_OUTPUT
+		OUT: LINT;
+	END_VAR
+
+	OUT := TO_LINT(IN:=IN, ENO=>ENO);
+END_FUNCTION_BLOCK
+
+END_NAMESPACE
+END_NAMESPACE

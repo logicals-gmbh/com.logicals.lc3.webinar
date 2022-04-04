@@ -1,0 +1,10 @@
+{CustomImplementation}
+FUNCTION_BLOCK AI
+	{ImplementationProperties (functionHasCFile;)}
+	VAR_INPUT
+		InputSelect : INT;
+	END_VAR
+	VAR_OUTPUT
+		AnalogValue : INT;
+	END_VAR
+END_FUNCTION_BLOCK

@@ -1,0 +1,22 @@
+NAMESPACE logicals.web.standard
+NAMESPACE convert
+
+/*
+ * Function block wrapper for IEC 61131-3 TO_LREAL<br>
+ * IN =  input value (REAL)<br>
+ * OUT = IN (LREAL)<br>
+ */
+FUNCTION_BLOCK wREAL_TO_LREAL
+	{ vNameAlignment:="center"; altName:="REAL_TO_LREAL"; bgColor:="Orange"; width:=140; hideIONames; }
+	VAR_INPUT
+		IN : REAL;
+	END_VAR
+	VAR_OUTPUT
+		OUT: LREAL;
+	END_VAR
+
+	OUT := TO_LREAL(IN:=IN, ENO=>ENO);
+END_FUNCTION_BLOCK
+
+END_NAMESPACE
+END_NAMESPACE

@@ -1,0 +1,285 @@
+USING logicals.web.standard.safe;
+
+NAMESPACE logicals.web.standard.safe
+NAMESPACE plcopen
+
+TYPE
+	SF_Override_State : UINT(
+		/* The function block is not active (initial state). */
+		Idle := 16#0000,
+		/* Static Reset condition detected after FB activation. */
+		Reset_Error := 16#C011,
+		/* Max Override time elapsed. */
+		Override_Error := 16#C410,
+		/* Protection field interrupted and muting not active or override is not active
+		 * and the timer for the MaxOverrideTime will be reset. */
+		Safety_Demand_AOPD := 16#8002,
+		/* The pre-connected muting FB shows an error but the safeguard (e.g. light
+		 * curtain) is not interrupted and no muting sensor is blocked. */
+		Muting_Error_but_Override_not_possible := 16#8012,
+		/* The pre-connected muting FB shows an error and the safeguard (e.g. light
+		 * curtain) is interrupted and/or at least one muting sensor is blocked. */
+		Override_Possible := 16#8022,
+		/* The override start signal is set to FALSE during override process. The
+		 * time for the MaxOverrideTime is still running. */
+		Override_Interrupt := 16#8832,
+		/* Override is active and the timer for the MaxOverrideTime is starting to run. */
+		Override_Active := 16#8000,
+		/* S_AOPD_Out from the pre-connected function block is TRUE. */
+		AOPD_Free := 16#8100
+	);
+END_TYPE
+
+FUNCTION_BLOCK SF_Override
+	{ altName:="SF_Override"; bgColor:="Gold"; width:=360; }
+	VAR_INPUT
+		/* See Section 5.1.1 General Input Parameters */
+		Activate : BOOL := FALSE;
+		/* Variable. OSSD signal from AOPD.
+		 * FALSE: Protection field interrupted.
+		 * TRUE: Protection field not interrupted. */
+		S_AOPD_In : SAFEBOOL := SAFEBOOL_Constant#SAFEFALSE;
+		/* Variable. S_AOPD_OUT signal from the previous muting block.
+		 * FALSE/TRUE: The Status of the Safety related output.
+		 * S_AOPD_OUT from the previous muting block. */
+		S_Muting_AOPD_Out : SAFEBOOL := SAFEBOOL_Constant#SAFEFALSE;
+		/* Error output of the previous connected Muting-FB.
+		 * FALSE: No error.
+		 * TRUE: Error in Muting Process */
+		MutingError : BOOL := FALSE;
+		/* Variable.
+		 * Status of the Muting sensor signal which is connected at the
+		 * input MutingSwitch11 of the previous muting function block
+		 * FALSE: Muting sensor 11 not actuated.
+		 * TRUE: Workpiece actuates muting sensor 11. */
+		MutingSwitch11 : BOOL := FALSE;
+		/* Variable.
+		 * Status of the Muting sensor signal which is connected at the
+		 * input MutingSwitch12 of the previous muting function block
+		 * FALSE: Muting sensor 12 not actuated.
+		 * TRUE: Workpiece actuates muting sensor 12. */
+		MutingSwitch12 : BOOL := FALSE;
+		/* Variable.
+		 * Status of the Muting sensor signal which is connected at the
+		 * input MutingSwitch21 of the previous muting function block
+		 * FALSE: Muting sensor 21 not actuated.
+		 * TRUE: Workpiece actuates muting sensor 21.
+		 * It shall be noted that this parameter is not connected if the
+		 * previous muting function is the SF_MutingPar_2Sensor. */
+		MutingSwitch21 : BOOL := FALSE;
+		/* Variable.
+		 * Status of the Muting sensor signal which is connected at the
+		 * input MutingSwitch22 of the previous muting function block
+		 * FALSE: Muting sensor 22 not actuated.
+		 * TRUE: Workpiece actuates muting sensor 22.
+		 * It shall be noted that this parameter is not connected if the
+		 * previous muting function is the SF_MutingPar_2Sensor. */
+		MutingSwitch22 : BOOL := FALSE;
+		/* Constant 0..10 min;
+		 * Maximum time for the overall Override process.
+		 * The time is started when the start conditions for the override
+		 * process are available. The timer is stopped when all the muting
+		 * sensors are not muted anymore.
+		 */
+		MaxOverrideTime : TIME := T#0s;
+		/* Signal for the start and stop of override functionality.
+		 * A rising edge is needed to start hte override functionality.
+		 * TRUE: If all override conditions are fulfilled, the override process
+		 * starts. At this moment also the time for the MaxOverrideTime starts.
+		 * FALSE: THe override process stops. The timer for the MaxOverrideTime
+		 * continues till the muting process is finished (transition 8832 to 8802).
+		 */
+		S_StartStopOverride : SAFEBOOL := SAFEBOOL_Constant#SAFEFALSE;
+		/* See 5.1.1 General Input Parameters */
+		Reset : BOOL := FALSE;
+	END_VAR
+	VAR_OUTPUT
+		/* See 5.1.2 General Output Parameters */
+		Ready : BOOL := FALSE;
+		/* Safety related output, indicates status of the muted guard or
+		 * override signal.
+		 * FALSE: AOPD protection field interrupted and muting not
+		 * active or override is not active.
+		 * TRUE: AOPD protection field not interrupted or muting active
+		 * or override is active. */
+		S_AOPD_OUT : SAFEBOOL := SAFEBOOL_Constant#SAFEFALSE;
+		/* Status signaling that override is possible
+		 * FALSE: Override not possible
+		 * TRUE: Override possible */
+		OverridePossible : BOOL := FALSE;
+		/* Indicates the status of Override process.
+		 * FALSE: Override not active.
+		 * TRUE: Override active. */
+		OverrideActive : BOOL := FALSE;
+		/* See 5.1.2 General Output Parameters */
+		SafetyDemand : BOOL := FALSE;
+		/* See 5.1.2 General Output Parameters */
+		ResetRequest : BOOL := FALSE;
+		/* See 5.1.2 General Output Parameters */
+		Error : BOOL := FALSE;
+		/* See 5.1.2 General Output Parameters */
+		DiagCode : WORD := 16#0000;
+	END_VAR
+	VAR
+		OverrideTimer : TON;
+		AnySwitchActive : BOOL;
+		R_Trig_StartStopOverride : R_TRIG;
+		R_Trig_Reset : R_TRIG;
+	END_VAR
+
+	IF(NOT Activate) THEN
+		DiagCode := TO_WORD(SF_Override_State#Idle);
+	ELSE
+		AnySwitchActive := MutingSwitch11 OR MutingSwitch12 OR MutingSwitch21 OR MutingSwitch22;
+		R_Trig_StartStopOverride(IS(S_StartStopOverride));
+		R_Trig_Reset(Reset);
+
+		CASE TO_UINT(DiagCode) OF
+			SF_Override_State#Idle:
+				// Activate is always true here
+				DiagCode := TO_WORD(SF_Override_State#Safety_Demand_AOPD);
+			SF_Override_State#Safety_Demand_AOPD:
+				IF(MutingError AND (IS(S_AOPD_In) AND NOT AnySwitchActive)) THEN
+					DiagCode := TO_WORD(SF_Override_State#Muting_Error_but_Override_not_possible);
+				ELSIF(MutingError AND (IS_NOT(S_AOPD_In) OR AnySwitchActive)) THEN
+					DiagCode := TO_WORD(SF_Override_State#Override_Possible);
+				ELSIF(IS(S_Muting_AOPD_Out)) THEN
+					DiagCode := TO_WORD(SF_Override_State#AOPD_Free);
+				END_IF;
+			SF_Override_State#Override_Possible:
+				IF(NOT (MutingError AND (IS_NOT(S_AOPD_In) OR AnySwitchActive))) THEN
+					DiagCode := TO_WORD(SF_Override_State#Safety_Demand_AOPD);
+				ELSIF(R_Trig_StartStopOverride.Q) THEN
+					DiagCode := TO_WORD(SF_Override_State#Override_Active);
+				END_IF;
+			SF_Override_State#Override_Active:
+				IF(OverrideTimer.Q) THEN
+					DiagCode := TO_WORD(SF_Override_State#Override_Error);
+				ELSIF(IS_NOT(S_StartStopOverride)) THEN
+					DiagCode := TO_WORD(SF_Override_State#Override_Interrupt);
+				ELSIF(NOT(MutingError AND (IS_NOT(S_AOPD_In) OR AnySwitchActive))) THEN
+					DiagCode := TO_WORD(SF_Override_State#Safety_Demand_AOPD);
+				END_IF;
+			SF_Override_State#Override_Interrupt:
+				IF(OverrideTimer.Q) THEN
+					DiagCode := TO_WORD(SF_Override_State#Override_Error);
+				ELSIF(NOT(MutingError AND (IS_NOT(S_AOPD_In) OR AnySwitchActive))) THEN
+					DiagCode := TO_WORD(SF_Override_State#Safety_Demand_AOPD);
+				ELSIF(IS(S_StartStopOverride)) THEN
+					DiagCode := TO_WORD(SF_Override_State#Override_Active);
+				END_IF;
+			SF_Override_State#Override_Error:
+				IF(Reset AND NOT R_Trig_Reset.Q) THEN
+					DiagCode := TO_WORD(SF_Override_State#Reset_Error);
+				ELSIF(R_Trig_Reset.Q) THEN
+					DiagCode := TO_WORD(SF_Override_State#Safety_Demand_AOPD);
+				END_IF;
+			SF_Override_State#Reset_Error:
+				IF(NOT Reset) THEN
+					DiagCode := TO_WORD(SF_Override_State#Override_Error);
+				END_IF;
+			SF_Override_State#AOPD_Free:
+				IF(IS_NOT(S_Muting_AOPD_Out)) THEN
+					DiagCode := TO_WORD(SF_Override_State#Safety_Demand_AOPD);
+				END_IF;
+			SF_Override_State#Muting_Error_but_Override_not_possible:
+				IF(NOT MutingError) THEN
+					DiagCode := TO_WORD(SF_Override_State#Safety_Demand_AOPD);
+				END_IF;
+		ELSE
+				ENO := FALSE;
+		END_CASE;
+	END_IF;
+
+	CASE TO_UINT(DiagCode) OF
+		SF_Override_State#Idle:
+			OverrideTimer(IN := FALSE);
+			Ready := FALSE;
+			S_AOPD_OUT := SAFEBOOL_Constant#SAFEFALSE;
+			OverridePossible := FALSE;
+			OverrideActive := FALSE;
+			SafetyDemand := FALSE;
+			ResetRequest := FALSE;
+			Error := FALSE;
+		SF_Override_State#Reset_Error:
+			OverrideTimer(IN := FALSE);
+			Ready := TRUE;
+			S_AOPD_OUT := SAFEBOOL_Constant#SAFEFALSE;
+			OverridePossible := FALSE;
+			OverrideActive := FALSE;
+			SafetyDemand := FALSE;
+			ResetRequest := FALSE;
+			Error := TRUE;
+		SF_Override_State#Override_Error:
+			OverrideTimer(IN := FALSE);
+			Ready := TRUE;
+			S_AOPD_OUT := SAFEBOOL_Constant#SAFEFALSE;
+			OverridePossible := FALSE;
+			OverrideActive := FALSE;
+			SafetyDemand := FALSE;
+			ResetRequest := TRUE;
+			Error := TRUE;
+		SF_Override_State#Safety_Demand_AOPD:
+			OverrideTimer(IN := FALSE);
+			Ready := TRUE;
+			S_AOPD_OUT := SAFEBOOL_Constant#SAFEFALSE;
+			OverridePossible := FALSE;
+			OverrideActive := FALSE;
+			SafetyDemand := FALSE;
+			ResetRequest := FALSE;
+			Error := FALSE;
+		SF_Override_State#Muting_Error_but_Override_not_possible:
+			OverrideTimer(IN := FALSE);
+			Ready := TRUE;
+			S_AOPD_OUT := SAFEBOOL_Constant#SAFEFALSE;
+			OverridePossible := FALSE;
+			OverrideActive := FALSE;
+			SafetyDemand := FALSE;
+			ResetRequest := FALSE;
+			Error := FALSE;
+		SF_Override_State#Override_Possible:
+			OverrideTimer(IN := FALSE);
+			Ready := TRUE;
+			S_AOPD_OUT := SAFEBOOL_Constant#SAFEFALSE;
+			OverridePossible := TRUE;
+			OverrideActive := FALSE;
+			SafetyDemand := FALSE;
+			ResetRequest := FALSE;
+			Error := FALSE;
+		SF_Override_State#Override_Interrupt:
+			OverrideTimer(IN := TRUE, PT := MaxOverrideTime);
+			Ready := TRUE;
+			S_AOPD_OUT := SAFEBOOL_Constant#SAFEFALSE;
+			OverridePossible := TRUE;
+			OverrideActive := FALSE;
+			SafetyDemand := TRUE;
+			ResetRequest := FALSE;
+			Error := FALSE;
+		SF_Override_State#Override_Active:
+			OverrideTimer(IN := TRUE, PT := MaxOverrideTime);
+			Ready := TRUE;
+			S_AOPD_OUT := SAFEBOOL_Constant#SAFETRUE;
+			OverridePossible := TRUE;
+			OverrideActive := TRUE;
+			SafetyDemand := FALSE;
+			ResetRequest := FALSE;
+			Error := FALSE;
+		SF_Override_State#AOPD_Free:
+			OverrideTimer(IN := FALSE);
+			Ready := TRUE;
+			S_AOPD_OUT := SAFEBOOL_Constant#SAFETRUE;
+			OverridePossible := FALSE;
+			OverrideActive := FALSE;
+			SafetyDemand := FALSE;
+			ResetRequest := FALSE;
+			Error := FALSE;
+		ELSE
+			ENO := FALSE;
+	END_CASE;
+
+	ENO := ENO AND CheckSAFEBOOL(S_AOPD_In) AND CheckSAFEBOOL(S_Muting_AOPD_Out) AND CheckSAFEBOOL(S_StartStopOverride);
+
+END_FUNCTION_BLOCK
+
+END_NAMESPACE
+END_NAMESPACE

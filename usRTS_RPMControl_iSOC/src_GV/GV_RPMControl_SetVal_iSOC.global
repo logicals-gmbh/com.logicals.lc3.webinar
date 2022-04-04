@@ -1,0 +1,49 @@
+/*
+ * Set-Werte iSOC
+ */
+GLOBALS GV_RPMControl_SetVal_iSOC
+	VAR_GLOBAL
+    /*
+     * GV fuer Ein- und Ausgangswerte
+     */ 
+     gstruc_PID_In  : DT_PID_In;
+     gstruc_PID_Out : DT_PID_Out;     
+    /*
+     * Skalierung PrcessValue 
+     */ 
+     gr_PV_In            : REAL;
+     gr_PV_MaxInVal      : REAL := 4096.0; // 12 Bit-Wandler
+     gr_PV_MinInVal      : REAL := 0.0;
+     gr_PV_MaxPhysVal    : REAL := 100.0;
+     gr_PV_MinPhysVal    : REAL := 0.0;
+     gr_PV_OffsetPhysVal : REAL := 0.0;
+     gx_PV_InValError    : BOOL;
+     gr_PV_OutPhysVal    : REAL;
+     gx_PV_PhysValError  : BOOL;
+    /*
+     * Skalierung SetPoint 
+     */ 
+     gr_SP_In            : REAL;
+     gr_SP_MaxInVal      : REAL := 4096.0; // 12 Bit-Wandler
+     gr_SP_MinInVal      : REAL := 0.0;
+     gr_SP_MaxPhysVal    : REAL := 100.0;
+     gr_SP_MinPhysVal    : REAL := 0.0;
+     gr_SP_OffsetPhysVal : REAL := 0.0;
+     gx_SP_InValError    : BOOL;
+     gr_SP_OutPhysVal    : REAL;
+     gx_SP_PhysValError  : BOOL;
+    /*
+     * De-Skalierung Y 
+     */ 
+     gr_Y_In            : REAL;
+     gr_Y_MaxInVal      : REAL := 100.0;
+     gr_Y_MinInVal      : REAL := 0.0;
+     gr_Y_MaxPhysVal    : REAL := 4096.0; // 12 Bit-Wandler
+     gr_Y_MinPhysVal    : REAL := 0.0;
+     gr_Y_OffsetPhysVal : REAL := 0.0;
+     gx_Y_InValError    : BOOL;
+     gr_Y_OutPhysVal    : REAL;
+     gx_Y_PhysValError  : BOOL;
+    END_VAR
+    
+END_GLOBALS

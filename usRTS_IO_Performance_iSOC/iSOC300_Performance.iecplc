@@ -1,0 +1,45 @@
+/*
+ * SPS-Konfiguration
+ * LC3 V3.13.0
+ * usRTS V1.17.0 
+ */
+
+{
+	CHANNEL GatewayChannel2
+		TCP
+			ADDRESS := 127.0.0.1;
+			PORT    := 1535;
+		END_TCP
+	END_CHANNEL
+}
+
+{
+	TARGET RemoteTarget2
+		PARAMS := '{
+			"transport": {
+				"type": "TCP",
+				"parameters": {
+					"ip": "192.168.128.210",
+					"port": 2409
+				}
+			},
+			"infrastructure": {
+				"type": "CMDLINETOOL",
+				"parameters": {
+					"programmerExec": "@PROGRAMMER@",
+					"programmerParam": "192.168.128.210 @FILENAME@"
+				}
+			}
+		}';
+	END_TARGET
+}
+
+CONFIGURATION iSOC300_Performance
+	RESOURCE iSOC300 ON usRTSiSOC300 { ON_TARGET := RemoteTarget2, VIA_CHANNEL := GatewayChannel2 }
+		
+		TASK TSK_Main(INTERVAL := TIME#5ms, PRIORITY := 38229);
+
+		PROGRAM INST_IO_Test WITH TSK_Main : PRG_IO_Test;
+
+	END_RESOURCE
+END_CONFIGURATION

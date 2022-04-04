@@ -1,0 +1,141 @@
+PROGRAM PRG_AppTest_FBD
+  VAR
+    FB_Ramp_ST : FB_Ramp_ST;
+    lusi_OpC : USINT;
+    lr_X1 : REAL := 100.0;
+    lr_X2 : REAL;
+    lr_X3 : REAL;
+    lr_LU : REAL;
+    lr_LL : REAL;
+    lr_SV : REAL;
+    lr_SpdUp : REAL := 10.0;
+    lr_SpdDn : REAL := 10.0;
+    lr_Y : REAL;
+    lr_XSum : REAL;
+    lx_Err : BOOL;
+    lui_ErrNo : UINT;
+    lusi_Exc : USINT;
+    lw_St : WORD;
+    lx_QU : BOOL;
+    lx_QL : BOOL;
+    lx_Stp : BOOL;
+    lx_QE : BOOL;
+    lx_Auto : BOOL;
+    lui_XSumChg : UINT;
+    lt_CycleTime_Sec : TIME := T#200ms;
+  END_VAR
+
+  (*
+
+    // Network 1:
+    FB_Ramp_ST(viusi_OpC := lusi_OpC, vir_X1 := lr_X1, vir_X2 := lr_X2, vir_X3 := lr_X3, vir_LU := lr_LU, vir_LL := lr_LL, vir_SV := lr_SV, vir_SpdUp := lr_SpdUp, vir_SpdDn := lr_SpdDn, vix_Stp := lx_Stp, vix_Auto := lx_Auto, vit_CycleTime_Sec := lt_CycleTime_Sec, vow_St => lw_St, vousi_Exc => lusi_Exc, vox_Err => lx_Err, voui_ErrNo => lui_ErrNo, vor_Y => lr_Y, vor_XSum => lr_XSum, vox_QU => lx_QU, vox_QL => lx_QL, vox_QE => lx_QE, voui_XSumChg => lui_XSumChg);
+
+  *)
+
+  @C(6) : @FB(FB_Ramp_ST), instanceNameVisible, @R(610.0, 260.0, 200.0, 318.0), @I(@N(viusi_OpC), @L(9.5)), @I(@N(vir_X1), @L(49.5)), @I(@N(vir_X2), @L(69.5)), @I(@N(vir_X3), @L(89.5)), @I(@N(vir_LU), @L(109.5)), @I(@N(vir_LL), @L(129.5)), @I(@N(vir_SV), @L(149.5)), @I(@N(vir_SpdUp), @L(189.5)), @I(@N(vir_SpdDn), @L(209.5)), @I(@N(vix_Stp), @L(249.5)), @I(@N(vix_Auto), @L(269.5)), @I(@N(vit_CycleTime_Sec), @L(309.5)), @O(@N(vow_St), @R(9.5)), @O(@N(vousi_Exc), @R(29.5)), @O(@N(vox_Err), @R(69.5)), @O(@N(voui_ErrNo), @R(89.5)), @O(@N(vor_Y), @R(129.5)), @O(@N(vor_XSum), @R(149.5)), @O(@N(vox_QU), @R(229.5)), @O(@N(vox_QL), @R(249.5)), @O(@N(vox_QE), @R(269.5)), @O(@N(voui_XSumChg), @R(289.5));
+  @VF(49) : @E(lusi_OpC), @R(360.0, 260.0, 140.0, 19.0);
+  @VF(13) : @E(lr_X1), @R(360.0, 300.0, 140.0, 19.0);
+  @VF(12) : @E(lr_X2), @R(360.0, 320.0, 140.0, 19.0);
+  @VF(11) : @E(lr_X3), @R(360.0, 340.0, 140.0, 19.0);
+  @VF(10) : @E(lr_LU), @R(360.0, 360.0, 140.0, 19.0);
+  @VF(7) : @E(lr_LL), @R(360.0, 380.0, 140.0, 19.0);
+  @VF(9) : @E(lr_SV), @R(360.0, 400.0, 140.0, 19.0);
+  @VF(14) : @E(lr_SpdUp), @R(360.0, 440.0, 140.0, 19.0);
+  @VF(15) : @E(lr_SpdDn), @R(360.0, 460.0, 140.0, 19.0);
+  @VF(25) : @E(lr_Y), @R(890.0, 380.0, 140.0, 19.0);
+  @VF(26) : @E(lr_XSum), @R(890.0, 400.0, 140.0, 19.0);
+  @VF(39) : @E(lx_Err), @R(890.0, 320.0, 140.0, 19.0);
+  @VF(41) : @E(lui_ErrNo), @R(890.0, 340.0, 140.0, 19.0);
+  @VF(42) : @E(lusi_Exc), @R(890.0, 280.0, 140.0, 19.0);
+  @VF(47) : @E(lw_St), @R(890.0, 260.0, 140.0, 19.0);
+  @VF(29) : @E(lx_QU), @R(890.0, 480.0, 140.0, 19.0);
+  @VF(30) : @E(lx_QL), @R(890.0, 500.0, 140.0, 19.0);
+  @VF(35) : @E(lx_Stp), @R(360.0, 500.0, 140.0, 19.0);
+  @VF(31) : @E(lx_QE), @R(890.0, 520.0, 140.0, 19.0);
+  @VF(36) : @E(lx_Auto), @R(360.0, 520.0, 140.0, 19.0);
+  @VF(43) : @E(lui_XSumChg), @R(890.0, 540.0, 140.0, 19.0);
+  @VF(18) : @E(lt_CycleTime_Sec), @R(290.0, 560.0, 210.0, 19.0);
+  @CF(1) : @R(350.0, 80.0, 680.0, 99.0), @T("Test des FB_Ramp_ST!"), @POU;
+  @OLT(2) : @R(230.0, 300.0, 80.0, 19.0), @S(13);
+  @OLT(3) : @R(1080.0, 260.0, 80.0, 19.0), @S(47);
+  @OLT(4) : @R(1080.0, 280.0, 80.0, 19.0), @S(42);
+  @OLT(5) : @R(1080.0, 340.0, 80.0, 19.0), @S(41);
+  @OLT(51) : @R(80.0, 560.0, 160.0, 19.0), @S(18);
+  @OLT(52) : @R(230.0, 500.0, 80.0, 19.0), @S(35);
+  @OLT(53) : @R(230.0, 520.0, 80.0, 19.0), @S(36);
+  @OLT(54) : @R(1080.0, 380.0, 80.0, 19.0), @S(25);
+  @OLT(55) : @R(1080.0, 400.0, 80.0, 19.0), @S(26);
+  @OLT(56) : @R(230.0, 440.0, 80.0, 19.0), @S(14);
+  @OLT(57) : @R(230.0, 460.0, 80.0, 19.0), @S(15);
+  @OLT(58) : @R(230.0, 360.0, 80.0, 19.0), @S(10);
+  @OLT(59) : @R(230.0, 380.0, 80.0, 19.0), @S(7);
+  @OLT(60) : @R(230.0, 260.0, 80.0, 19.0), @S(49);
+  @OLT(61) : @R(1080.0, 540.0, 80.0, 19.0), @S(43);
+
+  @G(20) :
+     @L(@VF(13).o, @C(6).vir_X1)
+    ;
+  @G(21) :
+     @L(@VF(12).o, @C(6).vir_X2)
+    ;
+  @G(22) :
+     @L(@VF(11).o, @C(6).vir_X3)
+    ;
+  @G(50) :
+     @L(@VF(49).o, @C(6).viusi_OpC)
+    ;
+  @G(23) :
+     @L(@VF(10).o, @C(6).vir_LU)
+    ;
+  @G(8) :
+     @L(@VF(7).o, @C(6).vir_LL)
+    ;
+  @G(24) :
+     @L(@VF(9).o, @C(6).vir_SV)
+    ;
+  @G(27) :
+     @L(@C(6).vor_Y, @VF(25).i)
+    ;
+  @G(28) :
+     @L(@C(6).vor_XSum, @VF(26).i)
+    ;
+  @G(40) :
+     @L(@C(6).vox_Err, @VF(39).i)
+    ;
+  @G(45) :
+     @L(@C(6).voui_ErrNo, @VF(41).i)
+    ;
+  @G(46) :
+     @L(@C(6).vousi_Exc, @VF(42).i)
+    ;
+  @G(48) :
+     @L(@C(6).vow_St, @VF(47).i)
+    ;
+  @G(16) :
+     @L(@VF(14).o, @C(6).vir_SpdUp)
+    ;
+  @G(17) :
+     @L(@VF(15).o, @C(6).vir_SpdDn)
+    ;
+  @G(32) :
+     @L(@C(6).vox_QU, @VF(29).i)
+    ;
+  @G(33) :
+     @L(@C(6).vox_QL, @VF(30).i)
+    ;
+  @G(37) :
+     @L(@VF(35).o, @C(6).vix_Stp)
+    ;
+  @G(34) :
+     @L(@C(6).vox_QE, @VF(31).i)
+    ;
+  @G(38) :
+     @L(@VF(36).o, @C(6).vix_Auto)
+    ;
+  @G(44) :
+     @L(@C(6).voui_XSumChg, @VF(43).i)
+    ;
+  @G(19) :
+     @L(@VF(18).o, @C(6).vit_CycleTime_Sec)
+    ;
+END_PROGRAM

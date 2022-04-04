@@ -1,0 +1,243 @@
+USING logicals.web.standard.safe;
+
+NAMESPACE logicals.web.standard.safe
+NAMESPACE plcopen
+
+TYPE
+	SF_SafetyRequest_State : UINT(
+	/* Acknowledgment lost while in the Safe state. */
+	Acknowledge_Lost := 16#C010,
+	/* S_OpMode request could not be completed within the monitoring time. */
+	MonitoringTime_Elapsed := 16#C020,
+	/* Static Reset detected in state 8401 (Init). */
+	Reset_Error_1 := 16#C001,
+	/* Static Reset detected in state C010 (Acknowledge Lost). */
+	Reset_Error_2 := 16#C014,
+	/* Static Reset detected in state C020 (MonitoringTime Elapsed). */
+	Reset_Error_3 := 16#C011,
+	/* The function block is not active (initial state). */
+	Idle := 16#0000,
+	/* Actuator is in a safe mode. */
+	Safe_Mode:= 16#8000,
+	/* State after Activate is set to TRUE or after a rising trigger at Reset. */
+	Init := 16#8401,
+	/* Operation mode without Acknowledge of safe mode */
+	Operation_Mode:= 16#8802,
+	/* Operation mode with Acknowledge of safe mode */
+	Wait_For_Confirmation_OpMode := 16#8804,
+	/* Waiting for confirmation from the drive (system interface). */
+	Wait_For_Confirmation := 16#8002,
+	/* Error was removed.
+	* However S_OpMode must be set to TRUE or S_Acknowledge must become TRUE before the FB can be continued. */
+	Wait_For_OpMode := 16#8004
+	);
+END_TYPE
+
+/*
+ * This function block provides the interface to a generic actuator, e.g. a safety drive or safety valve, to place the actuator in a safe state.
+ */
+FUNCTION_BLOCK SF_SafetyRequest
+	{ altName:="SF_SafetyRequest"; bgColor:="Gold"; width:=400; }
+	VAR_INPUT
+		/* See Section 5.1.1 General Input Parameters */
+		Activate : BOOL := FALSE;
+		/* Variable.
+		 * Requested mode of a generic safe actuator.
+		 * FALSE: Safe mode is requested.
+		 * TRUE: Operation mode is requested. */
+		S_OpMode : SAFEBOOL := SAFEBOOL_Constant#SAFEFALSE;
+		/* Variable.
+		 * Confirmation of the generic actuator, if actuator is in the Safe state.
+		 * FALSE: Operation mode (non-safe).
+		 * TRUE: Safe mode. */
+		S_Acknowledge : SAFEBOOL := SAFEBOOL_Constant#SAFEFALSE;
+		/* Constant.
+		 * Monitoring of the response time between the safety function request (S_OpMode set to FALSE)
+		 * and the actuator acknowledgment (S_Acknowledge switches to TRUE). */
+		MonitoringTime : TIME := T#0s;
+		/* See Section 5.1.1 General Input Parameters */
+		S_StartReset : SAFEBOOL := SAFEBOOL_Constant#SAFEFALSE;
+		/* See Section 5.1.1 General Input Parameters with the functionality as an error removed acknowledge */
+		Reset : BOOL := FALSE;
+	END_VAR
+
+	VAR_OUTPUT
+		/* See Section 5.1.2 General Output Parameters */
+		Ready : BOOL := FALSE;
+		/* Confirmation of the Safe state.
+		 * FALSE: Non-safe state.
+		 * TRUE: Safe state. */
+		S_SafetyActive : SAFEBOOL := SAFEBOOL_Constant#SAFEFALSE;
+		/* Request to place the actuator in a safe state.
+		 * FALSE: Safe state is requested.
+		 * TRUE: Non-safe state. */
+		S_SafetyRequest : SAFEBOOL := SAFEBOOL_Constant#SAFEFALSE;
+		/* See Section 5.1.2 General Output Parameters */
+		SafetyDemand : BOOL := FALSE;
+		/* See Section 5.1.2 General Output Parameters */
+		ResetRequest : BOOL := FALSE;
+		/* See Section 5.1.2 General Output Parameters */
+		Error : BOOL := FALSE;
+		/* See Section 5.1.2 General Output Parameters */
+		DiagCode : WORD := 16#0000;
+	END_VAR
+
+	VAR
+		MonitoringTimer : TON;
+		R_Trig_Reset : R_TRIG;
+	END_VAR
+
+	R_Trig_Reset(Reset);
+
+	IF(NOT Activate) THEN
+		DiagCode := TO_WORD(SF_SafetyRequest_State#Idle);
+	ELSE
+		CASE TO_UINT(DiagCode) OF
+			SF_SafetyRequest_State#Idle:
+				/* IF(Activate) THEN - ResetRequested is always true here */
+					DiagCode := TO_WORD(SF_SafetyRequest_State#Init);
+			SF_SafetyRequest_State#Init:
+				IF(Reset AND NOT R_Trig_Reset.Q) THEN
+					DiagCode := TO_WORD(SF_SafetyRequest_State#Reset_Error_1);
+				ELSIF(R_Trig_Reset.Q AND IS_NOT(S_Acknowledge)) THEN
+					DiagCode := TO_WORD(SF_SafetyRequest_State#Operation_Mode);
+				ELSIF(R_Trig_Reset.Q AND IS(S_Acknowledge)) THEN
+					DiagCode := TO_WORD(SF_SafetyRequest_State#Wait_For_Confirmation_OpMode);
+				END_IF;
+			SF_SafetyRequest_State#Operation_Mode:
+				IF(IS_NOT(S_OpMode)) THEN
+					DiagCode := TO_WORD(SF_SafetyRequest_State#Wait_For_Confirmation);
+				ELSIF(IS(S_Acknowledge)) THEN
+					DiagCode := TO_WORD(SF_SafetyRequest_State#Wait_For_Confirmation_OpMode);
+				END_IF;
+			SF_SafetyRequest_State#Wait_For_Confirmation_OpMode:
+				IF(IS_NOT(S_Acknowledge)) THEN
+					DiagCode := TO_WORD(SF_SafetyRequest_State#Operation_Mode);
+				ELSIF(IS_NOT(S_OpMode)) THEN
+					DiagCode := TO_WORD(SF_SafetyRequest_State#Wait_For_Confirmation);
+				END_IF;
+			SF_SafetyRequest_State#Wait_For_Confirmation:
+				MonitoringTimer();
+				IF(MonitoringTimer.Q) THEN
+					DiagCode := TO_WORD(SF_SafetyRequest_State#MonitoringTime_Elapsed);
+				ELSIF(IS(S_OpMode)) THEN
+					DiagCode := TO_WORD(SF_SafetyRequest_State#Wait_For_Confirmation_OpMode);
+				ELSIF(IS(S_Acknowledge)) THEN
+					DiagCode := TO_WORD(SF_SafetyRequest_State#Safe_Mode);
+				END_IF;
+			SF_SafetyRequest_State#MonitoringTime_Elapsed:
+				IF(Reset AND NOT R_Trig_Reset.Q) THEN
+					DiagCode := TO_WORD(SF_SafetyRequest_State#Reset_Error_3);
+				ELSIF(R_Trig_Reset.Q) THEN
+					DiagCode := TO_WORD(SF_SafetyRequest_State#Wait_For_OpMode);
+				END_IF;
+			SF_SafetyRequest_State#Wait_For_OpMode:
+				IF(IS(S_OpMode)) THEN
+					DiagCode := TO_WORD(SF_SafetyRequest_State#Wait_For_Confirmation_OpMode);
+				END_IF;
+			SF_SafetyRequest_State#Safe_Mode:
+				IF(IS_NOT(S_Acknowledge)) THEN
+					DiagCode := TO_WORD(SF_SafetyRequest_State#Acknowledge_Lost);
+				ELSIF(IS(S_OpMode)) THEN
+					DiagCode := TO_WORD(SF_SafetyRequest_State#Wait_For_Confirmation_OpMode);
+				END_IF;
+			SF_SafetyRequest_State#Acknowledge_Lost:
+				IF(Reset AND NOT R_Trig_Reset.Q) THEN
+					DiagCode := TO_WORD(SF_SafetyRequest_State#Reset_Error_2);
+				ELSIF(R_Trig_Reset.Q) THEN
+					DiagCode := TO_WORD(SF_SafetyRequest_State#Wait_For_OpMode);
+				END_IF;
+			SF_SafetyRequest_State#Reset_Error_1:
+				IF(NOT Reset) THEN
+					DiagCode := TO_WORD(SF_SafetyRequest_State#Init);
+				END_IF;
+			SF_SafetyRequest_State#Reset_Error_2:
+				IF(NOT Reset) THEN
+					DiagCode := TO_WORD(SF_SafetyRequest_State#Acknowledge_Lost);
+				END_IF;
+			SF_SafetyRequest_State#Reset_Error_3:
+				IF(NOT Reset) THEN
+					DiagCode := TO_WORD(SF_SafetyRequest_State#MonitoringTime_Elapsed);
+				END_IF;
+		END_CASE;
+	END_IF;
+
+	CASE TO_UINT(DiagCode) OF
+		SF_SafetyRequest_State#Idle:
+			MonitoringTimer(IN := FALSE);
+			Ready := FALSE;
+			S_SafetyActive := SAFEBOOL_Constant#SAFEFALSE;
+			S_SafetyRequest := SAFEBOOL_Constant#SAFEFALSE;
+			SafetyDemand := FALSE;
+			ResetRequest := FALSE;
+			Error := FALSE;
+		SF_SafetyRequest_State#Safe_Mode:
+			MonitoringTimer(IN := FALSE);
+			Ready := TRUE;
+			S_SafetyActive := SAFEBOOL_Constant#SAFETRUE;
+			S_SafetyRequest := SAFEBOOL_Constant#SAFEFALSE;
+			SafetyDemand := FALSE;
+			ResetRequest := FALSE;
+			Error := FALSE;
+		SF_SafetyRequest_State#Init:
+			MonitoringTimer(IN := FALSE);
+			Ready := TRUE;
+			S_SafetyActive := SAFEBOOL_Constant#SAFEFALSE;
+			S_SafetyRequest := SAFEBOOL_Constant#SAFEFALSE;
+			SafetyDemand := FALSE;
+			ResetRequest := TRUE;
+			Error := FALSE;
+		SF_SafetyRequest_State#Operation_Mode:
+			MonitoringTimer(IN := FALSE);
+			Ready := TRUE;
+			S_SafetyActive := SAFEBOOL_Constant#SAFEFALSE;
+			S_SafetyRequest := SAFEBOOL_Constant#SAFETRUE;
+			SafetyDemand := TRUE;
+			ResetRequest := FALSE;
+			Error := FALSE;
+		SF_SafetyRequest_State#Wait_For_Confirmation_OpMode:
+			MonitoringTimer(IN := TRUE, PT := MonitoringTime);
+			Ready := TRUE;
+			S_SafetyActive := SAFEBOOL_Constant#SAFEFALSE;
+			S_SafetyRequest := SAFEBOOL_Constant#SAFETRUE;
+			SafetyDemand := TRUE;
+			ResetRequest := FALSE;
+			Error := FALSE;
+		SF_SafetyRequest_State#Wait_For_Confirmation,
+		SF_SafetyRequest_State#Wait_For_OpMode:
+			MonitoringTimer(IN := TRUE, PT := MonitoringTime);
+			Ready := TRUE;
+			S_SafetyActive := SAFEBOOL_Constant#SAFEFALSE;
+			S_SafetyRequest := SAFEBOOL_Constant#SAFEFALSE;
+			SafetyDemand := FALSE;
+			ResetRequest := FALSE;
+			Error := FALSE;
+		SF_SafetyRequest_State#Acknowledge_Lost,
+		SF_SafetyRequest_State#MonitoringTime_Elapsed:
+			MonitoringTimer(IN := FALSE);
+			Ready := TRUE;
+			S_SafetyActive := SAFEBOOL_Constant#SAFEFALSE;
+			S_SafetyRequest := SAFEBOOL_Constant#SAFEFALSE;
+			SafetyDemand := FALSE;
+			ResetRequest := TRUE;
+			Error := TRUE;
+		SF_SafetyRequest_State#Reset_Error_1,
+		SF_SafetyRequest_State#Reset_Error_2,
+		SF_SafetyRequest_State#Reset_Error_3:
+			MonitoringTimer(IN := FALSE);
+			Ready := TRUE;
+			S_SafetyActive := SAFEBOOL_Constant#SAFEFALSE;
+			S_SafetyRequest := SAFEBOOL_Constant#SAFEFALSE;
+			SafetyDemand := FALSE;
+			ResetRequest := FALSE;
+			Error := TRUE;
+		ELSE
+			ENO := FALSE;
+	END_CASE;
+
+	ENO := ENO AND CheckSAFEBOOL(S_OpMode) AND CheckSAFEBOOL(S_Acknowledge) AND CheckSAFEBOOL(S_StartReset);
+
+END_FUNCTION_BLOCK
+
+END_NAMESPACE
+END_NAMESPACE

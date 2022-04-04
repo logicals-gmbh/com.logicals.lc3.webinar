@@ -1,4 +1,5 @@
 NAMESPACE com.logicals.Basic.Measure
+
 FUNCTION_BLOCK FB_lc_Measure_FBD
   {
     vir_In {index := 0};

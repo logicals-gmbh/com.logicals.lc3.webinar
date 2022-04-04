@@ -1,0 +1,1504 @@
+/*
+ * FB_lc_SFC_20Steps_ST
+ * 
+ * Muster fuer einen SFC in ST nach IEC 61131 3 programmiert mit 20 Schritte!
+ * 
+ * Mit: 
+ * Start-Funktion - Der SFC wird vom Init-Step ind den Schritt 2 geschaltet
+ * Stop-Funktion  - Der SFC haelt am Stop-Schritt an.
+ * Loop-Funktion  - Nach Erreichen von Schritt 20 wird mit Schritt 2 weiter gemact (Loop)
+ * Reset-Funktion - Der SFC geht in seinen Init-Schritt
+ * 
+ * Alle Aktuellen Daten des Schrittes werden in einer Datenstrktur aktualisiert!
+ */
+FUNCTION_BLOCK FB_lc_SFC_20Steps_ST  {
+    viui_StepLoopNo {loc := "left", index := 12};
+    viui_StepStopNo {loc := "left", index := 11};
+    vistrarr_StepName {loc := "left", index := 9};
+    vitarr_StepTransTime {loc := "left", index := 8};
+    vix_ShutDown {index := 0};
+    vix_LoopMode {loc := "left", index := 6};
+    vix_StopMode {loc := "left", index := 5};
+    vix_Reset {loc := "left", index := 4};
+    vix_Stop {loc := "left", index := 3};
+    vix_Start {loc := "left", index := 2};
+    vix_Term {loc := "left", index := 1};
+    width := 430;
+    height := 258;
+  }
+
+VAR_INPUT
+    vix_Term         : BOOL;
+    vix_ShutDown     : BOOL;
+END_VAR
+
+/*
+ * Start/Stop/.. Signale
+ */
+VAR_INPUT
+ /*
+  * Den SFC starten = Aus dem Warteschritt Action01 den Action02 setzen!
+  */
+  vix_Start : BOOL;
+ /*
+  * Das Weiterschalten per Weiterschaltzeit anhalten
+  */
+  vix_Stop  : BOOL;
+ /*
+  * Den InitStep = ActionInit setzen
+  */
+  vix_Reset : BOOL;
+ /*
+  * Das Weiterschalten unterbrechen im Schritt mit der Nummer viui_StepStopNo
+  */
+  vix_StopMode  : BOOL;
+ /*
+  * Das Weiterschalten in den Schritt 02 aus dem Schritt mit der Nummer viui_StepLooppNo
+  */
+  vix_LoopMode  : BOOL;
+END_VAR
+
+VAR_INPUT
+  /* 
+   * Weiterschaltzeit (TransitionTime) der Schritte
+   */ 
+   vitarr_StepTransTime  : ARRAY [0..20] OF TIME       := [T#1s,T#1s,T#1s,T#1s,T#1s,T#1s,T#1s,T#1s,T#1s,T#1s,T#1s,T#1s,T#1s,T#1s,T#1s,T#1s,T#1s,T#1s,T#1s,T#1s,T#1s];
+   vistrarr_StepName     : ARRAY [0..20] OF STRING[20] := ['ActionInit',
+   	                                                       'Action00','Action01','Action02','Action03','Action04','Action05','Action06',
+   	                                                       'Action07','Action08','Action09','Action10','Action11','Action12','Action13',
+   	                                                       'Action14','Action15','Action16','Action17','Action18','Action19'];   
+END_VAR
+
+VAR_INPUT   
+ /*
+  * Im StopMode soll in diesem Schritt angehlten werden!
+  */	
+  viui_StepStopNo   : UINT := 19;
+ /*
+  * Im LoopMode soll nach diesem Schritt der Step02 gesetzt werden
+  */
+  viui_StepLoopNo   : UINT; 
+END_VAR
+
+
+VAR_OUTPUT
+  vo_SFCState     : DT_lc_SFCVal;                     // Die Werte des aktuellen Step
+  voarr_SFCStates : ARRAY [0..20] OF DT_lc_SFCVAl;    // Alle Werte aller Schritte
+END_VAR
+
+VAR
+ /*
+  * Den SFC starten = Aus dem Warteschritt Action01 den Action02 setzen!
+  */
+  lx_Start : BOOL;
+ /*
+  * Das Weiterschalten per Weiterschaltzeit anhalten
+  */
+  lx_Stop  : BOOL;
+ /*
+  * Den InitStep = ActionInit setzen
+  */
+  lx_Reset : BOOL;
+ /*
+  * Das Weiterschalten unterbrechen im Schritt mit der Nummer viui_StepStopNo
+  */
+  lx_StopMode  : BOOL;
+ /*
+  * Das Weiterschalten in den Schritt 02 aus dem Schritt mit der Nummer viui_StepLooppNo
+  */
+  lx_LoopMode  : BOOL;
+
+END_VAR
+
+VAR
+   FB_arr_SFCStates       : ARRAY [0..20] OF FB_lc_GenSFCState;
+   FB_arr_SFCStatesR_TRIG : ARRAY [0..20] OF R_TRIG;
+END_VAR
+
+VAR
+   /*
+    * Initialisierungsmerker
+    */
+	FB_Init_R_TRIG : R_TRIG;
+	
+    lx_CycleInit      : BOOL;    
+    lui_CycleInitCount: UINT;
+    ludi_CycleCount   : UDINT;
+    lx_CyclePulse     : BOOL;
+
+END_VAR
+
+VAR
+   FB_Start_R_TRIG      : R_TRIG;
+   FB_StartLocal_R_TRIG : R_TRIG;
+
+   FB_Reset_R_TRIG      : R_TRIG;
+   FB_ResetLocal_R_TRIG : R_TRIG;
+END_VAR
+
+VAR
+   lstrarr_StepName : ARRAY [0..20] OF STRING[20];   
+  /* 
+   * Laufzeitueberwachung der Schritte
+   */ 
+   ltarr_StepCtrlTime  : ARRAY [0..20] OF TIME:= [T#10s,T#10s,T#10s,T#10s,T#10s,T#10s,T#10s,T#10s,T#10s,T#10s,T#10s,T#10s,T#10s,T#10s,T#10s,T#10s,T#10s,T#10s,T#10s,T#10s,T#10s];        
+  /* 
+   * Weiterschaltzeit (TransitionTime) der Schritte
+   */ 
+   ltarr_StepTransTime  : ARRAY [0..20] OF TIME := [T#1s,T#1s,T#1s,T#1s,T#1s,T#1s,T#1s,T#1s,T#1s,T#1s,T#1s,T#1s,T#1s,T#1s,T#1s,T#1s,T#1s,T#1s,T#1s,T#1s,T#1s];
+
+END_VAR
+
+VAR
+   lx_StartPulse      : BOOL;
+   lx_StartLocalPulse : BOOL;
+
+   lx_ResetPulse      : BOOL;
+   lx_ResetLocalPulse : BOOL;
+
+   lui_StepNo    : UINT;
+END_VAR
+
+VAR
+    lx_Init         : BOOL;
+END_VAR
+
+VAR
+   /*
+    * Schrittkette in SFC/ST
+    */ 
+	ludi_Step00count     : UDINT;
+	lui_Step00InitCount  : UINT;
+	lx_Step00TransOk     : BOOL;
+	lt_Step00Time        : TIME;
+	lx_Step00State       : BOOL;   // Schritt Status
+
+	ludi_Step01count     : UDINT;
+	lui_Step01InitCount  : UINT;
+	lx_Step01TransOk     : BOOL;
+	lt_Step01Time        : TIME;
+	lx_Step01State       : BOOL;   // Schritt Status
+
+	ludi_Step02count     : UDINT;
+	lui_Step02InitCount  : UINT;
+	lx_Step02TransOk     : BOOL;
+	lt_Step02Time        : TIME;
+	lx_Step02State       : BOOL;   // Schritt Status
+
+	ludi_Step03count     : UDINT;
+	lui_Step03InitCount  : UINT;
+	lx_Step03TransOk     : BOOL;
+	lt_Step03Time        : TIME;
+	lx_Step03State       : BOOL;   // Schritt Status
+
+	ludi_Step04count     : UDINT;
+	lui_Step04InitCount  : UINT;
+	lx_Step04TransOk     : BOOL;
+	lt_Step04Time        : TIME;
+	lx_Step04State       : BOOL;   // Schritt Status
+	
+	ludi_Step05count     : UDINT;
+	lui_Step05InitCount  : UINT;
+	lx_Step05TransOk     : BOOL;
+	lt_Step05Time        : TIME;
+	lx_Step05State       : BOOL;   // Schritt Status
+
+	ludi_Step06count     : UDINT;
+	lui_Step06InitCount  : UINT;
+	lx_Step06TransOk     : BOOL;
+	lt_Step06Time        : TIME;
+	lx_Step06State       : BOOL;   // Schritt Status
+
+	ludi_Step07count     : UDINT;
+	lui_Step07InitCount  : UINT;
+	lx_Step07TransOk     : BOOL;
+	lt_Step07Time        : TIME;
+	lx_Step07State       : BOOL;   // Schritt Status
+
+	ludi_Step08count     : UDINT;
+	lui_Step08InitCount  : UINT;
+	lx_Step08TransOk     : BOOL;
+	lt_Step08Time        : TIME;
+	lx_Step08State       : BOOL;   // Schritt Status
+
+	ludi_Step09count     : UDINT;
+	lui_Step09InitCount  : UINT;
+	lx_Step09TransOk     : BOOL;
+	lt_Step09Time        : TIME;
+	lx_Step09State       : BOOL;   // Schritt Status
+
+	ludi_Step10count     : UDINT;
+	lui_Step10InitCount  : UINT;
+	lx_Step10TransOk     : BOOL;
+	lt_Step10Time        : TIME;
+	lx_Step10State       : BOOL;   // Schritt Status
+
+	ludi_Step11count     : UDINT;
+	lui_Step11InitCount  : UINT;
+	lx_Step11TransOk     : BOOL;
+	lt_Step11Time        : TIME;
+	lx_Step11State       : BOOL;   // Schritt Status
+
+	ludi_Step12count     : UDINT;
+	lui_Step12InitCount  : UINT;
+	lx_Step12TransOk     : BOOL;
+	lt_Step12Time        : TIME;
+	lx_Step12State       : BOOL;   // Schritt Status
+
+	ludi_Step13count     : UDINT;
+	lui_Step13InitCount  : UINT;
+	lx_Step13TransOk     : BOOL;
+	lt_Step13Time        : TIME;
+	lx_Step13State       : BOOL;   // Schritt Status
+
+	ludi_Step14count     : UDINT;
+	lui_Step14InitCount  : UINT;
+	lx_Step14TransOk     : BOOL;
+	lt_Step14Time        : TIME;
+	lx_Step14State       : BOOL;   // Schritt Status
+
+	ludi_Step15count     : UDINT;
+	lui_Step15InitCount  : UINT;
+	lx_Step15TransOk     : BOOL;
+	lt_Step15Time        : TIME;
+	lx_Step15State       : BOOL;   // Schritt Status
+
+	ludi_Step16count     : UDINT;
+	lui_Step16InitCount  : UINT;
+	lx_Step16TransOk     : BOOL;
+	lt_Step16Time        : TIME;
+	lx_Step16State       : BOOL;   // Schritt Status
+
+	ludi_Step17count     : UDINT;
+	lui_Step17InitCount  : UINT;
+	lx_Step17TransOk     : BOOL;
+	lt_Step17Time        : TIME;
+	lx_Step17State       : BOOL;   // Schritt Status
+
+	ludi_Step18count     : UDINT;
+	lui_Step18InitCount  : UINT;
+	lx_Step18TransOk     : BOOL;
+	lt_Step18Time        : TIME;
+	lx_Step18State       : BOOL;   // Schritt Status
+
+	ludi_Step19count     : UDINT;
+	lui_Step19InitCount  : UINT;
+	lx_Step19TransOk     : BOOL;
+	lt_Step19Time        : TIME;
+	lx_Step19State       : BOOL;   // Schritt Status
+
+END_VAR
+
+/*
+ * Ausserhalb der Statements STEP, TRANSITION, ACTION darf kein SPS-Code programmiert sein!
+ * Bringt eine Warnung!
+ */
+
+/*
+ * Initialisierungsschritt 00
+ */
+INITIAL_Step step00 :
+  ActionGlobal();  // Um R_TRIG zu erfassen!
+  Action00_Init();
+END_STEP
+
+/*
+ * Weiterschaltung von Schritt Init nach Schritt 1 = Warte auf Start
+ */
+TRANSITION t0 FROM step00 TO step01
+	 := lx_Init = TRUE;
+END_TRANSITION
+/* ------------------------------- */
+
+/*
+ * Schritt 01 (WarteAufStart-Schritt)
+ */
+STEP step01 :
+    ActionGlobal();  // Um R_TRIG zu erfassen!
+	Action01();
+END_STEP
+
+/*
+ * Reset des SFC = Setzen des Step_00 = Init-Schritt
+ */
+TRANSITION t1Reset FROM step01 TO step00
+	:= (lx_ResetPulse = TRUE OR lx_ResetLocalPulse = TRUE);
+END_TRANSITION
+/*
+ * Weiterschaltung von Schritt 1 (WarteAufStart) nach Schritt 2
+ */
+TRANSITION t1 FROM step01 TO step02
+	:= lx_Step01TransOk = TRUE  AND (lx_StartPulse = TRUE OR lx_StartLocalPulse = TRUE);
+END_TRANSITION
+/* ------------------------------- */
+
+/*
+ * Schritt 02 (Erster Wirkschritt der Kette)
+ */
+STEP step02 :
+    ActionGlobal();  // Um R_TRIG zu erfassen!
+	Action02();
+END_STEP
+/*
+ * Reset des SFC = Setzen des Step_00 = Init-Schritt
+ */
+TRANSITION t2Reset FROM step02 TO step00
+	:= (lx_ResetPulse = TRUE OR lx_ResetLocalPulse = TRUE);
+END_TRANSITION
+
+/*
+ * Zeitgesteuerte Weiterscahltung
+ */
+TRANSITION t2 FROM step02 TO step03
+	:= lx_Step02TransOk = TRUE AND vix_Stop = FALSE;
+END_TRANSITION
+/* ------------------------------- */
+
+/*
+ * Schritt 03
+ */
+STEP step03 :
+    ActionGlobal();  // Um R_TRIG zu erfassen!
+	Action03();
+END_STEP
+
+/*
+ * Reset des SFC = Setzen des Step_00 = Init-Schritt
+ */
+TRANSITION t3Reset FROM step03 TO step00
+	:= (lx_ResetPulse = TRUE OR lx_ResetLocalPulse = TRUE);
+END_TRANSITION
+
+TRANSITION t3 FROM step03 TO Step04
+	:= lx_Step03TransOk = TRUE AND vix_Stop = FALSE;
+END_TRANSITION
+/*
+ * Loop des SFC = Setzen des Step_02, wenn LoopMode gesetzt UND der Schritt Loop-Ende ist
+ * Die LoopNr muss angegeben sein!
+ */
+TRANSITION t3Loop FROM step03 TO step02
+	:= vix_LoopMode = TRUE AND viui_StepLoopNo = lui_StepNo;
+END_TRANSITION
+
+/* ------------------------------- */
+
+/*
+ * Schritt 04
+ */
+STEP Step04 :
+    ActionGlobal();  // Um R_TRIG zu erfassen!
+	Action04();
+END_STEP
+
+/*
+ * Reset des SFC = Setzen des Step_00 = Init-Schritt
+ */
+TRANSITION t4Reset FROM Step05 TO step00
+	:= (lx_ResetPulse = TRUE OR lx_ResetLocalPulse = TRUE);
+END_TRANSITION
+
+TRANSITION t4 FROM Step04 TO Step05
+	:= lx_Step04TransOk = TRUE AND vix_Stop = FALSE;
+END_TRANSITION
+/*
+ * Loop des SFC = Setzen des Step_02, wenn LoopMode gesetzt UND der Schritt Loop-Ende ist
+ * Die LoopNr muss angegeben sein!
+ */
+TRANSITION t4Loop FROM Step04 TO step02
+	:= vix_LoopMode = TRUE AND viui_StepLoopNo = lui_StepNo;
+END_TRANSITION
+
+/* ------------------------------- */
+
+/*
+ * Schritt 05
+ */
+STEP Step05 :
+    ActionGlobal();  // Um R_TRIG zu erfassen!
+	Action05();
+END_STEP
+/*
+ * Reset des SFC = Setzen des Step_00 = Init-Schritt
+ */
+TRANSITION t5Reset FROM Step06 TO step00
+	:= (lx_ResetPulse = TRUE OR lx_ResetLocalPulse = TRUE);
+END_TRANSITION
+
+TRANSITION t5 FROM Step05 TO Step06
+	:= lx_Step05TransOk = TRUE AND vix_Stop = FALSE;
+END_TRANSITION
+/*
+ * Loop des SFC = Setzen des Step_02, wenn LoopMode gesetzt UND der Schritt Loop-Ende ist
+ * Die LoopNr muss angegeben sein!
+ */
+TRANSITION t5Loop FROM Step05 TO step02
+	:= vix_LoopMode = TRUE AND viui_StepLoopNo = lui_StepNo;
+END_TRANSITION
+/* ------------------------------- */
+
+/*
+ * Schritt 06
+ */
+STEP Step06 :
+    ActionGlobal();  // Um R_TRIG zu erfassen!
+	Action06();
+END_STEP
+
+/*
+ * Reset des SFC = Setzen des Step_00 = Init-Schritt
+ */
+TRANSITION t6Reset FROM Step07 TO step00
+	:= (lx_ResetPulse = TRUE OR lx_ResetLocalPulse = TRUE);
+END_TRANSITION
+
+TRANSITION t6 FROM Step06 TO Step07
+	:= lx_Step06TransOk = TRUE AND vix_Stop = FALSE;
+END_TRANSITION
+/*
+ * Loop des SFC = Setzen des Step_02, wenn LoopMode gesetzt UND der Schritt Loop-Ende ist
+ * Die LoopNr muss angegeben sein!
+ */
+TRANSITION t6Loop FROM Step06 TO step02
+	:= vix_LoopMode = TRUE AND viui_StepLoopNo = lui_StepNo;
+END_TRANSITION
+/* ------------------------------- */
+
+/*
+ * Schritt 07
+ */
+STEP Step07 :
+    ActionGlobal();  // Um R_TRIG zu erfassen!
+	Action07();
+END_STEP
+/*
+ * Reset des SFC = Setzen des Step_00 = Init-Schritt
+ */
+TRANSITION t7Reset FROM Step08 TO step00
+	:= (lx_ResetPulse = TRUE OR lx_ResetLocalPulse = TRUE);
+END_TRANSITION
+
+TRANSITION t7 FROM Step07 TO Step08
+	:= lx_Step07TransOk = TRUE AND vix_Stop = FALSE;
+END_TRANSITION
+/*
+ * Loop des SFC = Setzen des Step_02, wenn LoopMode gesetzt UND der Schritt Loop-Ende ist
+ * Die LoopNr muss angegeben sein!
+ */
+TRANSITION t7Loop FROM Step07 TO step02
+	:= vix_LoopMode = TRUE AND viui_StepLoopNo = lui_StepNo;
+END_TRANSITION
+/* ------------------------------- */
+
+/*
+ * Schritt 08
+ */
+STEP Step08 :
+    ActionGlobal();  // Um R_TRIG zu erfassen!
+	Action08();
+END_STEP
+/*
+ * Reset des SFC = Setzen des Step_00 = Init-Schritt
+ */
+TRANSITION t8Reset FROM Step09 TO step00
+	:= (lx_ResetPulse = TRUE OR lx_ResetLocalPulse = TRUE);
+END_TRANSITION
+
+TRANSITION t8 FROM Step08 TO Step09
+	:= lx_Step08TransOk = TRUE AND vix_Stop = FALSE;
+END_TRANSITION
+/*
+ * Loop des SFC = Setzen des Step_02, wenn LoopMode gesetzt UND der Schritt Loop-Ende ist
+ * Die LoopNr muss angegeben sein!
+ */
+TRANSITION t8Loop FROM Step08 TO step02
+	:= vix_LoopMode = TRUE AND viui_StepLoopNo = lui_StepNo;
+END_TRANSITION
+/* ------------------------------- */
+
+/*
+ * Schritt 09
+ */
+STEP Step09 :
+    ActionGlobal();  // Um R_TRIG zu erfassen!
+	Action09();
+END_STEP
+/*
+ * Reset des SFC = Setzen des Step_00 = Init-Schritt
+ */
+TRANSITION t9Reset FROM step10 TO step00
+	:= (lx_ResetPulse = TRUE OR lx_ResetLocalPulse = TRUE);
+END_TRANSITION
+
+TRANSITION t9 FROM Step09 TO step10
+	:= lx_Step09TransOk = TRUE AND vix_Stop = FALSE;
+END_TRANSITION
+/*
+ * Loop des SFC = Setzen des Step_02, wenn LoopMode gesetzt UND der Schritt Loop-Ende ist
+ * Die LoopNr muss angegeben sein!
+ */
+TRANSITION t9Loop FROM Step09 TO step02
+	:= vix_LoopMode = TRUE AND viui_StepLoopNo = lui_StepNo;
+END_TRANSITION
+/* ------------------------------- */
+
+/*
+ * Schritt 10
+ */
+STEP step10 :
+    ActionGlobal();  // Um R_TRIG zu erfassen!
+	Action10();
+END_STEP
+/*
+ * Reset des SFC = Setzen des Step_00 = Init-Schritt
+ */
+TRANSITION t10Reset FROM step11 TO step00
+	:= (lx_ResetPulse = TRUE OR lx_ResetLocalPulse = TRUE);
+END_TRANSITION
+
+TRANSITION t10 FROM step10 TO step11
+	:= lx_Step10TransOk = TRUE AND vix_Stop = FALSE;
+END_TRANSITION
+/*
+ * Loop des SFC = Setzen des Step_02, wenn LoopMode gesetzt UND der Schritt Loop-Ende ist
+ * Die LoopNr muss angegeben sein!
+ */
+TRANSITION t10Loop FROM step10 TO step02
+	:= vix_LoopMode = TRUE AND viui_StepLoopNo = lui_StepNo;
+END_TRANSITION
+/* ------------------------------- */
+
+/*
+ * Schritt 11
+ */
+STEP step11 :
+    ActionGlobal();  // Um R_TRIG zu erfassen!
+	Action11();
+END_STEP
+/*
+ * Reset des SFC = Setzen des Step_00 = Init-Schritt
+ */
+TRANSITION t11Reset FROM step12 TO step00
+	:= (lx_ResetPulse = TRUE OR lx_ResetLocalPulse = TRUE);
+END_TRANSITION
+
+TRANSITION t11 FROM step11 TO step12
+	:= lx_Step11TransOk = TRUE AND vix_Stop = FALSE;
+END_TRANSITION
+/*
+ * Loop des SFC = Setzen des Step_02, wenn LoopMode gesetzt UND der Schritt Loop-Ende ist
+ * Die LoopNr muss angegeben sein!
+ */
+TRANSITION t11Loop FROM step11 TO step02
+	:= vix_LoopMode = TRUE AND viui_StepLoopNo = lui_StepNo;
+END_TRANSITION
+/* ------------------------------- */
+
+/*
+ * Schritt 12
+ */
+STEP step12 :
+    ActionGlobal();  // Um R_TRIG zu erfassen!
+	Action12();
+END_STEP
+/*
+ * Reset des SFC = Setzen des Step_00 = Init-Schritt
+ */
+TRANSITION t12Reset FROM step13 TO step00
+	:= (lx_ResetPulse = TRUE OR lx_ResetLocalPulse = TRUE);
+END_TRANSITION
+
+TRANSITION t12 FROM step12 TO step13
+	:= lx_Step12TransOk = TRUE AND vix_Stop = FALSE;
+END_TRANSITION
+/*
+ * Loop des SFC = Setzen des Step_02, wenn LoopMode gesetzt UND der Schritt Loop-Ende ist
+ * Die LoopNr muss angegeben sein!
+ */
+TRANSITION t12Loop FROM step12 TO step02
+	:= vix_LoopMode = TRUE AND viui_StepLoopNo = lui_StepNo;
+END_TRANSITION
+/* ------------------------------- */
+
+/*
+ * Schritt 13
+ */
+STEP step13 :
+    ActionGlobal();  // Um R_TRIG zu erfassen!
+	Action13();
+END_STEP
+/*
+ * Reset des SFC = Setzen des Step_00 = Init-Schritt
+ */
+TRANSITION t13Reset FROM step14 TO step00
+	:= (lx_ResetPulse = TRUE OR lx_ResetLocalPulse = TRUE);
+END_TRANSITION
+
+TRANSITION t13 FROM step13 TO step14
+	:= lx_Step13TransOk = TRUE AND vix_Stop = FALSE;
+END_TRANSITION
+/*
+ * Loop des SFC = Setzen des Step_02, wenn LoopMode gesetzt UND der Schritt Loop-Ende ist
+ * Die LoopNr muss angegeben sein!
+ */
+TRANSITION t13Loop FROM step13 TO step02
+	:= vix_LoopMode = TRUE AND viui_StepLoopNo = lui_StepNo;
+END_TRANSITION
+/* ------------------------------- */
+
+/*
+ * Schritt 14
+ */
+STEP step14 :
+    ActionGlobal();  // Um R_TRIG zu erfassen!
+	Action14();
+END_STEP
+/*
+ * Reset des SFC = Setzen des Step_00 = Init-Schritt
+ */
+TRANSITION t14Reset FROM step15 TO step00
+	:= (lx_ResetPulse = TRUE OR lx_ResetLocalPulse = TRUE);
+END_TRANSITION
+
+TRANSITION t14 FROM step14 TO step15
+	:= lx_Step14TransOk = TRUE AND vix_Stop = FALSE;
+END_TRANSITION
+/*
+ * Loop des SFC = Setzen des Step_02, wenn LoopMode gesetzt UND der Schritt Loop-Ende ist
+ * Die LoopNr muss angegeben sein!
+ */
+TRANSITION t14Loop FROM step14 TO step02
+	:= vix_LoopMode = TRUE AND viui_StepLoopNo = lui_StepNo;
+END_TRANSITION
+
+/* ------------------------------- */
+
+/*
+ * Schritt 15
+ */
+STEP step15 :
+    ActionGlobal();  // Um R_TRIG zu erfassen!
+	Action15();
+END_STEP
+/*
+ * Reset des SFC = Setzen des Step_00 = Init-Schritt
+ */
+TRANSITION t15Reset FROM step15 TO step00
+	:= (lx_ResetPulse = TRUE OR lx_ResetLocalPulse = TRUE);
+END_TRANSITION
+
+TRANSITION t15 FROM step15 TO Step16
+	:= lx_Step15TransOk = TRUE AND vix_Stop = FALSE;
+END_TRANSITION
+/*
+ * Loop des SFC = Setzen des Step_02, wenn LoopMode gesetzt UND der Schritt Loop-Ende ist
+ * Die LoopNr muss angegeben sein!
+ */
+TRANSITION t15Loop FROM step15 TO step02
+	:= vix_LoopMode = TRUE AND viui_StepLoopNo = lui_StepNo;
+END_TRANSITION
+/* ------------------------------- */
+
+/*
+ * Schritt 16
+ */
+STEP Step16 :
+    ActionGlobal();  // Um R_TRIG zu erfassen!
+	Action16();
+END_STEP
+/*
+ * Reset des SFC = Setzen des Step_00 = Init-Schritt
+ */
+TRANSITION t16Reset FROM Step16 TO step00
+	:= (lx_ResetPulse = TRUE OR lx_ResetLocalPulse = TRUE);
+END_TRANSITION
+
+TRANSITION t16 FROM Step16 TO Step17
+	:= lx_Step16TransOk = TRUE AND vix_Stop = FALSE;
+END_TRANSITION
+/*
+ * Loop des SFC = Setzen des Step_02, wenn LoopMode gesetzt UND der Schritt Loop-Ende ist
+ * Die LoopNr muss angegeben sein!
+ */
+TRANSITION t16Loop FROM Step16 TO step02
+	:= vix_LoopMode = TRUE AND viui_StepLoopNo = lui_StepNo;
+END_TRANSITION
+/* ------------------------------- */
+
+/*
+ * Schritt 17
+ */
+STEP Step17 :
+    ActionGlobal();  // Um R_TRIG zu erfassen!
+	Action17();
+END_STEP
+/*
+ * Reset des SFC = Setzen des Step_00 = Init-Schritt
+ */
+TRANSITION t17Reset FROM Step17 TO step00
+	:= (lx_ResetPulse = TRUE OR lx_ResetLocalPulse = TRUE);
+END_TRANSITION
+
+TRANSITION t17 FROM Step17 TO Step18
+	:= lx_Step17TransOk = TRUE AND vix_Stop = FALSE;
+END_TRANSITION
+/*
+ * Loop des SFC = Setzen des Step_02, wenn LoopMode gesetzt UND der Schritt Loop-Ende ist
+ * Die LoopNr muss angegeben sein!
+ */
+TRANSITION t17Loop FROM Step17 TO step02
+	:= vix_LoopMode = TRUE AND viui_StepLoopNo = lui_StepNo;
+END_TRANSITION
+/* ------------------------------- */
+
+/*
+ * Schritt 18
+ */
+STEP Step18 :
+    ActionGlobal();  // Um R_TRIG zu erfassen!
+	Action18();
+END_STEP
+/*
+ * Reset des SFC = Setzen des Step_00 = Init-Schritt
+ */
+TRANSITION t18Reset FROM Step18 TO step00
+	:= (lx_ResetPulse = TRUE OR lx_ResetLocalPulse = TRUE);
+END_TRANSITION
+
+TRANSITION t18 FROM Step18 TO step19
+	:= lx_Step18TransOk = TRUE AND vix_Stop = FALSE;
+END_TRANSITION
+/*
+ * Loop des SFC = Setzen des Step_02, wenn LoopMode gesetzt UND der Schritt Loop-Ende ist
+ * Die LoopNr muss angegeben sein!
+ */
+TRANSITION t18Loop FROM Step18 TO step02
+	:= vix_LoopMode = TRUE AND viui_StepLoopNo = lui_StepNo;
+END_TRANSITION
+/* ------------------------------- */
+
+/*
+ * Schritt 19
+ */
+STEP step19 :
+    ActionGlobal();  // Um R_TRIG zu erfassen!
+	Action19();
+END_STEP
+/*
+ * Reset des SFC = Setzen des Step_00 = Init-Schritt
+ */
+TRANSITION t19Reset FROM step19 TO step00
+	:= (lx_ResetPulse = TRUE OR lx_ResetLocalPulse = TRUE);
+END_TRANSITION
+/*
+ * Loop des SFC = Setzen des Step_02, wenn LoopMode gesetzt UND der Schritt Loop-Ende ist
+ * Die LoopNr muss angegeben sein!
+ */
+TRANSITION t19Loop FROM step19 TO step02
+	:= vix_LoopMode = TRUE AND viui_StepLoopNo = lui_StepNo;
+END_TRANSITION
+/* ------------------------------- */
+
+ACTION Action00_Init:
+   /* 
+    * Alive Signal Schritt 00 = InitAction
+    */	
+	ludi_Step00count:=ludi_Step00count+1;
+
+	lx_Step00TransOk    := FALSE;
+	lx_Step01TransOk    := FALSE;
+	lx_Step02TransOk    := FALSE;
+	lx_Step03TransOk    := FALSE;
+	lx_Step03TransOk    := FALSE;
+	lx_Step05TransOk    := FALSE;
+	lx_Step06TransOk    := FALSE;
+	lx_Step07TransOk    := FALSE;
+	lx_Step08TransOk    := FALSE;
+	lx_Step09TransOk    := FALSE;
+	lx_Step10TransOk    := FALSE;
+	lx_Step11TransOk    := FALSE;
+	lx_Step12TransOk    := FALSE;
+	lx_Step13TransOk    := FALSE;
+	lx_Step14TransOk    := FALSE;
+	lx_Step15TransOk    := FALSE;
+	lx_Step16TransOk    := FALSE;
+	lx_Step17TransOk    := FALSE;
+	lx_Step18TransOk    := FALSE;
+	lx_Step19TransOk    := FALSE;
+
+	lx_Step00State    := FALSE;
+	lx_Step01State    := FALSE;
+	lx_Step02State    := FALSE;
+	lx_Step03State    := FALSE;
+	lx_Step04State    := FALSE;
+	lx_Step05State    := FALSE;
+	lx_Step06State    := FALSE;
+	lx_Step07State    := FALSE;
+	lx_Step08State    := FALSE;
+	lx_Step09State    := FALSE;
+	lx_Step10State    := FALSE;
+	lx_Step11State    := FALSE;
+	lx_Step12State    := FALSE;
+	lx_Step13State    := FALSE;
+	lx_Step14State    := FALSE;
+	lx_Step15State    := FALSE;
+	lx_Step16State    := FALSE;
+	lx_Step17State    := FALSE;
+	lx_Step18State    := FALSE;
+	lx_Step19State    := FALSE;
+	
+    lt_Step00Time                 := step00.T;
+
+	lui_StepNo                    := 0;	
+
+    FB_arr_SFCStates[lui_StepNo](vistr_StepName  := lstrarr_StepName[lui_StepNo],
+    	                         vit_StepTime    := lt_Step00Time,
+    	                         viudi_StepCount := ludi_Step00count,
+    	                         vix_StepState   := lx_Step00State,
+    	                         vix_StepTrans   := lx_Step00TransOk,
+    	                         viui_StepNo     := lui_StepNo,
+    	                         vostruc_SFCState => voarr_SFCStates[lui_StepNo]);
+    
+    vo_SFCState                  := voarr_SFCStates[lui_StepNo];
+
+   /*
+    * Initialisierung abgeschlossen!
+    */	
+	lx_Init            := TRUE;
+    
+END_ACTION
+
+/*
+ * Aktionen im Schritt 01 (Warteschritt)
+ */
+ACTION Action01:
+	lui_StepNo                    := 1;	
+   /*
+    * Ein Initialisierungspulse fuer den Schritt erzeugen
+    */
+    FB_arr_SFCStatesR_TRIG[lui_StepNo](CLK := TRUE);
+    IF FB_arr_SFCStatesR_TRIG[lui_StepNo].Q = TRUE THEN
+      lui_Step01InitCount := lui_Step01InitCount + 1;
+    END_IF;
+   /* 
+    * Alive Signal Schritt 01
+    */	
+	ludi_Step01count:=ludi_Step01count+1;
+	
+	if step01.T > ltarr_StepTransTime[lui_StepNo] then   
+		lx_Step01TransOk     := TRUE;
+	end_if;
+    lt_Step01Time   := step01.T;
+    lx_Step01State  := step01.X;
+
+    FB_arr_SFCStates[lui_StepNo](vistr_StepName   := lstrarr_StepName[lui_StepNo],
+    	                         vit_StepTime     := lt_Step01Time,
+    	                         viudi_StepCount  := ludi_Step01count,
+    	                         vix_StepState    := lx_Step01State,
+    	                         vix_StepTrans    := lx_Step01TransOk,
+    	                         viui_StepNo      := lui_StepNo,
+    	                         vostruc_SFCState => voarr_SFCStates[lui_StepNo]);
+    
+    vo_SFCState                  := voarr_SFCStates[lui_StepNo];
+
+END_ACTION
+/*
+ * Aktionen im Schritt 02
+ */
+ACTION Action02:
+	lui_StepNo                    := 2;	
+   /*
+    * Ein Initialisierungspulse fuer den Schritt erzeugen
+    */
+    FB_arr_SFCStatesR_TRIG[lui_StepNo](CLK := TRUE);
+    IF FB_arr_SFCStatesR_TRIG[lui_StepNo].Q = TRUE THEN
+      lui_Step02InitCount := lui_Step02InitCount + 1;
+    END_IF;
+   /* 
+    * Alive Signal Schritt 02
+    */	
+	ludi_Step02count:=ludi_Step02count+1;
+	
+	if step02.T > ltarr_StepTransTime[lui_StepNo] then   
+		lx_Step02TransOk     := TRUE;
+	end_if;
+    lt_Step02Time  := step02.T;	
+    lx_Step02State := step02.X;
+
+    FB_arr_SFCStates[lui_StepNo](vistr_StepName   := lstrarr_StepName[lui_StepNo],
+    	                         vit_StepTime     := lt_Step02Time,
+    	                         viudi_StepCount  := ludi_Step02count,
+    	                         vix_StepState    := lx_Step02State,
+    	                         vix_StepTrans    := lx_Step02TransOk,
+    	                         viui_StepNo      := lui_StepNo,
+    	                         vostruc_SFCState => voarr_SFCStates[lui_StepNo]);
+    
+    vo_SFCState                   := voarr_SFCStates[lui_StepNo];
+END_ACTION
+
+ACTION Action03:
+	lui_StepNo                    := 3;	
+   /*
+    * Ein Initialisierungspulse fuer den Schritt erzeugen
+    */
+    FB_arr_SFCStatesR_TRIG[lui_StepNo](CLK := TRUE);
+    IF FB_arr_SFCStatesR_TRIG[lui_StepNo].Q = TRUE THEN
+      lui_Step03InitCount := lui_Step03InitCount + 1;
+    END_IF;
+   /* 
+    * Alive Signal Schritt 03
+    */	
+	ludi_Step03count:=ludi_Step03count+1;
+
+	if step03.T > ltarr_StepTransTime[lui_StepNo] then   
+		lx_Step03TransOk     := TRUE;
+	end_if;
+    lt_Step03Time  := step03.T;
+    lx_Step03State := step03.X;
+
+    FB_arr_SFCStates[lui_StepNo](vistr_StepName   := lstrarr_StepName[lui_StepNo],
+    	                         vit_StepTime     := lt_Step03Time,
+    	                         viudi_StepCount  := ludi_Step03count,
+    	                         vix_StepState    := lx_Step03State,
+    	                         vix_StepTrans    := lx_Step03TransOk,
+    	                         viui_StepNo      := lui_StepNo,
+    	                         vostruc_SFCState => voarr_SFCStates[lui_StepNo]);
+    
+    vo_SFCState                   := voarr_SFCStates[lui_StepNo];
+
+END_ACTION
+
+ACTION Action04:
+	lui_StepNo                    := 4;	
+   /*
+    * Ein Initialisierungspulse fuer den Schritt erzeugen
+    */
+    FB_arr_SFCStatesR_TRIG[lui_StepNo](CLK := TRUE);
+    IF FB_arr_SFCStatesR_TRIG[lui_StepNo].Q = TRUE THEN
+      lui_Step04InitCount := lui_Step04InitCount + 1;
+    END_IF;
+   /* 
+    * Alive Signal Schritt 04
+    */	
+	ludi_Step04count:=ludi_Step04count+1;
+
+	if Step04.T > ltarr_StepTransTime[lui_StepNo] then   
+		lx_Step04TransOk     := TRUE;
+	end_if;
+    lt_Step04Time  := Step04.T;
+    lx_Step04State := Step04.X;
+
+    FB_arr_SFCStates[lui_StepNo](vistr_StepName   := lstrarr_StepName[lui_StepNo],
+    	                         vit_StepTime     := lt_Step04Time,
+    	                         viudi_StepCount  := ludi_Step04count,
+    	                         vix_StepState    := lx_Step04State,
+    	                         vix_StepTrans    := lx_Step04TransOk,
+    	                         viui_StepNo      := lui_StepNo,
+    	                         vostruc_SFCState => voarr_SFCStates[lui_StepNo]);
+    
+    vo_SFCState                   := voarr_SFCStates[lui_StepNo];
+
+END_ACTION
+
+ACTION Action05:
+	lui_StepNo                    := 5;	
+   /*
+    * Ein Initialisierungspulse fuer den Schritt erzeugen
+    */
+    FB_arr_SFCStatesR_TRIG[lui_StepNo](CLK := TRUE);
+    IF FB_arr_SFCStatesR_TRIG[lui_StepNo].Q = TRUE THEN
+      lui_Step05InitCount := lui_Step05InitCount + 1;
+    END_IF;
+   /* 
+    * Alive Signal Schritt 05
+    */	
+	ludi_Step05count:=ludi_Step05count+1;
+
+	if Step05.T > ltarr_StepTransTime[lui_StepNo] then   
+		lx_Step05TransOk     := TRUE;
+	end_if;
+    lt_Step05Time  := Step05.T;
+    lx_Step05State := Step05.X;
+
+    FB_arr_SFCStates[lui_StepNo](vistr_StepName   := lstrarr_StepName[lui_StepNo],
+    	                         vit_StepTime     := lt_Step05Time,
+    	                         viudi_StepCount  := ludi_Step05count,
+    	                         vix_StepState    := lx_Step05State,
+    	                         vix_StepTrans    := lx_Step05TransOk,
+    	                         viui_StepNo      := lui_StepNo,
+    	                         vostruc_SFCState => voarr_SFCStates[lui_StepNo]);
+    
+    vo_SFCState                   := voarr_SFCStates[lui_StepNo];
+END_ACTION
+
+ACTION Action06:
+	lui_StepNo                    := 6;	
+   /*
+    * Ein Initialisierungspulse fuer den Schritt erzeugen
+    */
+    FB_arr_SFCStatesR_TRIG[lui_StepNo](CLK := TRUE);
+    IF FB_arr_SFCStatesR_TRIG[lui_StepNo].Q = TRUE THEN
+      lui_Step06InitCount := lui_Step06InitCount + 1;
+    END_IF;
+   /* 
+    * Alive Signal Schritt 06
+    */	
+	ludi_Step06count:=ludi_Step06count+1;
+
+	if Step06.T > ltarr_StepTransTime[lui_StepNo] then   
+		lx_Step06TransOk     := TRUE;
+	end_if;
+    lt_Step06Time  := Step06.T;
+    lx_Step06State := Step06.X;
+
+    FB_arr_SFCStates[lui_StepNo](vistr_StepName   := lstrarr_StepName[lui_StepNo],
+    	                         vit_StepTime     := lt_Step06Time,
+    	                         viudi_StepCount  := ludi_Step06count,
+    	                         vix_StepState    := lx_Step06State,
+    	                         vix_StepTrans    := lx_Step06TransOk,
+    	                         viui_StepNo      := lui_StepNo,
+    	                         vostruc_SFCState => voarr_SFCStates[lui_StepNo]);
+    
+    vo_SFCState                   := voarr_SFCStates[lui_StepNo];
+END_ACTION
+
+ACTION Action07:
+	lui_StepNo                    := 7;	
+   /*
+    * Ein Initialisierungspulse fuer den Schritt erzeugen
+    */
+    FB_arr_SFCStatesR_TRIG[lui_StepNo](CLK := TRUE);
+    IF FB_arr_SFCStatesR_TRIG[lui_StepNo].Q = TRUE THEN
+      lui_Step07InitCount := lui_Step07InitCount + 1;
+    END_IF;
+   /* 
+    * Alive Signal Schritt 07
+    */	
+	ludi_Step07count:=ludi_Step07count+1;
+	if Step07.T > ltarr_StepTransTime[lui_StepNo] then   
+		lx_Step07TransOk     := TRUE;
+	end_if;
+    lt_Step07Time  := Step07.T;
+    lx_Step07State := Step07.X;
+
+    FB_arr_SFCStates[lui_StepNo](vistr_StepName   := lstrarr_StepName[lui_StepNo],
+    	                         vit_StepTime     := lt_Step07Time,
+    	                         viudi_StepCount  := ludi_Step07count,
+    	                         vix_StepState    := lx_Step07State,
+    	                         vix_StepTrans    := lx_Step07TransOk,
+    	                         viui_StepNo      := lui_StepNo,
+    	                         vostruc_SFCState => voarr_SFCStates[lui_StepNo]);
+    
+    vo_SFCState                   := voarr_SFCStates[lui_StepNo];
+END_ACTION
+
+ACTION Action08:
+	lui_StepNo                    := 8;	
+   /*
+    * Ein Initialisierungspulse fuer den Schritt erzeugen
+    */
+    FB_arr_SFCStatesR_TRIG[lui_StepNo](CLK := TRUE);
+    IF FB_arr_SFCStatesR_TRIG[lui_StepNo].Q = TRUE THEN
+      lui_Step08InitCount := lui_Step08InitCount + 1;
+    END_IF;
+   /* 
+    * Alive Signal Schritt 08
+    */	
+	ludi_Step08count:=ludi_Step08count+1;
+    	
+    if Step08.T > ltarr_StepTransTime[lui_StepNo] then
+		lx_Step08TransOk     := TRUE;
+    end_if;
+    lt_Step08Time  := Step08.T;
+    lx_Step08State := Step08.X;
+
+    FB_arr_SFCStates[lui_StepNo](vistr_StepName   := lstrarr_StepName[lui_StepNo],
+    	                         vit_StepTime     := lt_Step08Time,
+    	                         viudi_StepCount  := ludi_Step08count,
+    	                         vix_StepState    := lx_Step08State,
+    	                         vix_StepTrans    := lx_Step08TransOk,
+    	                         viui_StepNo      := lui_StepNo,
+    	                         vostruc_SFCState => voarr_SFCStates[lui_StepNo]);
+    
+    vo_SFCState                  := voarr_SFCStates[lui_StepNo];
+END_ACTION
+
+ACTION Action09:
+	lui_StepNo                    := 9;	
+   /*
+    * Ein Initialisierungspulse fuer den Schritt erzeugen
+    */
+    FB_arr_SFCStatesR_TRIG[lui_StepNo](CLK := TRUE);
+    IF FB_arr_SFCStatesR_TRIG[lui_StepNo].Q = TRUE THEN
+      lui_Step09InitCount := lui_Step09InitCount + 1;
+    END_IF;
+   /* 
+    * Alive Signal Schritt 09
+    */	
+	ludi_Step09count:=ludi_Step09count+1;
+	if Step09.T > ltarr_StepTransTime[lui_StepNo] then   
+		lx_Step09TransOk     := TRUE;
+	end_if;
+    lt_Step09Time  := Step09.T;
+    lx_Step09State := Step09.X;
+
+    FB_arr_SFCStates[lui_StepNo](vistr_StepName   := lstrarr_StepName[lui_StepNo],
+    	                         vit_StepTime     := lt_Step09Time,
+    	                         viudi_StepCount  := ludi_Step09count,
+    	                         vix_StepState    := lx_Step09State,
+    	                         vix_StepTrans    := lx_Step09TransOk,
+    	                         viui_StepNo      := lui_StepNo,
+    	                         vostruc_SFCState => voarr_SFCStates[lui_StepNo]);
+    
+    vo_SFCState                   := voarr_SFCStates[lui_StepNo];
+END_ACTION
+
+ACTION Action10:
+	lui_StepNo                    := 10;	
+   /*
+    * Ein Initialisierungspulse fuer den Schritt erzeugen
+    */
+    FB_arr_SFCStatesR_TRIG[lui_StepNo](CLK := TRUE);
+    IF FB_arr_SFCStatesR_TRIG[lui_StepNo].Q = TRUE THEN
+      lui_Step10InitCount := lui_Step10InitCount + 1;
+    END_IF;
+   /* 
+    * Alive Signal Schritt 10
+    */	
+	ludi_Step10count:=ludi_Step10count+1;
+	if step10.T > ltarr_StepTransTime[lui_StepNo] then   
+		lx_Step10TransOk     := TRUE;
+	end_if;
+    lt_Step10Time  := step10.T;
+    lx_Step10State := step10.X;
+
+    FB_arr_SFCStates[lui_StepNo](vistr_StepName   := lstrarr_StepName[lui_StepNo],
+    	                         vit_StepTime     := lt_Step10Time,
+    	                         viudi_StepCount  := ludi_Step10count,
+    	                         vix_StepState    := lx_Step10State,
+    	                         vix_StepTrans    := lx_Step10TransOk,
+    	                         viui_StepNo      := lui_StepNo,
+    	                         vostruc_SFCState => voarr_SFCStates[lui_StepNo]);
+    
+    vo_SFCState                   := voarr_SFCStates[lui_StepNo];
+END_ACTION
+
+ACTION Action11:
+	lui_StepNo                    := 11;	
+   /*
+    * Ein Initialisierungspulse fuer den Schritt erzeugen
+    */
+    FB_arr_SFCStatesR_TRIG[lui_StepNo](CLK := TRUE);
+    IF FB_arr_SFCStatesR_TRIG[lui_StepNo].Q = TRUE THEN
+      lui_Step11InitCount := lui_Step11InitCount + 1;
+    END_IF;
+   /* 
+    * Alive Signal Schritt 11
+    */	
+	ludi_Step11count:=ludi_Step11count+1;
+
+    if step11.T > ltarr_StepTransTime[lui_StepNo] then
+		lx_Step11TransOk     := TRUE;
+    end_if;
+    lt_Step11Time  := step11.T;
+    lx_Step11State := step11.X;
+
+    FB_arr_SFCStates[lui_StepNo](vistr_StepName   := lstrarr_StepName[lui_StepNo],
+    	                         vit_StepTime     := lt_Step11Time,
+    	                         viudi_StepCount  := ludi_Step11count,
+    	                         vix_StepState    := lx_Step11State,
+    	                         vix_StepTrans    := lx_Step11TransOk,
+    	                         viui_StepNo      := lui_StepNo,
+    	                         vostruc_SFCState => voarr_SFCStates[lui_StepNo]);
+    
+    vo_SFCState                  := voarr_SFCStates[lui_StepNo];
+END_ACTION
+
+ACTION Action12:
+	lui_StepNo                    := 12;	
+   /*
+    * Ein Initialisierungspulse fuer den Schritt erzeugen
+    */
+    FB_arr_SFCStatesR_TRIG[lui_StepNo](CLK := TRUE);
+    IF FB_arr_SFCStatesR_TRIG[lui_StepNo].Q = TRUE THEN
+      lui_Step11InitCount := lui_Step11InitCount + 1;
+    END_IF;
+   /* 
+    * Alive Signale Schritt 12
+    */	
+	ludi_Step12count:=ludi_Step12count+1;
+	if step12.T > ltarr_StepTransTime[lui_StepNo] then   
+		lx_Step12TransOk     := TRUE;
+	end_if;
+    lt_Step12Time  := step12.T;
+    lx_Step12State := step12.X;
+
+    FB_arr_SFCStates[lui_StepNo](vistr_StepName   := lstrarr_StepName[lui_StepNo],
+    	                         vit_StepTime     := lt_Step12Time,
+    	                         viudi_StepCount  := ludi_Step12count,
+    	                         vix_StepState    := lx_Step12State,
+    	                         vix_StepTrans    := lx_Step12TransOk,
+    	                         viui_StepNo      := lui_StepNo,
+    	                         vostruc_SFCState => voarr_SFCStates[lui_StepNo]);
+    
+    vo_SFCState                  := voarr_SFCStates[lui_StepNo];
+END_ACTION
+
+ACTION Action13:
+	lui_StepNo                    := 13;	
+   /*
+    * Ein Initialisierungspulse fuer den Schritt erzeugen
+    */
+    FB_arr_SFCStatesR_TRIG[lui_StepNo](CLK := TRUE);
+    IF FB_arr_SFCStatesR_TRIG[lui_StepNo].Q = TRUE THEN
+      lui_Step13InitCount := lui_Step13InitCount + 1;
+    END_IF;
+   /* 
+    * Alive Signal Schritt 13
+    */	
+	ludi_Step13count:=ludi_Step13count+1;
+	if step13.T > ltarr_StepTransTime[lui_StepNo] then   
+		lx_Step13TransOk     := TRUE;
+	end_if;
+    lt_Step13Time  := step13.T;
+    lx_Step13State := step13.X;
+
+    FB_arr_SFCStates[lui_StepNo](vistr_StepName   := lstrarr_StepName[lui_StepNo],
+    	                         vit_StepTime     := lt_Step13Time,
+    	                         viudi_StepCount  := ludi_Step13count,
+    	                         vix_StepState    := lx_Step13State,
+    	                         vix_StepTrans    := lx_Step13TransOk,
+    	                         viui_StepNo      := lui_StepNo,
+    	                         vostruc_SFCState => voarr_SFCStates[lui_StepNo]);
+    
+    vo_SFCState                   := voarr_SFCStates[lui_StepNo];
+END_ACTION
+
+ACTION Action14:
+	lui_StepNo                    := 14;	
+   /*
+    * Ein Initialisierungspulse fuer den Schritt erzeugen
+    */
+    FB_arr_SFCStatesR_TRIG[lui_StepNo](CLK := TRUE);
+    IF FB_arr_SFCStatesR_TRIG[lui_StepNo].Q = TRUE THEN
+      lui_Step14InitCount := lui_Step14InitCount + 1;
+    END_IF;
+   /* 
+    * Alive Signal Schritt 14
+    */	
+	ludi_Step14count:=ludi_Step14count+1;
+
+    if step14.T > ltarr_StepTransTime[lui_StepNo] then
+		lx_Step14TransOk     := TRUE;
+    end_if;
+    lt_Step14Time  := step14.T;
+    lx_Step14State := step14.X;
+
+    FB_arr_SFCStates[lui_StepNo](vistr_StepName   := lstrarr_StepName[lui_StepNo],
+    	                         vit_StepTime     := lt_Step14Time,
+    	                         viudi_StepCount  := ludi_Step14count,
+    	                         vix_StepState    := lx_Step14State,
+    	                         vix_StepTrans    := lx_Step14TransOk,
+    	                         viui_StepNo      := lui_StepNo,
+    	                         vostruc_SFCState => voarr_SFCStates[lui_StepNo]);
+    
+    vo_SFCState                   := voarr_SFCStates[lui_StepNo];
+END_ACTION
+
+ACTION Action15:
+	lui_StepNo                    := 15;	
+   /*
+    * Ein Initialisierungspulse fuer den Schritt erzeugen
+    */
+    FB_arr_SFCStatesR_TRIG[lui_StepNo](CLK := TRUE);
+    IF FB_arr_SFCStatesR_TRIG[lui_StepNo].Q = TRUE THEN
+      lui_Step15InitCount := lui_Step15InitCount + 1;
+    END_IF;
+   /* 
+    * Alive Signal Schritt 15
+    */	
+	ludi_Step15count:=ludi_Step15count+1;
+
+    if step15.T > ltarr_StepTransTime[lui_StepNo] then
+		lx_Step15TransOk     := TRUE;
+    end_if;
+    lt_Step15Time  := step15.T;
+    lx_Step15State := step15.X;
+
+    FB_arr_SFCStates[lui_StepNo](vistr_StepName   := lstrarr_StepName[lui_StepNo],
+    	                         vit_StepTime     := lt_Step15Time,
+    	                         viudi_StepCount  := ludi_Step15count,
+    	                         vix_StepState    := lx_Step15State,
+    	                         vix_StepTrans    := lx_Step15TransOk,
+    	                         viui_StepNo      := lui_StepNo,
+    	                         vostruc_SFCState => voarr_SFCStates[lui_StepNo]);
+    
+    vo_SFCState                   := voarr_SFCStates[lui_StepNo];
+END_ACTION
+
+ACTION Action16:
+	lui_StepNo                    := 16;	
+   /*
+    * Ein Initialisierungspulse fuer den Schritt erzeugen
+    */
+    FB_arr_SFCStatesR_TRIG[lui_StepNo](CLK := TRUE);
+    IF FB_arr_SFCStatesR_TRIG[lui_StepNo].Q = TRUE THEN
+      lui_Step16InitCount := lui_Step16InitCount + 1;
+    END_IF;
+   /* 
+    * Alive Signal Schritt 16
+    */	
+	ludi_Step16count:=ludi_Step16count+1;
+
+    if Step16.T > ltarr_StepTransTime[lui_StepNo] then
+		lx_Step16TransOk     := TRUE;
+    end_if;
+    lt_Step16Time  := Step16.T;
+    lx_Step16State := Step16.X;
+
+    FB_arr_SFCStates[lui_StepNo](vistr_StepName   := lstrarr_StepName[lui_StepNo],
+    	                         vit_StepTime     := lt_Step16Time,
+    	                         viudi_StepCount  := ludi_Step16count,
+    	                         vix_StepState    := lx_Step16State,
+    	                         vix_StepTrans    := lx_Step16TransOk,
+    	                         viui_StepNo      := lui_StepNo,
+    	                         vostruc_SFCState => voarr_SFCStates[lui_StepNo]);
+    
+    vo_SFCState                   := voarr_SFCStates[lui_StepNo];
+END_ACTION
+
+ACTION Action17:
+	lui_StepNo                    := 17;	
+   /*
+    * Ein Initialisierungspulse fuer den Schritt erzeugen
+    */
+    FB_arr_SFCStatesR_TRIG[lui_StepNo](CLK := TRUE);
+    IF FB_arr_SFCStatesR_TRIG[lui_StepNo].Q = TRUE THEN
+      lui_Step17InitCount := lui_Step17InitCount + 1;
+    END_IF;
+   /* 
+    * Alive Signal Schritt 17
+    */	
+	ludi_Step17count:=ludi_Step17count+1;
+
+    if Step17.T > ltarr_StepTransTime[lui_StepNo] then
+		lx_Step17TransOk     := TRUE;
+    end_if;
+    lt_Step17Time  := Step17.T;
+    lx_Step17State := Step17.X;
+
+    FB_arr_SFCStates[lui_StepNo](vistr_StepName   := lstrarr_StepName[lui_StepNo],
+    	                         vit_StepTime     := lt_Step17Time,
+    	                         viudi_StepCount  := ludi_Step17count,
+    	                         vix_StepState    := lx_Step17State,
+    	                         vix_StepTrans    := lx_Step17TransOk,
+    	                         viui_StepNo      := lui_StepNo,
+    	                         vostruc_SFCState => voarr_SFCStates[lui_StepNo]);
+    
+    vo_SFCState                   := voarr_SFCStates[lui_StepNo];
+END_ACTION
+
+ACTION Action18:
+	lui_StepNo                    := 18;	
+   /*
+    * Ein Initialisierungspulse fuer den Schritt erzeugen
+    */
+    FB_arr_SFCStatesR_TRIG[lui_StepNo](CLK := TRUE);
+    IF FB_arr_SFCStatesR_TRIG[lui_StepNo].Q = TRUE THEN
+      lui_Step18InitCount := lui_Step18InitCount + 1;
+    END_IF;
+   /* 
+    * Alive Signal Schritt 18
+    */	
+	ludi_Step18count:=ludi_Step18count+1;
+
+    if Step18.T > ltarr_StepTransTime[lui_StepNo] then
+		lx_Step18TransOk     := TRUE;
+    end_if;
+    lt_Step18Time  := Step18.T;
+    lx_Step18State := Step18.X;
+
+    FB_arr_SFCStates[lui_StepNo](vistr_StepName   := lstrarr_StepName[lui_StepNo],
+    	                         vit_StepTime     := lt_Step18Time,
+    	                         viudi_StepCount  := ludi_Step18count,
+    	                         vix_StepState    := lx_Step18State,
+    	                         vix_StepTrans    := lx_Step18TransOk,
+    	                         viui_StepNo      := lui_StepNo,
+    	                         vostruc_SFCState => voarr_SFCStates[lui_StepNo]);
+    
+    vo_SFCState                  := voarr_SFCStates[lui_StepNo];
+END_ACTION
+
+ACTION Action19:
+	lui_StepNo                    := 19;	
+   /*
+    * Ein Initialisierungspulse fuer den Schritt erzeugen
+    */
+    FB_arr_SFCStatesR_TRIG[lui_StepNo](CLK := TRUE);
+    IF FB_arr_SFCStatesR_TRIG[lui_StepNo].Q = TRUE THEN
+      lui_Step15InitCount := lui_Step15InitCount + 1;
+    END_IF;
+   /* 
+    * Alive Signal Schritt 19
+    */	
+	ludi_Step19count:=ludi_Step19count+1;
+
+    if step19.T > ltarr_StepTransTime[lui_StepNo] then
+		lx_Step19TransOk    := TRUE;
+    end_if;
+    lt_Step19Time  := step19.T;
+    lx_Step19State := step19.X;
+
+    FB_arr_SFCStates[lui_StepNo](vistr_StepName   := lstrarr_StepName[lui_StepNo],
+    	                         vit_StepTime     := lt_Step19Time,
+    	                         viudi_StepCount  := ludi_Step19count,
+    	                         vix_StepState    := lx_Step19State,
+    	                         vix_StepTrans    := lx_Step19TransOk,
+    	                         viui_StepNo      := lui_StepNo,
+    	                         vostruc_SFCState => voarr_SFCStates[lui_StepNo]);
+    
+    vo_SFCState                  := voarr_SFCStates[lui_StepNo];
+END_ACTION
+
+ACTION ActionGlobal:
+   /*
+    * Initialisierungsmerker
+    */
+	FB_Init_R_TRIG(CLK := TRUE, Q => lx_CycleInit);
+	
+	IF lx_CycleInit = TRUE THEN
+      lui_CycleInitCount := lui_CycleInitCount + 1;
+	END_IF;
+
+    ludi_CycleCount := ludi_CycleCount + 1;
+    
+    lx_CyclePulse := NOT(lx_CyclePulse);
+   /*
+    * Im InitCycle die EInstellwerte und Namen der Schritte unkopieren
+    */
+    IF lx_CycleInit = TRUE THEN
+     ltarr_StepTransTime := vitarr_StepTransTime;
+     lstrarr_StepName    := vistrarr_StepName;
+    END_IF;
+
+   /*
+    * StartPulse von VAR_INPUT um weiterzuschalten
+    */ 
+	FB_Start_R_TRIG(CLK := vix_Start, Q => lx_StartPulse);
+   /*
+    * StartPulseLocal um weiterzuschalten
+    */ 
+	FB_StartLocal_R_TRIG(CLK := lx_Start, Q => lx_StartLocalPulse);
+
+
+   /*
+    * ResetPulse um Reset zu triggern
+    */ 
+	FB_Reset_R_TRIG(CLK := vix_Reset, Q => lx_ResetPulse);
+   /*
+    * Lokal-ResetPulse um Reset zu triggern
+    */ 
+	FB_ResetLocal_R_TRIG(CLK := lx_Reset, Q => lx_ResetLocalPulse);
+
+END_ACTION
+
+END_FUNCTION_BLOCK

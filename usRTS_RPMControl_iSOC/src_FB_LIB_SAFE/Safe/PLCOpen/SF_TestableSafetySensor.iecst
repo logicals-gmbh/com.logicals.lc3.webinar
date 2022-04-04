@@ -1,0 +1,452 @@
+USING logicals.web.standard.safe;
+
+NAMESPACE logicals.web.standard.safe
+NAMESPACE plcopen
+
+TYPE
+	SF_TestableSafetySensor_State : UINT(
+	/* Invalid value at the TestTime parameter. Values between 0 ms and 150 ms are possible. */
+	Parameter_Error := 16#C000,
+	/* Static Reset condition detected after FB activation. */
+	Reset_Error_1 := 16#C001,
+	/* Static Reset condition detected in state 8403. */
+	Reset_Error_2 := 16#C011,
+	/* Static Reset condition detected in state Cx10. */
+	Reset_Error_3 := 16#C021,
+	/* Static Reset condition detected in state 8406. */
+	Reset_Error_4 := 16#C031,
+	/* Static Reset condition detected in state C000. */
+	Reset_Error_5 := 16#C041,
+	/* Static Reset condition detected in state 8413. */
+	Reset_Error_6 := 16#C051,
+	/* Test time elapsed in state 8020 or 8030. IF S_OSSD_IN = TRUE AND NoExternalTest = TRUE THEN x=4 ELSE x=0; */
+	Test_Error_1 := 16#C410,
+	Test_Error_2 := 16#C010,
+	/* The function block is not active (initial state). */
+	Idle := 16#0000,
+	/* An activation has been detected by the FB. */
+	Init := 16#8401,
+	/* The FB has detected a safety demand. The switch has not been automatically tested yet. */
+	ESPE_Interrupted_1 := 16#8802,
+	/* Wait for rising trigger of Reset after state 8802. */
+	Wait_for_Reset_1 := 16#8402,
+	/* The automatic sensor test was faulty. An external manual sensor test is necessary.
+	 * The support for the necessary external manual sensor test has been activated at the FB (NoExternalTest = FALSE).
+	 * A negative signal edge at the sensor is required.
+	 */
+	External_Function_Test := 16#8002,
+	/* The automatic sensor test was faulty. An external manual sensor test is necessary.
+	 * The support for the necessary external manual sensor test has been activated at the FB (NoExternalTest = FALSE).
+	 * A TRUE signal at the sensor is required.
+	 */
+	ESPE_Interrupted_External_Test := 16#8804,
+	/* The automatic sensor test was faulty. An external manual sensor test is necessary.
+	 * The support for the necessary external manual sensor test has been activated at the FB (NoExternalTest = FALSE).
+	 * The external manual test is complete. The FB detected a complete sensor switching cycle (external controlled).
+	 */
+	End_External_Test := 16#8404,
+	/* The FB has not detected a safety demand. The sensor has not been tested automatically. */
+	ESPE_Free_No_Test := 16#8010,
+	/* The FB has detected a safety demand. The switch was automatically tested. */
+	ESPE_Interrupted_2 := 16#8806,
+	/* Wait for rising trigger of Reset after state 8812. */
+	Wait_for_Reset_2 := 16#8406,
+	/* The automatic sensor test is active. Test Timer is started first time. The transmitter signal of the sensor is switched off by the FB.
+	 * The signal of the receiver must follow the signal of the transmitter.
+	 */
+	Test_Request := 16#8020,
+	/* The automatic sensor test is active. Test Timer is started second time.
+	 * The transmitter signal of the sensor is switched on by the FB. The signal of the receiver must follow the signal of the transmitter.
+	 */
+	Test_Active := 16#8030,
+	/* The FB has not detected a safety demand. The sensor was automatically tested. */
+	ESPE_Free_Test_ok := 16#8000
+	);
+END_TYPE
+
+FUNCTION_BLOCK SF_TestableSafetySensor
+	{ altName:="SF_TestableSafetySensor"; bgColor:="Gold"; width:=440;}
+	VAR_INPUT
+		/* See Section 5.1.1 General Input Parameters */
+		Activate : BOOL := FALSE;
+		/* Variable.
+		 * Status of sensor output, e.g., light curtain.
+		 * FALSE: Safety sensor in test state or demand for safety-related response.
+		 * TRUE: Sensor in the state for normal operating conditions.
+		 */
+		S_OSSD_In : SAFEBOOL := SAFEBOOL_Constant#SAFEFALSE;
+		/* Variable.
+		 * Input to start sensor test. Sets "S_TestOut" and starts the internal time monitoring function in the FB.
+		 * FALSE: No test requested.
+		 * TRUE: Test requested.
+		 */
+		StartTest : BOOL := FALSE;
+		/* Constant. Range: 0 ... 150ms. Test time of safety sensor. */
+		TestTime : TIME := T#10ms;
+		/* Constant.
+		 * Indicates if external manual sensor test is supported.
+		 * FALSE: The external manual sensor test is supported. Only after a complete manual sensor switching sequence, a automatic test is possible again after a faulty automatic sensor test.
+		 * TRUE: The external manual sensor test is not supported.
+		 * An automatic test is possible again without a manual sensor switching sequence after faulty automatic sensor test.
+		 */
+		NoExternalTest : BOOL := FALSE;
+		/* See Section 5.1.1 General Input Parameters */
+		S_StartReset : SAFEBOOL := SAFEBOOL_Constant#SAFEFALSE;
+		/* See Section 5.1.1 General Input Parameters */
+		S_AutoReset : SAFEBOOL := SAFEBOOL_Constant#SAFEFALSE;
+		/* See Section 5.1.1 General Input Parameters */
+		Reset : BOOL := FALSE;
+	END_VAR
+	VAR_OUTPUT
+		/* See Section 5.1.2 General Output Parameters */
+		Ready : BOOL := FALSE;
+		/* Safety related output indicating the status of the ESPE.
+		 * FALSE: The sensor has a safety-related action request or test error.
+		 * TRUE: The sensor has no safety-related action request AND no test error.
+		 */
+		S_OSSD_Out : SAFEBOOL := SAFEBOOL_Constant#SAFEFALSE;
+		/* Coupled with the test input of the sensor. Although specified as SAFEBOOL, in practice this signal will often be connected to a BOOL output.
+		 * FALSE: Test request issued.
+		 * TRUE: No test request.
+		 */
+		S_TestOut : SAFEBOOL := SAFEBOOL_Constant#SAFETRUE;
+		/* Feedback signal to the process.
+		 * FALSE: An automatic sensor test is not possible.
+		 * TRUE: An automatic sensor test is possible.
+		 */
+		TestPossible : BOOL := FALSE;
+		/* A positive signal edge indicates the successful execution of the automatic sensor test.
+		 * FALSE:
+		 * - An automatic sensor test was not executed yet.
+		 * - An automatic sensor test is active.
+		 * - An automatic sensor test was faulty.
+		 * TRUE: A sensor test was executed successfully.
+		 */
+		TestExecuted : BOOL := FALSE;
+		/* Optional. See 5.1.2 General Output Parameters */
+		SafetyDemand : BOOL := FALSE;
+		/* Optional. See 5.1.2 General Output Parameters */
+		ResetRequest : BOOL := FALSE;
+		/* See Section 5.1.2 General Output Parameters */
+		Error : BOOL := FALSE;
+		/* See Section 5.1.2 General Output Parameters */
+		DiagCode : WORD := 16#0000;
+	END_VAR
+	VAR
+		R_Trig_Reset : R_TRIG;
+		R_Trig_S_OSSD_In : R_TRIG;
+		R_Trig_StartTest : R_TRIG;
+		F_Trig_S_OSSD_In : F_TRIG;
+		Timer1 : TON;
+		Timer2 : TON;
+	END_VAR
+
+	R_Trig_Reset(Reset);
+	R_Trig_S_OSSD_In(IS(S_OSSD_In));
+	R_Trig_StartTest(StartTest);
+	F_Trig_S_OSSD_In(IS(S_OSSD_In));
+
+	IF(NOT Activate) THEN
+		DiagCode := TO_WORD(SF_TestableSafetySensor_State#Idle);
+	ELSE
+		CASE TO_UINT(DiagCode) OF
+			SF_TestableSafetySensor_State#Idle:
+				/* IF(Activate) THEN - Active is always true here */
+					DiagCode := TO_WORD(SF_TestableSafetySensor_State#Init);
+			SF_TestableSafetySensor_State#Init:
+				IF(TestTime > T#150ms) THEN
+					DiagCode := TO_WORD(SF_TestableSafetySensor_State#Parameter_Error);
+				ELSIF(Reset AND NOT R_Trig_Reset.Q) THEN
+					DiagCode := TO_WORD(SF_TestableSafetySensor_State#Reset_Error_1);
+				ELSIF(IS_NOT(S_OSSD_In)) THEN
+					DiagCode := TO_WORD(SF_TestableSafetySensor_State#ESPE_Interrupted_1);
+				ELSIF(IS(S_OSSD_In) AND NOT R_Trig_S_OSSD_In.Q AND (R_Trig_Reset.Q OR IS(S_StartReset))) THEN
+					DiagCode := TO_WORD(SF_TestableSafetySensor_State#ESPE_Free_No_Test);
+				END_IF;
+			SF_TestableSafetySensor_State#Parameter_Error:
+				IF(Reset AND NOT R_Trig_Reset.Q) THEN
+					DiagCode := TO_WORD(SF_TestableSafetySensor_State#Reset_Error_5);
+				ELSIF(R_Trig_Reset.Q AND TestTime <= T#150ms) THEN
+					DiagCode := TO_WORD(SF_TestableSafetySensor_State#Init);
+				END_IF;
+			SF_TestableSafetySensor_State#Reset_Error_5:
+				IF(NOT Reset) THEN
+					DiagCode := TO_WORD(SF_TestableSafetySensor_State#Parameter_Error);
+				END_IF;
+			SF_TestableSafetySensor_State#Reset_Error_1:
+				IF(NOT Reset) THEN
+					DiagCode := TO_WORD(SF_TestableSafetySensor_State#Init);
+				END_IF;
+			SF_TestableSafetySensor_State#ESPE_Interrupted_1:
+				IF(IS(S_OSSD_In)) THEN
+					DiagCode := TO_WORD(SF_TestableSafetySensor_State#Wait_for_Reset_1);
+				END_IF;
+			SF_TestableSafetySensor_State#End_External_Test:
+				IF(Reset AND NOT R_Trig_Reset.Q) THEN
+					DiagCode := TO_WORD(SF_TestableSafetySensor_State#Reset_Error_4);
+				ELSIF(R_Trig_Reset.Q AND IS_NOT(S_OSSD_In)) THEN
+					DiagCode := TO_WORD(SF_TestableSafetySensor_State#ESPE_Interrupted_1);
+				ELSIF(R_Trig_Reset.Q AND IS(S_OSSD_In) AND NOT R_Trig_S_OSSD_In.Q) THEN
+					DiagCode := TO_WORD(SF_TestableSafetySensor_State#ESPE_Free_No_Test);
+				END_IF;
+			SF_TestableSafetySensor_State#Reset_Error_4:
+				IF(NOT Reset) THEN
+					DiagCode := TO_WORD(SF_TestableSafetySensor_State#End_External_Test);
+				END_IF;
+			SF_TestableSafetySensor_State#ESPE_Interrupted_External_Test:
+				IF(IS(S_OSSD_In)) THEN
+					DiagCode := TO_WORD(SF_TestableSafetySensor_State#End_External_Test);
+				END_IF;
+			SF_TestableSafetySensor_State#External_Function_Test:
+				IF(F_Trig_S_OSSD_In.Q) THEN
+					DiagCode := TO_WORD(SF_TestableSafetySensor_State#ESPE_Interrupted_External_Test);
+				END_IF;
+			SF_TestableSafetySensor_State#Test_Request:
+				IF(Timer1.Q AND IS(S_OSSD_In) AND NoExternalTest) THEN
+					DiagCode := TO_WORD(SF_TestableSafetySensor_State#Test_Error_1);
+				ELSIF(Timer1.Q) THEN
+					DiagCode := TO_WORD(SF_TestableSafetySensor_State#Test_Error_2);
+				ELSIF(IS_NOT(S_OSSD_In)) THEN
+					DiagCode := TO_WORD(SF_TestableSafetySensor_State#Test_Active);
+				END_IF;
+			SF_TestableSafetySensor_State#Test_Active:
+				IF(Timer2.Q AND IS(S_OSSD_In) AND NoExternalTest) THEN
+						DiagCode := TO_WORD(SF_TestableSafetySensor_State#Test_Error_1);
+				ELSIF(Timer2.Q) THEN
+						DiagCode := TO_WORD(SF_TestableSafetySensor_State#Test_Error_2);
+				ELSIF(IS(S_OSSD_In)) THEN
+					DiagCode := TO_WORD(SF_TestableSafetySensor_State#ESPE_Free_Test_ok);
+				END_IF;
+			SF_TestableSafetySensor_State#Test_Error_1,
+			SF_TestableSafetySensor_State#Test_Error_2:
+				IF(Reset AND NOT R_Trig_Reset.Q) THEN
+					DiagCode := TO_WORD(SF_TestableSafetySensor_State#Reset_Error_3);
+				ELSIF(R_Trig_Reset.Q AND NOT NoExternalTest) THEN
+					DiagCode := TO_WORD(SF_TestableSafetySensor_State#External_Function_Test);
+				ELSIF(IS(S_OSSD_In) AND NOT R_Trig_S_OSSD_In.Q AND R_Trig_Reset.Q AND NoExternalTest) THEN
+					DiagCode := TO_WORD(SF_TestableSafetySensor_State#ESPE_Free_No_Test);
+				END_IF;
+			SF_TestableSafetySensor_State#Reset_Error_3:
+				IF(NOT Reset AND IS(S_OSSD_In) AND NoExternalTest) THEN
+					DiagCode := TO_WORD(SF_TestableSafetySensor_State#Test_Error_1);
+				ELSIF(NOT Reset) THEN
+					DiagCode := TO_WORD(SF_TestableSafetySensor_State#Test_Error_2);
+				END_IF;
+			SF_TestableSafetySensor_State#Wait_for_Reset_1:
+				IF(Reset AND NOT R_Trig_Reset.Q) THEN
+					DiagCode := TO_WORD(SF_TestableSafetySensor_State#Reset_Error_2);
+				ELSIF(IS_NOT(S_OSSD_In)) THEN
+					DiagCode := TO_WORD(SF_TestableSafetySensor_State#ESPE_Interrupted_1);
+				ELSIF(IS(S_OSSD_In) AND NOT R_Trig_S_OSSD_In.Q AND (R_Trig_Reset.Q OR IS(S_AutoReset))) THEN
+					DiagCode := TO_WORD(SF_TestableSafetySensor_State#ESPE_Free_No_Test);
+				END_IF;
+			SF_TestableSafetySensor_State#Reset_Error_2:
+				IF(NOT Reset) THEN
+					DiagCode := TO_WORD(SF_TestableSafetySensor_State#Wait_for_Reset_1);
+				END_IF;
+			SF_TestableSafetySensor_State#ESPE_Free_No_Test:
+				IF(IS_NOT(S_OSSD_In)) THEN
+					DiagCode := TO_WORD(SF_TestableSafetySensor_State#ESPE_Interrupted_1);
+				ELSIF(R_Trig_StartTest.Q) THEN
+					DiagCode := TO_WORD(SF_TestableSafetySensor_State#Test_Request);
+				END_IF;
+			SF_TestableSafetySensor_State#ESPE_Free_Test_ok:
+				IF(IS_NOT(S_OSSD_In)) THEN
+					DiagCode := TO_WORD(SF_TestableSafetySensor_State#ESPE_Interrupted_2);
+				ELSIF(R_Trig_StartTest.Q) THEN
+					DiagCode := TO_WORD(SF_TestableSafetySensor_State#Test_Request);
+				END_IF;
+			SF_TestableSafetySensor_State#Wait_for_Reset_2:
+				IF(Reset AND NOT R_Trig_Reset.Q) THEN
+					DiagCode := TO_WORD(SF_TestableSafetySensor_State#Reset_Error_6);
+				ELSIF(IS_NOT(S_OSSD_In)) THEN
+					DiagCode := TO_WORD(SF_TestableSafetySensor_State#ESPE_Interrupted_2);
+				ELSIF(IS(S_OSSD_In) AND (R_Trig_Reset.Q OR IS(S_AutoReset))) THEN
+					DiagCode := TO_WORD(SF_TestableSafetySensor_State#ESPE_Free_Test_ok);
+				END_IF;
+			SF_TestableSafetySensor_State#Reset_Error_6:
+				IF(NOT Reset) THEN
+					DiagCode := TO_WORD(SF_TestableSafetySensor_State#Wait_for_Reset_2);
+				END_IF;
+			SF_TestableSafetySensor_State#ESPE_Interrupted_2:
+				IF(IS(S_OSSD_In)) THEN
+					DiagCode := TO_WORD(SF_TestableSafetySensor_State#Wait_for_Reset_2);
+				END_IF;
+			ELSE
+				ENO := FALSE;
+		END_CASE;
+	END_IF;
+
+	CASE TO_UINT(DiagCode) OF
+		SF_TestableSafetySensor_State#Idle:
+			Timer1(IN := FALSE);
+			Timer2(IN := FALSE);
+			Ready := FALSE;
+			S_OSSD_Out := SAFEBOOL_Constant#SAFEFALSE;
+			S_TestOut := SAFEBOOL_Constant#SAFETRUE;
+			TestPossible := FALSE;
+			TestExecuted := FALSE;
+			SafetyDemand := FALSE;
+			ResetRequest := FALSE;
+			Error := FALSE;
+		SF_TestableSafetySensor_State#Init,
+		SF_TestableSafetySensor_State#Wait_for_Reset_1,
+		SF_TestableSafetySensor_State#End_External_Test:
+			Timer1(IN := FALSE);
+			Timer2(IN := FALSE);
+			Ready := TRUE;
+			S_OSSD_Out := SAFEBOOL_Constant#SAFEFALSE;
+			S_TestOut := SAFEBOOL_Constant#SAFETRUE;
+			TestPossible := FALSE;
+			TestExecuted := FALSE;
+			SafetyDemand := FALSE;
+			ResetRequest := TRUE;
+			Error := FALSE;
+		SF_TestableSafetySensor_State#ESPE_Interrupted_1,
+		SF_TestableSafetySensor_State#ESPE_Interrupted_External_Test:
+			Timer1(IN := FALSE);
+			Timer2(IN := FALSE);
+			Ready := TRUE;
+			S_OSSD_Out := SAFEBOOL_Constant#SAFEFALSE;
+			S_TestOut := SAFEBOOL_Constant#SAFETRUE;
+			TestPossible := FALSE;
+			TestExecuted := FALSE;
+			SafetyDemand := TRUE;
+			ResetRequest := FALSE;
+			Error := FALSE;
+		SF_TestableSafetySensor_State#ESPE_Interrupted_2:
+			Timer1(IN := FALSE);
+			Timer2(IN := FALSE);
+			Ready := TRUE;
+			S_OSSD_Out := SAFEBOOL_Constant#SAFEFALSE;
+			S_TestOut := SAFEBOOL_Constant#SAFETRUE;
+			TestPossible := FALSE;
+			TestExecuted := TRUE;
+			SafetyDemand := TRUE;
+			ResetRequest := FALSE;
+			Error := FALSE;
+		SF_TestableSafetySensor_State#External_Function_Test:
+			Timer1(IN := FALSE);
+			Timer2(IN := FALSE);
+			Ready := TRUE;
+			S_OSSD_Out := SAFEBOOL_Constant#SAFEFALSE;
+			S_TestOut := SAFEBOOL_Constant#SAFETRUE;
+			TestPossible := FALSE;
+			TestExecuted := FALSE;
+			SafetyDemand := FALSE;
+			ResetRequest := FALSE;
+			Error := FALSE;
+		SF_TestableSafetySensor_State#ESPE_Free_No_Test:
+			Timer1(IN := FALSE);
+			Timer2(IN := FALSE);
+			Ready := TRUE;
+			S_OSSD_Out := SAFEBOOL_Constant#SAFETRUE;
+			S_TestOut := SAFEBOOL_Constant#SAFETRUE;
+			TestPossible := TRUE;
+			TestExecuted := FALSE;
+			SafetyDemand := FALSE;
+			ResetRequest := FALSE;
+			Error := FALSE;
+		SF_TestableSafetySensor_State#Wait_for_Reset_2:
+			Timer1(IN := FALSE);
+			Timer2(IN := FALSE);
+			Ready := TRUE;
+			S_OSSD_Out := SAFEBOOL_Constant#SAFEFALSE;
+			S_TestOut := SAFEBOOL_Constant#SAFETRUE;
+			TestPossible := FALSE;
+			TestExecuted := TRUE;
+			SafetyDemand := FALSE;
+			ResetRequest := TRUE;
+			Error := FALSE;
+		SF_TestableSafetySensor_State#Test_Request:
+			Timer1(IN := TRUE, PT := TestTime);
+			Timer2(IN := FALSE);
+			Ready := TRUE;
+			S_OSSD_Out := SAFEBOOL_Constant#SAFETRUE;
+			S_TestOut := SAFEBOOL_Constant#SAFEFALSE;
+			TestPossible := FALSE;
+			TestExecuted := FALSE;
+			SafetyDemand := FALSE;
+			ResetRequest := FALSE;
+			Error := FALSE;
+		SF_TestableSafetySensor_State#Test_Active:
+			Timer1(IN := FALSE);
+			Timer2(IN := TRUE, PT := TestTime);
+			Ready := TRUE;
+			S_OSSD_Out := SAFEBOOL_Constant#SAFETRUE;
+			S_TestOut := SAFEBOOL_Constant#SAFETRUE;
+			TestPossible := FALSE;
+			TestExecuted := FALSE;
+			SafetyDemand := FALSE;
+			ResetRequest := FALSE;
+			Error := FALSE;
+		SF_TestableSafetySensor_State#ESPE_Free_Test_ok:
+			Timer1(IN := FALSE);
+			Timer2(IN := FALSE);
+			Ready := TRUE;
+			S_OSSD_Out := SAFEBOOL_Constant#SAFETRUE;
+			S_TestOut := SAFEBOOL_Constant#SAFETRUE;
+			TestPossible := TRUE;
+			TestExecuted := TRUE;
+			SafetyDemand := FALSE;
+			ResetRequest := FALSE;
+			Error := FALSE;
+		SF_TestableSafetySensor_State#Parameter_Error,
+		SF_TestableSafetySensor_State#Reset_Error_1,
+		SF_TestableSafetySensor_State#Reset_Error_2,
+		SF_TestableSafetySensor_State#Reset_Error_3,
+		SF_TestableSafetySensor_State#Reset_Error_4,
+		SF_TestableSafetySensor_State#Reset_Error_5:
+			Timer1(IN := FALSE);
+			Timer2(IN := FALSE);
+			Ready := TRUE;
+			S_OSSD_Out := SAFEBOOL_Constant#SAFEFALSE;
+			S_TestOut := SAFEBOOL_Constant#SAFETRUE;
+			TestPossible := FALSE;
+			TestExecuted := FALSE;
+			SafetyDemand := FALSE;
+			ResetRequest := FALSE;
+			Error := TRUE;
+		SF_TestableSafetySensor_State#Reset_Error_6:
+			Timer1(IN := FALSE);
+			Timer2(IN := FALSE);
+			Ready := TRUE;
+			S_OSSD_Out := SAFEBOOL_Constant#SAFEFALSE;
+			S_TestOut := SAFEBOOL_Constant#SAFETRUE;
+			TestPossible := FALSE;
+			TestExecuted := TRUE;
+			SafetyDemand := FALSE;
+			ResetRequest := FALSE;
+			Error := TRUE;
+		SF_TestableSafetySensor_State#Test_Error_1:
+			Timer1(IN := FALSE);
+			Timer2(IN := FALSE);
+			Ready := TRUE;
+			S_OSSD_Out := SAFEBOOL_Constant#SAFEFALSE;
+			S_TestOut := SAFEBOOL_Constant#SAFETRUE;
+			TestPossible := FALSE;
+			TestExecuted := FALSE;
+			SafetyDemand := FALSE;
+			ResetRequest := TRUE;
+			Error := TRUE;
+		SF_TestableSafetySensor_State#Test_Error_2:
+			Timer1(IN := FALSE);
+			Timer2(IN := FALSE);
+			Ready := TRUE;
+			S_OSSD_Out := SAFEBOOL_Constant#SAFEFALSE;
+			S_TestOut := SAFEBOOL_Constant#SAFETRUE;
+			TestPossible := FALSE;
+			TestExecuted := FALSE;
+			SafetyDemand := FALSE;
+			ResetRequest := FALSE;
+			Error := TRUE;
+		ELSE
+			ENO := FALSE;
+	END_CASE;
+
+	ENO := ENO AND CheckSAFEBOOL(S_OSSD_In) AND CheckSAFEBOOL(S_StartReset) AND CheckSAFEBOOL(S_AutoReset);
+
+END_FUNCTION_BLOCK
+
+END_NAMESPACE
+END_NAMESPACE

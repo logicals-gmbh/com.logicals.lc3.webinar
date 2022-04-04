@@ -1,0 +1,15 @@
+{CustomImplementation}
+FUNCTION_BLOCK DQ
+	{ ImplementationProperties ( functionHasCFile; ) }
+	VAR_INPUT
+		OutputSelect : INT;
+		OutputValue : BOOL;
+	END_VAR
+END_FUNCTION_BLOCK
+
+FUNCTION_BLOCK DQ_ALL
+	{ ImplementationProperties ( functionHasCFile; ) }
+	VAR_INPUT
+		AllOutputs : WORD;
+	END_VAR
+END_FUNCTION_BLOCK

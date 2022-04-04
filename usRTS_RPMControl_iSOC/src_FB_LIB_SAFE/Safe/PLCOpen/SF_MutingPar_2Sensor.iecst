@@ -1,0 +1,376 @@
+USING logicals.web.standard.safe;
+
+NAMESPACE logicals.web.standard.safe
+NAMESPACE plcopen
+
+TYPE
+	SF_MutingPar_2Sensor_State : UINT(
+	/* Static Reset condition detected after FB activation in state 8401. */
+	Reset_Error_1 := 16#C001,
+	/* Static Reset condition detected in state 8402. */
+	Reset_Error_2 := 16#C011,
+	/* Error detected in muting sequence state 8000, 8010, 8310. */
+	Error_Muting_Sequence_Base := 16#C004,
+	/* DiscTimeEntry or MaxMutingTime value out of range. */
+	Parameter_Error := 16#C010,
+	/* Timing error: Active muting time (when S_MutingActive = TRUE) ex-ceeds MaxMutingTime. */
+	Error_Timer_MaxMuting := 16#C020,
+	/* Timing error: Discrepancy time for switching MutingSwitch11 and MutingSwitch12 from FALSE to TRUE > DiscTimeEntry. */
+	Error_Timer_Entry := 16#C030,
+	/* The function block is not active (initial state). */
+	Idle := 16#0000,
+	/* Muting not active and no safety demand from AOPD. If timers from subsequent muting are still running, they are stopped. */
+	AOPD_Free := 16#8000,
+	/* Function block was activated. */
+	Init := 16#8401,
+	/* Safety demand detected by AOPD, muting not active. */
+	Safety_Demand_AOPD := 16#8802,
+	/* Safety demand or errors have been detected and are now cleared. Operator acknowledgment by Reset required. */
+	Wait_For_Reset := 16#8402,
+	/* Safety function activated. */
+	Safe := 16#8804,
+	/* Muting sequence is in starting phase after rising trigger of MutingSwitch11. Monitoring of DiscTimeEntry is activated. */
+	Muting_Start_1 := 16#8010,
+	/* Muting sequence is in starting phase after rising trigger of MutingSwitch12. Monitoring of DiscTimeEntry is activated. */
+	Muting_Start_2 := 16#8310,
+	/* Muting sequence is active either:
+	 * - After rising trigger of the second MutingSwitch 12 or 11 has been detected.
+	 * - When both MutingSwitch 11 and 12 have been actuated in the same cycle.
+	 * Monitoring of DiscTimeEntry is stopped. Monitoring of MaxMutingTime is activated.
+	 */
+	Muting_Active := 16#8020
+	);
+END_TYPE
+
+/* Muting is the intended suppression of the safety function. In this FB, parallel muting with two muting sensors is specified. */
+FUNCTION_BLOCK SF_MutingPar_2Sensor
+	{ altName:="SF_MutingPar_2Sensor"; bgColor:="Gold"; width:=420; }
+	VAR_INPUT
+		/* See Section 5.1.1 General Input Parameters */
+		Activate : BOOL := FALSE;
+		/* Variable.
+		 * OSSD signal from AOPD.
+		 * FALSE: Protection field interrupted.
+		 * TRUE: Protection field not interrupted. */
+		S_AOPD_In : SAFEBOOL := SAFEBOOL_Constant#SAFEFALSE;
+		/* Variable.
+		 * Status of Muting sensor 11.
+		 * FALSE: Muting sensor 11 not actuated.
+		 * TRUE: Workpiece actuates muting sensor 11.
+		 * Depending on the safety requirements it can be necessary to connect a SAFEBOOL. */
+		MutingSwitch11 : BOOL := FALSE;
+		/* Variable.
+		 * Status of Muting sensor 12.
+		 * FALSE: Muting sensor 12 not actuated.
+		 * TRUE: Workpiece actuates muting sensor 12.
+		 * Depending on the safety requirements it can be necessary to connect a SAFEBOOL. */
+		MutingSwitch12 : BOOL := FALSE;
+		/* Constant 0..4 s;
+		 * Max. discrepancy time for S_MutingSwitch11 and S_MutingSwitch12 entering muting gate */
+		DiscTimeEntry : TIME := T#0s;
+		/* Constant 0..120 min;
+		 * Maximum time for complete muting sequence, timer started when both muting sensors are actuated. */
+		MaxMutingTime : TIME := T#0s;
+		/* Variable or constant.
+		 * Command by the control system that enables the start of the muting function when needed by the machine cycle. After the start of the muting function, this signal can be switched off.
+		 * FALSE: Muting not enabled
+		 * TRUE: Start of Muting function enabled */
+		MutingEnable : BOOL := FALSE;
+		/* See Section 5.1.1 General Input Parameters */
+		S_StartReset : SAFEBOOL := SAFEBOOL_Constant#SAFEFALSE;
+		/* See Section 5.1.1 General Input Parameters */
+		Reset : BOOL := FALSE;
+	END_VAR
+
+	VAR_OUTPUT
+		/* See Section 5.1.2 General Output Parameters */
+		Ready : BOOL := FALSE;
+		/* Safety related output, indicates status of the muted guard.
+		 * FALSE: AOPD protection field interrupted and muting not active.
+		 * TRUE: AOPD protection field not interrupted or muting active. */
+		S_AOPD_Out : SAFEBOOL := SAFEBOOL_Constant#SAFEFALSE;
+		/* Indicates status of Muting process.
+		 * FALSE: Muting not active.
+		 * TRUE: Muting active. */
+		S_MutingActive : SAFEBOOL := SAFEBOOL_Constant#SAFEFALSE;
+		/* Optional. See 5.1.2 General Output Parameters */
+		SafetyDemand : BOOL := FALSE;
+		/* Optional. See 5.1.2 General Output Parameters */
+		ResetRequest : BOOL := FALSE;
+		/* See Section 5.1.2 General Output Parameters */
+		Error : BOOL := FALSE;
+		/* See Section 5.1.2 General Output Parameters */
+		DiagCode : WORD := 16#0000;
+	END_VAR
+
+	VAR
+		/* ControlCode is used for state tracking */
+		ControlCode : UINT := 16#0000;
+		MutingTimer : TON;
+		DiscTimeEntryTimer : TON;
+		R_Trig_Reset : R_TRIG;
+		R_Trig_S11 : R_TRIG;
+		R_Trig_S12 : R_TRIG;
+	END_VAR
+
+	R_Trig_Reset(Reset);
+	R_Trig_S11(MutingSwitch11);
+	R_Trig_S12(MutingSwitch12);
+
+	IF(NOT Activate) THEN
+		ControlCode := SF_MutingPar_2Sensor_State#Idle;
+		DiagCode := TO_WORD(ControlCode);
+	ELSE
+		CASE TO_UINT(ControlCode) OF
+			SF_MutingPar_2Sensor_State#Idle:
+				/* IF(Activate) THEN - Active is always true here */
+					ControlCode := SF_MutingPar_2Sensor_State#Init;
+					DiagCode := TO_WORD(ControlCode);
+			SF_MutingPar_2Sensor_State#Init:
+				IF(Reset AND NOT R_Trig_Reset.Q) THEN
+					ControlCode := SF_MutingPar_2Sensor_State#Reset_Error_1;
+					DiagCode := TO_WORD(ControlCode);
+				ELSIF(DiscTimeEntry < T#0s OR DiscTimeEntry > T#4s OR MaxMutingTime < T#0s OR MaxMutingTime > T#120m) THEN
+					ControlCode := SF_MutingPar_2Sensor_State#Parameter_Error;
+					DiagCode := TO_WORD(ControlCode);
+				ELSIF(R_Trig_Reset.Q OR IS(S_StartReset)) THEN
+					ControlCode := SF_MutingPar_2Sensor_State#Safe;
+					DiagCode := TO_WORD(ControlCode);
+				END_IF;
+			SF_MutingPar_2Sensor_State#Safe:
+				IF(IS_NOT(S_AOPD_In)) THEN
+					ControlCode := SF_MutingPar_2Sensor_State#Safety_Demand_AOPD;
+					DiagCode := TO_WORD(ControlCode);
+				ELSE
+					ControlCode := SF_MutingPar_2Sensor_State#AOPD_Free;
+					DiagCode := TO_WORD(ControlCode);
+				END_IF;
+			SF_MutingPar_2Sensor_State#Safety_Demand_AOPD:
+				IF(IS(S_AOPD_In)) THEN
+					ControlCode := SF_MutingPar_2Sensor_State#Wait_For_Reset;
+					DiagCode := TO_WORD(ControlCode);
+				END_IF;
+			SF_MutingPar_2Sensor_State#Wait_For_Reset:
+				IF(Reset AND NOT R_Trig_Reset.Q) THEN
+					ControlCode := SF_MutingPar_2Sensor_State#Reset_Error_2;
+					DiagCode := TO_WORD(ControlCode);
+				ELSIF(R_Trig_Reset.Q) THEN
+					ControlCode := SF_MutingPar_2Sensor_State#Safe;
+					DiagCode := TO_WORD(ControlCode);
+				END_IF;
+			SF_MutingPar_2Sensor_State#AOPD_Free:
+				IF((R_Trig_S11.Q AND MutingSwitch12 AND NOT R_Trig_S12.Q) OR
+				   (R_Trig_S12.Q AND MutingSwitch11 AND NOT R_Trig_S11.Q) OR
+				   ((MutingSwitch11 AND NOT R_Trig_S11.Q) AND (MutingSwitch12 AND NOT R_Trig_S12.Q)) OR
+				   (NOT MutingEnable AND R_Trig_S11.Q) OR
+				   (NOT MutingEnable AND R_Trig_S12.Q )) THEN
+					ControlCode := SF_MutingPar_2Sensor_State#Error_Muting_Sequence_Base;
+					IF(MutingEnable) THEN
+						DiagCode := TO_WORD(SF_MutingPar_2Sensor_State#Error_Muting_Sequence_Base + GetErrorStateOfMutingSensors(MutingSwitch11, MutingSwitch12));
+					ELSE
+						DiagCode := TO_WORD(SF_MutingPar_2Sensor_State#Error_Muting_Sequence_Base + 16#0F00 + GetErrorStateOfMutingSensors(MutingSwitch11, MutingSwitch12));
+					END_IF;
+				ELSIF(IS_NOT(S_AOPD_In)) THEN
+					ControlCode := SF_MutingPar_2Sensor_State#Safety_Demand_AOPD;
+					DiagCode := TO_WORD(ControlCode);
+				ELSIF(MutingEnable AND R_Trig_S11.Q AND NOT MutingSwitch12) THEN
+					ControlCode := SF_MutingPar_2Sensor_State#Muting_Start_1;
+					DiagCode := TO_WORD(ControlCode);
+				ELSIF(MutingEnable AND NOT MutingSwitch11 AND R_Trig_S12.Q) THEN
+					ControlCode := SF_MutingPar_2Sensor_State#Muting_Start_2;
+					DiagCode := TO_WORD(ControlCode);
+				ELSIF(MutingEnable AND R_Trig_S11.Q AND R_Trig_S12.Q) THEN
+					ControlCode := SF_MutingPar_2Sensor_State#Muting_Active;
+					DiagCode := TO_WORD(ControlCode);
+				END_IF;
+			SF_MutingPar_2Sensor_State#Muting_Start_1:
+				MutingTimer();
+				DiscTimeEntryTimer();
+
+				IF(NOT MutingEnable OR NOT MutingSwitch11) THEN
+					ControlCode := SF_MutingPar_2Sensor_State#Error_Muting_Sequence_Base;
+					IF(MutingEnable) THEN
+						DiagCode := TO_WORD(SF_MutingPar_2Sensor_State#Error_Muting_Sequence_Base + 16#0100 + GetErrorStateOfMutingSensors(MutingSwitch11, MutingSwitch12));
+					ELSE
+						DiagCode := TO_WORD(SF_MutingPar_2Sensor_State#Error_Muting_Sequence_Base + 16#0F00 + GetErrorStateOfMutingSensors(MutingSwitch11, MutingSwitch12));
+					END_IF;
+				ELSIF(MutingTimer.Q) THEN
+					ControlCode := SF_MutingPar_2Sensor_State#Error_Timer_MaxMuting;
+					DiagCode := TO_WORD(ControlCode);
+				ELSIF(DiscTimeEntryTimer.Q) THEN
+					ControlCode := SF_MutingPar_2Sensor_State#Error_Timer_Entry;
+					DiagCode := TO_WORD(ControlCode);
+				ELSIF(IS_NOT(S_AOPD_In)) THEN
+					ControlCode := SF_MutingPar_2Sensor_State#Safety_Demand_AOPD;
+					DiagCode := TO_WORD(ControlCode);
+				ELSIF(MutingEnable AND MutingSwitch11 AND R_Trig_S12.Q) THEN
+					ControlCode := SF_MutingPar_2Sensor_State#Muting_Active;
+					DiagCode := TO_WORD(ControlCode);
+				END_IF;
+			SF_MutingPar_2Sensor_State#Muting_Start_2:
+				MutingTimer();
+				DiscTimeEntryTimer();
+
+				IF(NOT MutingEnable OR NOT MutingSwitch12) THEN
+					ControlCode := SF_MutingPar_2Sensor_State#Error_Muting_Sequence_Base;
+					IF(MutingEnable) THEN
+						DiagCode := TO_WORD(SF_MutingPar_2Sensor_State#Error_Muting_Sequence_Base + 16#0200 + GetErrorStateOfMutingSensors(MutingSwitch11, MutingSwitch12));
+					ELSE
+						DiagCode := TO_WORD(SF_MutingPar_2Sensor_State#Error_Muting_Sequence_Base + 16#0F00 + GetErrorStateOfMutingSensors(MutingSwitch11, MutingSwitch12));
+					END_IF;
+				ELSIF(MutingTimer.Q) THEN
+					ControlCode := SF_MutingPar_2Sensor_State#Error_Timer_MaxMuting;
+					DiagCode := TO_WORD(ControlCode);
+				ELSIF(DiscTimeEntryTimer.Q) THEN
+					ControlCode := SF_MutingPar_2Sensor_State#Error_Timer_Entry;
+					DiagCode := TO_WORD(ControlCode);
+				ELSIF(IS_NOT(S_AOPD_In)) THEN
+					ControlCode := SF_MutingPar_2Sensor_State#Safety_Demand_AOPD;
+					DiagCode := TO_WORD(ControlCode);
+				ELSIF(MutingEnable AND R_Trig_S11.Q AND MutingSwitch12) THEN
+					ControlCode := SF_MutingPar_2Sensor_State#Muting_Active;
+					DiagCode := TO_WORD(ControlCode);
+				END_IF;
+			SF_MutingPar_2Sensor_State#Muting_Active:
+				MutingTimer();
+				DiscTimeEntryTimer();
+
+				IF(MutingTimer.Q) THEN
+					ControlCode := SF_MutingPar_2Sensor_State#Error_Timer_MaxMuting;
+					DiagCode := TO_WORD(ControlCode);
+				ELSIF(NOT MutingSwitch11 OR NOT MutingSwitch12) THEN
+					ControlCode := SF_MutingPar_2Sensor_State#AOPD_Free;
+					DiagCode := TO_WORD(ControlCode);
+				END_IF;
+			SF_MutingPar_2Sensor_State#Error_Muting_Sequence_Base:
+				IF(NOT (MutingSwitch11 OR MutingSwitch12)) THEN
+					ControlCode := SF_MutingPar_2Sensor_State#Wait_For_Reset;
+					DiagCode := TO_WORD(ControlCode);
+				END_IF;
+			SF_MutingPar_2Sensor_State#Error_Timer_MaxMuting,
+			SF_MutingPar_2Sensor_State#Error_Timer_Entry:
+				IF(NOT (MutingSwitch11 OR MutingSwitch12)) THEN
+					ControlCode := SF_MutingPar_2Sensor_State#Wait_For_Reset;
+					DiagCode := TO_WORD(ControlCode);
+				END_IF;
+			SF_MutingPar_2Sensor_State#Reset_Error_1:
+				IF(NOT Reset) THEN
+					ControlCode := SF_MutingPar_2Sensor_State#Init;
+					DiagCode := TO_WORD(ControlCode);
+				END_IF;
+			SF_MutingPar_2Sensor_State#Reset_Error_2:
+				IF(NOT Reset) THEN
+					ControlCode := SF_MutingPar_2Sensor_State#Wait_For_Reset;
+					DiagCode := TO_WORD(ControlCode);
+				END_IF;
+		END_CASE;
+	END_IF;
+
+	CASE TO_UINT(ControlCode) OF
+		SF_MutingPar_2Sensor_State#Idle:
+			DiscTimeEntryTimer(IN := FALSE);
+			MutingTimer(IN := FALSE);
+			Ready := FALSE;
+			S_AOPD_Out := SAFEBOOL_Constant#SAFEFALSE;
+			S_MutingActive := SAFEBOOL_Constant#SAFEFALSE;
+			SafetyDemand := FALSE;
+			ResetRequest := FALSE;
+			Error := FALSE;
+		SF_MutingPar_2Sensor_State#AOPD_Free:
+			DiscTimeEntryTimer(IN := FALSE);
+			MutingTimer(IN := FALSE);
+			Ready := TRUE;
+			S_AOPD_Out := SAFEBOOL_Constant#SAFETRUE;
+			S_MutingActive := SAFEBOOL_Constant#SAFEFALSE;
+			SafetyDemand := FALSE;
+			ResetRequest := FALSE;
+			Error := FALSE;
+		SF_MutingPar_2Sensor_State#Init,
+		SF_MutingPar_2Sensor_State#Wait_For_Reset:
+			DiscTimeEntryTimer(IN := FALSE);
+			MutingTimer(IN := FALSE);
+			Ready := TRUE;
+			S_AOPD_Out := SAFEBOOL_Constant#SAFEFALSE;
+			S_MutingActive := SAFEBOOL_Constant#SAFEFALSE;
+			SafetyDemand := FALSE;
+			ResetRequest := TRUE;
+			Error := FALSE;
+		SF_MutingPar_2Sensor_State#Safety_Demand_AOPD:
+			DiscTimeEntryTimer(IN := FALSE);
+			MutingTimer(IN := FALSE);
+			Ready := TRUE;
+			S_AOPD_Out := SAFEBOOL_Constant#SAFEFALSE;
+			S_MutingActive := SAFEBOOL_Constant#SAFEFALSE;
+			SafetyDemand := TRUE;
+			ResetRequest := FALSE;
+			Error := FALSE;
+		SF_MutingPar_2Sensor_State#Safe:
+			DiscTimeEntryTimer(IN := FALSE);
+			MutingTimer(IN := FALSE);
+			Ready := TRUE;
+			S_AOPD_Out := SAFEBOOL_Constant#SAFEFALSE;
+			S_MutingActive := SAFEBOOL_Constant#SAFEFALSE;
+			SafetyDemand := FALSE;
+			ResetRequest := FALSE;
+			Error := FALSE;
+		SF_MutingPar_2Sensor_State#Muting_Start_1,
+		SF_MutingPar_2Sensor_State#Muting_Start_2:
+			DiscTimeEntryTimer(IN := TRUE, PT := DiscTimeEntry);
+			MutingTimer(IN := TRUE, PT := MaxMutingTime);
+			Ready := TRUE;
+			S_AOPD_Out := SAFEBOOL_Constant#SAFETRUE;
+			S_MutingActive := SAFEBOOL_Constant#SAFEFALSE;
+			SafetyDemand := FALSE;
+			ResetRequest := FALSE;
+			Error := FALSE;
+		SF_MutingPar_2Sensor_State#Muting_Active:
+			DiscTimeEntryTimer(IN := FALSE);
+			MutingTimer(IN := TRUE, PT := MaxMutingTime);
+			Ready := TRUE;
+			S_AOPD_Out := SAFEBOOL_Constant#SAFETRUE;
+			S_MutingActive := SAFEBOOL_Constant#SAFETRUE;
+			SafetyDemand := FALSE;
+			ResetRequest := FALSE;
+			Error := FALSE;
+		SF_MutingPar_2Sensor_State#Reset_Error_1,
+		SF_MutingPar_2Sensor_State#Reset_Error_2,
+		SF_MutingPar_2Sensor_State#Error_Muting_Sequence_Base,
+		SF_MutingPar_2Sensor_State#Parameter_Error,
+		SF_MutingPar_2Sensor_State#Error_Timer_MaxMuting,
+		SF_MutingPar_2Sensor_State#Error_Timer_Entry:
+			DiscTimeEntryTimer(IN := FALSE);
+			MutingTimer(IN := FALSE);
+			Ready := TRUE;
+			S_AOPD_Out := SAFEBOOL_Constant#SAFEFALSE;
+			S_MutingActive := SAFEBOOL_Constant#SAFEFALSE;
+			SafetyDemand := FALSE;
+			ResetRequest := FALSE;
+			Error := TRUE;
+	END_CASE;
+
+	ENO := ENO AND CheckSAFEBOOL(S_AOPD_In) AND CheckSAFEBOOL(S_StartReset);
+
+END_FUNCTION_BLOCK
+
+/* returns a UINT that can be added to the DiagCode indicating which muting states were active prior to the Error */
+FUNCTION GetErrorStateOfMutingSensors : UINT
+	VAR_INPUT
+		MS_11 : BOOL;
+		MS_12 : BOOL;
+	END_VAR
+	VAR
+		Result : UINT := 16#0000;
+	END_VAR
+
+	IF(MS_11) THEN
+		Result := Result + 16#0010;
+	END_IF;
+	IF(MS_12) THEN
+		Result := Result + 16#0020;
+	END_IF;
+
+	GetErrorStateOfMutingSensors := Result;
+END_FUNCTION
+
+END_NAMESPACE
+END_NAMESPACE

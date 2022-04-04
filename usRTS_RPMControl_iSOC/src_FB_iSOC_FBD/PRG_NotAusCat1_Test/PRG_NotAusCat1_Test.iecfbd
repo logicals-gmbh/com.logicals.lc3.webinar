@@ -1,0 +1,37 @@
+PROGRAM PRG_NotAusCat1_Test
+  VAR
+    FB_NotAusCat11 : FB_NotAusCat1;
+    lx_NotHalt : BOOL;
+    lx_Quit : BOOL;
+    lx_Bremse : BOOL;
+    lx_Antrieb : BOOL;
+  END_VAR
+
+  (*
+
+    // Network 1:
+    FB_NotAusCat11(vix_NotHalt := lx_NotHalt, vix_Quit := lx_Quit, vox_Bremse => lx_Bremse, vox_Antrieb => lx_Antrieb);
+
+  *)
+
+  @VF(2) : @E(lx_NotHalt), @R(420.0, 280.0, 140.0, 19.0);
+  @VF(4) : @E(lx_Quit), @R(420.0, 300.0, 140.0, 19.0);
+  @VF(5) : @E(lx_Bremse), @R(990.0, 280.0, 140.0, 19.0);
+  @VF(6) : @E(lx_Antrieb), @R(990.0, 300.0, 140.0, 19.0);
+  @OLT(10) : @R(320.0, 250.0, 80.0, 19.0), @S(2);
+  @OLT(11) : @R(320.0, 270.0, 80.0, 19.0), @S(4);
+  @C(1) : @FB(FB_NotAusCat11), @R(620.0, 280.0, 290.0, 78.0), @I(@N(vix_NotHalt), @L(9.5)), @I(@N(vix_Quit), @L(29.5)), @I(@N(vit_VerzZeit1), @L(49.5)), @I(@N(vit_VerzZeit2), @L(69.5)), @O(@N(vox_Bremse), @R(9.5)), @O(@N(vox_Antrieb), @R(29.5));
+
+  @G(3) :
+     @L(@VF(2).o, @C(1).vix_NotHalt)
+    ;
+  @G(7) :
+     @L(@C(1).vox_Bremse, @VF(5).i)
+    ;
+  @G(8) :
+     @L(@C(1).vox_Antrieb, @VF(6).i)
+    ;
+  @G(9) :
+     @L(@VF(4).o, @C(1).vix_Quit)
+    ;
+END_PROGRAM

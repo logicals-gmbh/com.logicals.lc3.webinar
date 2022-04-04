@@ -1,0 +1,231 @@
+USING logicals.web.standard.safe;
+
+NAMESPACE logicals.web.standard.safe
+NAMESPACE plcopen
+
+TYPE
+	SF_Guard_State : UINT(
+	/* Static reset detected in state 8003. */
+	Reset_Error := 16#C001,
+	/* DiscrepancyTime elapsed in state 8806. */
+	Discrepancytime_Error_1 := 16#C010,
+	/* DiscrepancyTime elapsed in state 8808. */
+	Discrepancytime_Error_2 := 16#C020,
+	/* The function block is not active (initial state). */
+	Idle := 16#0000,
+	/* Safety guard closed and Safe state acknowledged. */
+	Normal := 16#8000,
+	/* Function block has been activated. */
+	Init := 16#8001,
+	/* Complete switching sequence required. */
+	Open_Guard_Request := 16#8802,
+	/* Waiting for rising trigger at Reset. */
+	Wait_For_Reset := 16#8402,
+	/* Guard completely opened. */
+	Guard_Opened := 16#8804,
+	/* S_GuardSwitch1 has been switched to TRUE - waiting for S_GuardSwitch2; discrepancy timer started. */
+	Wait_For_GuardSwitch2 := 16#8806,
+	/* S_GuardSwitch2 has been switched to TRUE - waiting for S_GuardSwitch1; discrepancy timer started. */
+	Wait_For_GuardSwitch1 := 16#8808,
+	/* Guard closed. Waiting for Reset, if S_AutoReset = FALSE. */
+	Guard_Closed := 16#8002
+	);
+END_TYPE
+
+/*
+ * This function block monitors the relevant safety guard.
+ * There are two independent input parameters for two switches at the safety guard coupled with a time difference (DiscrepancyTime) for closing the guard.
+ */
+FUNCTION_BLOCK SF_Guard
+	{ altName:="SF_Guard"; bgColor:="Gold"; width:=360; }
+	VAR_INPUT
+		/* See Section 5.1.1 General Input Parameters */
+		Activate : BOOL := FALSE;
+		/* Variable.
+		 * Guard switch 1 input.
+		 * FALSE: Guard is not closed.
+		 * TRUE: Guard is closed. */
+		S_GuardSwitch1 : SAFEBOOL := SAFEBOOL_Constant#SAFEFALSE;
+		/* Variable.
+		 * Guard switch 2 input.
+		 * FALSE: Guard is not closed.
+		 * TRUE: Guard is closed. */
+		S_GuardSwitch2 : SAFEBOOL := SAFEBOOL_Constant#SAFEFALSE;
+		/* Constant.
+		 * Configures the monitored synchronous time between S_GuardSwitch1 and S_GuardSwitch2. */
+		DiscrepancyTime : TIME := T#0ms;
+		/* See Section 5.1.1 General Input Parameters */
+		S_StartReset : SAFEBOOL := SAFEBOOL_Constant#SAFEFALSE;
+		/* See Section 5.1.1 General Input Parameters */
+		S_AutoReset : SAFEBOOL := SAFEBOOL_Constant#SAFEFALSE;
+		/* See Section 5.1.1 General Input Parameters */
+		 Reset : BOOL := FALSE;
+	END_VAR
+
+	VAR_OUTPUT
+		/* See Section 5.1.2 General Output Parameters */
+		Ready : BOOL := FALSE;
+		/* Output indicating that the guard is closed and the guarded area safe
+		 * FALSE: Guard is open.
+		 * TRUE: both S_GuardSwitches are TRUE, no error and acknowledgment. Guard is closed.. */
+		S_GuardOut : SAFEBOOL := SAFEBOOL_Constant#SAFEFALSE;
+		/* See Section 5.1.2 General Output Parameters */
+		SafetyDemand : BOOL := FALSE;
+		/* See Section 5.1.2 General Output Parameters */
+		ResetRequest : BOOL := FALSE;
+		/* See Section 5.1.2 General Output Parameters */
+		Error : BOOL := FALSE;
+		/* See Section 5.1.2 General Output Parameters */
+		DiagCode : WORD := 16#0000;
+	END_VAR
+
+	VAR
+		DiscrepancyTimer : TON;
+		R_Trig_Reset : R_TRIG;
+	END_VAR
+
+	R_Trig_Reset(Reset);
+
+	IF(NOT Activate) THEN
+		DiagCode := TO_WORD(SF_Equivalent_State#Idle);
+	ELSE
+		CASE TO_UINT(DiagCode) OF
+			SF_Guard_State#Idle:
+				/* IF(Activate) THEN - Active is always true here */
+					DiagCode := TO_WORD(SF_Guard_State#Init);
+			SF_Guard_State#Init:
+				IF(IS_NOT(S_GuardSwitch1) OR IS_NOT(S_GuardSwitch2)) THEN
+					DiagCode := TO_WORD(SF_Guard_State#Open_Guard_Request);
+				ELSIF(IS(S_GuardSwitch1) AND IS(S_GuardSwitch2) AND IS_NOT(S_StartReset)) THEN
+					DiagCode := TO_WORD(SF_Guard_State#Wait_For_Reset);
+				/*ELSIF(IS(S_GuardSwitch1) AND IS(S_GuardSwitch2) AND IS(S_StartReset)) THEN - S_GuardSwitch1 and S_GuardSwitch2 can only be true here, S_StartReset can only be true */
+				ELSE
+					DiagCode := TO_WORD(SF_Guard_State#Normal);
+				END_IF;
+			SF_Guard_State#Open_Guard_Request:
+				IF(IS_NOT(S_GuardSwitch1) AND IS_NOT(S_GuardSwitch2)) THEN
+					DiagCode := TO_WORD(SF_Guard_State#Guard_Opened);
+				END_IF;
+			SF_Guard_State#Guard_Opened:
+				IF(IS(S_GuardSwitch1)) THEN
+					DiagCode := TO_WORD(SF_Guard_State#Wait_For_GuardSwitch2);
+				ELSIF(IS(S_GuardSwitch2)) THEN
+					DiagCode := TO_WORD(SF_Guard_State#Wait_For_GuardSwitch1);
+				END_IF;
+			SF_Guard_State#Wait_For_GuardSwitch2:
+				DiscrepancyTimer();
+				IF(DiscrepancyTimer.Q) THEN
+					DiagCode := TO_WORD(SF_Guard_State#Discrepancytime_Error_1);
+				ELSIF(IS_NOT(S_GuardSwitch1)) THEN
+					DiagCode := TO_WORD(SF_Guard_State#Open_Guard_Request);
+				ELSIF(IS(S_GuardSwitch1) AND IS(S_GuardSwitch2)) THEN
+					DiagCode := TO_WORD(SF_Guard_State#Guard_Closed);
+				END_IF;
+			SF_Guard_State#Wait_For_GuardSwitch1:
+				DiscrepancyTimer();
+				IF(DiscrepancyTimer.Q) THEN
+					DiagCode := TO_WORD(SF_Guard_State#Discrepancytime_Error_2);
+				ELSIF(IS_NOT(S_GuardSwitch2)) THEN
+					DiagCode := TO_WORD(SF_Guard_State#Open_Guard_Request);
+				ELSIF(IS(S_GuardSwitch1) AND IS(S_GuardSwitch2)) THEN
+					DiagCode := TO_WORD(SF_Guard_State#Guard_Closed);
+				END_IF;
+			SF_Guard_State#Discrepancytime_Error_1,
+			SF_Guard_State#Discrepancytime_Error_2:
+				IF(IS_NOT(S_GuardSwitch1) AND IS_NOT(S_GuardSwitch2)) THEN
+					DiagCode := TO_WORD(SF_Guard_State#Guard_Opened);
+				END_IF;
+			SF_Guard_State#Guard_Closed:
+				IF(IS_NOT(S_GuardSwitch1) OR IS_NOT(S_GuardSwitch2)) THEN
+					DiagCode := TO_WORD(SF_Guard_State#Open_Guard_Request);
+				ELSIF(IS_NOT(S_AutoReset)) THEN
+					DiagCode := TO_WORD(SF_Guard_State#Wait_For_Reset);
+				/* ELSIF(IS(S_AutoReset)) THEN - S_AutoReset can only be true here */
+				ELSE
+					DiagCode := TO_WORD(SF_Guard_State#Normal);
+				END_IF;
+			SF_Guard_State#Wait_For_Reset:
+				IF(Reset AND NOT R_Trig_Reset.Q) THEN
+					DiagCode := TO_WORD(SF_Guard_State#Reset_Error);
+				ELSIF(IS_NOT(S_GuardSwitch1) OR IS_NOT(S_GuardSwitch2)) THEN
+					DiagCode := TO_WORD(SF_Guard_State#Open_Guard_Request);
+				ELSIF(R_Trig_Reset.Q) THEN
+					DiagCode := TO_WORD(SF_Guard_State#Normal);
+				END_IF;
+			SF_Guard_State#Normal:
+				IF(IS_NOT(S_GuardSwitch1) OR IS_NOT(S_GuardSwitch2)) THEN
+					DiagCode := TO_WORD(SF_Guard_State#Open_Guard_Request);
+				END_IF;
+			SF_Guard_State#Reset_Error:
+				IF(NOT Reset) THEN
+					DiagCode := TO_WORD(SF_Guard_State#Wait_For_Reset);
+				END_IF;
+		END_CASE;
+	END_IF;
+
+	CASE TO_UINT(DiagCode) OF
+		SF_Guard_State#Idle:
+			DiscrepancyTimer(IN := FALSE);
+			Ready := FALSE;
+			S_GuardOut := SAFEBOOL_Constant#SAFEFALSE;
+			SafetyDemand := FALSE;
+			ResetRequest := FALSE;
+			Error := FALSE;
+		SF_Guard_State#Normal:
+			DiscrepancyTimer(IN := FALSE);
+			Ready := TRUE;
+			S_GuardOut := SAFEBOOL_Constant#SAFETRUE;
+			SafetyDemand := FALSE;
+			ResetRequest := FALSE;
+			Error := FALSE;
+		SF_Guard_State#Init,
+		SF_Guard_State#Guard_Closed:
+			DiscrepancyTimer(IN := FALSE);
+			Ready := TRUE;
+			S_GuardOut := SAFEBOOL_Constant#SAFEFALSE;
+			SafetyDemand := FALSE;
+			ResetRequest := FALSE;
+			Error := FALSE;
+		SF_Guard_State#Open_Guard_Request,
+		SF_Guard_State#Guard_Opened:
+			DiscrepancyTimer(IN := FALSE);
+			Ready := TRUE;
+			S_GuardOut := SAFEBOOL_Constant#SAFEFALSE;
+			SafetyDemand := TRUE;
+			ResetRequest := FALSE;
+			Error := FALSE;
+		SF_Guard_State#Wait_For_GuardSwitch2,
+		SF_Guard_State#Wait_For_GuardSwitch1:
+			DiscrepancyTimer(IN := TRUE, PT := DiscrepancyTime);
+			Ready := TRUE;
+			S_GuardOut := SAFEBOOL_Constant#SAFEFALSE;
+			SafetyDemand := TRUE;
+			ResetRequest := FALSE;
+			Error := FALSE;
+		SF_Guard_State#Wait_For_Reset:
+			DiscrepancyTimer(IN := FALSE);
+			Ready := TRUE;
+			S_GuardOut := SAFEBOOL_Constant#SAFEFALSE;
+			SafetyDemand := FALSE;
+			ResetRequest := TRUE;
+			Error := FALSE;
+		SF_Guard_State#Reset_Error,
+		SF_Guard_State#Discrepancytime_Error_1,
+		SF_Guard_State#Discrepancytime_Error_2:
+			DiscrepancyTimer(IN := FALSE);
+			Ready := TRUE;
+			S_GuardOut := SAFEBOOL_Constant#SAFEFALSE;
+			SafetyDemand := FALSE;
+			ResetRequest := FALSE;
+			Error := TRUE;
+		ELSE
+			ENO := FALSE;
+	END_CASE;
+
+	ENO := ENO AND CheckSAFEBOOL(S_GuardSwitch1) AND CheckSAFEBOOL(S_GuardSwitch2) AND CheckSAFEBOOL(S_StartReset) AND CheckSAFEBOOL(S_AutoReset);
+
+END_FUNCTION_BLOCK
+
+
+END_NAMESPACE
+END_NAMESPACE

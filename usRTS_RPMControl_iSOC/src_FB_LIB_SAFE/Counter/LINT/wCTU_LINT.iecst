@@ -1,0 +1,52 @@
+NAMESPACE logicals.web.standard
+NAMESPACE counter
+
+/*
+ * Function block wrapper for IEC 61131-3 CTU_LINT<br>
+ * CU = increment on positive edge on CU (BOOL)<br>
+ * R  = flag for reset (BOOL)<br>
+ * PV = upper limit of counter (LINT)<br>
+ * Q  = flag showing whether upper limit is reached or not (BOOL)<br>
+ * CV = current value of counter (LINT)<br>
+ */
+FUNCTION_BLOCK wCTU_LINT
+	{ CV { index := 2 }; vNameAlignment:="center"; altName:="CTU_LINT"; bgColor:="LightPink"; width:=120; }
+	VAR_INPUT
+		CU : BOOL /* R_EDGE */;
+		R  : BOOL;
+		PV : LINT;
+	END_VAR
+	VAR_OUTPUT
+		Q  : BOOL;
+		CV : LINT;
+	END_VAR
+	VAR
+		M : BOOL;
+	END_VAR
+	VAR_TEMP
+		edgeCU : BOOL;
+	END_VAR
+
+	/* Perform Edge Recognition */
+	IF CU THEN
+		edgeCU := NOT M;
+		M := TRUE;
+	ELSE
+		edgeCU := CU;
+		M := FALSE;
+	END_IF;
+
+	IF R THEN
+		CV := 0;
+	ELSE
+		IF edgeCU THEN
+			IF CV < 16#7FFFFFFFFFFFFFFF THEN
+				CV := CV + 1;
+			END_IF;
+		END_IF;
+	END_IF;
+	Q := CV >= PV;
+END_FUNCTION_BLOCK
+
+END_NAMESPACE
+END_NAMESPACE

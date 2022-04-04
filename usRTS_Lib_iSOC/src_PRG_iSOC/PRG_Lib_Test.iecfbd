@@ -1,0 +1,987 @@
+PROGRAM PRG_Lib_Test
+  USING com.logicals.Basic.SigGen;
+  VAR
+    AI1 : AI;
+    AI2 : AI;
+    li_AI1 : INT := 0;
+    li_AI2 : INT := 1;
+    li_AnalogIn1 : INT := 0;
+    li_AnalogIn2 : INT := 0;
+    AO1 : AO;
+    li_AnalogOut : INT := 4711;
+    DI1 : DI;
+    DI2 : DI;
+    DI3 : DI;
+    DI4 : DI;
+    DI5 : DI;
+    DI6 : DI;
+    DI7 : DI;
+    DI8 : DI;
+    li_DQ1 : INT := 0;
+    li_DQ2 : INT := 1;
+    li_DQ3 : INT := 2;
+    li_DQ4 : INT := 3;
+    DQ1 : DQ;
+    DQ2 : DQ;
+    DQ3 : DQ;
+    li_DI1 : INT := 0;
+    li_DI2 : INT := 1;
+    li_DI3 : INT := 2;
+    li_DI4 : INT := 3;
+    li_DI5 : INT := 4;
+    li_DI6 : INT := 5;
+    li_DI7 : INT := 6;
+    li_DI8 : INT := 7;
+    lx_DigIn1 : BOOL;
+    lx_DigIn2 : BOOL;
+    lx_DigIn3 : BOOL;
+    lx_DigIn4 : BOOL;
+    lx_DigIn5 : BOOL;
+    lx_DigIn6 : BOOL;
+    lx_DigIn7 : BOOL;
+    lx_DigIn8 : BOOL;
+    DQ4 : DQ;
+    DQ5 : DQ;
+    DQ6 : DQ;
+    DQ7 : DQ;
+    DQ8 : DQ;
+    li_DQ5 : INT := 4;
+    li_DQ6 : INT := 5;
+    li_DQ7 : INT := 6;
+    li_DQ8 : INT := 7;
+    lx_DigOut1 : BOOL;
+    lx_DigOut2 : BOOL;
+    lx_DigOut3 : BOOL;
+    lx_DigOut4 : BOOL;
+    lx_DigOut5 : BOOL;
+    lx_DigOut6 : BOOL;
+    lx_DigOut7 : BOOL;
+    lx_DigOut8 : BOOL;
+    lx_TestDigOut1 : BOOL;
+    lx_TestDigOut2 : BOOL;
+    lx_TestDigOut3 : BOOL;
+    lx_TestDigOut4 : BOOL;
+    lx_TestDigOut5 : BOOL;
+    lx_TestDigOut6 : BOOL;
+    lx_TestDigOut7 : BOOL;
+    lx_TestDigOut8 : BOOL;
+    FB_lc_SFC_20Steps_ST1 : FB_lc_SFC20Steps_ST;
+    lui_StepStopNo : UINT := 10;
+    lui_StepLoopNo : UINT := 5;
+    lx_LoopMode : BOOL := TRUE;
+    lx_StopMode : BOOL;
+    lx_ResetMode : BOOL;
+    lx_Start : BOOL := TRUE;
+    lx_Stop : BOOL;
+    lstruc_SFCState : DT_lc_SFCVal;
+    TON1 : TON;
+    larrstruc_SFCState : ARRAY[0..20] OF DT_LC_SFCVAL;
+    lui_CycleCount : UINT;
+    lx_CyclePulse : BOOL;
+    R_TRIG1 : R_TRIG;
+    lx_CycleInit : BOOL;
+    FB_lc_1oo5_ST1 : FB_lc_1oo5_ST;
+    lx_RPM0 : BOOL;
+    lx_RPM1 : BOOL;
+    lx_RPM2 : BOOL;
+    lx_RPM3 : BOOL;
+    lx_RPM4 : BOOL;
+    lx_Reset : BOOL;
+    com_logicals_Basic_Flash_FB_lc_Flash_2Hz_FBD1 : com.logicals.Basic.Flash.FB_lc_Flash_2Hz_FBD;
+    lx_Flash_2Hz : BOOL;
+    lx_RPMManual : BOOL;
+    AO2 : AO;
+    li_AnalogInManual : INT;
+    li_AnalogInRPM0 : INT;
+    li_AnalogInRPM1 : INT := 35;
+    li_AnalogInRPM2 : INT := 60;
+    AO3 : AO;
+    FB_lc_Scale_ST1 : FB_lc_Scale_ST;
+    lr_MaxInVal : REAL := 100.0;
+    lr_MinInVal : REAL := 0.0;
+    lr_MaxPhysVal : REAL := 3450.0;
+    lr_MinPhysVal : REAL := 0.0;
+    lr_OffsetPhysVal : REAL := 0.0;
+    FB_lc_Scale_ST2 : FB_lc_Scale_ST;
+    AO4 : AO;
+    FB_lc_Scale_ST3 : FB_lc_Scale_ST;
+    AO5 : AO;
+    com_logicals_Basic_SigGen_FB_lc_GenSinCosSig_ST1 : com.logicals.Basic.SigGen.FB_lc_GenSinCosSig_ST;
+    li_AnalogInRPM3 : INT;
+    li_AnalogInRPM4 : INT;
+    lr_StepVal : REAL := 0.05;
+    lr_EndVal : REAL := 60.0;
+    lr_NullVal : REAL := 0.0;
+  END_VAR
+  VAR
+    ltarr_StepTransTime : ARRAY [0..20] OF TIME := [T#1s,T#1s,T#1s,T#1s,T#1s,T#1s,T#1s,T#1s,T#1s,T#1s,T#1s,T#1s,T#1s,T#1s,T#1s,T#1s,T#1s,T#1s,T#1s,T#1s,T#1s];
+    lstrarr_StepName : ARRAY [0..20] OF STRING[20] := ['ActionInit',
+   	                                                       'Action00','Action01','Action02','Action03','Action04','Action05','Action06',
+   	                                                       'Action07','Action08','Action09','Action10','Action11','Action12','Action13',
+   	                                                       'Action14','Action15','Action16','Action17','Action18','Action19'];
+  END_VAR
+
+  (*
+
+    // Network 1:
+    DI2(InputSelect := li_DI1, InputValue => lx_DigIn1);
+    DI3(InputSelect := li_DI2, InputValue => lx_DigIn2);
+    DI4(InputSelect := li_DI3, InputValue => lx_DigIn3);
+    DI5(InputSelect := li_DI4, InputValue => lx_DigIn4);
+    DI6(InputSelect := li_DI5, InputValue => lx_DigIn5);
+    FB_lc_1oo5_ST1(vix_In1 := lx_DigIn1, vix_In2 := lx_DigIn2, vix_In3 := lx_DigIn3, vix_In4 := lx_DigIn4, vix_In5 := lx_DigIn5, vox_Out1 => lx_RPM0, vox_Out2 => lx_RPM1, vox_Out3 => lx_RPM2, vox_Out4 => lx_RPM3, vox_Out5 => lx_RPM4);
+    AND(IN1 := NOT FB_lc_1oo5_ST1.vox_Out1, IN2 := NOT FB_lc_1oo5_ST1.vox_Out2, IN3 := NOT FB_lc_1oo5_ST1.vox_Out3, IN4 := NOT FB_lc_1oo5_ST1.vox_Out4, IN5 := NOT FB_lc_1oo5_ST1.vox_Out5, AND => lx_RPMManual);
+
+    // Network 2:
+    DI7(InputSelect := li_DI6, InputValue => lx_DigIn6);
+    lx_Reset := lx_DigIn6;
+
+    // Network 3:
+    DI8(InputSelect := li_DI7, InputValue => lx_DigIn7);
+
+    // Network 4:
+    DI1(InputSelect := li_DI8, InputValue => lx_DigIn8);
+
+    // Network 5:
+    ADD(IN1 := lui_CycleCount, IN2 := 1, ADD => lui_CycleCount);
+
+    // Network 6:
+    NOT(IN := lx_CyclePulse, NOT => lx_CyclePulse);
+
+    // Network 7:
+    R_TRIG1(CLK := TRUE, Q => lx_CycleInit);
+
+    // Network 8:
+    com_logicals_Basic_Flash_FB_lc_Flash_2Hz_FBD1(vox_Out => lx_Flash_2Hz);
+
+    // Network 9:
+    lx_DigOut1 := lx_RPM0;
+    OR(IN1 := lx_DigOut1, IN2 := lx_TestDigOut1, OR => @C(113).OR);
+    DQ1(OutputSelect := li_DQ1, OutputValue := @C(113).OR);
+
+    // Network 10:
+    lx_DigOut2 := lx_RPM1;
+    OR(IN1 := lx_DigOut2, IN2 := lx_TestDigOut2, OR => @C(116).OR);
+    DQ2(OutputSelect := li_DQ2, OutputValue := @C(116).OR);
+
+    // Network 11:
+    lx_DigOut3 := lx_RPM2;
+    OR(IN1 := lx_DigOut3, IN2 := lx_TestDigOut3, OR => @C(118).OR);
+    DQ3(OutputSelect := li_DQ3, OutputValue := @C(118).OR);
+
+    // Network 12:
+    lx_DigOut4 := lx_RPM3;
+    OR(IN1 := lx_DigOut4, IN2 := lx_TestDigOut4, OR => @C(120).OR);
+    DQ4(OutputSelect := li_DQ4, OutputValue := @C(120).OR);
+
+    // Network 13:
+    lx_DigOut5 := lx_RPM4;
+    OR(IN1 := lx_DigOut5, IN2 := lx_TestDigOut5, OR => @C(122).OR);
+    DQ8(OutputSelect := li_DQ5, OutputValue := @C(122).OR);
+
+    // Network 14:
+    AND(IN1 := lx_Reset, IN2 := lx_Flash_2Hz, AND => lx_DigOut6);
+    OR(IN1 := lx_DigOut6, IN2 := lx_TestDigOut6, OR => @C(124).OR);
+    DQ7(OutputSelect := li_DQ6, OutputValue := @C(124).OR);
+
+    // Network 15:
+    OR(IN1 := lx_DigOut7, IN2 := lx_TestDigOut7, OR => @C(126).OR);
+    DQ6(OutputSelect := li_DQ7, OutputValue := @C(126).OR);
+
+    // Network 16:
+    lx_DigOut8 := lx_CyclePulse;
+    OR(IN1 := lx_DigOut8, IN2 := lx_TestDigOut8, OR => @C(128).OR);
+    DQ5(OutputSelect := li_DQ8, OutputValue := @C(128).OR);
+
+    // Network 17:
+    AI1(InputSelect := li_AI1, AnalogValue => li_AnalogIn1);
+
+    // Network 18:
+    AI2(InputSelect := li_AI2, AnalogValue => li_AnalogIn2);
+
+    // Network 19:
+    MOVE(EN := lx_RPMManual, IN := li_AnalogIn1, ENO => @C(277).ENO, MOVE => (@C(277).MOVE, li_AnalogOut));
+    AO1(EN := @C(277).ENO, AnalogValue := @C(277).MOVE);
+
+    // Network 20:
+    MOVE(EN := lx_RPM0, ENO => @C(278).ENO, MOVE => (@C(278).MOVE, li_AnalogOut));
+    AO2(EN := @C(278).ENO, AnalogValue := @C(278).MOVE);
+
+    // Network 21:
+    TO_REAL(IN := li_AnalogInRPM1, TO_REAL => @C(309).TO_REAL);
+    FB_lc_Scale_ST1(vir_In := @C(309).TO_REAL, vir_MaxInVal := lr_MaxInVal, vir_MinInVal := lr_MinInVal, vir_MaxPhysVal := lr_MaxPhysVal, vir_MinPhysVal := lr_MinPhysVal, vir_OffsetPhysVal := lr_OffsetPhysVal);
+    TO_INT(IN := FB_lc_Scale_ST1.vor_OutPhysVal, TO_INT => @C(301).TO_INT);
+    MOVE(EN := lx_RPM1, IN := @C(301).TO_INT, ENO => @C(293).ENO, MOVE => (@C(293).MOVE, li_AnalogOut));
+    AO3(EN := @C(293).ENO, AnalogValue := @C(293).MOVE);
+
+    // Network 22:
+    TO_REAL(IN := li_AnalogInRPM2, TO_REAL => @C(326).TO_REAL);
+    FB_lc_Scale_ST2(vir_In := @C(326).TO_REAL, vir_MaxInVal := lr_MaxInVal, vir_MinInVal := lr_MinInVal, vir_MaxPhysVal := lr_MaxPhysVal, vir_MinPhysVal := lr_MinPhysVal, vir_OffsetPhysVal := lr_OffsetPhysVal);
+    TO_INT(IN := FB_lc_Scale_ST2.vor_OutPhysVal, TO_INT => @C(327).TO_INT);
+    MOVE(EN := lx_RPM2, IN := @C(327).TO_INT, ENO => @C(328).ENO, MOVE => (@C(328).MOVE, li_AnalogOut));
+    AO4(EN := @C(328).ENO, AnalogValue := @C(328).MOVE);
+
+    // Network 23:
+    SEL(G := lx_RPM4, IN0 := lr_NullVal, IN1 := lr_StepVal, SEL => @C(387).SEL);
+    SEL(G := lx_RPM4, IN0 := lr_NullVal, IN1 := lr_EndVal, SEL => @C(389).SEL);
+    com_logicals_Basic_SigGen_FB_lc_GenSinCosSig_ST1(vir_StepVal := @C(387).SEL, vir_EndVal := @C(389).SEL);
+    TO_INT(IN := com_logicals_Basic_SigGen_FB_lc_GenSinCosSig_ST1.vor_Sin_X_2, TO_INT => li_AnalogInRPM4);
+
+    // Network 24:
+    TO_REAL(IN := li_AnalogInRPM4, TO_REAL => @C(356).TO_REAL);
+    FB_lc_Scale_ST3(vir_In := @C(356).TO_REAL, vir_MaxInVal := lr_MaxInVal, vir_MinInVal := lr_MinInVal, vir_MaxPhysVal := lr_MaxPhysVal, vir_MinPhysVal := lr_MinPhysVal, vir_OffsetPhysVal := lr_OffsetPhysVal);
+    TO_INT(IN := FB_lc_Scale_ST3.vor_OutPhysVal, TO_INT => @C(357).TO_INT);
+    MOVE(EN := lx_RPM4, IN := @C(357).TO_INT, ENO => @C(358).ENO, MOVE => (@C(358).MOVE, li_AnalogOut));
+    AO5(EN := @C(358).ENO, AnalogValue := @C(358).MOVE);
+
+    // Network 25:
+    TON1(IN := lx_Start, PT := T#5s);
+    FB_lc_SFC_20Steps_ST1(vix_Start := TON1.Q, vix_Stop := lx_Stop, vix_Reset := lx_ResetMode, vix_StopMode := lx_StopMode, vix_LoopMode := lx_LoopMode, vitarr_StepTransTime := ltarr_StepTransTime, vistrarr_StepName := lstrarr_StepName, viui_StepStopNo := lui_StepStopNo, viui_StepLoopNo := lui_StepLoopNo, vo_SFCState => lstruc_SFCState, voarr_SFCStates => larrstruc_SFCState);
+
+    // Network 26:
+    lx_DigOut1 := larrstruc_SFCState[2].x_StepState;
+
+    // Network 27:
+    lx_DigOut2 := larrstruc_SFCState[3].x_StepState;
+
+    // Network 28:
+    lx_DigOut3 := larrstruc_SFCState[4].x_StepState;
+
+    // Network 29:
+    lx_DigOut4 := larrstruc_SFCState[5].x_StepState;
+
+    // Network 30:
+    lx_DigOut5 := larrstruc_SFCState[6].x_StepState;
+
+  *)
+
+  @C(35) : @FB(AI1), @R(730.0, 1450.0, 190.0, 48.0), @I(@N(InputSelect), @L(9.5)), @O(@N(AnalogValue), @R(9.5));
+  @C(36) : @FB(AI2), @R(730.0, 1530.0, 190.0, 48.0), @I(@N(InputSelect), @L(9.5)), @O(@N(AnalogValue), @R(9.5));
+  @VF(37) : @E(li_AI1), @R(520.0, 1450.0, 140.0, 19.0);
+  @VF(39) : @E(li_AI2), @R(520.0, 1530.0, 140.0, 19.0);
+  @VF(41) : @E(li_AnalogIn1), @R(970.0, 1450.0, 140.0, 19.0);
+  @VF(42) : @E(li_AnalogIn2), @R(970.0, 1530.0, 140.0, 19.0);
+  @OLT(45) : @R(980.0, 1430.0, 80.0, 19.0), @S(41);
+  @OLT(46) : @R(980.0, 1510.0, 80.0, 19.0), @S(42);
+  @C(47) : @FB(AO1), @R(870.0, 1700.0, 240.0, 38.0), @I(@N(EN), @L(9.5)), @I(@N(AnalogValue), @L(29.5)), @O(@N(ENO), @R(9.5));
+  @CF(62) : @R(410.0, 20.0, 810.0, 99.0), @T("IO-Test-Programm iSOC300 Steuerung$NCreated: 2021-11-02 DG"), @POU;
+  @CF(65) : @R(640.0, 130.0, 320.0, 29.0), @T("Digitale Eingaenge 0..7 lesen"), @POU;
+  @CF(66) : @R(720.0, 780.0, 580.0, 29.0), @T("Digitalen Eingaeng auf digitalen Ausgang kopieren"), @POU;
+  @CF(68) : @R(540.0, 1380.0, 530.0, 29.0), @T("Die beiden Analogeeingaenge lesen"), @POU;
+  @CF(69) : @R(550.0, 1630.0, 530.0, 29.0), @T("Den Analogeingang 1 auf den Analogausgang kopieren im Mode RPMManual"), @POU;
+  @VF(1) : @E(li_AnalogIn1), @R(360.0, 1720.0, 160.0, 19.0);
+  @OLT(3) : @R(360.0, 1740.0, 80.0, 19.0), @S(1);
+  @C(4) : @FB(DI1), @R(470.0, 310.0, 270.0, 18.0), @I(@N(InputSelect), @L(9.5)), @O(@N(InputValue), @R(9.5));
+  @VF(5) : @E(li_DI8), @R(290.0, 310.0, 140.0, 19.0);
+  @VF(7) : @E(lx_DigIn8), @R(810.0, 310.0, 140.0, 19.0);
+  @VF(9) : @E(lx_DigOut4), @R(700.0, 980.0, 140.0, 19.0);
+  @VF(12) : @E(li_DQ4), @R(960.0, 960.0, 140.0, 19.0);
+  @C(14) : @FB(DI2), @R(470.0, 170.0, 270.0, 18.0), @I(@N(InputSelect), @L(9.5)), @O(@N(InputValue), @R(9.5));
+  @VF(15) : @E(lx_DigIn1), @R(810.0, 170.0, 140.0, 19.0);
+  @VF(16) : @E(li_DI1), @R(290.0, 170.0, 140.0, 19.0);
+  @C(19) : @FB(DI3), @R(470.0, 190.0, 270.0, 18.0), @I(@N(InputSelect), @L(9.5)), @O(@N(InputValue), @R(9.5));
+  @VF(20) : @E(lx_DigIn2), @R(810.0, 190.0, 140.0, 19.0);
+  @VF(21) : @E(li_DI2), @R(290.0, 190.0, 140.0, 19.0);
+  @C(24) : @FB(DI4), @R(470.0, 210.0, 270.0, 18.0), @I(@N(InputSelect), @L(9.5)), @O(@N(InputValue), @R(9.5));
+  @VF(25) : @E(lx_DigIn3), @R(810.0, 210.0, 140.0, 19.0);
+  @VF(26) : @E(li_DI3), @R(290.0, 210.0, 140.0, 19.0);
+  @C(29) : @FB(DQ1), @R(1180.0, 840.0, 120.0, 38.0), @I(@N(OutputSelect), @L(9.5)), @I(@N(OutputValue), @L(29.5));
+  @VF(30) : @E(lx_DigOut1), @R(700.0, 860.0, 140.0, 19.0);
+  @VF(31) : @E(li_DQ1), @R(960.0, 840.0, 140.0, 19.0);
+  @C(34) : @FB(DQ2), @R(1180.0, 880.0, 120.0, 38.0), @I(@N(OutputSelect), @L(9.5)), @I(@N(OutputValue), @L(29.5));
+  @VF(48) : @E(lx_DigOut2), @R(700.0, 900.0, 140.0, 19.0);
+  @VF(49) : @E(li_DQ2), @R(960.0, 880.0, 140.0, 19.0);
+  @C(52) : @FB(DQ3), @R(1180.0, 920.0, 120.0, 38.0), @I(@N(OutputSelect), @L(9.5)), @I(@N(OutputValue), @L(29.5));
+  @VF(55) : @E(lx_DigOut3), @R(700.0, 940.0, 140.0, 19.0);
+  @VF(56) : @E(li_DQ3), @R(960.0, 920.0, 140.0, 19.0);
+  @C(60) : @FB(DI5), @R(470.0, 230.0, 270.0, 18.0), @I(@N(InputSelect), @L(9.5)), @O(@N(InputValue), @R(9.5));
+  @C(61) : @FB(DI6), @R(470.0, 250.0, 270.0, 18.0), @I(@N(InputSelect), @L(9.5)), @O(@N(InputValue), @R(9.5));
+  @C(63) : @FB(DI7), @R(470.0, 270.0, 270.0, 18.0), @I(@N(InputSelect), @L(9.5)), @O(@N(InputValue), @R(9.5));
+  @C(64) : @FB(DI8), @R(470.0, 290.0, 270.0, 18.0), @I(@N(InputSelect), @L(9.5)), @O(@N(InputValue), @R(9.5));
+  @VF(67) : @E(li_DI4), @R(290.0, 230.0, 140.0, 19.0);
+  @VF(70) : @E(li_DI5), @R(290.0, 250.0, 140.0, 19.0);
+  @VF(71) : @E(li_DI6), @R(290.0, 270.0, 140.0, 19.0);
+  @VF(72) : @E(li_DI7), @R(290.0, 290.0, 140.0, 19.0);
+  @VF(73) : @E(lx_DigIn4), @R(810.0, 230.0, 140.0, 19.0);
+  @VF(74) : @E(lx_DigIn5), @R(810.0, 250.0, 140.0, 19.0);
+  @VF(75) : @E(lx_DigIn6), @R(810.0, 270.0, 140.0, 19.0);
+  @VF(76) : @E(lx_DigIn7), @R(810.0, 290.0, 140.0, 19.0);
+  @C(10) : @FB(DQ4), @R(1180.0, 960.0, 120.0, 38.0), @I(@N(OutputSelect), @L(9.5)), @I(@N(OutputValue), @L(29.5));
+  @C(85) : @FB(DQ5), @R(1180.0, 1120.0, 120.0, 38.0), @I(@N(OutputSelect), @L(9.5)), @I(@N(OutputValue), @L(29.5));
+  @C(86) : @FB(DQ6), @R(1180.0, 1080.0, 120.0, 38.0), @I(@N(OutputSelect), @L(9.5)), @I(@N(OutputValue), @L(29.5));
+  @C(87) : @FB(DQ7), @R(1180.0, 1040.0, 120.0, 38.0), @I(@N(OutputSelect), @L(9.5)), @I(@N(OutputValue), @L(29.5));
+  @C(88) : @FB(DQ8), @R(1180.0, 1000.0, 120.0, 38.0), @I(@N(OutputSelect), @L(9.5)), @I(@N(OutputValue), @L(29.5));
+  @VF(89) : @E(lx_DigOut8), @R(700.0, 1140.0, 140.0, 19.0);
+  @VF(90) : @E(li_DQ8), @R(960.0, 1120.0, 140.0, 19.0);
+  @VF(91) : @E(lx_DigOut7), @R(700.0, 1100.0, 140.0, 19.0);
+  @VF(92) : @E(li_DQ7), @R(960.0, 1080.0, 140.0, 19.0);
+  @VF(93) : @E(lx_DigOut6), @R(700.0, 1060.0, 140.0, 19.0);
+  @VF(94) : @E(li_DQ6), @R(960.0, 1040.0, 140.0, 19.0);
+  @VF(95) : @E(lx_DigOut5), @R(700.0, 1020.0, 140.0, 19.0);
+  @VF(96) : @E(li_DQ5), @R(960.0, 1000.0, 140.0, 19.0);
+  @VF(105) : @E(lx_TestDigOut1), @R(700.0, 880.0, 140.0, 19.0);
+  @VF(106) : @E(lx_TestDigOut2), @R(700.0, 920.0, 140.0, 19.0);
+  @VF(107) : @E(lx_TestDigOut3), @R(700.0, 960.0, 140.0, 19.0);
+  @VF(108) : @E(lx_TestDigOut4), @R(700.0, 1000.0, 140.0, 19.0);
+  @VF(109) : @E(lx_TestDigOut5), @R(700.0, 1040.0, 140.0, 19.0);
+  @VF(110) : @E(lx_TestDigOut6), @R(700.0, 1080.0, 140.0, 19.0);
+  @VF(111) : @E(lx_TestDigOut7), @R(700.0, 1120.0, 140.0, 19.0);
+  @VF(112) : @E(lx_TestDigOut8), @R(700.0, 1160.0, 140.0, 19.0);
+  @C(113) : @F(OR), @R(880.0, 860.0, 40.0, 38.0), BOOL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(OR), @R(9.5));
+  @C(116) : @F(OR), @R(880.0, 900.0, 40.0, 38.0), BOOL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(OR), @R(9.5));
+  @C(118) : @F(OR), @R(880.0, 940.0, 40.0, 38.0), BOOL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(OR), @R(9.5));
+  @C(120) : @F(OR), @R(880.0, 980.0, 40.0, 38.0), BOOL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(OR), @R(9.5));
+  @C(122) : @F(OR), @R(880.0, 1020.0, 40.0, 38.0), BOOL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(OR), @R(9.5));
+  @C(124) : @F(OR), @R(880.0, 1060.0, 40.0, 38.0), BOOL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(OR), @R(9.5));
+  @C(126) : @F(OR), @R(880.0, 1100.0, 40.0, 38.0), BOOL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(OR), @R(9.5));
+  @C(128) : @F(OR), @R(880.0, 1140.0, 40.0, 38.0), BOOL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(OR), @R(9.5));
+  @C(137) : @FB(FB_lc_SFC_20Steps_ST1), @R(880.0, 2860.0, 430.0, 258.0), @I(@N(vix_Term), @L(29.5)), @I(@N(vix_ShutDown), @L(9.5)), @I(@N(vix_Start), @L(49.5)), @I(@N(vix_Stop), @L(69.5)), @I(@N(vix_Reset), @L(89.5)), @I(@N(vix_StopMode), @L(109.5)), @I(@N(vix_LoopMode), @L(129.5)), @I(@N(vitarr_StepTransTime), @L(169.5)), @I(@N(vistrarr_StepName), @L(189.5)), @I(@N(viui_StepStopNo), @L(229.5)), @I(@N(viui_StepLoopNo), @L(249.5)), @O(@N(vo_SFCState), @R(9.5)), @O(@N(voarr_SFCStates), @R(29.5));
+  @VF(141) : @E(lui_StepStopNo), @R(590.0, 3080.0, 140.0, 19.0);
+  @VF(143) : @E(lui_StepLoopNo), @R(590.0, 3100.0, 140.0, 19.0);
+  @VF(145) : @E(ltarr_StepTransTime), @R(250.0, 3020.0, 300.0, 19.0);
+  @VF(147) : @E(lstrarr_StepName), @R(250.0, 3040.0, 300.0, 19.0);
+  @VF(148) : @E(lx_LoopMode), @R(590.0, 2980.0, 140.0, 19.0);
+  @VF(150) : @E(lx_StopMode), @R(590.0, 2960.0, 140.0, 19.0);
+  @VF(152) : @E(lx_ResetMode), @R(590.0, 2940.0, 140.0, 19.0);
+  @VF(154) : @E(lx_Start), @R(270.0, 2900.0, 140.0, 19.0);
+  @VF(156) : @E(lx_Stop), @R(590.0, 2920.0, 140.0, 19.0);
+  @VF(159) : @E(lstruc_SFCState), @R(1370.0, 2860.0, 140.0, 19.0);
+  @VF(161) : @E(lstruc_SFCState.udi_StepCount), @R(880.0, 3160.0, 430.0, 19.0);
+  @VF(162) : @E(lstruc_SFCState.x_StepState), @R(880.0, 3180.0, 430.0, 19.0);
+  @VF(163) : @E(lstruc_SFCState.x_StepTrans), @R(880.0, 3200.0, 430.0, 19.0);
+  @VF(164) : @E(lstruc_SFCState.t_StepTime), @R(880.0, 3220.0, 430.0, 19.0);
+  @VF(165) : @E(lstruc_SFCState.str_StepName), @R(880.0, 3240.0, 430.0, 19.0);
+  @VF(166) : @E(lstruc_SFCState.ui_StepNo), @R(880.0, 3260.0, 430.0, 19.0);
+  @OLT(167) : @R(1340.0, 3160.0, 130.0, 19.0), @S(161);
+  @OLT(168) : @R(1340.0, 3180.0, 130.0, 19.0), @S(162);
+  @OLT(169) : @R(1340.0, 3200.0, 130.0, 19.0), @S(163);
+  @OLT(170) : @R(1340.0, 3220.0, 130.0, 19.0), @S(164);
+  @OLT(171) : @R(1340.0, 3240.0, 130.0, 19.0), @S(165);
+  @OLT(138) : @R(1340.0, 3260.0, 130.0, 19.0), @S(166);
+  @OLT(139) : @R(170.0, 2900.0, 80.0, 19.0), @S(154);
+  @C(140) : @FB(TON1), @R(450.0, 2900.0, 100.0, 38.0), @I(@N(IN), @L(9.5)), @I(@N(PT), @L(29.5)), @O(@N(Q), @R(9.5)), @O(@N(ET), @R(29.5));
+  @VF(173) : @E(T#5s), @R(270.0, 2920.0, 140.0, 19.0);
+  @VF(175) : @E(larrstruc_SFCState), @R(1370.0, 2880.0, 140.0, 19.0);
+  @VF(177) : @E(larrstruc_SFCState[2].x_StepState), @R(880.0, 3350.0, 330.0, 19.0);
+  @VF(178) : @E(larrstruc_SFCState[3].x_StepState), @R(880.0, 3370.0, 330.0, 19.0);
+  @VF(179) : @E(larrstruc_SFCState[4].x_StepState), @R(880.0, 3390.0, 330.0, 19.0);
+  @VF(180) : @E(larrstruc_SFCState[5].x_StepState), @R(880.0, 3410.0, 330.0, 19.0);
+  @VF(181) : @E(larrstruc_SFCState[6].x_StepState), @R(880.0, 3430.0, 330.0, 19.0);
+  @VF(182) : @E(larrstruc_SFCState[7].x_StepState), @R(880.0, 3450.0, 330.0, 19.0);
+  @VF(183) : @E(larrstruc_SFCState[8].x_StepState), @R(880.0, 3470.0, 330.0, 19.0);
+  @VF(184) : @E(larrstruc_SFCState[9].x_StepState), @R(880.0, 3490.0, 330.0, 19.0);
+  @VF(185) : @E(lx_DigOut1), @R(1310.0, 3350.0, 140.0, 19.0);
+  @VF(186) : @E(lx_DigOut2), @R(1310.0, 3370.0, 140.0, 19.0);
+  @VF(187) : @E(lx_DigOut3), @R(1310.0, 3390.0, 140.0, 19.0);
+  @VF(188) : @E(lx_DigOut4), @R(1310.0, 3410.0, 140.0, 19.0);
+  @VF(189) : @E(lx_DigOut5), @R(1310.0, 3430.0, 140.0, 19.0);
+  @CF(201) : @R(620.0, 2740.0, 810.0, 99.0), @T("Lauflicht mit SFC in ST!"), @POU;
+  @CF(202) : @R(800.0, 3300.0, 810.0, 29.0), @T("Lauflichtstatus fuer Ausgaenge!"), @POU;
+  @VF(190) : @E(lui_CycleCount), @R(640.0, 450.0, 140.0, 19.0);
+  @C(191) : @F(ADD), @R(830.0, 450.0, 40.0, 38.0), UINT, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(ADD), @R(9.5));
+  @VF(192) : @E(1), @R(640.0, 470.0, 140.0, 19.0), UINT;
+  @VF(198) : @E(lui_CycleCount), @R(1160.0, 450.0, 140.0, 19.0);
+  @VF(204) : @E(lx_CyclePulse), @R(640.0, 520.0, 140.0, 19.0);
+  @C(205) : @F(NOT), @R(830.0, 520.0, 60.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(NOT), @R(9.5));
+  @VF(207) : @E(lx_CyclePulse), @R(1160.0, 520.0, 140.0, 19.0);
+  @C(209) : @FB(R_TRIG1), @R(830.0, 560.0, 140.0, 18.0), @I(@N(CLK), @L(9.5)), @O(@N(Q), @R(9.5));
+  @VF(210) : @E(TRUE), @R(640.0, 560.0, 140.0, 19.0);
+  @VF(212) : @E(lx_CycleInit), @R(1160.0, 560.0, 140.0, 19.0);
+  @VF(214) : @E(lx_CyclePulse), @R(420.0, 1140.0, 140.0, 19.0);
+  @C(216) : @FB(FB_lc_1oo5_ST1), @R(1190.0, 170.0, 300.0, 208.0), @I(@N(vix_In1), @L(9.5)), @I(@N(vix_In2), @L(29.5)), @I(@N(vix_In3), @L(49.5)), @I(@N(vix_In4), @L(69.5)), @I(@N(vix_In5), @L(89.5)), @O(@N(vox_Out), @R(129.5)), @O(@N(vox_Err), @R(169.5)), @O(@N(voui_ErrNo), @R(189.5)), @O(@N(vox_Out1), @R(9.5)), @O(@N(vox_Out2), @R(29.5)), @O(@N(vox_Out3), @R(49.5)), @O(@N(vox_Out4), @R(69.5)), @O(@N(vox_Out5), @R(89.5));
+  @VF(222) : @E(lx_RPM0), @R(1730.0, 170.0, 140.0, 19.0);
+  @VF(224) : @E(lx_RPM1), @R(1730.0, 190.0, 140.0, 19.0);
+  @VF(225) : @E(lx_RPM2), @R(1730.0, 210.0, 140.0, 19.0);
+  @VF(228) : @E(lx_RPM3), @R(1730.0, 230.0, 140.0, 19.0);
+  @VF(230) : @E(lx_RPM4), @R(1730.0, 250.0, 140.0, 19.0);
+  @VF(232) : @E(lx_RPM0), @R(420.0, 860.0, 140.0, 19.0);
+  @VF(233) : @E(lx_RPM1), @R(420.0, 900.0, 140.0, 19.0);
+  @VF(234) : @E(lx_RPM2), @R(420.0, 940.0, 140.0, 19.0);
+  @VF(235) : @E(lx_RPM3), @R(420.0, 980.0, 140.0, 19.0);
+  @VF(236) : @E(lx_RPM4), @R(420.0, 1020.0, 140.0, 19.0);
+  @VF(242) : @E(lx_Reset), @R(1000.0, 270.0, 140.0, 19.0);
+  @VF(244) : @E(lx_Reset), @R(420.0, 1060.0, 140.0, 19.0);
+  @C(245) : @FB(com_logicals_Basic_Flash_FB_lc_Flash_2Hz_FBD1), @R(720.0, 660.0, 260.0, 58.0), @O(@N(vox_Out), @R(9.5));
+  @VF(246) : @E(lx_Flash_2Hz), @R(1160.0, 660.0, 140.0, 19.0);
+  @VF(248) : @E(lx_Flash_2Hz), @R(420.0, 1080.0, 140.0, 19.0);
+  @C(249) : @F(AND), @R(600.0, 1060.0, 40.0, 38.0), BOOL, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(AND), @R(9.5));
+  @CF(253) : @R(1350.0, 840.0, 200.0, 29.0), @T("RPM0-Anzeige"), @POU;
+  @CF(254) : @R(1350.0, 880.0, 200.0, 29.0), @T("RPM1-Anzeige"), @POU;
+  @CF(255) : @R(1350.0, 920.0, 200.0, 29.0), @T("RPM2-Anzeige"), @POU;
+  @CF(256) : @R(1350.0, 960.0, 200.0, 29.0), @T("RPM3-Anzeige"), @POU;
+  @CF(257) : @R(1350.0, 1000.0, 200.0, 29.0), @T("RPM4-Anzeige"), @POU;
+  @CF(258) : @R(1350.0, 1040.0, 200.0, 29.0), @T("Reset-Anzeige Blinkend"), @POU;
+  @CF(259) : @R(140.0, 860.0, 200.0, 29.0), @T("RPM0-0%"), @POU;
+  @CF(260) : @R(140.0, 900.0, 200.0, 29.0), @T("RPM1-35%"), @POU;
+  @CF(261) : @R(140.0, 940.0, 200.0, 29.0), @T("RPM2-65%"), @POU;
+  @CF(262) : @R(140.0, 980.0, 200.0, 29.0), @T("RPM3-SFC"), @POU;
+  @CF(263) : @R(140.0, 1020.0, 200.0, 29.0), @T("RPM4-SigGen"), @POU;
+  @CF(264) : @R(140.0, 1060.0, 200.0, 29.0), @T("Reset-Anzeige Blinkend"), @POU;
+  @CF(265) : @R(1160.0, 1440.0, 200.0, 49.0), @T("Analogeingangswert AI1$NVon Poti 1"), @POU;
+  @CF(266) : @R(1160.0, 1520.0, 200.0, 49.0), @T("Analogeingangswert AI1$NVon Tacho"), @POU;
+  @CF(267) : @R(1150.0, 1710.0, 200.0, 49.0), @T("Analogausgangswert AO1$NAn Motor"), @POU;
+  @C(268) : @F(AND), @R(1670.0, 300.0, 40.0, 98.0), BOOL, @I(@N(IN1), @L(9.5), @NEG), @I(@N(IN2), @L(29.5), @NEG), @I(@N(IN3), @L(49.5), @NEG), @I(@N(IN4), @L(69.5), @NEG), @I(@N(IN5), @L(89.5), @NEG), @O(@N(AND), @R(9.5));
+  @VF(274) : @E(lx_RPMManual), @R(1730.0, 300.0, 140.0, 19.0);
+  @VF(276) : @E(lx_RPMManual), @R(360.0, 1700.0, 160.0, 19.0);
+  @C(277) : @F(MOVE), @R(640.0, 1700.0, 60.0, 38.0), INT, @I(@N(EN), @L(9.5)), @I(@N(IN), @L(29.5)), @O(@N(ENO), @R(9.5)), @O(@N(MOVE), @R(29.5));
+  @VF(280) : @E(li_AnalogOut), @R(870.0, 1740.0, 140.0, 19.0);
+  @C(59) : @FB(AO2), @R(1160.0, 1860.0, 240.0, 38.0), @I(@N(EN), @L(9.5)), @I(@N(AnalogValue), @L(29.5)), @O(@N(ENO), @R(9.5));
+  @C(278) : @F(MOVE), @R(930.0, 1860.0, 60.0, 38.0), INT, @I(@N(EN), @L(9.5)), @I(@N(IN), @L(29.5)), @O(@N(ENO), @R(9.5)), @O(@N(MOVE), @R(29.5));
+  @VF(281) : @E(lx_RPM0), @R(90.0, 1860.0, 170.0, 19.0);
+  @VF(283) : @E(li_AnalogOut), @R(1160.0, 1900.0, 140.0, 19.0);
+  @CF(285) : @R(550.0, 1790.0, 530.0, 29.0), @T("Den Analogausgang auf 0% setzen!"), @POU;
+  @CF(286) : @R(1440.0, 1860.0, 200.0, 49.0), @T("Analogausgangswert AO1$NAn Motor"), @POU;
+  @VF(282) : @E(li_AnalogInRPM0), @R(90.0, 1880.0, 170.0, 19.0);
+  @C(292) : @FB(AO3), @R(1160.0, 1980.0, 240.0, 38.0), @I(@N(EN), @L(9.5)), @I(@N(AnalogValue), @L(29.5)), @O(@N(ENO), @R(9.5));
+  @C(293) : @F(MOVE), @R(930.0, 1980.0, 60.0, 38.0), INT, @I(@N(EN), @L(9.5)), @I(@N(IN), @L(29.5)), @O(@N(ENO), @R(9.5)), @O(@N(MOVE), @R(29.5));
+  @VF(294) : @E(li_AnalogOut), @R(1160.0, 2020.0, 140.0, 19.0);
+  @VF(295) : @E(lx_RPM1), @R(90.0, 1980.0, 170.0, 19.0);
+  @VF(296) : @E(li_AnalogInRPM1), @R(90.0, 2000.0, 170.0, 19.0);
+  @CF(297) : @R(1440.0, 1980.0, 200.0, 49.0), @T("Analogausgangswert AO1$NAn Motor"), @POU;
+  @CF(298) : @R(550.0, 1930.0, 530.0, 29.0), @T("Analogausgang auf 35% setzen!"), @POU;
+  @OLT(304) : @R(0.0, 1880.0, 80.0, 19.0), @S(282);
+  @OLT(305) : @R(0.0, 2000.0, 80.0, 19.0), @S(296);
+  @OLT(306) : @R(880.0, 1760.0, 80.0, 19.0), @S(280);
+  @C(284) : @FB(FB_lc_Scale_ST1), @R(430.0, 2000.0, 340.0, 118.0), @I(@N(vir_In), @L(9.5)), @I(@N(vir_MaxInVal), @L(29.5)), @I(@N(vir_MinInVal), @L(49.5)), @I(@N(vir_MaxPhysVal), @L(69.5)), @I(@N(vir_MinPhysVal), @L(89.5)), @I(@N(vir_OffsetPhysVal), @L(109.5)), @O(@N(vor_OutPhysVal), @R(9.5)), @O(@N(vox_InValError), @R(29.5)), @O(@N(vox_PhysValError), @R(49.5)), @O(@N(voui_ErrNo), @R(69.5)), @O(@N(vox_Err), @R(89.5));
+  @C(301) : @F(TO_INT), @R(790.0, 2000.0, 120.0, 18.0), REAL, @I(@N(IN), @L(9.5)), @O(@N(TO_INT), @R(9.5));
+  @C(309) : @F(TO_REAL), @R(280.0, 2000.0, 120.0, 18.0), INT, @I(@N(IN), @L(9.5)), @O(@N(TO_REAL), @R(9.5));
+  @VF(312) : @E(lr_MaxInVal), @R(120.0, 2020.0, 140.0, 19.0);
+  @VF(314) : @E(lr_MinInVal), @R(120.0, 2040.0, 140.0, 19.0);
+  @VF(316) : @E(lr_MaxPhysVal), @R(120.0, 2060.0, 140.0, 19.0);
+  @VF(318) : @E(lr_MinPhysVal), @R(120.0, 2080.0, 140.0, 19.0);
+  @VF(320) : @E(lr_OffsetPhysVal), @R(120.0, 2100.0, 190.0, 19.0);
+  @OLT(322) : @R(1170.0, 1920.0, 80.0, 19.0), @S(283);
+  @OLT(323) : @R(1170.0, 2040.0, 80.0, 19.0), @S(294);
+  @C(324) : @FB(FB_lc_Scale_ST2), @R(430.0, 2190.0, 340.0, 118.0), @I(@N(vir_In), @L(9.5)), @I(@N(vir_MaxInVal), @L(29.5)), @I(@N(vir_MinInVal), @L(49.5)), @I(@N(vir_MaxPhysVal), @L(69.5)), @I(@N(vir_MinPhysVal), @L(89.5)), @I(@N(vir_OffsetPhysVal), @L(109.5)), @O(@N(vor_OutPhysVal), @R(9.5)), @O(@N(vox_InValError), @R(29.5)), @O(@N(vox_PhysValError), @R(49.5)), @O(@N(voui_ErrNo), @R(69.5)), @O(@N(vox_Err), @R(89.5));
+  @C(325) : @FB(AO4), @R(1160.0, 2170.0, 240.0, 38.0), @I(@N(EN), @L(9.5)), @I(@N(AnalogValue), @L(29.5)), @O(@N(ENO), @R(9.5));
+  @C(326) : @F(TO_REAL), @R(280.0, 2190.0, 120.0, 18.0), INT, @I(@N(IN), @L(9.5)), @O(@N(TO_REAL), @R(9.5));
+  @C(327) : @F(TO_INT), @R(790.0, 2190.0, 120.0, 18.0), REAL, @I(@N(IN), @L(9.5)), @O(@N(TO_INT), @R(9.5));
+  @C(328) : @F(MOVE), @R(930.0, 2170.0, 60.0, 38.0), INT, @I(@N(EN), @L(9.5)), @I(@N(IN), @L(29.5)), @O(@N(ENO), @R(9.5)), @O(@N(MOVE), @R(29.5));
+  @VF(329) : @E(lx_RPM2), @R(90.0, 2170.0, 170.0, 19.0);
+  @VF(330) : @E(li_AnalogInRPM2), @R(90.0, 2190.0, 170.0, 19.0);
+  @VF(331) : @E(lr_MaxInVal), @R(120.0, 2210.0, 140.0, 19.0);
+  @VF(332) : @E(lr_MinInVal), @R(120.0, 2230.0, 140.0, 19.0);
+  @VF(333) : @E(lr_MaxPhysVal), @R(120.0, 2250.0, 140.0, 19.0);
+  @VF(334) : @E(lr_MinPhysVal), @R(120.0, 2270.0, 140.0, 19.0);
+  @VF(335) : @E(lr_OffsetPhysVal), @R(120.0, 2290.0, 190.0, 19.0);
+  @VF(336) : @E(li_AnalogOut), @R(1160.0, 2210.0, 140.0, 19.0);
+  @OLT(337) : @R(0.0, 2190.0, 80.0, 19.0), @S(330);
+  @OLT(338) : @R(1170.0, 2230.0, 80.0, 19.0), @S(336);
+  @CF(339) : @R(550.0, 2130.0, 530.0, 29.0), @T("Analogausgang auf 60% setzen!"), @POU;
+  @CF(340) : @R(1440.0, 2170.0, 200.0, 49.0), @T("Analogausgangswert AO1$NAn Motor"), @POU;
+  @C(354) : @FB(FB_lc_Scale_ST3), @R(430.0, 2550.0, 340.0, 118.0), @I(@N(vir_In), @L(9.5)), @I(@N(vir_MaxInVal), @L(29.5)), @I(@N(vir_MinInVal), @L(49.5)), @I(@N(vir_MaxPhysVal), @L(69.5)), @I(@N(vir_MinPhysVal), @L(89.5)), @I(@N(vir_OffsetPhysVal), @L(109.5)), @O(@N(vor_OutPhysVal), @R(9.5)), @O(@N(vox_InValError), @R(29.5)), @O(@N(vox_PhysValError), @R(49.5)), @O(@N(voui_ErrNo), @R(69.5)), @O(@N(vox_Err), @R(89.5));
+  @C(355) : @FB(AO5), @R(1160.0, 2530.0, 240.0, 38.0), @I(@N(EN), @L(9.5)), @I(@N(AnalogValue), @L(29.5)), @O(@N(ENO), @R(9.5));
+  @C(356) : @F(TO_REAL), @R(280.0, 2550.0, 120.0, 18.0), INT, @I(@N(IN), @L(9.5)), @O(@N(TO_REAL), @R(9.5));
+  @C(357) : @F(TO_INT), @R(790.0, 2550.0, 120.0, 18.0), REAL, @I(@N(IN), @L(9.5)), @O(@N(TO_INT), @R(9.5));
+  @C(358) : @F(MOVE), @R(930.0, 2530.0, 60.0, 38.0), INT, @I(@N(EN), @L(9.5)), @I(@N(IN), @L(29.5)), @O(@N(ENO), @R(9.5)), @O(@N(MOVE), @R(29.5));
+  @VF(359) : @E(lr_MaxInVal), @R(120.0, 2570.0, 140.0, 19.0);
+  @VF(360) : @E(lr_MinInVal), @R(120.0, 2590.0, 140.0, 19.0);
+  @VF(361) : @E(lr_MaxPhysVal), @R(120.0, 2610.0, 140.0, 19.0);
+  @VF(362) : @E(lr_MinPhysVal), @R(120.0, 2630.0, 140.0, 19.0);
+  @VF(363) : @E(lr_OffsetPhysVal), @R(120.0, 2650.0, 190.0, 19.0);
+  @VF(364) : @E(li_AnalogOut), @R(1160.0, 2570.0, 140.0, 19.0);
+  @VF(365) : @E(li_AnalogInRPM4), @R(90.0, 2550.0, 170.0, 19.0);
+  @VF(366) : @E(lx_RPM4), @R(0.0, 2530.0, 170.0, 19.0);
+  @OLT(367) : @R(1170.0, 2590.0, 80.0, 19.0), @S(364);
+  @OLT(368) : @R(0.0, 2550.0, 80.0, 19.0), @S(365);
+  @CF(369) : @R(1440.0, 2530.0, 200.0, 49.0), @T("Analogausgangswert AO1$NAn Motor"), @POU;
+  @CF(370) : @R(550.0, 2330.0, 530.0, 29.0), @T("Analogausgang per SigGen testen! 0..60% als Sin_X2-Signal!"), @POU;
+  @C(384) : @FB(com_logicals_Basic_SigGen_FB_lc_GenSinCosSig_ST1), @R(690.0, 2370.0, 300.0, 138.0), @I(@N(vir_StepVal), @L(9.5)), @I(@N(vir_EndVal), @L(29.5)), @O(@N(vor_Sin_X), @R(9.5)), @O(@N(vor_Cos_X), @R(29.5)), @O(@N(vor_Sin_X_2), @R(49.5)), @O(@N(vor_Cos_X_2), @R(69.5)), @O(@N(voui_ErrNo), @R(89.5)), @O(@N(vox_Err), @R(109.5));
+  @VF(385) : @E(lx_RPM4), @R(0.0, 2370.0, 170.0, 19.0);
+  @C(387) : @F(SEL), @R(450.0, 2370.0, 120.0, 58.0), REAL, @I(@N(G), @L(9.5)), @I(@N(IN0), @L(29.5)), @I(@N(IN1), @L(49.5)), @O(@N(SEL), @R(9.5));
+  @C(389) : @F(SEL), @R(450.0, 2450.0, 120.0, 58.0), REAL, @I(@N(G), @L(9.5)), @I(@N(IN0), @L(29.5)), @I(@N(IN1), @L(49.5)), @O(@N(SEL), @R(9.5));
+  @VF(392) : @E(li_AnalogInRPM4), @R(1160.0, 2410.0, 170.0, 19.0);
+  @C(393) : @F(TO_INT), @R(1020.0, 2410.0, 120.0, 18.0), REAL, @I(@N(IN), @L(9.5)), @O(@N(TO_INT), @R(9.5));
+  @VF(396) : @E(lr_StepVal), @R(220.0, 2410.0, 140.0, 19.0);
+  @VF(398) : @E(lr_EndVal), @R(220.0, 2490.0, 140.0, 19.0);
+  @VF(386) : @E(lr_NullVal), @R(220.0, 2390.0, 140.0, 19.0);
+  @OLT(403) : @R(110.0, 2410.0, 80.0, 19.0), @S(396);
+  @OLT(404) : @R(110.0, 2490.0, 80.0, 19.0), @S(398);
+  @CP(269) : 1629.5, 179.5;
+  @CP(270) : 1609.5, 199.5;
+  @CP(271) : 1589.5, 219.5;
+  @CP(272) : 1569.5, 239.5;
+  @CP(273) : 1549.5, 259.5;
+  @CP(54) : 819.5, 1729.5;
+  @CP(287) : 1109.5, 1889.5;
+  @CP(299) : 1109.5, 2009.5;
+  @CP(341) : 1109.5, 2199.5;
+  @CP(371) : 1109.5, 2559.5;
+  @CP(400) : 419.5, 2379.5;
+  @CP(402) : 389.5, 2399.5;
+
+  @G(38) :
+     @L(@VF(37).o, @C(35).InputSelect)
+    ;
+  @G(40) :
+     @L(@VF(39).o, @C(36).InputSelect)
+    ;
+  @G(43) :
+     @L(@C(35).AnalogValue, @VF(41).i)
+    ;
+  @G(44) :
+     @L(@C(36).AnalogValue, @VF(42).i)
+    ;
+  @G(2) :
+     @L(@VF(1).o, @C(277).IN)
+    ;
+  @G(6) :
+     @L(@VF(5).o, @C(4).InputSelect)
+    ;
+  @G(8) :
+     @L(@C(4).InputValue, @VF(7).i)
+    ;
+  @G(17) :
+     @L(@VF(16).o, @C(14).InputSelect)
+    ;
+  @G(18) :
+     @L(@C(14).InputValue, @VF(15).i)
+    ;
+  @G(22) :
+     @L(@VF(21).o, @C(19).InputSelect)
+    ;
+  @G(23) :
+     @L(@C(19).InputValue, @VF(20).i)
+    ;
+  @G(27) :
+     @L(@VF(26).o, @C(24).InputSelect)
+    ;
+  @G(28) :
+     @L(@C(24).InputValue, @VF(25).i)
+    ;
+  @G(32) :
+     @L(@VF(30).o, @C(113).IN1)
+    ;
+  @G(33) :
+     @L(@VF(31).o, @C(29).OutputSelect)
+    ;
+  @G(50) :
+     @L(@VF(48).o, @C(116).IN1)
+    ;
+  @G(51) :
+     @L(@VF(49).o, @C(34).OutputSelect)
+    ;
+  @G(57) :
+     @L(@VF(55).o, @C(118).IN1)
+    ;
+  @G(58) :
+     @L(@VF(56).o, @C(52).OutputSelect)
+    ;
+  @G(77) :
+     @L(@VF(67).o, @C(60).InputSelect)
+    ;
+  @G(78) :
+     @L(@VF(70).o, @C(61).InputSelect)
+    ;
+  @G(79) :
+     @L(@VF(71).o, @C(63).InputSelect)
+    ;
+  @G(80) :
+     @L(@VF(72).o, @C(64).InputSelect)
+    ;
+  @G(81) :
+     @L(@C(60).InputValue, @VF(73).i)
+    ;
+  @G(82) :
+     @L(@C(61).InputValue, @VF(74).i)
+    ;
+  @G(83) :
+     @L(@C(63).InputValue, @VF(75).i)
+    ;
+  @G(84) :
+     @L(@C(64).InputValue, @VF(76).i)
+    ;
+  @G(11) :
+     @L(@VF(9).o, @C(120).IN1)
+    ;
+  @G(13) :
+     @L(@VF(12).o, @C(10).OutputSelect)
+    ;
+  @G(97) :
+     @L(@VF(89).o, @C(128).IN1)
+    ;
+  @G(98) :
+     @L(@VF(90).o, @C(85).OutputSelect)
+    ;
+  @G(99) :
+     @L(@VF(91).o, @C(126).IN1)
+    ;
+  @G(100) :
+     @L(@VF(92).o, @C(86).OutputSelect)
+    ;
+  @G(101) :
+     @L(@VF(93).o, @C(124).IN1)
+    ;
+  @G(102) :
+     @L(@VF(94).o, @C(87).OutputSelect)
+    ;
+  @G(103) :
+     @L(@VF(95).o, @C(122).IN1)
+    ;
+  @G(104) :
+     @L(@VF(96).o, @C(88).OutputSelect)
+    ;
+  @G(114) :
+     @L(@C(113).OR, @C(29).OutputValue)
+    ;
+  @G(115) :
+     @L(@VF(105).o, @C(113).IN2)
+    ;
+  @G(117) :
+     @L(@C(116).OR, @C(34).OutputValue)
+    ;
+  @G(119) :
+     @L(@C(118).OR, @C(52).OutputValue)
+    ;
+  @G(121) :
+     @L(@C(120).OR, @C(10).OutputValue)
+    ;
+  @G(123) :
+     @L(@C(122).OR, @C(88).OutputValue)
+    ;
+  @G(125) :
+     @L(@C(124).OR, @C(87).OutputValue)
+    ;
+  @G(127) :
+     @L(@C(126).OR, @C(86).OutputValue)
+    ;
+  @G(129) :
+     @L(@C(128).OR, @C(85).OutputValue)
+    ;
+  @G(130) :
+     @L(@VF(106).o, @C(116).IN2)
+    ;
+  @G(131) :
+     @L(@VF(107).o, @C(118).IN2)
+    ;
+  @G(132) :
+     @L(@VF(108).o, @C(120).IN2)
+    ;
+  @G(133) :
+     @L(@VF(109).o, @C(122).IN2)
+    ;
+  @G(134) :
+     @L(@VF(110).o, @C(124).IN2)
+    ;
+  @G(135) :
+     @L(@VF(111).o, @C(126).IN2)
+    ;
+  @G(136) :
+     @L(@VF(112).o, @C(128).IN2)
+    ;
+  @G(142) :
+     @L(@VF(141).o, @C(137).viui_StepStopNo)
+    ;
+  @G(144) :
+     @L(@VF(143).o, @C(137).viui_StepLoopNo)
+    ;
+  @G(146) :
+     @L(@VF(145).o, @C(137).vitarr_StepTransTime)
+    ;
+  @G(149) :
+     @L(@VF(148).o, @C(137).vix_LoopMode)
+    ;
+  @G(151) :
+     @L(@VF(150).o, @C(137).vix_StopMode)
+    ;
+  @G(153) :
+     @L(@VF(152).o, @C(137).vix_Reset)
+    ;
+  @G(157) :
+     @L(@VF(156).o, @C(137).vix_Stop)
+    ;
+  @G(158) :
+     @L(@VF(147).o, @C(137).vistrarr_StepName)
+    ;
+  @G(160) :
+     @L(@C(137).vo_SFCState, @VF(159).i)
+    ;
+  @G(155) :
+     @L(@VF(154).o, @C(140).IN)
+    ;
+  @G(172) :
+     @L(@C(140).Q, @C(137).vix_Start)
+    ;
+  @G(174) :
+     @L(@VF(173).o, @C(140).PT)
+    ;
+  @G(176) :
+     @L(@C(137).voarr_SFCStates, @VF(175).i)
+    ;
+  @G(193) :
+     @L(@VF(177).o, @VF(185).i)
+    ;
+  @G(194) :
+     @L(@VF(178).o, @VF(186).i)
+    ;
+  @G(195) :
+     @L(@VF(179).o, @VF(187).i)
+    ;
+  @G(196) :
+     @L(@VF(180).o, @VF(188).i)
+    ;
+  @G(197) :
+     @L(@VF(181).o, @VF(189).i)
+    ;
+  @G(199) :
+     @L(@VF(190).o, @C(191).IN1)
+    ;
+  @G(200) :
+     @L(@VF(192).o, @C(191).IN2)
+    ;
+  @G(203) :
+     @L(@C(191).ADD, @VF(198).i)
+    ;
+  @G(206) :
+     @L(@VF(204).o, @C(205).IN)
+    ;
+  @G(208) :
+     @L(@C(205).NOT, @VF(207).i)
+    ;
+  @G(211) :
+     @L(@VF(210).o, @C(209).CLK)
+    ;
+  @G(213) :
+     @L(@C(209).Q, @VF(212).i)
+    ;
+  @G(215) :
+     @L(@VF(214).o, @VF(89).i)
+    ;
+  @G(217) :
+     @L(@VF(15).o, @C(216).vix_In1)
+    ;
+  @G(218) :
+     @L(@VF(20).o, @C(216).vix_In2)
+    ;
+  @G(219) :
+     @L(@VF(25).o, @C(216).vix_In3)
+    ;
+  @G(220) :
+     @L(@VF(73).o, @C(216).vix_In4)
+    ;
+  @G(221) :
+     @L(@VF(74).o, @C(216).vix_In5)
+    ;
+  @G(223) :
+     @L(@C(216).vox_Out1, @CP(269)),
+     @L(@CP(269), @VF(222).i),
+     @L(@CP(269), @C(268).IN1)
+    ;
+  @G(226) :
+     @L(@C(216).vox_Out2, @CP(270)),
+     @L(@CP(270), @VF(224).i),
+     @L(@CP(270), @C(268).IN2)
+    ;
+  @G(227) :
+     @L(@C(216).vox_Out3, @CP(271)),
+     @L(@CP(271), @VF(225).i),
+     @L(@CP(271), @C(268).IN3)
+    ;
+  @G(229) :
+     @L(@C(216).vox_Out4, @CP(272)),
+     @L(@CP(272), @VF(228).i),
+     @L(@CP(272), @C(268).IN4)
+    ;
+  @G(231) :
+     @L(@C(216).vox_Out5, @CP(273)),
+     @L(@CP(273), @VF(230).i),
+     @L(@CP(273), @C(268).IN5)
+    ;
+  @G(237) :
+     @L(@VF(232).o, @VF(30).i)
+    ;
+  @G(238) :
+     @L(@VF(233).o, @VF(48).i)
+    ;
+  @G(239) :
+     @L(@VF(234).o, @VF(55).i)
+    ;
+  @G(240) :
+     @L(@VF(235).o, @VF(9).i)
+    ;
+  @G(241) :
+     @L(@VF(236).o, @VF(95).i)
+    ;
+  @G(243) :
+     @L(@VF(75).o, @VF(242).i)
+    ;
+  @G(247) :
+     @L(@C(245).vox_Out, @VF(246).i)
+    ;
+  @G(250) :
+     @L(@VF(244).o, @C(249).IN1)
+    ;
+  @G(251) :
+     @L(@VF(248).o, @C(249).IN2)
+    ;
+  @G(252) :
+     @L(@C(249).AND, @VF(93).i)
+    ;
+  @G(275) :
+     @L(@C(268).AND, @VF(274).i)
+    ;
+  @G(279) :
+     @L(@VF(276).o, @C(277).EN)
+    ;
+  @G(53) :
+     @L(@C(277).MOVE, @CP(54)),
+     @L(@CP(54), @C(47).AnalogValue),
+     @L(@CP(54), @VF(280).i)
+    ;
+  @G(288) :
+     @L(@VF(281).o, @C(278).EN)
+    ;
+  @G(290) :
+     @L(@C(278).MOVE, @CP(287)),
+     @L(@CP(287), @C(59).AnalogValue),
+     @L(@CP(287), @VF(283).i)
+    ;
+  @G(289) :
+     @L(@C(277).ENO, @C(47).EN)
+    ;
+  @G(291) :
+     @L(@C(278).ENO, @C(59).EN)
+    ;
+  @G(300) :
+     @L(@C(293).MOVE, @CP(299)),
+     @L(@CP(299), @C(292).AnalogValue),
+     @L(@CP(299), @VF(294).i)
+    ;
+  @G(302) :
+     @L(@VF(295).o, @C(293).EN)
+    ;
+  @G(303) :
+     @L(@C(293).ENO, @C(292).EN)
+    ;
+  @G(307) :
+     @L(@C(284).vor_OutPhysVal, @C(301).IN)
+    ;
+  @G(308) :
+     @L(@C(301).TO_INT, @C(293).IN)
+    ;
+  @G(310) :
+     @L(@VF(296).o, @C(309).IN)
+    ;
+  @G(311) :
+     @L(@C(309).TO_REAL, @C(284).vir_In)
+    ;
+  @G(313) :
+     @L(@VF(312).o, @C(284).vir_MaxInVal)
+    ;
+  @G(315) :
+     @L(@VF(314).o, @C(284).vir_MinInVal)
+    ;
+  @G(317) :
+     @L(@VF(316).o, @C(284).vir_MaxPhysVal)
+    ;
+  @G(319) :
+     @L(@VF(318).o, @C(284).vir_MinPhysVal)
+    ;
+  @G(321) :
+     @L(@VF(320).o, @C(284).vir_OffsetPhysVal)
+    ;
+  @G(342) :
+     @L(@VF(330).o, @C(326).IN)
+    ;
+  @G(343) :
+     @L(@C(326).TO_REAL, @C(324).vir_In)
+    ;
+  @G(344) :
+     @L(@VF(331).o, @C(324).vir_MaxInVal)
+    ;
+  @G(345) :
+     @L(@VF(332).o, @C(324).vir_MinInVal)
+    ;
+  @G(346) :
+     @L(@VF(333).o, @C(324).vir_MaxPhysVal)
+    ;
+  @G(347) :
+     @L(@VF(334).o, @C(324).vir_MinPhysVal)
+    ;
+  @G(348) :
+     @L(@C(324).vor_OutPhysVal, @C(327).IN)
+    ;
+  @G(349) :
+     @L(@VF(335).o, @C(324).vir_OffsetPhysVal)
+    ;
+  @G(350) :
+     @L(@VF(329).o, @C(328).EN)
+    ;
+  @G(351) :
+     @L(@C(327).TO_INT, @C(328).IN)
+    ;
+  @G(352) :
+     @L(@C(328).MOVE, @CP(341)),
+     @L(@CP(341), @C(325).AnalogValue),
+     @L(@CP(341), @VF(336).i)
+    ;
+  @G(353) :
+     @L(@C(328).ENO, @C(325).EN)
+    ;
+  @G(372) :
+     @L(@VF(363).o, @C(354).vir_OffsetPhysVal)
+    ;
+  @G(373) :
+     @L(@VF(361).o, @C(354).vir_MaxPhysVal)
+    ;
+  @G(374) :
+     @L(@VF(362).o, @C(354).vir_MinPhysVal)
+    ;
+  @G(375) :
+     @L(@VF(360).o, @C(354).vir_MinInVal)
+    ;
+  @G(376) :
+     @L(@VF(359).o, @C(354).vir_MaxInVal)
+    ;
+  @G(377) :
+     @L(@VF(365).o, @C(356).IN)
+    ;
+  @G(378) :
+     @L(@C(356).TO_REAL, @C(354).vir_In)
+    ;
+  @G(379) :
+     @L(@C(354).vor_OutPhysVal, @C(357).IN)
+    ;
+  @G(380) :
+     @L(@C(357).TO_INT, @C(358).IN)
+    ;
+  @G(381) :
+     @L(@C(358).MOVE, @CP(371)),
+     @L(@CP(371), @C(355).AnalogValue),
+     @L(@CP(371), @VF(364).i)
+    ;
+  @G(382) :
+     @L(@VF(366).o, @C(358).EN)
+    ;
+  @G(383) :
+     @L(@C(358).ENO, @C(355).EN)
+    ;
+  @G(388) :
+     @L(@C(387).SEL, @C(384).vir_StepVal)
+    ;
+  @G(390) :
+     @L(@C(389).SEL, @C(384).vir_EndVal)
+    ;
+  @G(391) :
+     @L(@VF(385).o, @CP(400)),
+     @L(@CP(400), @C(387).G),
+     @L(@CP(400), @C(389).G)
+    ;
+  @G(394) :
+     @L(@C(393).TO_INT, @VF(392).i)
+    ;
+  @G(395) :
+     @L(@C(384).vor_Sin_X_2, @C(393).IN)
+    ;
+  @G(397) :
+     @L(@VF(396).o, @C(387).IN1)
+    ;
+  @G(399) :
+     @L(@VF(398).o, @C(389).IN1)
+    ;
+  @G(401) :
+     @L(@VF(386).o, @CP(402)),
+     @L(@CP(402), @C(387).IN0),
+     @L(@CP(402), @C(389).IN0)
+    ;
+END_PROGRAM

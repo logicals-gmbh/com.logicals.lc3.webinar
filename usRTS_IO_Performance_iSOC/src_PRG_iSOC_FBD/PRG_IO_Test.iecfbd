@@ -1,0 +1,296 @@
+PROGRAM PRG_IO_Test
+  VAR
+    AI1 : AI;
+    AI2 : AI;
+    li_AI1 : INT := 0;
+    li_AI2 : INT := 1;
+    li_AnalogIn1 : INT := 0;
+    li_AnalogIn2 : INT := 0;
+    AO1 : AO;
+    li_AnalogOut : INT := 4711;
+    DI1 : DI;
+    DI2 : DI;
+    DI3 : DI;
+    DI4 : DI;
+    DI5 : DI;
+    DI6 : DI;
+    DI7 : DI;
+    DI8 : DI;
+    li_DQ1 : INT := 0;
+    li_DQ2 : INT := 1;
+    li_DQ3 : INT := 2;
+    li_DQ4 : INT := 3;
+    DQ2 : DQ;
+    DQ3 : DQ;
+    DQ4 : DQ;
+    li_DI1 : INT := 0;
+    li_DI2 : INT := 1;
+    li_DI3 : INT := 2;
+    li_DI4 : INT := 3;
+    li_DI5 : INT := 4;
+    li_DI6 : INT := 5;
+    li_DI7 : INT := 6;
+    li_DI8 : INT := 7;
+    lx_DigIn1 : BOOL;
+    lx_DigIn2 : BOOL;
+    lx_DigIn3 : BOOL;
+    lx_DigIn4 : BOOL;
+    lx_DigIn5 : BOOL;
+    lx_DigIn6 : BOOL;
+    lx_DigIn7 : BOOL;
+    lx_DigIn8 : BOOL;
+    DQ5 : DQ;
+    lx_Toggle : BOOL;
+    DQ6 : DQ;
+    li_DQ5 : INT := 4;
+    li_DQ6 : INT := 5;
+    li_DQ7 : INT := 6;
+    ludi_CycleCount : UDINT;
+    FORCEMRK1 : FORCEMRK;
+  END_VAR
+
+  (*
+
+    // Network 1:
+    DI2(InputSelect := li_DI1, InputValue => lx_DigIn1);
+
+    // Network 2:
+    DI3(InputSelect := li_DI2, InputValue => lx_DigIn2);
+
+    // Network 3:
+    DI4(InputSelect := li_DI3, InputValue => lx_DigIn3);
+
+    // Network 4:
+    DI5(InputSelect := li_DI4, InputValue => lx_DigIn4);
+
+    // Network 5:
+    DI6(InputSelect := li_DI5, InputValue => lx_DigIn5);
+
+    // Network 6:
+    DI7(InputSelect := li_DI6, InputValue => lx_DigIn6);
+
+    // Network 7:
+    DI8(InputSelect := li_DI7, InputValue => lx_DigIn7);
+
+    // Network 8:
+    DI1(InputSelect := li_DI8, InputValue => lx_DigIn8);
+
+    // Network 9:
+    DQ2(OutputSelect := li_DQ1, OutputValue := lx_DigIn8);
+
+    // Network 10:
+    DQ3(OutputSelect := li_DQ2, OutputValue := lx_DigIn7);
+
+    // Network 11:
+    DQ4(OutputSelect := li_DQ3, OutputValue := lx_DigIn6);
+
+    // Network 12:
+    DQ5(OutputSelect := li_DQ4, OutputValue := lx_DigIn5);
+
+    // Network 13:
+    ADD(IN1 := ludi_CycleCount, IN2 := 1, ADD => ludi_CycleCount);
+
+    // Network 14:
+    NOT(IN := lx_Toggle, NOT => @C(87).NOT);
+    FORCEMRK1(IN := @C(87).NOT, OUT => lx_Toggle);
+
+    // Network 15:
+    DQ6(OutputSelect := li_DQ7, OutputValue := lx_Toggle);
+
+    // Network 16:
+    AI1(InputSelect := li_AI1, AnalogValue => li_AnalogIn1);
+
+    // Network 17:
+    AI2(InputSelect := li_AI2, AnalogValue => li_AnalogIn2);
+
+    // Network 18:
+    li_AnalogOut := li_AnalogIn1;
+    AO1(AnalogValue := li_AnalogOut);
+
+  *)
+
+  @C(35) : @FB(AI1), @R(680.0, 1440.0, 190.0, 48.0), @I(@N(InputSelect), @L(9.5)), @O(@N(AnalogValue), @R(9.5));
+  @C(36) : @FB(AI2), @R(680.0, 1520.0, 190.0, 48.0), @I(@N(InputSelect), @L(9.5)), @O(@N(AnalogValue), @R(9.5));
+  @VF(37) : @E(li_AI1), @R(470.0, 1440.0, 140.0, 19.0);
+  @VF(39) : @E(li_AI2), @R(470.0, 1520.0, 140.0, 19.0);
+  @VF(41) : @E(li_AnalogIn1), @R(920.0, 1440.0, 140.0, 19.0);
+  @VF(42) : @E(li_AnalogIn2), @R(920.0, 1520.0, 140.0, 19.0);
+  @OLT(45) : @R(930.0, 1420.0, 80.0, 19.0), @S(41);
+  @OLT(46) : @R(930.0, 1500.0, 80.0, 19.0), @S(42);
+  @C(47) : @FB(AO1), @R(820.0, 1680.0, 240.0, 18.0), @I(@N(AnalogValue), @L(9.5));
+  @VF(53) : @E(li_AnalogOut), @R(650.0, 1680.0, 140.0, 19.0);
+  @OLT(59) : @R(690.0, 1660.0, 80.0, 19.0), @S(53);
+  @CF(62) : @R(410.0, 20.0, 810.0, 99.0), @T("IO-Test-Programm iSOC300 Steuerung$NCreated: 2021-11-02 DG"), @POU;
+  @CF(65) : @R(620.0, 170.0, 320.0, 29.0), @T("Digitale Eingaenge 0..7 lesen"), @POU;
+  @CF(66) : @R(520.0, 560.0, 530.0, 29.0), @T("Digitalen Eingaeng auf digitalen Ausgang kopieren"), @POU;
+  @CF(68) : @R(490.0, 1370.0, 530.0, 29.0), @T("Die beiden Analogeeingaenge lesen"), @POU;
+  @CF(69) : @R(500.0, 1590.0, 530.0, 29.0), @T("Den Analogeingang 1 auf den Analogausgang kopieren"), @POU;
+  @VF(1) : @E(li_AnalogIn1), @R(470.0, 1680.0, 140.0, 19.0);
+  @OLT(3) : @R(530.0, 1660.0, 80.0, 19.0), @S(1);
+  @C(4) : @FB(DI1), @R(620.0, 410.0, 270.0, 18.0), @I(@N(InputSelect), @L(9.5)), @O(@N(InputValue), @R(9.5));
+  @VF(5) : @E(li_DI8), @R(440.0, 410.0, 140.0, 19.0);
+  @VF(7) : @E(lx_DigIn8), @R(960.0, 410.0, 140.0, 19.0);
+  @VF(9) : @E(lx_DigIn5), @R(440.0, 790.0, 140.0, 19.0);
+  @VF(12) : @E(li_DQ4), @R(440.0, 770.0, 140.0, 19.0);
+  @C(14) : @FB(DI2), @R(620.0, 270.0, 270.0, 18.0), @I(@N(InputSelect), @L(9.5)), @O(@N(InputValue), @R(9.5));
+  @VF(15) : @E(lx_DigIn1), @R(960.0, 270.0, 140.0, 19.0);
+  @VF(16) : @E(li_DI1), @R(440.0, 270.0, 140.0, 19.0);
+  @C(19) : @FB(DI3), @R(620.0, 290.0, 270.0, 18.0), @I(@N(InputSelect), @L(9.5)), @O(@N(InputValue), @R(9.5));
+  @VF(20) : @E(lx_DigIn2), @R(960.0, 290.0, 140.0, 19.0);
+  @VF(21) : @E(li_DI2), @R(440.0, 290.0, 140.0, 19.0);
+  @C(24) : @FB(DI4), @R(620.0, 310.0, 270.0, 18.0), @I(@N(InputSelect), @L(9.5)), @O(@N(InputValue), @R(9.5));
+  @VF(25) : @E(lx_DigIn3), @R(960.0, 310.0, 140.0, 19.0);
+  @VF(26) : @E(li_DI3), @R(440.0, 310.0, 140.0, 19.0);
+  @C(29) : @FB(DQ2), @R(660.0, 650.0, 120.0, 38.0), @I(@N(OutputSelect), @L(9.5)), @I(@N(OutputValue), @L(29.5));
+  @VF(30) : @E(lx_DigIn8), @R(440.0, 670.0, 140.0, 19.0);
+  @VF(31) : @E(li_DQ1), @R(440.0, 650.0, 140.0, 19.0);
+  @C(34) : @FB(DQ3), @R(660.0, 690.0, 120.0, 38.0), @I(@N(OutputSelect), @L(9.5)), @I(@N(OutputValue), @L(29.5));
+  @VF(48) : @E(lx_DigIn7), @R(440.0, 710.0, 140.0, 19.0);
+  @VF(49) : @E(li_DQ2), @R(440.0, 690.0, 140.0, 19.0);
+  @C(52) : @FB(DQ4), @R(660.0, 730.0, 120.0, 38.0), @I(@N(OutputSelect), @L(9.5)), @I(@N(OutputValue), @L(29.5));
+  @VF(55) : @E(lx_DigIn6), @R(440.0, 750.0, 140.0, 19.0);
+  @VF(56) : @E(li_DQ3), @R(440.0, 730.0, 140.0, 19.0);
+  @C(60) : @FB(DI5), @R(620.0, 330.0, 270.0, 18.0), @I(@N(InputSelect), @L(9.5)), @O(@N(InputValue), @R(9.5));
+  @C(61) : @FB(DI6), @R(620.0, 350.0, 270.0, 18.0), @I(@N(InputSelect), @L(9.5)), @O(@N(InputValue), @R(9.5));
+  @C(63) : @FB(DI7), @R(620.0, 370.0, 270.0, 18.0), @I(@N(InputSelect), @L(9.5)), @O(@N(InputValue), @R(9.5));
+  @C(64) : @FB(DI8), @R(620.0, 390.0, 270.0, 18.0), @I(@N(InputSelect), @L(9.5)), @O(@N(InputValue), @R(9.5));
+  @VF(67) : @E(li_DI4), @R(440.0, 330.0, 140.0, 19.0);
+  @VF(70) : @E(li_DI5), @R(440.0, 350.0, 140.0, 19.0);
+  @VF(71) : @E(li_DI6), @R(440.0, 370.0, 140.0, 19.0);
+  @VF(72) : @E(li_DI7), @R(440.0, 390.0, 140.0, 19.0);
+  @VF(73) : @E(lx_DigIn4), @R(960.0, 330.0, 140.0, 19.0);
+  @VF(74) : @E(lx_DigIn5), @R(960.0, 350.0, 140.0, 19.0);
+  @VF(75) : @E(lx_DigIn6), @R(960.0, 370.0, 140.0, 19.0);
+  @VF(76) : @E(lx_DigIn7), @R(960.0, 390.0, 140.0, 19.0);
+  @C(10) : @FB(DQ5), @R(660.0, 770.0, 120.0, 38.0), @I(@N(OutputSelect), @L(9.5)), @I(@N(OutputValue), @L(29.5));
+  @CF(85) : @R(520.0, 960.0, 530.0, 29.0), @T("Toggle zur Analyse der Zykluszeit"), @POU;
+  @VF(86) : @E(lx_Toggle), @R(440.0, 1010.0, 140.0, 19.0);
+  @C(87) : @F(NOT), @R(680.0, 1010.0, 60.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(NOT), @R(9.5));
+  @VF(88) : @E(lx_Toggle), @R(980.0, 1010.0, 140.0, 19.0);
+  @C(91) : @FB(DQ6), @R(680.0, 1110.0, 120.0, 38.0), @I(@N(OutputSelect), @L(9.5)), @I(@N(OutputValue), @L(29.5));
+  @VF(93) : @E(li_DQ7), @R(440.0, 1110.0, 140.0, 19.0);
+  @VF(92) : @E(lx_Toggle), @R(440.0, 1130.0, 140.0, 19.0);
+  @CF(96) : @R(520.0, 840.0, 530.0, 29.0), @T("Toggle zur Analyse der Zykluszeit"), @POU;
+  @VF(97) : @E(ludi_CycleCount), @R(440.0, 890.0, 140.0, 19.0);
+  @C(98) : @F(ADD), @R(660.0, 890.0, 40.0, 38.0), UDINT, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(ADD), @R(9.5));
+  @VF(100) : @E(1), @R(440.0, 910.0, 140.0, 19.0), UDINT;
+  @VF(102) : @E(ludi_CycleCount), @R(970.0, 890.0, 140.0, 19.0);
+  @C(104) : @FB(FORCEMRK1), @R(810.0, 1010.0, 120.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(OUT), @R(9.5));
+  @OLT(106) : @R(970.0, 910.0, 140.0, 19.0), @S(102);
+  @OLT(107) : @R(810.0, 1040.0, 120.0, 39.0), @S(104);
+
+  @G(38) :
+     @L(@VF(37).o, @C(35).InputSelect)
+    ;
+  @G(40) :
+     @L(@VF(39).o, @C(36).InputSelect)
+    ;
+  @G(43) :
+     @L(@C(35).AnalogValue, @VF(41).i)
+    ;
+  @G(44) :
+     @L(@C(36).AnalogValue, @VF(42).i)
+    ;
+  @G(54) :
+     @L(@VF(53).o, @C(47).AnalogValue)
+    ;
+  @G(2) :
+     @L(@VF(1).o, @VF(53).i)
+    ;
+  @G(6) :
+     @L(@VF(5).o, @C(4).InputSelect)
+    ;
+  @G(8) :
+     @L(@C(4).InputValue, @VF(7).i)
+    ;
+  @G(17) :
+     @L(@VF(16).o, @C(14).InputSelect)
+    ;
+  @G(18) :
+     @L(@C(14).InputValue, @VF(15).i)
+    ;
+  @G(22) :
+     @L(@VF(21).o, @C(19).InputSelect)
+    ;
+  @G(23) :
+     @L(@C(19).InputValue, @VF(20).i)
+    ;
+  @G(27) :
+     @L(@VF(26).o, @C(24).InputSelect)
+    ;
+  @G(28) :
+     @L(@C(24).InputValue, @VF(25).i)
+    ;
+  @G(32) :
+     @L(@VF(30).o, @C(29).OutputValue)
+    ;
+  @G(33) :
+     @L(@VF(31).o, @C(29).OutputSelect)
+    ;
+  @G(50) :
+     @L(@VF(48).o, @C(34).OutputValue)
+    ;
+  @G(51) :
+     @L(@VF(49).o, @C(34).OutputSelect)
+    ;
+  @G(57) :
+     @L(@VF(55).o, @C(52).OutputValue)
+    ;
+  @G(58) :
+     @L(@VF(56).o, @C(52).OutputSelect)
+    ;
+  @G(77) :
+     @L(@VF(67).o, @C(60).InputSelect)
+    ;
+  @G(78) :
+     @L(@VF(70).o, @C(61).InputSelect)
+    ;
+  @G(79) :
+     @L(@VF(71).o, @C(63).InputSelect)
+    ;
+  @G(80) :
+     @L(@VF(72).o, @C(64).InputSelect)
+    ;
+  @G(81) :
+     @L(@C(60).InputValue, @VF(73).i)
+    ;
+  @G(82) :
+     @L(@C(61).InputValue, @VF(74).i)
+    ;
+  @G(83) :
+     @L(@C(63).InputValue, @VF(75).i)
+    ;
+  @G(84) :
+     @L(@C(64).InputValue, @VF(76).i)
+    ;
+  @G(11) :
+     @L(@VF(9).o, @C(10).OutputValue)
+    ;
+  @G(13) :
+     @L(@VF(12).o, @C(10).OutputSelect)
+    ;
+  @G(89) :
+     @L(@VF(86).o, @C(87).IN)
+    ;
+  @G(90) :
+     @L(@C(87).NOT, @C(104).IN)
+    ;
+  @G(95) :
+     @L(@VF(93).o, @C(91).OutputSelect)
+    ;
+  @G(94) :
+     @L(@VF(92).o, @C(91).OutputValue)
+    ;
+  @G(99) :
+     @L(@VF(97).o, @C(98).IN1)
+    ;
+  @G(101) :
+     @L(@VF(100).o, @C(98).IN2)
+    ;
+  @G(103) :
+     @L(@C(98).ADD, @VF(102).i)
+    ;
+  @G(105) :
+     @L(@C(104).OUT, @VF(88).i)
+    ;
+END_PROGRAM

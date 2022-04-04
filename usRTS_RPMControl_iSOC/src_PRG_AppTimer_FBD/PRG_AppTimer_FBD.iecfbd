@@ -1,0 +1,232 @@
+PROGRAM PRG_AppTimer_FBD
+  VAR
+    lusi_OpC : USINT { description := "operating mode code";comment := "1=Reset, 2=FOLLOW, 3=HOLD, 4=BYPASS, 5=RESET-FOLLOW, 6=RESET-HOLD"; };
+    lr_X1 : REAL := 100.0 { description := "input value x1";comment := "1. input of ramp-generator"; };
+    lr_X2 : REAL { description := "input value X2";comment := "2. input of ramp-generator"; };
+    lr_X3 : REAL { description := "input value X3";comment := "3. input of ramp-generator"; };
+    lr_LU : REAL { description := "limit upper";comment := "value for limitation of output Y"; };
+    lr_LL : REAL { description := "limit lower";comment := "value for limitation of output Y"; };
+    lr_SV : REAL { description := "set value";comment := "ramp-generator set to SV with OpCode=RESET"; };
+    lr_SpdUp : REAL := 10.0 { description := "speed up";comment := "ramp speed upwards"; };
+    lr_SpdDn : REAL := 10.0 { description := "speed down";comment := "ramp speed downwards"; };
+    lx_Stp : BOOL { description := "Stop";comment := "stops the calculation of the ramp-generator"; };
+    lx_Auto : BOOL { description := "Auto";comment := "Auto start the calculation of the ramp-generator"; };
+    lt_CycleTime_Sec : TIME := T#200ms { description := "time base";comment := "scanning time of FB"; };
+    lw_St : WORD { description := "state";comment := "bit encoded state flags of FB"; };
+    lusi_Exc : USINT { description := "exception";comment := "error-code field"; };
+    lx_Err : BOOL { description := "error";comment := "error-code field"; };
+    lui_ErrNo : UINT { description := "error number";comment := "error number field"; };
+    lr_Y : REAL { description := "output value Y";comment := "output ramp_generator limited by LU and LL"; };
+    lr_XSum : REAL { description := "X inputs sum";comment := "sum of inputs X1+X2+X3"; };
+    lx_QU : BOOL { description := "LU reached";comment := "TRUE = upper limit reached"; };
+    lx_QL : BOOL { description := "LL reached";comment := "TRUE = lower limit is reached"; };
+    lx_QE : BOOL { description := "XSum reached";comment := "TRUE = XSum (X1+X2+X3) is reached"; };
+    lui_XSumChg : UINT { description := "XSum changed";comment := "XSum Changed"; };
+  END_VAR
+  VAR
+    com_logicals_Basic_Flash_FB_lc_Flash_2Hz_FBD1 : com.logicals.Basic.Flash.FB_lc_Flash_2Hz_FBD;
+    R_TRIG1 : R_TRIG;
+    lx_Flash_2Hz : BOOL;
+    lx_CycleInit : BOOL;
+    lx_CyclePulse : BOOL;
+    lui_CycleCount : UINT;
+    FB_Ramp_ST1 : FB_Ramp_ST;
+  END_VAR
+  VAR_EXTERNAL
+    gx_ModeRPM4 : BOOL;
+    gx_ModeRPM3 : BOOL;
+    gx_ModeRPM2 : BOOL;
+    gx_ModeRPM1 : BOOL;
+    gx_ModeRPM0 : BOOL;
+    gudi_CycleCountAppLoop : UDINT;
+    gudi_CycleCountAppLogic : UDINT;
+    gudi_CycleCountAppTimer : UDINT;
+  END_VAR
+
+  (*
+
+    // Network 1:
+    ADD(IN1 := lui_CycleCount, IN2 := 1, ADD => lui_CycleCount);
+
+    // Network 2:
+    ADD(IN1 := gudi_CycleCountAppTimer, IN2 := 1, ADD => gudi_CycleCountAppTimer);
+
+    // Network 3:
+    NOT(IN := lx_CyclePulse, NOT => lx_CyclePulse);
+
+    // Network 4:
+    R_TRIG1(CLK := TRUE, Q => lx_CycleInit);
+
+    // Network 5:
+    com_logicals_Basic_Flash_FB_lc_Flash_2Hz_FBD1(vox_Out => lx_Flash_2Hz);
+
+    // Network 6:
+    FB_Ramp_ST1(viusi_OpC := lusi_OpC, vir_X1 := lr_X1, vir_X2 := lr_X2, vir_X3 := lr_X3, vir_LU := lr_LU, vir_LL := lr_LL, vir_SV := lr_SV, vir_SpdUp := lr_SpdUp, vir_SpdDn := lr_SpdDn, vix_Stp := lx_Stp, vix_Auto := lx_Auto, vit_CycleTime_Sec := lt_CycleTime_Sec, vow_St => lw_St, vousi_Exc => lusi_Exc, vox_Err => lx_Err, voui_ErrNo => lui_ErrNo, vor_Y => lr_Y, vor_XSum => lr_XSum, vox_QU => lx_QU, vox_QL => lx_QL, vox_QE => lx_QE, voui_XSumChg => lui_XSumChg);
+
+  *)
+
+  @C(245) : @FB(com_logicals_Basic_Flash_FB_lc_Flash_2Hz_FBD1), @R(580.0, 560.0, 260.0, 58.0), @O(@N(vox_Out), @R(9.5));
+  @C(209) : @FB(R_TRIG1), @R(680.0, 490.0, 140.0, 18.0), @I(@N(CLK), @L(9.5)), @O(@N(Q), @R(9.5));
+  @C(205) : @F(NOT), @R(680.0, 450.0, 60.0, 18.0), BOOL, @I(@N(IN), @L(9.5)), @O(@N(NOT), @R(9.5));
+  @C(191) : @F(ADD), @R(760.0, 240.0, 40.0, 38.0), UINT, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(ADD), @R(9.5));
+  @VF(499) : @E(gx_ModeRPM4), @R(870.0, 1020.0, 140.0, 19.0);
+  @VF(4) : @E(gx_ModeRPM3), @R(870.0, 980.0, 140.0, 19.0);
+  @VF(3) : @E(gx_ModeRPM2), @R(870.0, 940.0, 140.0, 19.0);
+  @VF(2) : @E(gx_ModeRPM1), @R(870.0, 900.0, 140.0, 19.0);
+  @VF(184) : @E(gx_ModeRPM0), @R(870.0, 860.0, 140.0, 19.0);
+  @VF(246) : @E(lx_Flash_2Hz), @R(1020.0, 560.0, 140.0, 19.0);
+  @VF(212) : @E(lx_CycleInit), @R(1020.0, 490.0, 140.0, 19.0);
+  @VF(210) : @E(TRUE), @R(490.0, 490.0, 140.0, 19.0);
+  @VF(204) : @E(lx_CyclePulse), @R(490.0, 450.0, 140.0, 19.0);
+  @VF(207) : @E(lx_CyclePulse), @R(1020.0, 450.0, 140.0, 19.0);
+  @VF(192) : @E(1), @R(490.0, 260.0, 140.0, 19.0), UINT;
+  @VF(190) : @E(lui_CycleCount), @R(490.0, 240.0, 140.0, 19.0);
+  @VF(198) : @E(lui_CycleCount), @R(1020.0, 240.0, 140.0, 19.0);
+  @CF(418) : @R(600.0, 860.0, 200.0, 19.0), @T("0%"), @POU;
+  @CF(417) : @R(600.0, 900.0, 200.0, 19.0), @T("35%"), @POU;
+  @CF(103) : @R(600.0, 810.0, 400.0, 39.0), @T("SP-Point per Schalter einstellbar in PRG_AppLoop_FBD"), @POU;
+  @CF(416) : @R(600.0, 940.0, 200.0, 19.0), @T("70%"), @POU;
+  @CF(415) : @R(600.0, 980.0, 200.0, 19.0), @T("Poti"), @POU;
+  @CF(414) : @R(600.0, 1020.0, 200.0, 19.0), @T("SFC aus AppLogic"), @POU;
+  @CF(68) : @R(430.0, 1190.0, 790.0, 29.0), @T("Die beiden Analogeeingaenge lesen wird im PRG_AppLoop_FBD gelesen!"), @POU;
+  @CF(65) : @R(430.0, 740.0, 800.0, 49.0), @T("Digitale Eingaenge 0..7 werden in PRG_AppLoop-Zyklus gelesen und auf die GVs geschrieben!$NDie Betriebsarten werden ebenfalls dort gebildet!"), @POU;
+  @CF(66) : @R(430.0, 1070.0, 790.0, 69.0), @T("Digitale Ausgaenge werden von PRG_AppLoop-Zyklus geschrieben!"), @POU;
+  @CF(1) : @R(420.0, 160.0, 810.0, 49.0), @T("Lokale Hilfsvariablen fuer PRG_AppLogic_FBD"), @POU;
+  @CF(62) : @R(420.0, 40.0, 810.0, 99.0), @T("IO-Test-Programm iSOC300 Steuerung$NCreated: 2021-11-02 DG"), @POU;
+  @C(252) : @F(ADD), @R(760.0, 300.0, 40.0, 38.0), UDINT, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(ADD), @R(9.5));
+  @VF(293) : @E(1), @R(540.0, 320.0, 140.0, 19.0), UDINT;
+  @VF(309) : @E(gudi_CycleCountAppTimer), @R(430.0, 300.0, 250.0, 19.0);
+  @VF(441) : @E(gudi_CycleCountAppTimer), @R(840.0, 300.0, 250.0, 19.0);
+  @VF(442) : @E(gudi_CycleCountAppLogic), @R(840.0, 340.0, 250.0, 19.0);
+  @VF(443) : @E(gudi_CycleCountAppLoop), @R(840.0, 380.0, 250.0, 19.0);
+  @OLT(444) : @R(1010.0, 360.0, 80.0, 19.0), @S(443);
+  @OLT(445) : @R(1010.0, 320.0, 80.0, 19.0), @S(442);
+  @OLT(446) : @R(1010.0, 280.0, 80.0, 19.0), @S(441);
+  @CF(5) : @R(430.0, 1390.0, 790.0, 29.0), @T("Test des FB_Ramp_ST"), @POU;
+  @C(6) : @FB(FB_Ramp_ST1), instanceNameVisible, @R(740.0, 1490.0, 200.0, 318.0), @I(@N(viusi_OpC), @L(9.5)), @I(@N(vir_X1), @L(49.5)), @I(@N(vir_X2), @L(69.5)), @I(@N(vir_X3), @L(89.5)), @I(@N(vir_LU), @L(109.5)), @I(@N(vir_LL), @L(129.5)), @I(@N(vir_SV), @L(149.5)), @I(@N(vir_SpdUp), @L(189.5)), @I(@N(vir_SpdDn), @L(209.5)), @I(@N(vix_Stp), @L(249.5)), @I(@N(vix_Auto), @L(269.5)), @I(@N(vit_CycleTime_Sec), @L(309.5)), @O(@N(vow_St), @R(9.5)), @O(@N(vousi_Exc), @R(29.5)), @O(@N(vox_Err), @R(69.5)), @O(@N(voui_ErrNo), @R(89.5)), @O(@N(vor_Y), @R(129.5)), @O(@N(vor_XSum), @R(149.5)), @O(@N(vox_QU), @R(229.5)), @O(@N(vox_QL), @R(249.5)), @O(@N(vox_QE), @R(269.5)), @O(@N(voui_XSumChg), @R(289.5));
+  @VF(7) : @E(lr_LL), @R(490.0, 1610.0, 140.0, 19.0);
+  @VF(9) : @E(lr_SV), @R(490.0, 1630.0, 140.0, 19.0);
+  @VF(10) : @E(lr_LU), @R(490.0, 1590.0, 140.0, 19.0);
+  @VF(11) : @E(lr_X3), @R(490.0, 1570.0, 140.0, 19.0);
+  @VF(12) : @E(lr_X2), @R(490.0, 1550.0, 140.0, 19.0);
+  @VF(13) : @E(lr_X1), @R(490.0, 1530.0, 140.0, 19.0);
+  @VF(14) : @E(lr_SpdUp), @R(490.0, 1670.0, 140.0, 19.0);
+  @VF(15) : @E(lr_SpdDn), @R(490.0, 1690.0, 140.0, 19.0);
+  @VF(18) : @E(lt_CycleTime_Sec), @R(420.0, 1790.0, 210.0, 19.0);
+  @VF(25) : @E(lr_Y), @R(1020.0, 1610.0, 140.0, 19.0);
+  @VF(26) : @E(lr_XSum), @R(1020.0, 1630.0, 140.0, 19.0);
+  @VF(29) : @E(lx_QU), @R(1020.0, 1710.0, 140.0, 19.0);
+  @VF(30) : @E(lx_QL), @R(1020.0, 1730.0, 140.0, 19.0);
+  @VF(31) : @E(lx_QE), @R(1020.0, 1750.0, 140.0, 19.0);
+  @VF(35) : @E(lx_Stp), @R(490.0, 1730.0, 140.0, 19.0);
+  @VF(36) : @E(lx_Auto), @R(490.0, 1750.0, 140.0, 19.0);
+  @VF(39) : @E(lx_Err), @R(1020.0, 1550.0, 140.0, 19.0);
+  @VF(41) : @E(lui_ErrNo), @R(1020.0, 1570.0, 140.0, 19.0);
+  @VF(42) : @E(lusi_Exc), @R(1020.0, 1510.0, 140.0, 19.0);
+  @VF(43) : @E(lui_XSumChg), @R(1020.0, 1770.0, 140.0, 19.0);
+  @VF(47) : @E(lw_St), @R(1020.0, 1490.0, 140.0, 19.0);
+  @VF(49) : @E(lusi_OpC), @R(490.0, 1490.0, 140.0, 19.0);
+  @OLT(51) : @R(380.0, 1530.0, 80.0, 19.0), @S(13);
+  @OLT(52) : @R(1210.0, 1610.0, 80.0, 19.0), @S(25);
+  @OLT(53) : @R(1210.0, 1630.0, 80.0, 19.0), @S(26);
+
+  @G(247) :
+     @L(@C(245).vox_Out, @VF(246).i)
+    ;
+  @G(211) :
+     @L(@VF(210).o, @C(209).CLK)
+    ;
+  @G(213) :
+     @L(@C(209).Q, @VF(212).i)
+    ;
+  @G(206) :
+     @L(@VF(204).o, @C(205).IN)
+    ;
+  @G(208) :
+     @L(@C(205).NOT, @VF(207).i)
+    ;
+  @G(200) :
+     @L(@VF(192).o, @C(191).IN2)
+    ;
+  @G(199) :
+     @L(@VF(190).o, @C(191).IN1)
+    ;
+  @G(203) :
+     @L(@C(191).ADD, @VF(198).i)
+    ;
+  @G(310) :
+     @L(@VF(293).o, @C(252).IN2)
+    ;
+  @G(311) :
+     @L(@VF(309).o, @C(252).IN1)
+    ;
+  @G(312) :
+     @L(@C(252).ADD, @VF(441).i)
+    ;
+  @G(8) :
+     @L(@VF(7).o, @C(6).vir_LL)
+    ;
+  @G(16) :
+     @L(@VF(14).o, @C(6).vir_SpdUp)
+    ;
+  @G(17) :
+     @L(@VF(15).o, @C(6).vir_SpdDn)
+    ;
+  @G(19) :
+     @L(@VF(18).o, @C(6).vit_CycleTime_Sec)
+    ;
+  @G(20) :
+     @L(@VF(13).o, @C(6).vir_X1)
+    ;
+  @G(21) :
+     @L(@VF(12).o, @C(6).vir_X2)
+    ;
+  @G(22) :
+     @L(@VF(11).o, @C(6).vir_X3)
+    ;
+  @G(23) :
+     @L(@VF(10).o, @C(6).vir_LU)
+    ;
+  @G(24) :
+     @L(@VF(9).o, @C(6).vir_SV)
+    ;
+  @G(27) :
+     @L(@C(6).vor_Y, @VF(25).i)
+    ;
+  @G(28) :
+     @L(@C(6).vor_XSum, @VF(26).i)
+    ;
+  @G(32) :
+     @L(@C(6).vox_QU, @VF(29).i)
+    ;
+  @G(33) :
+     @L(@C(6).vox_QL, @VF(30).i)
+    ;
+  @G(34) :
+     @L(@C(6).vox_QE, @VF(31).i)
+    ;
+  @G(37) :
+     @L(@VF(35).o, @C(6).vix_Stp)
+    ;
+  @G(38) :
+     @L(@VF(36).o, @C(6).vix_Auto)
+    ;
+  @G(40) :
+     @L(@C(6).vox_Err, @VF(39).i)
+    ;
+  @G(44) :
+     @L(@C(6).voui_XSumChg, @VF(43).i)
+    ;
+  @G(45) :
+     @L(@C(6).voui_ErrNo, @VF(41).i)
+    ;
+  @G(46) :
+     @L(@C(6).vousi_Exc, @VF(42).i)
+    ;
+  @G(48) :
+     @L(@C(6).vow_St, @VF(47).i)
+    ;
+  @G(50) :
+     @L(@VF(49).o, @C(6).viusi_OpC)
+    ;
+END_PROGRAM

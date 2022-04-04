@@ -1,0 +1,22 @@
+NAMESPACE logicals.web.standard
+NAMESPACE convert
+
+/*
+ * Function block wrapper for IEC 61131-3 TO_LWORD<br>
+ * IN =  input value (ULINT)<br>
+ * OUT = IN (LWORD)<br>
+ */
+FUNCTION_BLOCK wULINT_TO_LWORD
+	{ vNameAlignment:="center"; altName:="ULINT_TO_LWORD"; bgColor:="DodgerBlue"; width:=140; hideIONames; }
+	VAR_INPUT
+		IN : ULINT;
+	END_VAR
+	VAR_OUTPUT
+		OUT: LWORD;
+	END_VAR
+
+	OUT := TO_LWORD(IN:=IN, ENO=>ENO);
+END_FUNCTION_BLOCK
+
+END_NAMESPACE
+END_NAMESPACE

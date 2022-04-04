@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<keywordspec format="ROBOT" generated="20211208 09:21:53" name="com.logicals.lc3.testframework.robot.keywords.Keywords" type="library">
+<version>1.0</version>
+<scope>test suite</scope>
+<namedargs>yes</namedargs>
+<doc>Keyword library for logi.CAD 3 testframework
+    </doc>
+<kw name="Data">
+<arguments>
+<arg>*varargs</arg>
+<arg>**kwargs</arg>
+</arguments>
+<doc />
+<tags>
+</tags>
+</kw>
+<kw name="Disconnect">
+<arguments>
+</arguments>
+<doc />
+<tags>
+</tags>
+</kw>
+<kw name="Finish">
+<arguments>
+</arguments>
+<doc />
+<tags>
+</tags>
+</kw>
+<kw name="Head">
+<arguments>
+<arg>*varargs</arg>
+<arg>**kwargs</arg>
+</arguments>
+<doc />
+<tags>
+</tags>
+</kw>
+<kw name="Init">
+<arguments>
+<arg>*varargs</arg>
+<arg>**kwargs</arg>
+</arguments>
+<doc />
+<tags>
+</tags>
+</kw>
+<kw name="Prepare Test Bed">
+<arguments>
+<arg>qualified_pou_name</arg>
+<arg>**kwargs</arg>
+</arguments>
+<doc />
+<tags>
+</tags>
+</kw>
+<kw name="Set Defaults">
+<arguments>
+<arg>**kwargs</arg>
+</arguments>
+<doc />
+<tags>
+</tags>
+</kw>
+<kw name="Set Variable Testmodes">
+<arguments>
+<arg>**kwargs</arg>
+</arguments>
+<doc />
+<tags>
+</tags>
+</kw>
+<kw name="Shift">
+<arguments>
+<arg>*varargs</arg>
+</arguments>
+<doc />
+<tags>
+</tags>
+</kw>
+<kw name="Tol">
+<arguments>
+<arg>*varargs</arg>
+</arguments>
+<doc />
+<tags>
+</tags>
+</kw>
+</keywordspec>

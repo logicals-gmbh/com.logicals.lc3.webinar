@@ -1,0 +1,10 @@
+{ CustomImplementation }
+
+NAMESPACE logicals.web.standard.safe
+
+TYPE
+	SAFEBOOL_Constant : BYTE(SAFEFALSE := 16#00, SAFETRUE := 16#AA);
+	SAFEBOOL : BYTE := SAFEBOOL_Constant#SAFEFALSE;
+END_TYPE
+
+END_NAMESPACE

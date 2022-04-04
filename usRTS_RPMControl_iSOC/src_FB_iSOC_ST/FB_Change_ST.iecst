@@ -1,0 +1,30 @@
+/*
+ * Check if REAL is changed between two calls
+ */
+FUNCTION_BLOCK FB_lc_ChangeREAL_ST
+  /*
+   * Change REAL
+   * 
+   * InputValue was changed during two cycles
+   */
+   VAR_INPUT
+    vir_In : REAL;
+   END_VAR
+
+   VAR_OUTPUT
+    voi_Out : BOOL;
+   END_VAR
+   
+   VAR
+    li_OldVal : REAL;
+   END_VAR
+   
+   IF NE(IN1 := li_OldVal, IN2 := vir_In) THEN
+    voi_Out := TRUE;
+   ELSE
+    voi_Out := FALSE;
+   END_IF;
+   
+   li_OldVal := vir_In;
+
+END_FUNCTION_BLOCK

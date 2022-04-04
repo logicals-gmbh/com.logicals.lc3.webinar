@@ -1,0 +1,7 @@
+{CustomImplementation}
+FUNCTION_BLOCK AO
+	{ImplementationProperties (functionHasCFile;)}
+	VAR_INPUT
+		AnalogValue : INT;
+	END_VAR
+END_FUNCTION_BLOCK

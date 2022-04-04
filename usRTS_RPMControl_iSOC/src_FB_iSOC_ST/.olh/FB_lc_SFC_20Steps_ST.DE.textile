@@ -1,0 +1,42 @@
+h1. FB_lc_SFC_20Steps_ST
+
+h2. Kurz-Information
+
+###. Aendern Sie die folgende Tabelle NICHT. Sie wird automatisch erzeugt.
+###. Um die Grafik der Schnittstelle zu erstellen, oeffnen Sie den Schnittstellen-Editor und druecken Sie Strg+Umschalt+P.
+
+table(#tableborders){border:1px solid grey; border-spacing: 0px;}.
+|<(tableHeaderCell). Name|@FB_lc_SFC_20Steps_ST@|
+|<(tableHeaderCell). POE-Typ|Funktionsbaustein|
+|<(tableHeaderCell). Schnittstelle|!FB_lc_SFC_20Steps_ST.png!|
+
+h2. Funktionalit&auml;t
+
+h2. Eing&auml;nge, Ausg&auml;nge, Ergebniswert
+
+###. Aendern Sie NUR die Beschreibung in der folgenden Tabelle. Die anderen Daten werden automatisch erzeugt (Bezeichner, Datentypen).
+
+###. IO_BEGIN
+
+table(#tableborders){border:1px solid grey; border-spacing: 0px;}.
+|(tableHeaderCell). Abschnitt|(tableHeaderCell). Bezeichner|(tableHeaderCell). Datentyp|(tableHeaderCell). Beschreibung|
+|Eingang:|@vix_Term@|@BOOL@|Geben Sie eine Beschreibung an|
+|Eingang:|@vix_ShutDown@|@BOOL@|Geben Sie eine Beschreibung an|
+|Eingang:|@vix_Start@|@BOOL@|Geben Sie eine Beschreibung an|
+|Eingang:|@vix_Stop@|@BOOL@|Geben Sie eine Beschreibung an|
+|Eingang:|@vix_Reset@|@BOOL@|Geben Sie eine Beschreibung an|
+|Eingang:|@vix_StopMode@|@BOOL@|Geben Sie eine Beschreibung an|
+|Eingang:|@vix_LoopMode@|@BOOL@|Geben Sie eine Beschreibung an|
+|Eingang:|@vitarr_StepTransTime@|@ARRAY[0..20] OF TIME@|Geben Sie eine Beschreibung an|
+|Eingang:|@vistrarr_StepName@|@ARRAY[0..20] OF STRING[20]@|Geben Sie eine Beschreibung an|
+|Eingang:|@viui_StepStopNo@|@UINT@|Geben Sie eine Beschreibung an|
+|Eingang:|@viui_StepLoopNo@|@UINT@|Geben Sie eine Beschreibung an|
+|Ausgang:|@vo_SFCState@|@DT_lc_SFCVal@|Geben Sie eine Beschreibung an|
+|Ausgang:|@voarr_SFCStates@|@ARRAY[0..20] OF DT_lc_SFCVal@|Geben Sie eine Beschreibung an|
+
+###. IO_END
+
+h2. Beispiel
+
+###. Dieser Abschnitt kann ein Beispiel enthalten, das die Funktionalitaet des Bausteins beschreibt.
+

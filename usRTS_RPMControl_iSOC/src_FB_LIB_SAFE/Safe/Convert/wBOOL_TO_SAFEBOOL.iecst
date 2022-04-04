@@ -1,0 +1,27 @@
+NAMESPACE logicals.web.standard.safe
+NAMESPACE convert
+
+/*
+ * Function block wrapper for TO_SAFEBOOL<br>
+ * IN =  input value (BOOL)<br>
+ * OUT = IN (SAFEBOOL)<br>
+ */
+FUNCTION_BLOCK wBOOL_TO_SAFEBOOL
+	{ vNameAlignment:="center"; altName:="BOOL_TO_SAFEBOOL"; bgColor:="Gold"; width:=160; hideIONames; }
+	VAR_INPUT
+		IN : BOOL;
+	END_VAR
+	VAR_OUTPUT
+		OUT: SAFEBOOL;
+	END_VAR
+
+	IF (IN <> FALSE)
+	THEN
+		OUT := SAFEBOOL_Constant#SAFETRUE;
+	ELSE
+		OUT := SAFEBOOL_Constant#SAFEFALSE;
+	END_IF;
+END_FUNCTION_BLOCK
+
+END_NAMESPACE
+END_NAMESPACE

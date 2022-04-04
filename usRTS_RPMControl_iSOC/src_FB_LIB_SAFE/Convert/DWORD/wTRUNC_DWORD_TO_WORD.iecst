@@ -1,0 +1,22 @@
+NAMESPACE logicals.web.standard
+NAMESPACE convert
+
+/*
+ * Function block wrapper for IEC 61131-3 TO_WORD<br>
+ * IN =  input value (DWORD)<br>
+ * OUT = IN (WORD)<br>
+ */
+FUNCTION_BLOCK wTRUNC_DWORD_TO_WORD
+	{ vNameAlignment:="center"; altName:="TRUNC_DWORD_TO_WORD"; bgColor:="DodgerBlue"; width:=200; hideIONames; }
+	VAR_INPUT
+		IN : DWORD;
+	END_VAR
+	VAR_OUTPUT
+		OUT: WORD;
+	END_VAR
+
+	OUT := TO_WORD(IN:=IN, ENO=>ENO);
+END_FUNCTION_BLOCK
+
+END_NAMESPACE
+END_NAMESPACE

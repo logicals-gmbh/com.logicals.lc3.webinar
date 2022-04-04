@@ -1,0 +1,370 @@
+USING logicals.web.standard.safe;
+
+NAMESPACE logicals.web.standard.safe
+NAMESPACE plcopen
+
+TYPE
+	SF_ModeSelector_State : UINT(
+	/* The FB detected that two or more S_ModeX are TRUE, e.g., short-circuit of cables. Only one S_ModeX OR no S_ModeX = TRUE */
+	Error_Short_Circuit := 16#C010,
+	Error_Short_Circuit_Fixed := 16#C410,
+
+	/* The FB detected that all S_ModeX are FALSE: The period following a falling S_ModeX trigger exceeds ModeMonitorTime, e.g., open-circuit of cables. Only one S_ModeX = TRUE */
+	Error_Open_Circuit := 16#C020,
+	Error_Open_Circuit_Fixed := 16#C420,
+
+	/* Static Reset signal detected in state C410. */
+	Reset_Error_1 := 16#C011,
+	/* Static Reset signal detected in state C420. */
+	Reset_Error_2 := 16#C021,
+	/* The function block is not active (initial state). */
+	Idle := 16#0000,
+	/* State after activation or when S_ModeX has changed (unless locked) or after Reset of an error state. */
+	Mode_Changed := 16#8802,
+	/* Valid mode selection, but not yet locked. */
+	Mode_Selected := 16#8000,
+	/* Valid mode selection is locked. */
+	Mode_Locked := 16#8010
+	);
+
+	ModeState : INT(Only_One_S_ModeX := 0, No_S_ModeX := 1, More_Than_One_S_ModeX := 2);
+
+END_TYPE
+
+
+/* This function block selects the system operation mode, such as manual, automatic, semi-automatic, etc. */
+FUNCTION_BLOCK SF_ModeSelector
+	{ altName:="SF_ModeSelector"; bgColor:="Gold"; width:=340; }
+	VAR_INPUT
+		/* See Table 5.1.1 General Input Parameters */
+		Activate : BOOL := FALSE;
+		/* Variable or constant.
+		* Input 0 from mode selector switch
+		* FALSE: Mode 0 is not requested by operator.
+		* TRUE: Mode 0 is requested by operator. */
+		S_Mode0 : SAFEBOOL := SAFEBOOL_Constant#SAFEFALSE;
+		/* Variable or constant.
+		 * Input 1 from mode selector switch
+		 * FALSE: Mode 1 is not requested by operator.
+		 * TRUE: Mode 1 is requested by operator. */
+		S_Mode1 : SAFEBOOL := SAFEBOOL_Constant#SAFEFALSE;
+		/* Variable or constant.
+		 * Input 2 from mode selector switch
+		 * FALSE: Mode 2 is not requested by operator.
+		 * TRUE: Mode 2 is requested by operator. */
+		S_Mode2 : SAFEBOOL := SAFEBOOL_Constant#SAFEFALSE;
+		/* Variable or constant.
+		 * Input 3 from mode selector switch
+		 * FALSE: Mode 3 is not requested by operator.
+		 * TRUE: Mode 3 is requested by operator. */
+		S_Mode3 : SAFEBOOL := SAFEBOOL_Constant#SAFEFALSE;
+		/* Variable or constant.
+		 * Input 4 from mode selector switch
+		 * FALSE: Mode 4 is not requested by operator.
+		 * TRUE: Mode 4 is requested by operator. */
+		S_Mode4 : SAFEBOOL := SAFEBOOL_Constant#SAFEFALSE;
+		/* Variable or constant.
+		 * Input 5 from mode selector switch
+		 * FALSE: Mode 5 is not requested by operator.
+		 * TRUE: Mode 5 is requested by operator. */
+		S_Mode5 : SAFEBOOL := SAFEBOOL_Constant#SAFEFALSE;
+		/* Variable or constant.
+		 * Input 6 from mode selector switch
+		 * FALSE: Mode 6 is not requested by operator.
+		 * TRUE: Mode 6 is requested by operator. */
+		S_Mode6 : SAFEBOOL := SAFEBOOL_Constant#SAFEFALSE;
+		/* Variable or constant.
+		 * Input 7 from mode selector switch
+		 * FALSE: Mode 7 is not requested by operator.
+		 * TRUE: Mode 7 is requested by operator. */
+		S_Mode7 : SAFEBOOL := SAFEBOOL_Constant#SAFEFALSE;
+		/* Variable or constant.
+		 * Locks the selected mode
+		 * FALSE: The actual S_ModeXSel output is locked therefore a change of any S_ModeX input
+		 * does not lead to a change in the S_ModeXSel output even in the event of a rising edge of Set-Mode.
+		 * TRUE: The selected S_ModeXSel is not locked; a mode selec-tion change is possible. */
+		S_Unlock : SAFEBOOL := SAFEBOOL_Constant#SAFEFALSE;
+		/* Variable (or constant FALSE, if AutoSetMode = TRUE)
+		 * Sets the selected mode
+		 * Operator acknowledges the setting of a mode.
+		 * Any change to new S_ModeX = TRUE leads to S_AnyModeSel/S_ModeXSel = FALSE, only a rising SetMode trigger then leads to new S_ModeXSel = TRUE. */
+		S_SetMode : SAFEBOOL := SAFEBOOL_Constant#SAFEFALSE;
+		/* Constant.
+		 * Parameterizes the acknowledgement mode
+		 * FALSE: A change in mode must be acknowledged by the operator via SetMode.
+		 * TRUE: A valid change of the S_ModeX input to another S_ModeX automatically leads to a change in S_ModeXSel
+		 * without operator acknowledgment via SetMode (as long as this is not locked by S_Unlock). */
+		AutoSetMode : BOOL := FALSE;
+		/* Constant.
+		 * Maximum permissible time for changing the selection input. */
+		ModeMonitorTime : TIME := T#0s;
+		/* See Section 5.1.1 General Input Parameters */
+		Reset : BOOL := FALSE;
+	END_VAR
+
+	VAR_OUTPUT
+		/* See Section 5.1.2 General Output Parameters */
+		Ready : BOOL := FALSE;
+		/* Indicates that mode 0 is selected and acknowledged.
+		 * FALSE: Mode 0 is not selected or not active.
+		 * TRUE: Mode 0 is selected and active. */
+		S_Mode0Sel : SAFEBOOL := FALSE;
+		/* Indicates that mode 1 is selected and acknowledged.
+		 * FALSE: Mode 1 is not selected or not active.
+		 * TRUE: Mode 1 is selected and active. */
+		S_Mode1Sel : SAFEBOOL := FALSE;
+		/* Indicates that mode 2 is selected and acknowledged.
+		 * FALSE: Mode 2 is not selected or not active.
+		 * TRUE: Mode 2 is selected and active. */
+		S_Mode2Sel : SAFEBOOL := FALSE;
+		/* Indicates that mode 3 is selected and acknowledged.
+		 * FALSE: Mode 3 is not selected or not active.
+		 * TRUE: Mode 3 is selected and active. */
+		S_Mode3Sel : SAFEBOOL := FALSE;
+		/* Indicates that mode 4 is selected and acknowledged.
+		 * FALSE: Mode 4 is not selected or not active.
+		 * TRUE: Mode 4 is selected and active. */
+		S_Mode4Sel : SAFEBOOL := FALSE;
+		/* Indicates that mode 5 is selected and acknowledged.
+		 * FALSE: Mode 5 is not selected or not active.
+		 * TRUE: Mode 5 is selected and active. */
+		S_Mode5Sel : SAFEBOOL := FALSE;
+		/* Indicates that mode 6 is selected and acknowledged.
+		 * FALSE: Mode 6 is not selected or not active.
+		 * TRUE: Mode 6 is selected and active. */
+		S_Mode6Sel : SAFEBOOL := FALSE;
+		/* Indicates that mode 7 is selected and acknowledged.
+		 * FALSE: Mode 7 is not selected or not active.
+		 * TRUE: Mode 7 is selected and active. */
+		S_Mode7Sel : SAFEBOOL := FALSE;
+		/* Indicates that any of the 8 modes is selected and acknowledged.
+		 * FALSE: No S_ModeX is selected.
+		 * TRUE: One of the 8 S_ModeX is selected and active. */
+		S_AnyModeSel : SAFEBOOL := FALSE;
+		/* Optional. See 5.1.2 General Output Parameters */
+		SafetyDemand : BOOL := FALSE;
+		/* Optional. See 5.1.2 General Output Parameters */
+		ResetRequest : BOOL := FALSE;
+		/* See Section 5.1.2 General Output Parameters */
+		Error : BOOL := FALSE;
+		/* See Section 5.1.2 General Output Parameters */
+		DiagCode : WORD := 16#0000;
+	END_VAR
+
+	VAR
+		R_Trig_Reset : R_TRIG;
+		R_Trig_S_SetMode : R_TRIG;
+
+		ModeMonitorTimer : TON;
+	END_VAR
+
+	VAR_TEMP
+		OneS_ModeChanged : BOOL;
+
+		modeState : ModeState;
+	END_VAR
+
+	IF(NOT Activate) THEN
+		DiagCode := TO_WORD(SF_ModeSelector_State#Idle);
+		ModeMonitorTimer(IN := FALSE);
+	ELSE
+
+		modeState := DetermineModeState(S_Mode0, S_Mode1, S_Mode2, S_Mode3, S_Mode4, S_Mode5, S_Mode6, S_Mode7);
+
+		ModeMonitorTimer(IN := modeState = ModeState#No_S_ModeX, PT := ModeMonitorTime);
+
+		OneS_ModeChanged := S_Mode0 <> S_Mode0Sel OR S_Mode1 <> S_Mode1Sel OR S_Mode2 <> S_Mode2Sel OR S_Mode3 <> S_Mode3Sel OR S_Mode4 <> S_Mode4Sel OR S_Mode5 <> S_Mode5Sel OR S_Mode6 <> S_Mode6Sel OR S_Mode7 <> S_Mode7Sel;
+
+		R_Trig_Reset(Reset);
+		R_Trig_S_SetMode(IS(S_SetMode));
+
+		CASE TO_UINT(DiagCode) OF
+			SF_ModeSelector_State#Idle:
+				/* IF(Activate) THEN - Active is always true here */
+					DiagCode := TO_WORD(SF_ModeSelector_State#Mode_Changed);
+			SF_ModeSelector_State#Mode_Changed:
+				IF(modeState = ModeState#More_Than_One_S_ModeX) THEN
+					DiagCode := TO_WORD(SF_ModeSelector_State#Error_Short_Circuit);
+				ELSIF(ModeMonitorTimer.Q) THEN
+					DiagCode := TO_WORD(SF_ModeSelector_State#Error_Open_Circuit);
+				ELSIF((AutoSetMode OR R_Trig_S_SetMode.Q) AND IS(S_Unlock) AND modeState = ModeState#Only_One_S_ModeX) THEN
+					DiagCode := TO_WORD(SF_ModeSelector_State#Mode_Selected);
+				END_IF;
+			SF_ModeSelector_State#Error_Short_Circuit, SF_ModeSelector_State#Error_Short_Circuit_Fixed:
+				IF(Reset AND NOT R_Trig_Reset.Q) THEN
+					DiagCode := TO_WORD(SF_ModeSelector_State#Reset_Error_1);
+				ELSIF((modeState = ModeState#Only_One_S_ModeX OR modeState = ModeState#No_S_ModeX) AND R_Trig_Reset.Q) THEN
+					DiagCode := TO_WORD(SF_ModeSelector_State#Mode_Changed);
+				ELSE
+					DiagCode := TO_WORD(DetermineErrorShortCircuit(modeState));
+				END_IF;
+			SF_ModeSelector_State#Error_Open_Circuit, SF_ModeSelector_State#Error_Open_Circuit_Fixed:
+				IF(Reset AND NOT R_Trig_Reset.Q) THEN
+					DiagCode := TO_WORD(SF_ModeSelector_State#Reset_Error_2);
+				ELSIF(modeState = ModeState#Only_One_S_ModeX AND R_Trig_Reset.Q) THEN
+					DiagCode := TO_WORD(SF_ModeSelector_State#Mode_Changed);
+				ELSE
+					DiagCode := TO_WORD(DetermineErrorOpenCircuit(modeState));
+				END_IF;
+			 SF_ModeSelector_State#Reset_Error_1:
+				IF(NOT Reset) THEN
+					DiagCode := TO_WORD(DetermineErrorShortCircuit(modeState));
+				END_IF;
+			SF_ModeSelector_State#Reset_Error_2:
+				IF(NOT Reset) THEN
+					DiagCode := TO_WORD(DetermineErrorOpenCircuit(modeState));
+				END_IF;
+			SF_ModeSelector_State#Mode_Selected:
+				IF(modeState = ModeState#More_Than_One_S_ModeX) THEN
+					DiagCode := TO_WORD(DetermineErrorShortCircuit(modeState));
+				ELSIF(OneS_ModeChanged) THEN
+					DiagCode := TO_WORD(SF_ModeSelector_State#Mode_Changed);
+				ELSIF(IS_NOT(S_Unlock)) THEN
+					DiagCode := TO_WORD(SF_ModeSelector_State#Mode_Locked);
+				END_IF;
+			SF_ModeSelector_State#Mode_Locked:
+				IF(modeState = ModeState#More_Than_One_S_ModeX AND IS(S_Unlock)) THEN
+					DiagCode := TO_WORD(DetermineErrorShortCircuit(modeState));
+				ELSIF(OneS_ModeChanged AND IS(S_Unlock)) THEN
+					DiagCode := TO_WORD(SF_ModeSelector_State#Mode_Changed);
+				ELSIF(IS(S_Unlock)) THEN
+					DiagCode := TO_WORD(SF_ModeSelector_State#Mode_Selected);
+				END_IF;
+		END_CASE;
+	END_IF;
+
+	CASE TO_UINT(DiagCode) OF
+		SF_ModeSelector_State#Error_Short_Circuit_Fixed,
+		SF_ModeSelector_State#Error_Open_Circuit_Fixed:
+			Ready := TRUE;
+			SafetyDemand := FALSE;
+			ResetRequest := TRUE;
+			Error := TRUE;
+			S_AnyModeSel := SAFEBOOL_Constant#SAFEFALSE;
+			S_Mode0Sel := SAFEBOOL_Constant#SAFEFALSE;
+			S_Mode1Sel := SAFEBOOL_Constant#SAFEFALSE;
+			S_Mode2Sel := SAFEBOOL_Constant#SAFEFALSE;
+			S_Mode3Sel := SAFEBOOL_Constant#SAFEFALSE;
+			S_Mode4Sel := SAFEBOOL_Constant#SAFEFALSE;
+			S_Mode5Sel := SAFEBOOL_Constant#SAFEFALSE;
+			S_Mode6Sel := SAFEBOOL_Constant#SAFEFALSE;
+			S_Mode7Sel := SAFEBOOL_Constant#SAFEFALSE;
+		SF_ModeSelector_State#Error_Short_Circuit,
+		SF_ModeSelector_State#Error_Open_Circuit,
+		SF_ModeSelector_State#Reset_Error_1,
+		SF_ModeSelector_State#Reset_Error_2:
+			Ready := TRUE;
+			SafetyDemand := FALSE;
+			ResetRequest := FALSE;
+			Error := TRUE;
+			S_AnyModeSel := SAFEBOOL_Constant#SAFEFALSE;
+			S_Mode0Sel := SAFEBOOL_Constant#SAFEFALSE;
+			S_Mode1Sel := SAFEBOOL_Constant#SAFEFALSE;
+			S_Mode2Sel := SAFEBOOL_Constant#SAFEFALSE;
+			S_Mode3Sel := SAFEBOOL_Constant#SAFEFALSE;
+			S_Mode4Sel := SAFEBOOL_Constant#SAFEFALSE;
+			S_Mode5Sel := SAFEBOOL_Constant#SAFEFALSE;
+			S_Mode6Sel := SAFEBOOL_Constant#SAFEFALSE;
+			S_Mode7Sel := SAFEBOOL_Constant#SAFEFALSE;
+		SF_ModeSelector_State#Idle:
+			Ready := FALSE;
+			SafetyDemand := FALSE;
+			ResetRequest := FALSE;
+			Error := FALSE;
+			S_AnyModeSel := SAFEBOOL_Constant#SAFEFALSE;
+			S_Mode0Sel := SAFEBOOL_Constant#SAFEFALSE;
+			S_Mode1Sel := SAFEBOOL_Constant#SAFEFALSE;
+			S_Mode2Sel := SAFEBOOL_Constant#SAFEFALSE;
+			S_Mode3Sel := SAFEBOOL_Constant#SAFEFALSE;
+			S_Mode4Sel := SAFEBOOL_Constant#SAFEFALSE;
+			S_Mode5Sel := SAFEBOOL_Constant#SAFEFALSE;
+			S_Mode6Sel := SAFEBOOL_Constant#SAFEFALSE;
+			S_Mode7Sel := SAFEBOOL_Constant#SAFEFALSE;
+		SF_ModeSelector_State#Mode_Changed:
+			Ready := TRUE;
+			SafetyDemand := TRUE;
+			ResetRequest := FALSE;
+			Error := FALSE;
+			S_AnyModeSel := SAFEBOOL_Constant#SAFEFALSE;
+			S_Mode0Sel := SAFEBOOL_Constant#SAFEFALSE;
+			S_Mode1Sel := SAFEBOOL_Constant#SAFEFALSE;
+			S_Mode2Sel := SAFEBOOL_Constant#SAFEFALSE;
+			S_Mode3Sel := SAFEBOOL_Constant#SAFEFALSE;
+			S_Mode4Sel := SAFEBOOL_Constant#SAFEFALSE;
+			S_Mode5Sel := SAFEBOOL_Constant#SAFEFALSE;
+			S_Mode6Sel := SAFEBOOL_Constant#SAFEFALSE;
+			S_Mode7Sel := SAFEBOOL_Constant#SAFEFALSE;
+		SF_ModeSelector_State#Mode_Selected:
+			Ready := TRUE;
+			SafetyDemand := FALSE;
+			ResetRequest := FALSE;
+			Error := FALSE;
+			S_AnyModeSel := SAFEBOOL_Constant#SAFETRUE;
+			S_Mode0Sel := S_Mode0;
+			S_Mode1Sel := S_Mode1;
+			S_Mode2Sel := S_Mode2;
+			S_Mode3Sel := S_Mode3;
+			S_Mode4Sel := S_Mode4;
+			S_Mode5Sel := S_Mode5;
+			S_Mode6Sel := S_Mode6;
+			S_Mode7Sel := S_Mode7;
+		SF_ModeSelector_State#Mode_Locked:
+			Ready := TRUE;
+			SafetyDemand := FALSE;
+			ResetRequest := FALSE;
+			Error := FALSE;
+			S_AnyModeSel := SAFEBOOL_Constant#SAFETRUE;
+	END_CASE;
+
+	ENO := ENO AND CheckSAFEBOOL(S_Mode0) AND CheckSAFEBOOL(S_Mode1) AND CheckSAFEBOOL(S_Mode2) AND CheckSAFEBOOL(S_Mode3) AND CheckSAFEBOOL(S_Mode4) AND CheckSAFEBOOL(S_Mode5) AND CheckSAFEBOOL(S_Mode6) AND CheckSAFEBOOL(S_Mode7) AND CheckSAFEBOOL(S_Unlock) AND CheckSAFEBOOL(S_SetMode);
+
+END_FUNCTION_BLOCK
+
+FUNCTION DetermineModeState : INT
+
+	VAR_INPUT
+		S_Mode0 : SAFEBOOL;
+		S_Mode1 : SAFEBOOL;
+		S_Mode2 : SAFEBOOL;
+		S_Mode3 : SAFEBOOL;
+		S_Mode4 : SAFEBOOL;
+		S_Mode5 : SAFEBOOL;
+		S_Mode6 : SAFEBOOL;
+		S_Mode7 : SAFEBOOL;
+	END_VAR
+
+	IF(XOR(IS(S_Mode0),IS(S_Mode1),IS(S_Mode2),IS(S_Mode3),IS(S_Mode4),IS(S_Mode5),IS(S_Mode6),IS(S_Mode7))) THEN
+		DetermineModeState := ModeState#Only_One_S_ModeX;
+	ELSIF(NOT OR(IS(S_Mode0),IS(S_Mode1),IS(S_Mode2),IS(S_Mode3),IS(S_Mode4),IS(S_Mode5),IS(S_Mode6),IS(S_Mode7))) THEN
+		DetermineModeState := ModeState#No_S_ModeX;
+	ELSE
+		DetermineModeState := ModeState#More_Than_One_S_ModeX;
+	END_IF;
+END_FUNCTION
+
+FUNCTION DetermineErrorShortCircuit : UINT
+	VAR_INPUT
+		modeState : ModeState;
+	END_VAR
+
+	IF(modeState = ModeState#Only_One_S_ModeX OR modeState = ModeState#No_S_ModeX) THEN
+		DetermineErrorShortCircuit := SF_ModeSelector_State#Error_Short_Circuit_Fixed;
+	ELSE
+		DetermineErrorShortCircuit := SF_ModeSelector_State#Error_Short_Circuit;
+	END_IF;
+END_FUNCTION
+
+FUNCTION DetermineErrorOpenCircuit : UINT
+	VAR_INPUT
+		modeState : ModeState;
+	END_VAR
+
+	IF(modeState = ModeState#Only_One_S_ModeX) THEN
+		DetermineErrorOpenCircuit := SF_ModeSelector_State#Error_Open_Circuit_Fixed;
+	ELSE
+		DetermineErrorOpenCircuit := SF_ModeSelector_State#Error_Open_Circuit;
+	END_IF;
+END_FUNCTION
+
+END_NAMESPACE
+END_NAMESPACE

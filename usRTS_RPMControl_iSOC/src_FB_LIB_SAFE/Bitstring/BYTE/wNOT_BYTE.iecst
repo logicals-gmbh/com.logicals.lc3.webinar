@@ -1,0 +1,22 @@
+NAMESPACE logicals.web.standard
+NAMESPACE bitstring
+
+/*
+ * Function block wrapper for IEC 61131-3 NOT<br>
+ * IN = input (BYTE)<br>
+ * OUT = !IN (BYTE)<br>
+ */
+FUNCTION_BLOCK wNOT_BYTE
+	{ vNameAlignment:="center"; altName:="NOT"; bgColor:="DodgerBlue"; width:=60; hideIONames; }
+	VAR_INPUT
+		IN : BYTE;
+	END_VAR
+	VAR_OUTPUT
+		OUT: BYTE;
+	END_VAR
+
+	OUT := NOT(IN:=IN, ENO=>ENO);
+END_FUNCTION_BLOCK
+
+END_NAMESPACE
+END_NAMESPACE

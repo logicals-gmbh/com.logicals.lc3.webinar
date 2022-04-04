@@ -1,0 +1,67 @@
+/*
+ * Globale Variablen zum Test des Baustein FB_lc_SFC_20Steps_ST
+ */
+GLOBALS GV_SFC20
+
+	VAR_GLOBAL
+     gx_SFC20_Reset : BOOL;	
+     gx_SFC20_Start : BOOL;	
+     gx_SFC20_Stop  : BOOL;	
+     gx_SFC20_Loop  : BOOL;	
+
+     gx_SFC20_StartState : BOOL;	
+     gx_SFC20_StopState  : BOOL;	
+
+     gx_SFC20_LoopState  : BOOL;	
+
+     gx_SFC20_LoopMode   : BOOL; // Button Visu
+     gx_SFC20_StopMode   : BOOL; // Button Visu
+
+     gx_SFC20_LoopModeState   : BOOL; // Statusanzeige
+     gx_SFC20_StopModeState   : BOOL; // Statusanzeige
+
+     gui_SFC20_LoopStepNo   : UINT := 20;
+     gui_SFC20_StopStepNo   : UINT := 20;
+
+     gstr_SFC20_StateText : STRING[30];
+
+     gx_SFC20_SetPar      : BOOL;	
+
+    /*
+     * Wert von Visu eingegeben
+     */
+     grarr_SetSFC20Time  : ARRAY[0..20] OF REAL := [5.0,5.0,5.0,5.0,5.0,5.0,5.0,5.0,5.0,5.0,5.0,5.0,5.0,5.0,5.0,5.0,5.0,5.0,5.0,5.0,5.0];
+    
+    /*
+     * Verweilzeiten von Visu mit gx_SFC_SetPar uebernommen un din Visu anzeigen!
+     */      
+     grarr_SFC20Time     : ARRAY[0..20] OF REAL := [1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0];
+
+    /*
+     * Verweilzeiten von Visu mit gx_SFC_SetPar uebernommen und von REAL in TIME gewmdelt
+     */      
+     gtarr_SFC20Time     : ARRAY[0..20] OF TIME := [T#1s,T#1s,T#1s,T#1s,T#1s,T#1s,T#1s,T#1s,T#1s,T#1s,T#1s,T#1s,T#1s,T#1s,T#1s,T#1s,T#1s,T#1s,T#1s,T#1s,T#1s];
+
+    /*
+     * Aktuelle Zeiten als TIME (Visu) (Step_nn.T)
+     */ 
+     gtarr_SFC20Time_Act : ARRAY[0..20] OF TIME;
+
+    /*
+     * Aktuelle Zeiten als REAL (Visu) (Step_nn.T)
+     */ 
+     grarr_SFC20Time_Act : ARRAY[0..20] OF REAL;
+
+    /*
+     * Status der Schrittausgaenge (Step_nn.X)
+     */ 
+     gxarr_SFC20_Action_State : ARRAY[0..20] OF BOOL;
+
+    /*
+     * Status des aktuellen Schrittes (Step_nn.X)
+     */ 
+     gstruc_SFC20_State : DT_lc_SFCVal;
+
+	END_VAR
+
+END_GLOBALS

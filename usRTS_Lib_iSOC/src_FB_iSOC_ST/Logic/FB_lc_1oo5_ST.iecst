@@ -1,0 +1,51 @@
+/*
+ * 1oo5 in ST
+ */
+FUNCTION_BLOCK FB_lc_1oo5_ST  {
+    voui_ErrNo {loc := "right", index := 9};
+    vox_Err {loc := "right", index := 8};
+    vox_Out {index := 6};
+    width := 300;
+    height := 208;
+  }
+
+VAR_INPUT
+ vix_In1 : BOOL;
+ vix_In2 : BOOL;
+ vix_In3 : BOOL;
+ vix_In4 : BOOL;
+ vix_In5 : BOOL;
+END_VAR
+
+VAR_OUTPUT
+  vox_Out    : BOOL;
+  vox_Err    : BOOL;
+  voui_ErrNo : UINT;
+
+  vox_Out1 : BOOL;
+  vox_Out2 : BOOL;
+  vox_Out3 : BOOL;
+  vox_Out4 : BOOL;
+  vox_Out5 : BOOL;
+
+
+END_VAR
+
+vox_OUT := (vix_In1 AND NOT vix_In2 AND NOT vix_In3 AND NOT vix_In4 AND NOT vix_In5) OR
+           (vix_In2 AND NOT vix_In1 AND NOT vix_In3 AND NOT vix_In4 AND NOT vix_In5) OR
+           (vix_In3 AND NOT vix_In1 AND NOT vix_In2 AND NOT vix_In4 AND NOT vix_In5) OR
+           (vix_In4 AND NOT vix_In1 AND NOT vix_In2 AND NOT vix_In3 AND NOT vix_In5) OR
+           (vix_In5 AND NOT vix_In1 AND NOT vix_In2 AND NOT vix_In3 AND NOT vix_In4);
+/*
+ * Die Ausgaenge werden TRUE, wenn 1oo5 OK
+ */
+
+vox_Out1 := (vix_In1 AND vox_Out);
+vox_Out2 := (vix_In2 AND vox_Out);
+vox_Out3 := (vix_In3 AND vox_Out);
+vox_Out4 := (vix_In4 AND vox_Out);
+vox_Out5 := (vix_In5 AND vox_Out);
+
+vox_Err := NOT vox_OUT;
+
+END_FUNCTION_BLOCK

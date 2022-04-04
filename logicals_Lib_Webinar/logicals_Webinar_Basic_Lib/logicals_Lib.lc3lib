@@ -1,13 +1,14 @@
 /*
  * logi.CAD 3 Library logicals_Lib_Webinar
+ * New Name com.logi.cals.Webinar.Basic
  * 
  * Created:
  * 20220226 _ DG Created Version 0.0.1
+ *
+ * Modified:
  * 20220329 _ DG Created Version 0.0.2
  * 20220329 _ DG Created Version 0.0.3
  * 20220330 _ DG Created Version 0.0.4
- *
- * New Name com.logi.cals.Webinar.Basic
  * 
  */
  
@@ -39,8 +40,8 @@ LIBRARY com.logicals.Webinar.Basic
 
    FOLDER "src_C_GetTime"
        IEC := com.logicals.Basic.GetTime.FUN_lc_GetTime_C;
-       // FILE := "..\..\src_C_GetTime\src-code\lcfu___COM.LOGICALS.BASIC.GETTIME.GETTIME.c";
-       // FILE := "../../src_C_GetTime/src-code/lcfu___COM.LOGICALS.BASIC.GETTIME.GETTIME.h";
+       // FILE := "..\..\src_C_GetTime\src-code\lcfu___com.logicals.Basic.GETTIME.GETTIME.c";
+       // FILE := "../../src_C_GetTime/src-code/lcfu___com.logicals.Basic.GETTIME.GETTIME.h";
    END_FOLDER 
 
    FOLDER "src_C_Quad"

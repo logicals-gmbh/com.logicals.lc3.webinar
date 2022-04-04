@@ -1,0 +1,29 @@
+NAMESPACE logicals.web.standard.safe
+NAMESPACE compare
+
+/*
+ * Function block wrapper for IEC 61131-3 GE<br>
+ * IN1 =  1st value (SAFEINT)<br>
+ * IN2 =  2nd value (SAFEINT)<br>
+ * OUT = SAFETRUE if IN1 >= IN2 (SAFEBOOL)<br>
+ */
+FUNCTION_BLOCK wGE_SAFEINT
+	{ vNameAlignment:="center"; altName:=">="; bgColor:="GoldenRod"; width:=40; hideIONames; }
+	VAR_INPUT
+		IN1 : SAFEINT;
+		IN2 : SAFEINT;
+	END_VAR
+	VAR_OUTPUT
+		OUT : SAFEBOOL;
+	END_VAR
+
+	IF (GE(IN1:=IN1, IN2:=IN2, ENO=>ENO) <> FALSE)
+	THEN
+		OUT := SAFEBOOL_Constant#SAFETRUE;
+	ELSE
+		OUT := SAFEBOOL_Constant#SAFEFALSE;
+	END_IF;
+END_FUNCTION_BLOCK
+
+END_NAMESPACE
+END_NAMESPACE

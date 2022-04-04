@@ -1,0 +1,25 @@
+NAMESPACE logicals.web.standard
+NAMESPACE edge
+
+/*
+ * Function block wrapper for IEC 61131-3 R_TRIG<br>
+ * CLK = current value (BOOL)<br>
+ * Q = flag showing rising edge detection (BOOL)<br>
+ */
+FUNCTION_BLOCK wR_TRIG
+	{ vNameAlignment:="center"; altName:="R_TRIG"; bgColor:="MediumBlue"; width:=140; }
+	VAR_INPUT
+		CLK: BOOL;
+	END_VAR
+	VAR_OUTPUT
+		Q: BOOL;
+	END_VAR
+	VAR
+		R_TRIG : R_TRIG;
+	END_VAR
+
+	R_TRIG(CLK:=CLK, Q=>Q, ENO=>ENO);
+END_FUNCTION_BLOCK
+
+END_NAMESPACE
+END_NAMESPACE

@@ -1,0 +1,357 @@
+USING logicals.web.standard.safe;
+
+NAMESPACE logicals.web.standard.safe
+NAMESPACE plcopen
+
+TYPE
+	SF_GuardLockingSerial_State : UINT(
+	/* Static Reset detected in state 8001. */
+	Reset_Error_0 := 16#C001,
+	/* S_Guard is not TRUE although the door was not requested to be opened. */
+	Guard_Error := 16#C010,
+	/* Static Reset detected in state C410. */
+	Reset_Error_1 := 16#C011,
+	/* S_Guard becomes TRUE again after being lost (C010). */
+	Guard_Return := 16#C410,
+	/* Lost safety acknowledge signal. S_Guard is TRUE. */
+	Safety_Lost_S_Guard_True := 16#C450,
+	/* Lost safety acknowledge signal. S_Guard is FALSE. */
+	Safety_Lost_S_Guard_False := 16#C050,
+	/* Static Reset detected in state C420. */
+	Reset_Error_2 := 16#C021,
+	/* Safety acknowledge signal becomes TRUE again after being lost (Cx50). */
+	Safety_Return := 16#C420,
+	/* Static Reset detected in state 8430. */
+	Reset_Error_3 := 16#C031,
+	/* Waiting time to Unlock exceeded. S_Guard is TRUE. */
+	Unlock_Request_Error_S_Guard_True := 16#C440,
+	/* Waiting time to Unlock exceeded. S_Guard is FALSE. */
+	Unlock_Request_Error_S_Guard_False := 16#C040,
+	/* Static Reset detected in state Cx40. */
+	Reset_Error_4 := 16#C041,
+	/* The function block is not active (initial state). */
+	Idle := 16#0000,
+	/* Guard is closed and locked. */
+	Guard_Closed_And_Locked := 16#8000,
+	/* Function block was activated and initiated. S_Guard is TRUE. */
+	Init_S_Guard_True := 16#8401,
+	/* Function block was activated and initiated. S_Guard is FALSE. */
+	Init_S_Guard_False := 16#8801,
+	/* Door is closed and locked, now waiting for operator reset */
+	Wait_For_Reset := 16#8430,
+	/* Waiting for operator to request to open the door (unlock request). */
+	Wait_For_Operator := 16#8812,
+	/* Guard is unlocked. Door can be closed or open. */
+	Guard_Open_And_Or_Unlocked := 16#8822,
+	/* S_UnlockGuard is TRUE, however the acknowledge signal S_GuardLocked is still TRUE (so waiting for acknowledge <FALSE>) */
+	Wait_For_Unlocked := 16#8410
+	);
+END_TYPE
+
+
+/*
+ * This FB controls an entrance to a hazardous area via an interlocking guard with guard locking (four state interlock-ing).
+ * The used switch does not distinguish between if the safety door is unlocked but not opened or unlocked and opened.
+ * Therefore we only have the S_Guard input compared to SF_GuardLocking_2.
+ */
+FUNCTION_BLOCK SF_GuardLockingSerial
+	{ altName:="SF_GuardLockingSerial"; bgColor:="Gold"; width:=420; }
+	VAR_INPUT
+		/* See 5.1.1 General Input Parameters */
+		Activate : BOOl := FALSE;
+		/* Variable.
+		 * Monitors the guard interlocking. This can be connect to S_GuardOut from the SF_Guard FB
+		 * FALSE: Guard open.
+		 * TRUE: Guard closed and guarded area safe. */
+		S_Guard : SAFEBOOL := SAFEBOOL_Constant#SAFEFALSE;
+		/* Variable.
+		 * Status of the hazardous area (EDM), e.g., based on speed moni-toring or safe time off delay.
+		 * FALSE: Machine in "non-safe" state.
+		 * TRUE: Machine in safe state. */
+		S_SafetyActive : SAFEBOOL := SAFEBOOL_Constant#SAFEFALSE;
+		/* Variable.
+		 * Operator intervention  request to unlock the guard.
+		 * FALSE: No request.
+		 * TRUE: Request made. */
+		UnlockRequest : BOOL := FALSE;
+		/* See 5.1.1 General Input Parameters */
+		S_StartReset : SAFEBOOL := SAFEBOOL_Constant#SAFEFALSE;
+		/* See 5.1.1 General Input Parameters */
+		S_AutoReset : SAFEBOOL := SAFEBOOL_Constant#SAFEFALSE;
+		/* See 5.1.1 General Input Parameters.
+		 * Also used to request the guard to be locked again. The quality of the signal must conform to a manual reset device. */
+		Reset : BOOL := FALSE;
+	END_VAR
+
+	VAR_OUTPUT
+		/* See 5.1.2 General Output Parameters */
+		Ready : BOOL := FALSE;
+		/* Interface to hazardous area which must be stopped.
+		 * FALSE: No safe state.
+		 * TRUE: Safe state. */
+		S_GuardLocked : SAFEBOOL := SAFEBOOL_Constant#SAFEFALSE;
+		/* Signal to unlock the guard.
+		 * FALSE: Close guard.
+		 * TRUE: Unlock guard. */
+		S_UnlockGuard : SAFEBOOL := SAFEBOOL_Constant#SAFEFALSE;
+		/* See 5.1.2 General Output Parameters */
+		SafetyDemand : BOOL := FALSE;
+		/* See 5.1.2 General Output Parameters */
+		ResetRequest : BOOL := FALSE;
+		/* See 5.1.2 General Output Parameters */
+		Error : BOOL := FALSE;
+		/* See 5.1.2 General Output Parameters */
+		DiagCode : WORD := 16#0000;
+	END_VAR
+
+	VAR
+		R_Trig_Reset : R_TRIG;
+		R_Trig_UnlockRequest : R_TRIG;
+		Unlock_Waiting_Timer : TON;
+	END_VAR
+
+	R_Trig_Reset(Reset);
+	R_Trig_UnlockRequest(UnlockRequest);
+
+	IF(NOT Activate) THEN
+		DiagCode := TO_WORD(SF_GuardLockingSerial_State#Idle);
+	ELSE
+		CASE TO_UINT(DiagCode) OF
+			SF_GuardLockingSerial_State#Idle:
+				/* IF(Activate) THEN - Active is always true here */
+				IF(IS(S_Guard)) THEN
+					DiagCode := TO_WORD(SF_GuardLockingSerial_State#Init_S_Guard_True);
+				ELSE
+					DiagCode := TO_WORD(SF_GuardLockingSerial_State#Init_S_Guard_False);
+				END_IF;
+			SF_GuardLockingSerial_State#Init_S_Guard_True,
+			SF_GuardLockingSerial_State#Init_S_Guard_False:
+				IF(Reset AND NOT R_Trig_Reset.Q AND IS_NOT(S_StartReset)) THEN
+					DiagCode := TO_WORD(SF_GuardLockingSerial_State#Reset_Error_0);
+				ELSIF(IS_NOT(S_Guard) AND UnlockRequest) THEN
+					DiagCode := TO_WORD(SF_GuardLockingSerial_State#Guard_Open_And_Or_Unlocked);
+				ELSIF(IS_NOT(S_Guard) AND NOT UnlockRequest) THEN
+					DiagCode := TO_WORD(SF_GuardLockingSerial_State#Guard_Error);
+				ELSIF((R_Trig_Reset.Q OR IS(S_StartReset)) AND IS(S_Guard)) THEN
+					DiagCode := TO_WORD(SF_GuardLockingSerial_State#Guard_Closed_And_Locked);
+				END_IF;
+			SF_GuardLockingSerial_State#Guard_Open_And_Or_Unlocked:
+				IF(IS_NOT(S_SafetyActive)) THEN
+					DiagCode := DetermineSafetyLost_GuardLockingSerial(S_Guard);
+				ELSIF(NOT UnlockRequest) THEN
+					DiagCode := TO_WORD(SF_GuardLockingSerial_State#Wait_For_Operator);
+				END_IF;
+			SF_GuardLockingSerial_State#Safety_Lost_S_Guard_True,
+			SF_GuardLockingSerial_State#Safety_Lost_S_Guard_False:
+				IF(IS(S_SafetyActive)) THEN
+					DiagCode := TO_WORD(SF_GuardLockingSerial_State#Safety_Return);
+				ELSIF(R_Trig_Reset.Q AND IS(S_Guard)) THEN
+					DiagCode := TO_WORD(SF_GuardLockingSerial_State#Guard_Closed_And_Locked);
+				END_IF;
+			SF_GuardLockingSerial_State#Safety_Return:
+				IF(Reset AND NOT R_Trig_Reset.Q) THEN
+					DiagCode := TO_WORD(SF_GuardLockingSerial_State#Reset_Error_2);
+				ELSIF(IS_NOT(S_SafetyActive)) THEN
+					DiagCode := DetermineSafetyLost_GuardLockingSerial(S_Guard);
+				ELSIF(R_Trig_Reset.Q AND IS_NOT(S_Guard)) THEN
+					DiagCode := TO_WORD(SF_GuardLockingSerial_State#Wait_For_Operator);
+				ELSIF(R_Trig_Reset.Q AND IS(S_Guard)) THEN
+					DiagCode := TO_WORD(SF_GuardLockingSerial_State#Guard_Closed_And_Locked);
+				END_IF;
+			SF_GuardLockingSerial_State#Wait_For_Operator:
+				IF(IS_NOT(S_SafetyActive)) THEN
+					DiagCode := DetermineSafetyLost_GuardLockingSerial(S_Guard);
+				//NOTE: This transition was adapted, because when using the original transition, transition 3 would be unreachable!
+				ELSIF(IS(S_Guard) AND IS_NOT(S_AutoReset)) THEN
+					DiagCode := TO_WORD(SF_GuardLockingSerial_State#Wait_For_Reset);
+				ELSIF(IS(S_Guard) AND IS(S_AutoReset)) THEN
+					DiagCode := TO_WORD(SF_GuardLockingSerial_State#Guard_Closed_And_Locked);
+				END_IF;
+			SF_GuardLockingSerial_State#Wait_For_Reset:
+				IF(Reset AND NOT R_Trig_Reset.Q AND IS_NOT(S_AutoReset)) THEN
+					DiagCode := TO_WORD(SF_GuardLockingSerial_State#Reset_Error_3);
+				ELSIF(IS_NOT(S_Guard)) THEN
+					DiagCode := TO_WORD(SF_GuardLockingSerial_State#Guard_Error);
+				ELSIF(R_Trig_Reset.Q) THEN
+					DiagCode := TO_WORD(SF_GuardLockingSerial_State#Guard_Closed_And_Locked);
+				ELSIF(R_Trig_UnlockRequest.Q) THEN
+					DiagCode := TO_WORD(SF_GuardLockingSerial_State#Wait_For_Unlocked);
+				END_IF;
+			SF_GuardLockingSerial_State#Wait_For_Unlocked:
+				Unlock_Waiting_Timer();
+				IF(IS_NOT(S_Guard)) THEN
+					DiagCode := TO_WORD(SF_GuardLockingSerial_State#Guard_Open_And_Or_Unlocked);
+				ELSIF(R_Trig_Reset.Q AND IS(S_Guard)) THEN
+					DiagCode := TO_WORD(SF_GuardLockingSerial_State#Guard_Closed_And_Locked);
+				ELSIF(Unlock_Waiting_Timer.Q) THEN
+					//S_Guard can only be TRUE here -> no need to check it
+					DiagCode := TO_WORD(SF_GuardLockingSerial_State#Unlock_Request_Error_S_Guard_True);
+				END_IF;
+			SF_GuardLockingSerial_State#Unlock_Request_Error_S_Guard_True,
+			SF_GuardLockingSerial_State#Unlock_Request_Error_S_Guard_False:
+				IF(Reset AND NOT R_Trig_Reset.Q AND IS_NOT(S_AutoReset)) THEN
+					DiagCode := TO_WORD(SF_GuardLockingSerial_State#Reset_Error_4);
+				ELSIF(R_Trig_Reset.Q AND IS(S_Guard)) THEN
+					DiagCode := TO_WORD(SF_GuardLockingSerial_State#Guard_Closed_And_Locked);
+				END_IF;
+			SF_GuardLockingSerial_State#Guard_Closed_And_Locked:
+				IF(IS_NOT(S_Guard)) THEN
+					DiagCode := TO_WORD(SF_GuardLockingSerial_State#Guard_Error);
+				ELSIF(R_Trig_UnlockRequest.Q AND IS(S_SafetyActive)) THEN
+					DiagCode := TO_WORD(SF_GuardLockingSerial_State#Wait_For_Unlocked);
+				END_IF;
+			SF_GuardLockingSerial_State#Guard_Error:
+				IF(IS(S_Guard)) THEN
+					DiagCode := TO_WORD(SF_GuardLockingSerial_State#Guard_Return);
+				END_IF;
+			SF_GuardLockingSerial_State#Guard_Return:
+				IF(IS_NOT(S_Guard)) THEN
+					DiagCode := TO_WORD(SF_GuardLockingSerial_State#Guard_Error);
+				ELSIF(Reset AND NOT R_Trig_Reset.Q) THEN
+					DiagCode := TO_WORD(SF_GuardLockingSerial_State#Reset_Error_1);
+				ELSIF(R_Trig_Reset.Q AND IS(S_Guard)) THEN
+					DiagCode := TO_WORD(SF_GuardLockingSerial_State#Guard_Closed_And_Locked);
+				END_IF;
+			SF_GuardLockingSerial_State#Reset_Error_0:
+				IF(NOT Reset) THEN
+					IF(IS(S_Guard)) THEN
+						DiagCode := TO_WORD(SF_GuardLockingSerial_State#Init_S_Guard_True);
+					ELSE
+						DiagCode := TO_WORD(SF_GuardLockingSerial_State#Init_S_Guard_False);
+					END_IF;
+				END_IF;
+			SF_GuardLockingSerial_State#Reset_Error_1:
+				IF(NOT Reset) THEN
+					DiagCode := TO_WORD(SF_GuardLockingSerial_State#Guard_Return);
+				END_IF;
+			SF_GuardLockingSerial_State#Reset_Error_2:
+				IF(NOT Reset) THEN
+					DiagCode := TO_WORD(SF_GuardLockingSerial_State#Safety_Return);
+				END_IF;
+			SF_GuardLockingSerial_State#Reset_Error_3:
+				IF(NOT Reset) THEN
+					DiagCode := TO_WORD(SF_GuardLockingSerial_State#Wait_For_Reset);
+				END_IF;
+			SF_GuardLockingSerial_State#Reset_Error_4:
+				IF(NOT Reset) THEN
+					IF(IS(S_Guard)) THEN
+						DiagCode := TO_WORD(SF_GuardLockingSerial_State#Unlock_Request_Error_S_Guard_True);
+					ELSE
+						DiagCode := TO_WORD(SF_GuardLockingSerial_State#Unlock_Request_Error_S_Guard_False);
+					END_IF;
+				END_IF;
+		END_CASE;
+	END_IF;
+
+	CASE TO_UINT(DiagCode) OF
+		SF_GuardLockingSerial_State#Idle:
+			Unlock_Waiting_Timer(IN := FALSE);
+			Ready := FALSE;
+			S_GuardLocked := SAFEBOOL_Constant#SAFEFALSE;
+			S_UnlockGuard := SAFEBOOL_Constant#SAFEFALSE;
+			SafetyDemand := FALSE;
+			ResetRequest := FALSE;
+			Error := FALSE;
+		SF_GuardLockingSerial_State#Guard_Closed_And_Locked:
+			Unlock_Waiting_Timer(IN := FALSE);
+			Ready := TRUE;
+			S_GuardLocked := SAFEBOOL_Constant#SAFETRUE;
+			S_UnlockGuard := SAFEBOOL_Constant#SAFEFALSE;
+			SafetyDemand := FALSE;
+			ResetRequest := FALSE;
+			Error := FALSE;
+		SF_GuardLockingSerial_State#Init_S_Guard_True,
+		SF_GuardLockingSerial_State#Wait_For_Reset:
+			Unlock_Waiting_Timer(IN := FALSE);
+			Ready := TRUE;
+			S_GuardLocked := SAFEBOOL_Constant#SAFEFALSE;
+			S_UnlockGuard := SAFEBOOL_Constant#SAFEFALSE;
+			SafetyDemand := FALSE;
+			ResetRequest := TRUE;
+			Error := FALSE;
+		SF_GuardLockingSerial_State#Init_S_Guard_False,
+		SF_GuardLockingSerial_State#Wait_For_Operator:
+			Unlock_Waiting_Timer(IN := FALSE);
+			Ready := TRUE;
+			S_GuardLocked := SAFEBOOL_Constant#SAFEFALSE;
+			S_UnlockGuard := SAFEBOOL_Constant#SAFEFALSE;
+			SafetyDemand := TRUE;
+			ResetRequest := FALSE;
+			Error := FALSE;
+		SF_GuardLockingSerial_State#Guard_Open_And_Or_Unlocked:
+			Unlock_Waiting_Timer(IN := FALSE);
+			Ready := TRUE;
+			S_GuardLocked := SAFEBOOL_Constant#SAFEFALSE;
+			S_UnlockGuard := SAFEBOOL_Constant#SAFETRUE;
+			SafetyDemand := TRUE;
+			ResetRequest := FALSE;
+			Error := FALSE;
+		SF_GuardLockingSerial_State#Wait_For_Unlocked:
+			Unlock_Waiting_Timer(IN := TRUE, PT := T#2s);
+			Ready := TRUE;
+			S_GuardLocked := SAFEBOOL_Constant#SAFEFALSE;
+			S_UnlockGuard := SAFEBOOL_Constant#SAFETRUE;
+			SafetyDemand := FALSE;
+			ResetRequest := TRUE;
+			Error := FALSE;
+		SF_GuardLockingSerial_State#Reset_Error_0,
+		SF_GuardLockingSerial_State#Guard_Error,
+		SF_GuardLockingSerial_State#Reset_Error_1,
+		SF_GuardLockingSerial_State#Reset_Error_3:
+			Unlock_Waiting_Timer(IN := FALSE);
+			Ready := TRUE;
+			S_GuardLocked := SAFEBOOL_Constant#SAFEFALSE;
+			S_UnlockGuard := SAFEBOOL_Constant#SAFEFALSE;
+			SafetyDemand := FALSE;
+			ResetRequest := FALSE;
+			Error := TRUE;
+		SF_GuardLockingSerial_State#Guard_Return:
+			Unlock_Waiting_Timer(IN := FALSE);
+			Ready := TRUE;
+			S_GuardLocked := SAFEBOOL_Constant#SAFEFALSE;
+			S_UnlockGuard := SAFEBOOL_Constant#SAFEFALSE;
+			SafetyDemand := FALSE;
+			ResetRequest := TRUE;
+			Error := TRUE;
+		SF_GuardLockingSerial_State#Safety_Lost_S_Guard_True,
+		SF_GuardLockingSerial_State#Safety_Return,
+		SF_GuardLockingSerial_State#Unlock_Request_Error_S_Guard_True:
+			 Unlock_Waiting_Timer(IN := FALSE);
+			Ready := TRUE;
+			S_GuardLocked := SAFEBOOL_Constant#SAFEFALSE;
+			S_UnlockGuard := SAFEBOOL_Constant#SAFETRUE;
+			SafetyDemand := FALSE;
+			ResetRequest := TRUE;
+			Error := TRUE;
+		SF_GuardLockingSerial_State#Safety_Lost_S_Guard_False,
+		SF_GuardLockingSerial_State#Reset_Error_2,
+		SF_GuardLockingSerial_State#Unlock_Request_Error_S_Guard_False,
+		SF_GuardLockingSerial_State#Reset_Error_4:
+			Unlock_Waiting_Timer(IN := FALSE);
+			Ready := TRUE;
+			S_GuardLocked := SAFEBOOL_Constant#SAFEFALSE;
+			S_UnlockGuard := SAFEBOOL_Constant#SAFETRUE;
+			SafetyDemand := FALSE;
+			ResetRequest := FALSE;
+			Error := TRUE;
+		ELSE
+			ENO := FALSE;
+	END_CASE;
+
+	ENO := ENO AND CheckSAFEBOOL(S_Guard) AND CheckSAFEBOOL(S_SafetyActive) AND CheckSAFEBOOL(S_StartReset) AND CheckSAFEBOOL(S_AutoReset);
+END_FUNCTION_BLOCK
+
+FUNCTION DetermineSafetyLost_GuardLockingSerial : WORD
+	VAR_INPUT
+		S_Guard : SAFEBOOL;
+	END_VAR
+
+	IF(IS(S_Guard)) THEN
+		DetermineSafetyLost_GuardLockingSerial := TO_WORD(SF_GuardLockingSerial_State#Safety_Lost_S_Guard_True);
+	ELSE
+		DetermineSafetyLost_GuardLockingSerial := TO_WORD(SF_GuardLockingSerial_State#Safety_Lost_S_Guard_False);
+	END_IF;
+END_FUNCTION
+
+END_NAMESPACE
+END_NAMESPACE

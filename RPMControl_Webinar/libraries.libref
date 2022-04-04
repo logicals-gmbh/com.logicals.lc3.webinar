@@ -1,3 +1,3 @@
 LIBRARY com.logicals.lc3.library.standard VERSION := "3.2.7" ;
 LIBRARY com.logicals.lc3.library.system VERSION := "2.0.20" ;
-LIBRARY com.logicals.Webinar.Basic VERSION := "0.0.2-SNAPSHOT" ;
+LIBRARY com.logicals.Webinar.Basic VERSION := "0.0.4-SNAPSHOT" ;

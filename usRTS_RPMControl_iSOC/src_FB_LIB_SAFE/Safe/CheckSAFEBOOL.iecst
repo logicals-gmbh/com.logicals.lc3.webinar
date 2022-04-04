@@ -1,0 +1,11 @@
+NAMESPACE logicals.web.standard.safe
+
+/* only a internal/private helper function - should not be public in a library */
+FUNCTION CheckSAFEBOOL : BOOL
+	VAR_INPUT
+		IN : SAFEBOOL;
+	END_VAR
+	CheckSAFEBOOL := IN = SAFEBOOL_Constant#SAFEFALSE OR IN = SAFEBOOL_Constant#SAFETRUE;
+END_FUNCTION
+
+END_NAMESPACE

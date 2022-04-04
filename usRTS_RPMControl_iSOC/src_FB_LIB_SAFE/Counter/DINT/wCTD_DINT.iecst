@@ -1,0 +1,31 @@
+NAMESPACE logicals.web.standard
+NAMESPACE counter
+
+/*
+ * Function block wrapper for IEC 61131-3 CTD_DINT<br>
+ * CD = decrement on positive edge on CD (BOOL)<br>
+ * LD = flag for reset (CV:=PV) (BOOL)<br>
+ * PV = initial value for counting (DINT)<br>
+ * Q  = flag showing whether 0 is reached or not (BOOL)<br>
+ * CV = current value of counter (DINT)<br>
+ */
+FUNCTION_BLOCK wCTD_DINT
+	{ CV { index := 2 }; vNameAlignment:="center"; altName:="CTD_DINT"; bgColor:="LightPink"; width:=120; }
+	VAR_INPUT
+		CD : BOOL /* R_EDGE */;
+		LD : BOOL;
+		PV : DINT;
+	END_VAR
+	VAR_OUTPUT
+		Q  : BOOL;
+		CV : DINT;
+	END_VAR
+	VAR
+		CTD_DINT : CTD_DINT;
+	END_VAR
+
+	CTD_DINT(CD:=CD, LD:=LD, PV:=PV, Q=>Q, CV=>CV, ENO=>ENO);
+END_FUNCTION_BLOCK
+
+END_NAMESPACE
+END_NAMESPACE

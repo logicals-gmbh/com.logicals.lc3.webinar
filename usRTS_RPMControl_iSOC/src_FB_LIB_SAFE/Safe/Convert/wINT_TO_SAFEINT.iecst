@@ -1,0 +1,22 @@
+NAMESPACE logicals.web.standard.safe
+NAMESPACE convert
+
+/*
+ * Function block wrapper for TO_SAFEINT<br>
+ * IN =  input value (INT)<br>
+ * OUT = IN (SAFEINT)<br>
+ */
+FUNCTION_BLOCK wINT_TO_SAFEINT
+	{ vNameAlignment:="center"; altName:="INT_TO_SAFEINT"; bgColor:="GoldenRod"; width:=140; hideIONames; }
+	VAR_INPUT
+		IN : INT;
+	END_VAR
+	VAR_OUTPUT
+		OUT: SAFEINT;
+	END_VAR
+
+	OUT := IN;
+END_FUNCTION_BLOCK
+
+END_NAMESPACE
+END_NAMESPACE

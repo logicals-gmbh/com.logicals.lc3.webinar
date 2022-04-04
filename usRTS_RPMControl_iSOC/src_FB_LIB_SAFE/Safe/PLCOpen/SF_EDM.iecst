@@ -1,0 +1,353 @@
+USING logicals.web.standard.safe;
+
+NAMESPACE logicals.web.standard.safe
+NAMESPACE plcopen
+
+TYPE
+
+	SF_EDM_State : UINT(
+	/* Static Reset signal in state 8001. */
+	Reset_Error_1 := 16#C001,
+	/* Static Reset signal or same signals at EDM1 and Reset (rising trigger at Reset and EDM1 at the same time) in state C010. */
+	Reset_Error_21 := 16#C011,
+	/* Static Reset signal or same signals at EDM2 and Reset (rising trigger at Reset and EDM2 at the same time) in state C020. */
+	Reset_Error_22 := 16#C021,
+	/* Static Reset signal or same signals at EDM1, EDM2, and Reset (rising trigger at Reset, EDM1, and EDM2 at the same time) in state C030. */
+	Reset_Error_23 := 16#C031,
+	/* Static Reset signal or same signals at EDM1 and Reset (rising trigger at Reset and EDM1 at the same time) in state C040. */
+	Reset_Error_31 := 16#C041,
+	/* Static Reset signal or same signals at EDM2 and Reset (rising trigger at Reset and EDM2 at the same time) in state C050. */
+	Reset_Error_32 := 16#C051,
+	/* Static Reset signal or same signals at EDM1, EDM2, and Reset (rising trigger at Reset, EDM1, and EDM2 at the same time) in state C060. */
+	Reset_Error_33 := 16#C061,
+	/* Static Reset signal in state C070. */
+	Reset_Error_41 := 16#C071,
+	/* Static Reset signal in state C080. */
+	Reset_Error_42 := 16#C081,
+	/* Static Reset signal in state C090. */
+	Reset_Error_43 := 16#C091,
+
+	/* The signal at EDM1 is not valid in the initial actuator state. In state 8010 the EDM1 signal is FALSE when enabling O_OutControl. */
+	EDM_Error_11 := 16#C010,
+	/* The signal at EDM2 is not valid in the initial actuator state. In state 8010 the EDM2 signal is FALSE when enabling O_OutControl. */
+	EDM_Error_12 := 16#C020,
+	/* The signals at EDM1 and EDM2 are not valid in the initial actuator states. In state 8010 the EDM1 and EDM2 signals are FALSE when ena-bling O_OutControl. */
+	EDM_Error_13 := 16#C030,
+	/* The signal at EDM1 is not valid in the initial actuator state. In state 8010 the EDM1 signal is FALSE and the monitoring time has elapsed. */
+	EDM_Error_21 := 16#C040,
+	/* The signal at EDM2 is not valid in the initial actuator state. In state 8010 the EDM2 signal is FALSE and the monitoring time has elapsed. */
+	EDM_Error_22 := 16#C050,
+	/* The signals at EDM1 and EDM2 are not valid in the initial actuator states. In state 8010 the EDM1 and EDM2 signals are FALSE and the monitoring time has elapsed. */
+	EDM_Error_23 := 16#C060,
+	/* The signal at EDM1 is not valid in the actuator switching state. In state 8000 the EDM1 signal is TRUE and the monitoring time has elapsed. */
+	EDM_Error_31 := 16#C070,
+	/* The signal at EDM2 is not valid in the actuator switching state. In state 8000 the EDM2 signal is TRUE and the monitoring time has elapsed. */
+	EDM_Error_32 := 16#C080,
+	/* The signals at EDM1 and EDM2 are not valid in the actuator switching state. In state 8000 the EDM1 and EDM2 signals are TRUE and the monitoring time has elapsed. */
+	EDM_Error_33 := 16#C090,
+	/* Similar signals at S_OutControl and Reset (R_TRIG at same cycle) de-tected (may be a programming error) */
+	Init_Error := 16#C100,
+	/* The function block is not active (initial state). */
+	Idle := 16#0000,
+	/* Block activation startup inhibit is active. Reset required. */
+	Init := 16#8401,
+	/* EDM control is not active. Timer starts when state is entered */
+	Output_Disable := 16#8802,
+	/* EDM control is active. Timer starts when state is entered */
+	Output_Enable := 16#8000
+	);
+
+END_TYPE
+
+
+/* External device monitoring - The FB controls a safety output and monitors controlled actuators, e.g. subsequent contactors */
+FUNCTION_BLOCK SF_EDM
+	{ altName:="SF_EDM"; bgColor:="Gold"; width:=320; }
+
+	VAR_INPUT
+		/* See Section 5.1.1 General Input Parameters */
+		Activate : BOOL := FALSE;
+		/* Variable.
+		 * Control signal of the preceeding safety FB's.
+		 * Typical function block signals from the library
+		 * (e.g., SF_OutControl, SF_TwoHandControlTypeII, and/or others).
+		 * FALSE: Disable safety output (S_EDM_Out).
+		 * TRUE: Enable safety output (S_EDM_Out). */
+		S_OutControl : SAFEBOOL := SAFEBOOL_Constant#SAFEFALSE;
+		/* Variable.
+		 * Feedback signal of the first connected actuator.
+		 * FALSE: Switching state of the first connected actuator.
+		 * TRUE: Initial state of the first connected actuator. */
+		EDM1 : BOOL := FALSE;
+		/* Variable.
+		 * Feedback signal of the second connected actuator.
+		 * According to the actuators installed, the wiring between the feedback signals and the targeted safety level, it can be that only combined input is used here. In that case the user must use a graphic connection to jumper the EDM1 and EDM2 parameters. EDM1 and EDM2 are then con-trolled by the same signal.
+		 * FALSE: Switching state of the second connected actuator.
+		 * TRUE: Initial state of the second connected actuator. */
+		EDM2 : BOOL := FALSE;
+		/* Constant.
+		 * Max. response time of the connected and monitored actuators. */
+		MonitoringTime : TIME := T#0ms;
+		/* See Section 5.1.1 General Input Parameters */
+		Reset : BOOL := FALSE;
+	END_VAR
+
+	VAR_OUTPUT
+		/* See Section 5.1.2 General Output Parameters */
+		Ready : BOOL := FALSE;
+		/* Controls the actuator. The result is monitored by the feedback signal EDMx.
+		 * FALSE: Disable connected actuators.
+		 * TRUE: Enable connected actuators. */
+		S_EDM_Out : SAFEBOOL := SAFEBOOL_Constant#SAFEFALSE;
+		/* See Section 5.1.2 General Output Parameters */
+		SafetyDemand : BOOL := FALSE;
+		/* See Section 5.1.2 General Output Parameters */
+		ResetRequest : BOOL := FALSE;
+		/* See Section 5.1.2 General Output Parameters */
+		Error : BOOL := FALSE;
+		/* See Section 5.1.2 General Output Parameters */
+		DiagCode : WORD := 16#0000;
+	END_VAR
+
+	VAR
+		R_Trig_Reset : R_TRIG;
+		R_Trig_S_OutControl : R_TRIG;
+		R_Trig_EDM1 : R_TRIG;
+		R_Trig_EDM2 : R_TRIG;
+		MonitoringTimer_OutputDisable : TON;
+		MonitoringTimer_OutputEnable : TON;
+	END_VAR
+
+	R_Trig_Reset(Reset);
+	R_Trig_EDM1(EDM1);
+	R_Trig_EDM2(EDM2);
+	R_Trig_S_OutControl(IS(S_OutControl));
+
+	IF(NOT Activate) THEN
+		DiagCode := TO_WORD(SF_EDM_State#Idle);
+	ELSE
+		CASE TO_UINT(DiagCode) OF
+			SF_EDM_State#Idle:
+				/* IF(Activate) THEN - Activate is always true here */
+					DiagCode := TO_WORD(SF_EDM_State#Init);
+			SF_EDM_State#Init:
+				IF(Reset AND NOT R_Trig_Reset.Q) THEN
+					DiagCode := TO_WORD(SF_EDM_State#Reset_Error_1);
+				ELSIF(R_Trig_Reset.Q AND R_Trig_S_OutControl.Q) THEN
+					DiagCode := TO_WORD(SF_EDM_State#Init_Error);
+				ELSIF(R_Trig_Reset.Q) THEN
+					DiagCode := TO_WORD(SF_EDM_State#Output_Disable);
+				END_IF;
+			SF_EDM_State#Reset_Error_1:
+				IF(NOT Reset) THEN
+					DiagCode := TO_WORD(SF_EDM_State#Init);
+				END_IF;
+			SF_EDM_State#Init_Error:
+				IF(NOT Reset) THEN
+					DiagCode := TO_WORD(SF_EDM_State#Init);
+				END_IF;
+			SF_EDM_State#Output_Disable:
+				MonitoringTimer_OutputDisable();
+				//NOTE: priorities are definied exactly in this way, because otherwise some states would be unreachable!
+				IF(IS(S_OutControl) AND NOT EDM1 AND NOT EDM2) THEN
+					DiagCode := TO_WORD(SF_EDM_State#EDM_Error_13);
+				ELSIF(IS(S_OutControl) AND NOT EDM1) THEN
+					DiagCode := TO_WORD(SF_EDM_State#EDM_Error_11);
+				ELSIF(IS(S_OutControl) AND NOT EDM2) THEN
+					DiagCode := TO_WORD(SF_EDM_State#EDM_Error_12);
+				ELSIF(MonitoringTimer_OutputDisable.Q AND NOT EDM1 AND NOT EDM2) THEN
+					DiagCode := TO_WORD(SF_EDM_State#EDM_Error_23);
+				ELSIF(MonitoringTimer_OutputDisable.Q AND NOT EDM1) THEN
+					DiagCode := TO_WORD(SF_EDM_State#EDM_Error_21);
+				ELSIF(MonitoringTimer_OutputDisable.Q AND NOT EDM2) THEN
+					DiagCode := TO_WORD(SF_EDM_State#EDM_Error_22);
+				ELSIF(IS(S_OutControl)) THEN
+					DiagCode := TO_WORD(SF_EDM_State#Output_Enable);
+				END_IF;
+			SF_EDM_State#EDM_Error_11:
+				IF((Reset AND NOT R_Trig_Reset.Q AND EDM1 AND EDM2) OR (R_Trig_Reset.Q AND R_Trig_EDM1.Q)) THEN
+					DiagCode := TO_WORD(SF_EDM_State#Reset_Error_21);
+				ELSIF(R_Trig_Reset.Q AND EDM1 AND EDM2) THEN
+					DiagCode := TO_WORD(SF_EDM_State#Output_Disable);
+				END_IF;
+			SF_EDM_State#EDM_Error_12:
+				IF((Reset AND NOT R_Trig_Reset.Q AND EDM1 AND EDM2) OR (R_Trig_Reset.Q AND R_Trig_EDM2.Q)) THEN
+					DiagCode := TO_WORD(SF_EDM_State#Reset_Error_22);
+				ELSIF(R_Trig_Reset.Q AND EDM1 AND EDM2) THEN
+					DiagCode := TO_WORD(SF_EDM_State#Output_Disable);
+				END_IF;
+			SF_EDM_State#EDM_Error_13:
+				IF((Reset AND NOT R_Trig_Reset.Q AND EDM1 AND EDM2) OR (R_Trig_Reset.Q AND R_Trig_EDM1.Q AND R_Trig_EDM2.Q)) THEN
+					DiagCode := TO_WORD(SF_EDM_State#Reset_Error_23);
+				ELSIF(R_Trig_Reset.Q AND EDM1 AND EDM2) THEN
+					DiagCode := TO_WORD(SF_EDM_State#Output_Disable);
+				END_IF;
+			SF_EDM_State#Reset_Error_21:
+				IF(NOT Reset) THEN
+					DiagCode := TO_WORD(SF_EDM_State#EDM_Error_11);
+				END_IF;
+			SF_EDM_State#Reset_Error_22:
+				IF(NOT Reset) THEN
+					DiagCode := TO_WORD(SF_EDM_State#EDM_Error_12);
+				END_IF;
+			SF_EDM_State#Reset_Error_23:
+				IF(NOT Reset) THEN
+					DiagCode := TO_WORD(SF_EDM_State#EDM_Error_13);
+				END_IF;
+			SF_EDM_State#EDM_Error_21:
+				IF((Reset AND NOT R_Trig_Reset.Q AND EDM1 AND EDM2) OR (R_Trig_Reset.Q AND R_Trig_EDM1.Q)) THEN
+					DiagCode := TO_WORD(SF_EDM_State#Reset_Error_31);
+				ELSIF(R_Trig_Reset.Q AND EDM1 AND EDM2) THEN
+					DiagCode := TO_WORD(SF_EDM_State#Output_Disable);
+				END_IF;
+			SF_EDM_State#EDM_Error_22:
+				IF((Reset AND NOT R_Trig_Reset.Q AND EDM1 AND EDM2) OR (R_Trig_Reset.Q AND R_Trig_EDM2.Q)) THEN
+					DiagCode := TO_WORD(SF_EDM_State#Reset_Error_32);
+				ELSIF(R_Trig_Reset.Q AND EDM1 AND EDM2) THEN
+					DiagCode := TO_WORD(SF_EDM_State#Output_Disable);
+				END_IF;
+			SF_EDM_State#EDM_Error_23:
+				IF((Reset AND NOT R_Trig_Reset.Q AND EDM1 AND EDM2) OR (R_Trig_Reset.Q AND R_Trig_EDM1.Q AND R_Trig_EDM2.Q)) THEN
+					DiagCode := TO_WORD(SF_EDM_State#Reset_Error_33);
+				ELSIF(R_Trig_Reset.Q AND EDM1 AND EDM2) THEN
+					DiagCode := TO_WORD(SF_EDM_State#Output_Disable);
+				END_IF;
+			SF_EDM_State#Reset_Error_31:
+				IF(NOT Reset) THEN
+					DiagCode := TO_WORD(SF_EDM_State#EDM_Error_21);
+				END_IF;
+			SF_EDM_State#Reset_Error_32:
+				IF(NOT Reset) THEN
+					DiagCode := TO_WORD(SF_EDM_State#EDM_Error_22);
+				END_IF;
+			SF_EDM_State#Reset_Error_33:
+				IF(NOT Reset) THEN
+					DiagCode := TO_WORD(SF_EDM_State#EDM_Error_23);
+				END_IF;
+			SF_EDM_State#Output_Enable:
+				MonitoringTimer_OutputEnable();
+				//NOTE: priorities are definied exactly in this way, because otherwise some states would be unreachable!
+				IF(MonitoringTimer_OutputEnable.Q AND EDM1 AND EDM2) THEN
+					DiagCode := TO_WORD(SF_EDM_State#EDM_Error_33);
+				ELSIF(MonitoringTimer_OutputEnable.Q AND EDM1) THEN
+					DiagCode := TO_WORD(SF_EDM_State#EDM_Error_31);
+				ELSIF(MonitoringTimer_OutputEnable.Q AND EDM2) THEN
+					DiagCode := TO_WORD(SF_EDM_State#EDM_Error_32);
+				ELSIF(IS_NOT(S_OutControl)) THEN
+					DiagCode := TO_WORD(SF_EDM_State#Output_Disable);
+				END_IF;
+			SF_EDM_State#EDM_Error_31:
+				IF(Reset AND NOT R_Trig_Reset.Q) THEN
+					DiagCode := TO_WORD(SF_EDM_State#Reset_Error_41);
+				ELSIF(R_Trig_Reset.Q AND NOT (R_Trig_EDM1.Q OR R_Trig_EDM2.Q)) THEN
+					DiagCode := TO_WORD(SF_EDM_State#Output_Disable);
+				END_IF;
+			SF_EDM_State#EDM_Error_32:
+				IF(Reset AND NOT R_Trig_Reset.Q) THEN
+					DiagCode := TO_WORD(SF_EDM_State#Reset_Error_42);
+				ELSIF(R_Trig_Reset.Q AND NOT (R_Trig_EDM1.Q OR R_Trig_EDM2.Q)) THEN
+					DiagCode := TO_WORD(SF_EDM_State#Output_Disable);
+				END_IF;
+			SF_EDM_State#EDM_Error_33:
+				IF(Reset AND NOT R_Trig_Reset.Q) THEN
+					DiagCode := TO_WORD(SF_EDM_State#Reset_Error_43);
+				ELSIF(R_Trig_Reset.Q AND NOT (R_Trig_EDM1.Q OR R_Trig_EDM2.Q)) THEN
+					DiagCode := TO_WORD(SF_EDM_State#Output_Disable);
+				END_IF;
+			SF_EDM_State#Reset_Error_41:
+				IF(NOT Reset) THEN
+					DiagCode := TO_WORD(SF_EDM_State#EDM_Error_31);
+				END_IF;
+			SF_EDM_State#Reset_Error_42:
+				IF(NOT Reset) THEN
+					DiagCode := TO_WORD(SF_EDM_State#EDM_Error_32);
+				END_IF;
+			SF_EDM_State#Reset_Error_43:
+				IF(NOT Reset) THEN
+					DiagCode := TO_WORD(SF_EDM_State#EDM_Error_33);
+				END_IF;
+		END_CASE;
+	END_IF;
+
+	CASE TO_UINT(DiagCode) OF
+		SF_EDM_State#Idle:
+			MonitoringTimer_OutputDisable(IN := FALSE);
+			MonitoringTimer_OutputEnable(IN := FALSE);
+			Ready := FALSE;
+			S_EDM_Out := SAFEBOOL_Constant#SAFEFALSE;
+			SafetyDemand := FALSE;
+			ResetRequest := FALSE;
+			Error := FALSE;
+		SF_EDM_State#Init:
+			MonitoringTimer_OutputDisable(IN := FALSE);
+			MonitoringTimer_OutputEnable(IN := FALSE);
+			Ready := TRUE;
+			S_EDM_Out := SAFEBOOL_Constant#SAFEFALSE;
+			SafetyDemand := FALSE;
+			ResetRequest := TRUE;
+			Error := FALSE;
+		SF_EDM_State#Output_Disable:
+			MonitoringTimer_OutputDisable(IN := TRUE, PT := MonitoringTime);
+			MonitoringTimer_OutputEnable(IN := FALSE);
+			Ready := TRUE;
+			S_EDM_Out := SAFEBOOL_Constant#SAFEFALSE;
+			SafetyDemand := TRUE;
+			ResetRequest := FALSE;
+			Error := FALSE;
+		SF_EDM_State#Output_Enable:
+			MonitoringTimer_OutputEnable(IN := TRUE, PT := MonitoringTime);
+			MonitoringTimer_OutputDisable(IN := FALSE);
+			Ready := TRUE;
+			S_EDM_Out := SAFEBOOL_Constant#SAFETRUE;
+			SafetyDemand := FALSE;
+			ResetRequest := FALSE;
+			Error := FALSE;
+		SF_EDM_State#Reset_Error_1,
+		SF_EDM_State#Reset_Error_21,
+		SF_EDM_State#Reset_Error_22,
+		SF_EDM_State#Reset_Error_23,
+		SF_EDM_State#Reset_Error_31,
+		SF_EDM_State#Reset_Error_32,
+		SF_EDM_State#Reset_Error_33,
+		SF_EDM_State#Reset_Error_41,
+		SF_EDM_State#Reset_Error_42,
+		SF_EDM_State#Reset_Error_43,
+		SF_EDM_State#EDM_Error_13,
+		SF_EDM_State#Init_Error:
+			MonitoringTimer_OutputDisable(IN := FALSE);
+			MonitoringTimer_OutputEnable(IN := FALSE);
+			Ready := TRUE;
+			S_EDM_Out := SAFEBOOL_Constant#SAFEFALSE;
+			SafetyDemand := FALSE;
+			ResetRequest := FALSE;
+			Error := TRUE;
+		SF_EDM_State#EDM_Error_11,
+		SF_EDM_State#EDM_Error_12,
+		SF_EDM_State#EDM_Error_21,
+		SF_EDM_State#EDM_Error_22,
+		SF_EDM_State#EDM_Error_23:
+			MonitoringTimer_OutputDisable(IN := FALSE);
+			MonitoringTimer_OutputEnable(IN := FALSE);
+			Ready := TRUE;
+			S_EDM_Out := SAFEBOOL_Constant#SAFEFALSE;
+			SafetyDemand := FALSE;
+			ResetRequest := FALSE;
+			Error := TRUE;
+		SF_EDM_State#EDM_Error_31,
+		SF_EDM_State#EDM_Error_32,
+		SF_EDM_State#EDM_Error_33:
+			MonitoringTimer_OutputDisable(IN := FALSE);
+			MonitoringTimer_OutputEnable(IN := FALSE);
+			Ready := TRUE;
+			S_EDM_Out := SAFEBOOL_Constant#SAFEFALSE;
+			SafetyDemand := FALSE;
+			ResetRequest := TRUE;
+			Error := TRUE;
+	END_CASE;
+
+	ENO := ENO AND CheckSAFEBOOL(S_OutControl);
+
+END_FUNCTION_BLOCK
+
+END_NAMESPACE
+END_NAMESPACE

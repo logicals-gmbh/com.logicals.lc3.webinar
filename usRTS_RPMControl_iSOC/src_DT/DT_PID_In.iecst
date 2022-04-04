@@ -1,0 +1,16 @@
+TYPE
+   DT_PID_In : STRUCT
+    r_Inp     : REAL;  // control difference 
+    r_TI      : REAL;  // Integral action time [s] 
+    r_Kv      : REAL;  // derivative action amplification
+    r_T1      : REAL;  // fading time constant [s]     .
+    
+    x_Auto    : BOOL;  // controller on automatic operation       .
+    x_Extern  : BOOL;  // controller on automatic operation       .
+    r_YManual : REAL;  // Manual operation preset value     .
+    
+    r_Lvu     : REAL;  // Upper limiting value of the actuating variable        .
+    r_Lvd     : REAL;  // Lower limiting value of the actuating variable        .
+    r_Kp      : REAL;  // Proportional control factor       .
+   END_STRUCT;
+END_TYPE

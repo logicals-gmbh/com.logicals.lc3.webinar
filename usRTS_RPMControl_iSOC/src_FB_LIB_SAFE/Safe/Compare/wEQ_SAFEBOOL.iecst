@@ -1,0 +1,30 @@
+NAMESPACE logicals.web.standard.safe
+NAMESPACE compare
+
+/*
+ * Function block wrapper for IEC 61131-3 EQ<br>
+ * IN1 =  1st value (SAFEBOOL)<br>
+ * IN2 =  2nd value (SAFEBOOL)<br>
+ * OUT = true if IN1 is equal to IN2 (SAFEBOOL)<br>
+ */
+FUNCTION_BLOCK wEQ_SAFEBOOL
+	{ vNameAlignment:="center"; altName:="="; bgColor:="Gold"; width:=40; hideIONames; }
+	VAR_INPUT
+		IN1 : SAFEBOOL;
+		IN2 : SAFEBOOL;
+	END_VAR
+	VAR_OUTPUT
+		OUT : SAFEBOOL;
+	END_VAR
+
+	IF (EQ(IN1:=IN1<>SAFEBOOL_Constant#SAFEFALSE, IN2:=IN2<>SAFEBOOL_Constant#SAFEFALSE, ENO=>ENO) <> FALSE)
+	THEN
+		OUT := SAFEBOOL_Constant#SAFETRUE;
+	ELSE
+		OUT := SAFEBOOL_Constant#SAFEFALSE;
+	END_IF;
+	ENO := ENO AND CheckSAFEBOOL(IN1) AND CheckSAFEBOOL(IN2);
+END_FUNCTION_BLOCK
+
+END_NAMESPACE
+END_NAMESPACE

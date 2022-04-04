@@ -1,0 +1,27 @@
+NAMESPACE logicals.web.standard.safe
+NAMESPACE select
+
+/*
+ * Function block wrapper for IEC 61131-3 SEL<br>
+ * G = selector (SAFEBOOL)<br>
+ * IN0 = first value (SAFEINT)<br>
+ * IN1 = second value (SAFEINT)<br>
+ * OUT := G ? IN1 : IN0; (SAFEINT)<br>
+ */
+FUNCTION_BLOCK wSEL_SAFEINT
+	{ vNameAlignment:="center"; altName:="SEL"; bgColor:="GoldenRod"; width:=120; }
+	VAR_INPUT
+		G : SAFEBOOL;
+		IN0 : SAFEINT;
+		IN1 : SAFEINT;
+	END_VAR
+	VAR_OUTPUT
+		OUT : SAFEINT;
+	END_VAR
+
+	OUT := SEL_INT(G:=G<>SAFEBOOL_Constant#SAFEFALSE, IN0:=IN0, IN1:=IN1, ENO=>ENO);
+	ENO := ENO AND CheckSAFEBOOL(G);
+END_FUNCTION_BLOCK
+
+END_NAMESPACE
+END_NAMESPACE

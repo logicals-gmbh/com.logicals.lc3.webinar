@@ -1,0 +1,28 @@
+NAMESPACE logicals.web.standard
+NAMESPACE bitstring
+
+/*
+ * Function block wrapper for IEC 61131-3 OR<br>
+ * IN1 =  1st value (DWORD)<br>
+ * IN2 =  2nd value (DWORD)<br>
+ * IN3 =  3rd value (DWORD)<br>
+ * IN4 =  4th value (DWORD)<br>
+ * OUT = IN1 OR IN2 OR IN3 OR IN4 (DWORD)<br>
+ */
+FUNCTION_BLOCK wOR_DWORD_4
+	{ vNameAlignment:="center"; altName:=">=1"; bgColor:="DodgerBlue"; width:=40; hideIONames; }
+	VAR_INPUT
+		IN1 : DWORD;
+		IN2 : DWORD;
+		IN3 : DWORD;
+		IN4 : DWORD;
+	END_VAR
+	VAR_OUTPUT
+		OUT: DWORD;
+	END_VAR
+
+	OUT := OR(IN1:=IN1, IN2:=IN2, IN3:=IN3, IN4:=IN4, ENO=>ENO);
+END_FUNCTION_BLOCK
+
+END_NAMESPACE
+END_NAMESPACE

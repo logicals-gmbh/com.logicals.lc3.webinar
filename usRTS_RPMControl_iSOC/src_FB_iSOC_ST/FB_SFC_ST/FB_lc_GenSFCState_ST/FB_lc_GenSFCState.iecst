@@ -1,0 +1,26 @@
+/*
+ * Werte aus Step in DT_Struktur wandeln
+ */
+FUNCTION_BLOCK FB_lc_GenSFCState
+
+  VAR_INPUT
+	viudi_StepCount   : UDINT;
+	vix_StepTrans     : BOOL;
+	vit_StepTime      : TIME;
+	vix_StepState     : BOOL;   
+	vistr_StepName    : STRING[20];
+	viui_StepNo       : UINT;
+  END_VAR
+  
+  VAR_OUTPUT
+   vostruc_SFCState : DT_lc_SFCVal;
+  END_VAR
+  
+  vostruc_SFCState.str_StepName  := vistr_StepName;    // 
+  vostruc_SFCState.x_StepState   := vix_StepState;     // Schrittstatus
+  vostruc_SFCState.udi_StepCount := viudi_StepCount;   // LifeTick des Schritts
+  vostruc_SFCState.t_StepTime    := vit_StepTime;      // Verweilzeit des Schritts
+  vostruc_SFCState.ui_StepNo     := viui_StepNo;       // Nummer des Schritts
+  vostruc_SFCState.x_StepTrans   := vix_StepTrans;     // Weiterschaltbedingung aktiv
+  
+END_FUNCTION_BLOCK

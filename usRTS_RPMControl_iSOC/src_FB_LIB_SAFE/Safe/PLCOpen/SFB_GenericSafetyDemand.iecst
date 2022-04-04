@@ -1,0 +1,173 @@
+USING logicals.web.standard.safe;
+
+NAMESPACE logicals.web.standard.safe
+NAMESPACE plcopen
+
+TYPE
+	SFB_GenericSafetyDemand_State : UINT(
+	/* Reset is TRUE while waiting for S_SafetyDemandIn = TRUE. */
+	Reset_Error_1 := 16#C001,
+	/* Reset is TRUE while waiting for S_SafetyDemandIn = TRUE. */
+	Reset_Error_2 := 16#C011,
+	/* The function block is not active (initial state). */
+	Idle := 16#0000,
+	/* Activation is TRUE. The function block was enabled. Check if S_StartReset is required. */
+	Init := 16#8001,
+	/* Activation is TRUE. Check if Reset is FALSE and wait for S_SafetyDemandIn = TRUE. */
+	Wait_for_S_SafetyDemandIn_1 := 16#8802,
+	/* Activation is TRUE. S_SafetyDemandIn = TRUE. Wait for rising trigger of Reset. */
+	Wait_for_Reset_1 := 16#8402,
+	/* Activation is TRUE. Safety demand detected. Check if Reset is FALSE and wait for S_SafetyDemandIn = TRUE. */
+	Wait_for_S_SafetyDemandIn_2 := 16#8804,
+	/* Activation is TRUE. S_SafetyDemandIn = TRUE. Check for S_AutoReset or wait for rising trigger of Reset. */
+	Wait_for_Reset_2 := 16#8404,
+	/* Activation is TRUE. S_SafetyDemandIn = TRUE. Functional mode with S_SafetyDemandOut = TRUE. */
+	Safety_Output_Enabled := 16#8000
+	);
+END_TYPE
+
+FUNCTION_BLOCK SFB_GenericSafetyDemand /* is a private module! */
+	VAR_INPUT
+		/* See Section 5.1.1 General Input Parameters */
+		Activate : BOOL := FALSE;
+		/* Safety demand input.
+		 * Variable.
+		 * FALSE: Demand for safety-related response
+		 * TRUE: No demand for safety-related response
+		 */
+		S_SafetyDemandIn : SAFEBOOL := SAFEBOOL_Constant#SAFEFALSE;
+		/* See Section 5.1.1 General Input Parameters */
+		S_StartReset : SAFEBOOL := SAFEBOOL_Constant#SAFEFALSE;
+		/* See Section 5.1.1 General Input Parameters */
+		S_AutoReset : SAFEBOOL := SAFEBOOL_Constant#SAFEFALSE;
+		/* See Section 5.1.1 General Input Parameters */
+		Reset : BOOL := FALSE;
+	END_VAR
+	VAR_OUTPUT
+		/* See Section 5.1.2 General Output Parameters */
+		Ready : BOOL := FALSE;
+		/* Output for the safety-related response.
+		 * FALSE: Safety output disabled. Demand for safety-related response
+		 * TRUE: Safety output enabled. No demand for safety-related response
+		 */
+		S_SafetyDemandOut : SAFEBOOL := SAFEBOOL_Constant#SAFEFALSE;
+		/* Optional. See 5.1.2 General Output Parameters */
+		SafetyDemand : BOOL := FALSE;
+		/* Optional. See 5.1.2 General Output Parameters */
+		ResetRequest : BOOL := FALSE;
+		/* See Section 5.1.2 General Output Parameters */
+		Error : BOOL := FALSE;
+		/* See Section 5.1.2 General Output Parameters */
+		DiagCode : WORD := 16#0000;
+	END_VAR
+
+	IF(NOT Activate) THEN
+		DiagCode := TO_WORD(SFB_GenericSafetyDemand_State#Idle);
+	ELSE
+		CASE TO_UINT(DiagCode) OF
+			SFB_GenericSafetyDemand_State#Idle:
+				/* IF(Activate) THEN - Active is always true here */
+					DiagCode := TO_WORD(SFB_GenericSafetyDemand_State#Init);
+			SFB_GenericSafetyDemand_State#Init:
+				IF(IS_NOT(S_StartReset)) THEN
+					DiagCode := TO_WORD(SFB_GenericSafetyDemand_State#Wait_for_S_SafetyDemandIn_1);
+				ELSIF(IS(S_StartReset) AND IS_NOT(S_SafetyDemandIn)) THEN
+					DiagCode := TO_WORD(SFB_GenericSafetyDemand_State#Wait_for_S_SafetyDemandIn_2);
+				ELSE /* (IS(S_SafetyDemandIn) AND IS(S_StartReset)) THEN */
+					DiagCode := TO_WORD(SFB_GenericSafetyDemand_State#Safety_Output_Enabled);
+				END_IF;
+			SFB_GenericSafetyDemand_State#Wait_for_S_SafetyDemandIn_1:
+				IF(IS(S_SafetyDemandIn)) THEN
+					IF(Reset) THEN
+						DiagCode := TO_WORD(SFB_GenericSafetyDemand_State#Reset_Error_1);
+					ELSE
+						DiagCode := TO_WORD(SFB_GenericSafetyDemand_State#Wait_for_Reset_1);
+					END_IF;
+				END_IF;
+			SFB_GenericSafetyDemand_State#Wait_for_Reset_1:
+				IF(IS_NOT(S_SafetyDemandIn)) THEN
+					DiagCode := TO_WORD(SFB_GenericSafetyDemand_State#Wait_for_S_SafetyDemandIn_1);
+				ELSIF(Reset) THEN
+					DiagCode := TO_WORD(SFB_GenericSafetyDemand_State#Safety_Output_Enabled);
+				END_IF;
+			SFB_GenericSafetyDemand_State#Reset_Error_1:
+				IF(NOT Reset) THEN
+					DiagCode := TO_WORD(SFB_GenericSafetyDemand_State#Wait_for_Reset_1);
+				END_IF;
+			SFB_GenericSafetyDemand_State#Wait_for_S_SafetyDemandIn_2:
+				IF (IS(S_SafetyDemandIn)) THEN
+					IF(Reset) THEN
+						DiagCode := TO_WORD(SFB_GenericSafetyDemand_State#Reset_Error_2);
+					ELSIF(IS_NOT(S_AutoReset)) THEN
+						DiagCode := TO_WORD(SFB_GenericSafetyDemand_State#Wait_for_Reset_2);
+					ELSIF(IS(S_AutoReset)) THEN
+						DiagCode := TO_WORD(SFB_GenericSafetyDemand_State#Safety_Output_Enabled);
+					END_IF;
+				END_IF;
+			SFB_GenericSafetyDemand_State#Wait_for_Reset_2:
+				IF(IS_NOT(S_SafetyDemandIn)) THEN
+					DiagCode := TO_WORD(SFB_GenericSafetyDemand_State#Wait_for_S_SafetyDemandIn_2);
+				ELSIF(Reset OR IS(S_AutoReset)) THEN
+					DiagCode := TO_WORD(SFB_GenericSafetyDemand_State#Safety_Output_Enabled);
+				END_IF;
+			SFB_GenericSafetyDemand_State#Reset_Error_2:
+				IF(NOT Reset) THEN
+					DiagCode := TO_WORD(SFB_GenericSafetyDemand_State#Wait_for_Reset_2);
+				END_IF;
+			SFB_GenericSafetyDemand_State#Safety_Output_Enabled:
+				IF(IS_NOT(S_SafetyDemandIn)) THEN
+					DiagCode := TO_WORD(SFB_GenericSafetyDemand_State#Wait_for_S_SafetyDemandIn_2);
+				END_IF;
+			ELSE
+				ENO := FALSE;
+		END_CASE;
+	END_IF;
+
+	CASE TO_UINT(DiagCode) OF
+		SFB_GenericSafetyDemand_State#Idle:
+			Ready := FALSE;
+			S_SafetyDemandOut := SAFEBOOL_Constant#SAFEFALSE;
+			SafetyDemand := FALSE;
+			ResetRequest := FALSE;
+			Error := FALSE;
+		SFB_GenericSafetyDemand_State#Init:
+			Ready := TRUE;
+			S_SafetyDemandOut := SAFEBOOL_Constant#SAFEFALSE;
+			SafetyDemand := FALSE;
+			ResetRequest := FALSE;
+			Error := FALSE;
+		SFB_GenericSafetyDemand_State#Wait_for_S_SafetyDemandIn_1, SFB_GenericSafetyDemand_State#Wait_for_S_SafetyDemandIn_2:
+			Ready := TRUE;
+			S_SafetyDemandOut := SAFEBOOL_Constant#SAFEFALSE;
+			SafetyDemand := TRUE;
+			ResetRequest := FALSE;
+			Error := FALSE;
+		SFB_GenericSafetyDemand_State#Wait_for_Reset_1, SFB_GenericSafetyDemand_State#Wait_for_Reset_2:
+			Ready := TRUE;
+			S_SafetyDemandOut := SAFEBOOL_Constant#SAFEFALSE;
+			SafetyDemand := FALSE;
+			ResetRequest := TRUE;
+			Error := FALSE;
+		SFB_GenericSafetyDemand_State#Safety_Output_Enabled:
+			Ready := TRUE;
+			S_SafetyDemandOut := SAFEBOOL_Constant#SAFETRUE;
+			SafetyDemand := FALSE;
+			ResetRequest := FALSE;
+			Error := FALSE;
+		SFB_GenericSafetyDemand_State#Reset_Error_1, SFB_GenericSafetyDemand_State#Reset_Error_2:
+			Ready := TRUE;
+			S_SafetyDemandOut := SAFEBOOL_Constant#SAFEFALSE;
+			SafetyDemand := FALSE;
+			ResetRequest := FALSE;
+			Error := TRUE;
+		ELSE
+			ENO := FALSE;
+	END_CASE;
+
+	ENO := ENO AND CheckSAFEBOOL(S_SafetyDemandIn) AND CheckSAFEBOOL(S_StartReset) AND CheckSAFEBOOL(S_AutoReset);
+
+END_FUNCTION_BLOCK
+
+END_NAMESPACE
+END_NAMESPACE
+

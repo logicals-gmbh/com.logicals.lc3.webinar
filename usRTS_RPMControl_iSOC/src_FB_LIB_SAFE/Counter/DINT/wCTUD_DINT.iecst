@@ -1,0 +1,37 @@
+NAMESPACE logicals.web.standard
+NAMESPACE counter
+
+/*
+ * Function block wrapper for IEC 61131-3 CTUD_DINT<br>
+ * CU = increment on positive edge on CU (BOOL)<br>
+ * CD = decrement on positive edge on CD (BOOL)<br>
+ * R  = flag for reset (CV:=0) (BOOL)<br>
+ * LD = flag for load (CV:=PV) (BOOL)<br>
+ * PV = upper limit of counter (DINT)<br>
+ * QU = flag showing whether upper limit is reached or not (BOOL)<br>
+ * QD = flag showing whether 0 is reached or not (BOOL)<br>
+ * CV = current value of counter (DINT)<br>
+ */
+FUNCTION_BLOCK wCTUD_DINT
+	{ vNameAlignment:="center"; altName:="CTUD_DINT"; bgColor:="LightPink"; width:=120; }
+	VAR_INPUT
+		CU : BOOL /* R_EDGE */;
+		CD : BOOL /* R_EDGE */;
+		R  : BOOL;
+		LD : BOOL;
+		PV : DINT;
+	END_VAR
+	VAR_OUTPUT
+		QU : BOOL;
+		QD : BOOL;
+		CV : DINT;
+	END_VAR
+	VAR
+		CTUD_DINT : CTUD_DINT;
+	END_VAR
+
+	CTUD_DINT(CU:=CU, CD:=CD, R:=R, LD:=LD, PV:=PV, QU=>QU, QD=>QD, CV=>CV, ENO=>ENO);
+END_FUNCTION_BLOCK
+
+END_NAMESPACE
+END_NAMESPACE

@@ -1,0 +1,28 @@
+NAMESPACE logicals.web.standard
+NAMESPACE bitstring
+
+/*
+ * Function block wrapper for IEC 61131-3 AND<br>
+ * IN1 =  1st value (BYTE)<br>
+ * IN2 =  2nd value (BYTE)<br>
+ * IN3 =  3rd value (BYTE)<br>
+ * IN4 =  4th value (BYTE)<br>
+ * OUT = IN1 AND IN2 AND IN3 AND IN4 (BYTE)<br>
+ */
+FUNCTION_BLOCK wAND_BYTE_4
+	{ vNameAlignment:="center"; altName:="&"; bgColor:="DodgerBlue"; width:=40; hideIONames; }
+	VAR_INPUT
+		IN1 : BYTE;
+		IN2 : BYTE;
+		IN3 : BYTE;
+		IN4 : BYTE;
+	END_VAR
+	VAR_OUTPUT
+		OUT: BYTE;
+	END_VAR
+
+	OUT := AND(IN1:=IN1, IN2:=IN2, IN3:=IN3, IN4:=IN4, ENO=>ENO);
+END_FUNCTION_BLOCK
+
+END_NAMESPACE
+END_NAMESPACE

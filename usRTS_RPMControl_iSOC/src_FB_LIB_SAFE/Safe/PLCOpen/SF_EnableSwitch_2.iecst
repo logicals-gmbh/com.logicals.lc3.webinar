@@ -1,0 +1,177 @@
+USING logicals.web.standard.safe;
+
+NAMESPACE logicals.web.standard.safe
+NAMESPACE plcopen
+
+TYPE
+	SF_EnableSwitch_2_State : UINT(
+	/* Static Reset signal detected in state Cx10. */
+	Reset_Error_1 := 16#C001,
+	/* Enable switch in position 2 during activation of S_SafetyActive. */
+	Operation_Error_1_Position_2 := 16#C010,
+	/* Enable switch in position 1 or 3 during activation of S_SafetyActive. */
+	Operation_Error_1_Position_1_Or_3 := 16#C410,
+	/* The function block is not active (initial state). */
+	Idle := 16#0000,
+	/* Safe operation mode is not active. */
+	Basic_Operation_Mode := 16#8002,
+	/* Safe operation mode is active. */
+	Safe_Operation_Mode := 16#8004,
+	/* Safe operation mode is active and the enable switch is in position 1 or 3. */
+	Position_1_Or_3 := 16#8802,
+	/* Safe operation mode is active and the enable switch is in position 2. */
+	Position_2 := 16#8000
+	);
+END_TYPE
+
+/**
+ * The SF_EnableSwitch_2 evaluates the signals of an enable switch with two or three positions.
+ */
+FUNCTION_BLOCK SF_EnableSwitch_2
+	{ altName:="SF_EnableSwitch_2"; bgColor:="Gold"; width:=380;}
+	VAR_INPUT
+		/* See 5.1.1 General Input Parameters */
+		Activate : BOOL := FALSE;
+		/* Variable or constant.
+		 * Confirmation of the safe mode (limitation of the speed or the power of motion, limitation of the range of mo-tion).
+		 * FALSE: Safe mode is not active.
+		 * TRUE: Safe mode is active. */
+		S_SafetyActive : SAFEBOOL := SAFEBOOL_Constant#SAFEFALSE;
+		/* Variable.
+		 * Signal of connected enable switch. The evaluation of the signals (discrepancy) will be done within the IO unit or the FB_Equivalent
+		 * FALSE: Not Enabled.
+		 * TRUE: Enabled. */
+		S_EnableIn : SAFEBOOL := SAFEBOOL_Constant#SAFEFALSE;
+		/* See 5.1.1 General Input Parameters */
+		Reset : BOOL := FALSE;
+	END_VAR
+
+	VAR_OUTPUT
+		/* See 5.1.2 General Output Parameters */
+		Ready : BOOL := FALSE;
+		/* Safety related output: Indicates suspension of guard.
+		 * FALSE: Disable suspension of safeguarding.
+		 * TRUE: Enable suspension of safeguarding. */
+		S_EnableSwitchOut : SAFEBOOL := SAFEBOOL_Constant#SAFEFALSE;
+		/* See 5.1.2 General Output Parameters */
+		SafetyDemand : BOOL := FALSE;
+		/* See 5.1.2 General Output Parameters */
+		ResetRequest : BOOL := FALSE;
+		/* See 5.1.2 General Output Parameters */
+		Error : BOOL := FALSE;
+		/* See 5.1.2 General Output Parameters */
+		DiagCode : WORD := 16#0000;
+	END_VAR
+
+	VAR
+		R_Trig_Reset : R_TRIG;
+	END_VAR
+
+	R_Trig_Reset(Reset);
+
+	IF(NOT Activate) THEN
+		DiagCode := TO_WORD(SF_EnableSwitch_2_State#Idle);
+	ELSE
+		CASE TO_UINT(DiagCode) OF
+			SF_EnableSwitch_2_State#Idle:
+				/* IF(Activate) THEN - Active is always TRUE here */
+					DiagCode := TO_WORD(SF_EnableSwitch_2_State#Basic_Operation_Mode);
+			SF_EnableSwitch_2_State#Basic_Operation_Mode:
+				IF(IS(S_SafetyActive)) THEN
+					DiagCode := TO_WORD(SF_EnableSwitch_2_State#Safe_Operation_Mode);
+				END_IF;
+			SF_EnableSwitch_2_State#Safe_Operation_Mode:
+				IF(IS_NOT(S_SafetyActive)) THEN
+					DiagCode := TO_WORD(SF_EnableSwitch_2_State#Basic_Operation_Mode);
+				ELSIF(IS(S_EnableIn)) THEN
+					DiagCode := TO_WORD(SF_EnableSwitch_2_State#Operation_Error_1_Position_2);
+				/* ELSIF(IS_NOT(S_EnableIn)) THEN - S_EnableIn can only be FALSE here */
+				ELSE
+					DiagCode := TO_WORD(SF_EnableSwitch_2_State#Position_1_Or_3);
+				END_IF;
+			SF_EnableSwitch_2_State#Operation_Error_1_Position_2,
+			SF_EnableSwitch_2_State#Operation_Error_1_Position_1_Or_3:
+				IF(IS_NOT(S_SafetyActive)) THEN
+					DiagCode := TO_WORD(SF_EnableSwitch_2_State#Basic_Operation_Mode);
+				ELSIF(Reset AND NOT R_Trig_Reset.Q) THEN
+					DiagCode := TO_WORD(SF_EnableSwitch_2_State#Reset_Error_1);
+				ELSIF(IS_NOT(S_EnableIn) AND R_Trig_Reset.Q) THEN
+					DiagCode := TO_WORD(SF_EnableSwitch_2_State#Position_1_Or_3);
+				END_IF;
+			SF_EnableSwitch_2_State#Reset_Error_1:
+				IF(IS_NOT(S_SafetyActive)) THEN
+					DiagCode := TO_WORD(SF_EnableSwitch_2_State#Basic_Operation_Mode);
+				ELSIF(NOT Reset) THEN
+					IF(IS(S_EnableIn)) THEN
+						DiagCode := TO_WORD(SF_EnableSwitch_2_State#Operation_Error_1_Position_2);
+					ELSE
+						DiagCode := TO_WORD(SF_EnableSwitch_2_State#Operation_Error_1_Position_1_Or_3);
+					END_IF;
+				END_IF;
+			SF_EnableSwitch_2_State#Position_1_Or_3:
+				IF(IS_NOT(S_SafetyActive)) THEN
+					DiagCode := TO_WORD(SF_EnableSwitch_2_State#Basic_Operation_Mode);
+				ELSIF(IS(S_EnableIn)) THEN
+					DiagCode := TO_WORD(SF_EnableSwitch_2_State#Position_2);
+				END_IF;
+			SF_EnableSwitch_2_State#Position_2:
+				IF(IS_NOT(S_SafetyActive)) THEN
+					DiagCode := TO_WORD(SF_EnableSwitch_2_State#Basic_Operation_Mode);
+				ELSIF(IS_NOT(S_EnableIn)) THEN
+					DiagCode := TO_WORD(SF_EnableSwitch_2_State#Position_1_Or_3);
+				END_IF;
+			ELSE
+				ENO := FALSE;
+		END_CASE;
+	END_IF;
+
+	CASE TO_UINT(DiagCode) OF
+		SF_EnableSwitch_2_State#Idle:
+			Ready := FALSE;
+			S_EnableSwitchOut := SAFEBOOL_Constant#SAFEFALSE;
+			SafetyDemand := FALSE;
+			ResetRequest := FALSE;
+			Error := FALSE;
+		SF_EnableSwitch_2_State#Basic_Operation_Mode,
+		SF_EnableSwitch_2_State#Safe_Operation_Mode:
+			Ready := TRUE;
+			S_EnableSwitchOut := SAFEBOOL_Constant#SAFEFALSE;
+			SafetyDemand := FALSE;
+			ResetRequest := FALSE;
+			Error := FALSE;
+		SF_EnableSwitch_2_State#Position_1_Or_3:
+			Ready := TRUE;
+			S_EnableSwitchOut := SAFEBOOL_Constant#SAFEFALSE;
+			SafetyDemand := TRUE;
+			ResetRequest := FALSE;
+			Error := FALSE;
+		SF_EnableSwitch_2_State#Position_2:
+			Ready := TRUE;
+			S_EnableSwitchOut := SAFEBOOL_Constant#SAFETRUE;
+			SafetyDemand := FALSE;
+			ResetRequest := FALSE;
+			Error := FALSE;
+		SF_EnableSwitch_2_State#Reset_Error_1,
+		SF_EnableSwitch_2_State#Operation_Error_1_Position_2:
+			Ready := TRUE;
+			S_EnableSwitchOut := SAFEBOOL_Constant#SAFEFALSE;
+			SafetyDemand := FALSE;
+			ResetRequest := FALSE;
+			Error := TRUE;
+		SF_EnableSwitch_2_State#Operation_Error_1_Position_1_Or_3:
+			Ready := TRUE;
+			S_EnableSwitchOut := SAFEBOOL_Constant#SAFEFALSE;
+			SafetyDemand := FALSE;
+			ResetRequest := TRUE;
+			Error := TRUE;
+		ELSE
+			ENO := FALSE;
+	END_CASE;
+
+	ENO := ENO AND CheckSAFEBOOL(S_SafetyActive) AND CheckSAFEBOOL(S_EnableIn);
+
+END_FUNCTION_BLOCK
+
+END_NAMESPACE
+END_NAMESPACE
+

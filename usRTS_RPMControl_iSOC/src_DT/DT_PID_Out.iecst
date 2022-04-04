@@ -1,0 +1,12 @@
+TYPE
+   DT_PID_Out : STRUCT
+    x_Lu      : BOOL; // Upper Limit
+    x_Ld      : BOOL; // Lower Limit
+    
+    r_Out     : REAL; // Output Variable
+    
+    r_P       : REAL; // Proportional Part
+    r_I       : REAL; // Integral Part
+    r_D       : REAL; // Derivative Part  
+   END_STRUCT;
+END_TYPE

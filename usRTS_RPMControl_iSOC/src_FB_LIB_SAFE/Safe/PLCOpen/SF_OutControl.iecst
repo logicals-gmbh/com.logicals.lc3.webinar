@@ -1,0 +1,205 @@
+USING logicals.web.standard.safe;
+
+NAMESPACE logicals.web.standard.safe
+NAMESPACE plcopen
+
+TYPE
+	SF_OutControl_State : UINT(
+	/* Static Reset signal in state 8401. */
+	Reset_Error_1 := 16#C001,
+	/* Static Reset signal in state 8404. */
+	Reset_Error_2 := 16#C011,
+	/* Static signal at ProcessControl in state 8006. */
+	Control_Error := 16#C010,
+	/* Simultaneous rising trigger at Reset and ProcessControl in state 8401. */
+	Init_Error := 16#C020,
+	/* Simultaneous rising trigger at Reset and ProcessControl in state 8404. */
+	Lock_Error := 16#C030,
+	/* The function block is not active (initial state). */
+	Idle := 16#0000,
+	/* Block activation startup inhibit is active. Reset required. */
+	Init := 16#8401,
+	/* Triggered safety function. */
+	Safe := 16#8802,
+	/* Safety function startup inhibit is active. Reset required. */
+	Lock := 16#8404,
+	/* Process control is not active. */
+	Output_Disable := 16#8006,
+	/* Process control is active and safety is enabled. */
+	Output_Enable := 16#8000
+	);
+END_TYPE
+
+
+/* Control of a safety output with a signal from the functional application and a safety signal with optional startup inhibits. */
+FUNCTION_BLOCK SF_OutControl
+	{ altName:="SF_OutControl"; bgColor:="Gold"; width:=360; }
+	VAR_INPUT
+		/* See Section 5.1.1 General Input Parameters */
+		Activate : BOOL := FALSE;
+		/* Variable.
+		 * Control signal of the preceding safety FB.
+		 * Typical function block signals from the library (e.g., SF_EStop, SF_GuardMonitoring, SF_TwoHand_Control_TypeII, and/or others).
+		 * FALSE: The preceding safety FB's are in safe state.
+		 * TRUE: The preceding safety FB's enable safety control. */
+		S_SafeControl : SAFEBOOL := SAFEBOOL_Constant#SAFEFALSE;
+		/* Variable or constant.
+		 * Control signal from the functional application.
+		 * FALSE: Request to set S_OutControl to FALSE.
+		 * TRUE: Request to set S_OutControl to TRUE. */
+		ProcessControl : BOOL := FALSE;
+		/* Constant.
+		 * Optional conditions for process control.
+		 * FALSE: Dynamic change at ProcessControl (FALSE => TRUE) required after block activation or triggered safety function. Additional function start required.
+		 * TRUE: No dynamic change at ProcessControl (FALSE => TRUE) required after block activation or triggered safety function. */
+		StaticControl : BOOL := FALSE;
+		/* See Section 5.1.1 General Input Parameters */
+		S_StartReset : SAFEBOOL := SAFEBOOL_Constant#SAFEFALSE;
+		/* See Section 5.1.1 General Input Parameters */
+		S_AutoReset : SAFEBOOL := SAFEBOOL_Constant#SAFEFALSE;
+		/* See Section 5.1.1 General Input Parameters */
+		Reset : BOOL := FALSE;
+	END_VAR
+
+	VAR_OUTPUT
+		/* See Section 5.1.2 General Output Parameters */
+		Ready : BOOL := FALSE;
+		/* Controls connected actuators.
+		 * FALSE: Disable connected actuators.
+		 * TRUE: Enable connected actuators. */
+		S_OutControl : SAFEBOOL := SAFEBOOL_Constant#SAFEFALSE;
+		/* See Section 5.1.2 General Output Parameters */
+		SafetyDemand : BOOL := FALSE;
+		/* See Section 5.1.2 General Output Parameters */
+		ResetRequest : BOOL := FALSE;
+		/* See Section 5.1.2 General Output Parameters */
+		Error : BOOL := FALSE;
+		/* See Section 5.1.2 General Output Parameters */
+		DiagCode : WORD := 16#0000;
+	END_VAR
+
+	VAR
+		R_Trig_Reset : R_TRIG;
+		R_Trig_ProcessControl : R_TRIG;
+	END_VAR
+
+	R_Trig_Reset(Reset);
+	R_Trig_ProcessControl(ProcessControl);
+
+	IF(NOT Activate) THEN
+		DiagCode := TO_WORD(SF_OutControl_State#Idle);
+	ELSE
+		CASE TO_UINT(DiagCode) OF
+			SF_OutControl_State#Idle:
+				/* IF(Activate) THEN - Active is always true here */
+					DiagCode := TO_WORD(SF_OutControl_State#Init);
+			SF_OutControl_State#Init:
+				IF(Reset AND NOT R_Trig_Reset.Q AND NOT IS(S_StartReset)) THEN
+					DiagCode := TO_WORD(SF_OutControl_State#Reset_Error_1);
+				ELSIF(R_Trig_Reset.Q AND R_Trig_ProcessControl.Q) THEN
+					DiagCode := TO_WORD(SF_OutControl_State#Init_Error);
+				ELSIF(R_Trig_Reset.Q OR IS(S_StartReset)) THEN
+					DiagCode := TO_WORD(SF_OutControl_State#Output_Disable);
+				END_IF;
+			SF_OutControl_State#Reset_Error_1:
+				IF(NOT Reset) THEN
+					DiagCode := TO_WORD(SF_OutControl_State#Init);
+				END_IF;
+			SF_OutControl_State#Init_Error:
+				IF(NOT Reset) THEN
+					DiagCode := TO_WORD(SF_OutControl_State#Init);
+				END_IF;
+			SF_OutControl_State#Output_Disable:
+				IF(IS_NOT(S_SafeControl)) THEN
+					DiagCode := TO_WORD(SF_OutControl_State#Safe);
+				ELSIF(NOT R_Trig_ProcessControl.Q AND ProcessControl AND NOT StaticControl) THEN
+					DiagCode := TO_WORD(SF_OutControl_State#Control_Error);
+				ELSIF(IS(S_SafeControl) AND (R_Trig_ProcessControl.Q OR (StaticControl AND ProcessControl))) THEN
+					DiagCode := TO_WORD(SF_OutControl_State#Output_Enable);
+				END_IF;
+			SF_OutControl_State#Control_Error:
+				IF(NOT ProcessControl) THEN
+					DiagCode := TO_WORD(SF_OutControl_State#Output_Disable);
+				END_IF;
+			SF_OutControl_State#Output_Enable:
+				IF(IS_NOT(S_SafeControl)) THEN
+					DiagCode := TO_WORD(SF_OutControl_State#Safe);
+				ELSIF(NOT ProcessControl) THEN
+					DiagCode := TO_WORD(SF_OutControl_State#Output_Disable);
+				END_IF;
+			SF_OutControl_State#Safe:
+				IF(IS(S_SafeControl)) THEN
+					DiagCode := TO_WORD(SF_OutControl_State#Lock);
+				END_IF;
+			SF_OutControl_State#Lock:
+				IF(IS_NOT(S_SafeControl)) THEN
+					DiagCode := TO_WORD(SF_OutControl_State#Safe);
+				ELSIF(Reset AND NOT R_Trig_Reset.Q AND IS_NOT(S_AutoReset)) THEN
+					DiagCode := TO_WORD(SF_OutControl_State#Reset_Error_2);
+				ELSIF(R_Trig_Reset.Q AND R_Trig_ProcessControl.Q) THEN
+					DiagCode := TO_WORD(SF_OutControl_State#Lock_Error);
+				ELSIF(R_Trig_Reset.Q OR IS(S_AutoReset)) THEN
+					DiagCode := TO_WORD(SF_OutControl_State#Output_Disable);
+				END_IF;
+			SF_OutControl_State#Lock_Error:
+				IF(NOT Reset) THEN
+					DiagCode := TO_WORD(SF_OutControl_State#Lock);
+				END_IF;
+			SF_OutControl_State#Reset_Error_2:
+				IF(NOT Reset) THEN
+					DiagCode := TO_WORD(SF_OutControl_State#Lock);
+				END_IF;
+		END_CASE;
+	END_IF;
+
+
+	CASE TO_UINT(DiagCode) OF
+		SF_OutControl_State#Idle:
+			Ready := FALSE;
+			S_OutControl := SAFEBOOL_Constant#SAFEFALSE;
+			SafetyDemand := FALSE;
+			ResetRequest := FALSE;
+			Error := FALSE;
+		SF_OutControl_State#Init,
+		SF_OutControl_State#Lock:
+			Ready := TRUE;
+			S_OutControl := SAFEBOOL_Constant#SAFEFALSE;
+			SafetyDemand := FALSE;
+			ResetRequest := TRUE;
+			Error := FALSE;
+		SF_OutControl_State#Safe:
+			Ready := TRUE;
+			S_OutControl := SAFEBOOL_Constant#SAFEFALSE;
+			SafetyDemand := TRUE;
+			ResetRequest := FALSE;
+			Error := FALSE;
+		SF_OutControl_State#Output_Disable:
+			Ready := TRUE;
+			S_OutControl := SAFEBOOL_Constant#SAFEFALSE;
+			SafetyDemand := FALSE;
+			ResetRequest := FALSE;
+			Error := FALSE;
+		SF_OutControl_State#Output_Enable:
+			Ready := TRUE;
+			S_OutControl := SAFEBOOL_Constant#SAFETRUE;
+			SafetyDemand := FALSE;
+			ResetRequest := FALSE;
+			Error := FALSE;
+		SF_OutControl_State#Reset_Error_1,
+		SF_OutControl_State#Reset_Error_2,
+		SF_OutControl_State#Control_Error,
+		SF_OutControl_State#Init_Error,
+		SF_OutControl_State#Lock_Error:
+			Ready := TRUE;
+			S_OutControl := SAFEBOOL_Constant#SAFEFALSE;
+			SafetyDemand := FALSE;
+			ResetRequest := FALSE;
+			Error := TRUE;
+	END_CASE;
+
+	ENO := ENO AND CheckSAFEBOOL(S_SafeControl) AND CheckSAFEBOOL(S_StartReset) AND CheckSAFEBOOL(S_AutoReset);
+
+END_FUNCTION_BLOCK
+
+END_NAMESPACE
+END_NAMESPACE

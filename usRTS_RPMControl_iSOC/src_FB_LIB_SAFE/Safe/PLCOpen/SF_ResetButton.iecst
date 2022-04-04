@@ -1,0 +1,174 @@
+USING logicals.web.standard.safe;
+
+NAMESPACE logicals.web.standard.safe
+NAMESPACE plcopen
+
+TYPE
+	SF_ResetButton_State : UINT(
+	/* TrailingMinimum > TrailingMaximum OR TrailingMinimum < 100 msec. */
+	Parameter_Error := 16#C000,
+	/* ResetIn is TRUE while waiting for NOT ResetIn. */
+	Reset_Error := 16#C001,
+	/* TrailingMaximum elapsed before detecting F_TRIG at ResetIn. Waiting for R_TRIG at ResetIn. */
+	Error_Trailing_Maximum := 16#C3E0,
+	/* F_TRIG at ResetIn detected before TrailingMinimum elapsed. Waiting for R_TRIG at ResetIn. */
+	Error_Trailing_Minimum := 16#C3F0,
+	/* The function block is not active (initial state). */
+	Idle := 16#0000,
+	/* The function block is enabled. Wait for R_TRIG at ResetIn. */
+	Wait_for_R_TRIG := 16#83E2,
+	/* ResetIn is TRUE. Wait for F_TRIG at ResetIn */
+	Wait_for_F_TRIG := 16#83F2,
+	/* Valid reset behavior was detected. The state is valid for at least one cycle and will automatically transfer to 83E2. */
+	Reset_Detected := 16#8000
+	);
+END_TYPE
+
+/*
+ * This function block adds the trailing edge functionality to all the function blocks with reset input with rising edge detection. This can be used to comply to EN ISO 13849-1:2015
+ */
+FUNCTION_BLOCK SF_ResetButton
+	{ altName:="SF_ResetButton"; bgColor:="Gold"; width:=380; }
+	VAR_INPUT
+		/* Input which should be connected to the ResetRequest output of the paired FB.
+			TRUE: ResetRequested
+			FALSE: No reset requested / no monitoring of ResetIn. */
+		ResetRequested : BOOL := TRUE;
+		/* Variable.
+			Input of reset button
+			FALSE: reset button released;
+			TRUE: reset button actuated by operator. */
+		Button : BOOL := FALSE;
+		/* Constant. Valid in trailing mode. Minimum time that the reset switch has to be actuated.
+			If the reset button is pushed shorter than this time, the reset is ignored.
+			Typical value 350msec.Absolut minimum value is 100msec.Minimum value 2 PLC cycles. */
+		TrailingMinimum : TIME := T#350ms;
+		/* Constant. Valid in trailing mode.
+			Maximum time that the reset switch is actuated.
+			Typical value can be around 2 sec. If the reset button is pushed longer than this time, the reset is ignored. */
+		TrailingMaximum : TIME := T#2s;
+	END_VAR
+	VAR_OUTPUT
+		/* See 5.1.2 General Output Parameters */
+		Ready : BOOL := FALSE;
+		/* Pulse for the initiation of the reset procedure.
+			This pulse is generated after the falling edge.
+			Pulse output with rising edge first. At least 1 cycle. */
+		ResetOut : BOOL := FALSE;
+		/* See 5.1.2 General Output Parameters */
+		Error : BOOL := FALSE;
+		/* See 5.1.2 General Output Parameters */
+		DiagCode : WORD := 16#0000;
+	END_VAR
+	VAR
+		TrailingMinimumTimer : TON;
+		TrailingMaximumTimer : TON;
+		R_Trig_Button : R_TRIG;
+		F_Trig_Button : F_TRIG;
+	END_VAR
+
+	R_Trig_Button(Button);
+	F_Trig_Button(Button);
+
+	IF(NOT ResetRequested) THEN
+		DiagCode := TO_WORD(SF_ResetButton_State#Idle);
+	ELSE
+		CASE TO_UINT(DiagCode) OF
+			SF_ResetButton_State#Idle:
+				/* IF(ResetRequested) THEN - ResetRequested is always true here */
+					IF(Button) THEN
+						DiagCode := TO_WORD(SF_ResetButton_State#Reset_Error);
+					ELSE
+					DiagCode := TO_WORD(SF_ResetButton_State#Wait_for_R_TRIG);
+					END_IF;
+			SF_ResetButton_State#Wait_for_R_TRIG:
+				IF(TrailingMinimum > TrailingMaximum) OR (TrailingMinimum < T#100ms) THEN
+					DiagCode := TO_WORD(SF_ResetButton_State#Parameter_Error);
+				ELSIF(R_Trig_Button.Q) THEN
+					DiagCode := TO_WORD(SF_ResetButton_State#Wait_for_F_TRIG);
+				END_IF;
+			SF_ResetButton_State#Reset_Error:
+				IF(NOT Button) THEN
+					DiagCode := TO_WORD(SF_ResetButton_State#Wait_for_R_TRIG);
+				END_IF;
+			SF_ResetButton_State#Wait_for_F_TRIG:
+				TrailingMinimumTimer();
+				TrailingMaximumTimer();
+				IF(F_Trig_Button.Q) AND (NOT TrailingMinimumTimer.Q) THEN
+					DiagCode := TO_WORD(SF_ResetButton_State#Error_Trailing_Minimum);
+				ELSIF(TrailingMaximumTimer.Q) THEN
+					DiagCode := TO_WORD(SF_ResetButton_State#Error_Trailing_Maximum);
+				ELSIF(F_Trig_Button.Q) THEN
+					DiagCode := TO_WORD(SF_ResetButton_State#Reset_Detected);
+				END_IF;
+			SF_ResetButton_State#Error_Trailing_Maximum:
+				IF(R_Trig_Button.Q) THEN
+					DiagCode := TO_WORD(SF_ResetButton_State#Wait_for_F_TRIG);
+				END_IF;
+			SF_ResetButton_State#Error_Trailing_Minimum:
+				IF(R_Trig_Button.Q) THEN
+					DiagCode := TO_WORD(SF_ResetButton_State#Wait_for_F_TRIG);
+				END_IF;
+			SF_ResetButton_State#Reset_Detected:
+				DiagCode := TO_WORD(SF_ResetButton_State#Wait_for_R_TRIG);
+			ELSE
+				ENO := FALSE;
+		END_CASE;
+	END_IF;
+
+		CASE TO_UINT(DiagCode) OF
+			SF_ResetButton_State#Parameter_Error:
+				TrailingMinimumTimer(IN := FALSE);
+				TrailingMaximumTimer(IN := FALSE);
+				Ready := TRUE;
+				ResetOut := FALSE;
+				Error := TRUE;
+			SF_ResetButton_State#Reset_Error:
+				TrailingMinimumTimer(IN := FALSE);
+				TrailingMaximumTimer(IN := FALSE);
+				Ready := TRUE;
+				ResetOut := FALSE;
+				Error := TRUE;
+			SF_ResetButton_State#Error_Trailing_Maximum:
+				TrailingMinimumTimer(IN := FALSE);
+				TrailingMaximumTimer(IN := FALSE);
+				Ready := TRUE;
+				ResetOut := FALSE;
+				Error := TRUE;
+			SF_ResetButton_State#Error_Trailing_Minimum:
+				TrailingMinimumTimer(IN := FALSE);
+				TrailingMaximumTimer(IN := FALSE);
+				Ready := TRUE;
+				ResetOut := FALSE;
+				Error := TRUE;
+			SF_ResetButton_State#Idle:
+				TrailingMinimumTimer(IN := FALSE);
+				TrailingMaximumTimer(IN := FALSE);
+				Ready := FALSE;
+				ResetOut := FALSE;
+				Error := FALSE;
+			SF_ResetButton_State#Wait_for_R_TRIG:
+				TrailingMinimumTimer(IN := FALSE);
+				TrailingMaximumTimer(IN := FALSE);
+				Ready := TRUE;
+				ResetOut := FALSE;
+				Error := FALSE;
+			SF_ResetButton_State#Wait_for_F_TRIG:
+				TrailingMinimumTimer(IN := TRUE, PT := TrailingMinimum);
+				TrailingMaximumTimer(IN := TRUE, PT := TrailingMaximum);
+				Ready := TRUE;
+				ResetOut := FALSE;
+				Error := FALSE;
+			SF_ResetButton_State#Reset_Detected:
+				TrailingMinimumTimer(IN := FALSE);
+				TrailingMaximumTimer(IN := FALSE);
+				Ready := TRUE;
+				ResetOut := TRUE;
+				Error := FALSE;
+			ELSE
+				ENO := FALSE;
+		END_CASE;
+END_FUNCTION_BLOCK
+
+END_NAMESPACE
+END_NAMESPACE

@@ -1,0 +1,22 @@
+NAMESPACE logicals.web.standard
+NAMESPACE convert
+
+/*
+ * Function block wrapper for IEC 61131-3 TO_DWORD<br>
+ * IN =  input value (BYTE)<br>
+ * OUT = IN (DWORD)<br>
+ */
+FUNCTION_BLOCK wBYTE_TO_DWORD
+	{ vNameAlignment:="center"; altName:="BYTE_TO_DWORD"; bgColor:="DodgerBlue"; width:=140; hideIONames; }
+	VAR_INPUT
+		IN : BYTE;
+	END_VAR
+	VAR_OUTPUT
+		OUT: DWORD;
+	END_VAR
+
+	OUT := TO_DWORD(IN:=IN, ENO=>ENO);
+END_FUNCTION_BLOCK
+
+END_NAMESPACE
+END_NAMESPACE

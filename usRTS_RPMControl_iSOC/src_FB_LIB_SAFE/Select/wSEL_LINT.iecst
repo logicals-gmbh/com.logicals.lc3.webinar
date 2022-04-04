@@ -1,0 +1,26 @@
+NAMESPACE logicals.web.standard
+NAMESPACE select
+
+/*
+ * Function block wrapper for IEC 61131-3 SEL<br>
+ * G = selector (BOOL)<br>
+ * IN0 = first value (LINT)<br>
+ * IN1 = second value (LINT)<br>
+ * OUT := G ? IN1 : IN0; (LINT)<br>
+ */
+FUNCTION_BLOCK wSEL_LINT
+	{ vNameAlignment:="center"; altName:="SEL"; bgColor:="LightPink"; width:=120; }
+	VAR_INPUT
+		G : BOOL;
+		IN0 : LINT;
+		IN1 : LINT;
+	END_VAR
+	VAR_OUTPUT
+		OUT : LINT;
+	END_VAR
+
+	OUT := SEL_LINT(G:=G, IN0:=IN0, IN1:=IN1, ENO=>ENO);
+END_FUNCTION_BLOCK
+
+END_NAMESPACE
+END_NAMESPACE

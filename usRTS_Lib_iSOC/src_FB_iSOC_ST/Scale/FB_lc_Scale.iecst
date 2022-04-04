@@ -1,0 +1,103 @@
+/*
+ * Skalierungsbaustein fuer AnalogEin- und Ausgaaenge
+ */
+FUNCTION_BLOCK FB_lc_Scale_ST  {
+    width := 340;
+  }
+  /*
+   * MaxInVal: MaxVal from AnalogInput (digits)
+   * MinInVal: MinVal from AnalogInput (digits)
+   * MaxPhysVal: MaxPhysVal from AnalogInput (digits)
+   * MinPhysVal: MinPhysVal from AnalogInput (digits)
+   */
+   VAR_INPUT
+    vir_In            : REAL;
+    vir_MaxInVal      : REAL;
+    vir_MinInVal      : REAL;
+    vir_MaxPhysVal    : REAL;
+    vir_MinPhysVal    : REAL;
+    vir_OffsetPhysVal : REAL;
+   END_VAR
+
+   VAR_OUTPUT
+    vor_OutPhysVal   : REAL;
+    vox_InValError   : BOOL;
+    vox_PhysValError : BOOL;
+   END_VAR
+
+   VAR_OUTPUT
+    voui_ErrNo : UINT;
+	vox_Err    : BOOL;
+   END_VAR
+
+   VAR
+    lr_DeltaInVal         : REAL;
+    lx_NotEqualDeltaInVal : BOOL;    
+    lr_DeltaPhysVal       : REAL;
+    lr_Steigung           : REAL;
+    lr_Scale              : REAL;
+   END_VAR
+   
+   VAR
+    FB_InitR_TRIG : R_TRIG;
+   END_VAR
+
+   VAR
+    lx_CyclePulse  : BOOL;
+    li_CycleCount  : INT;
+    lx_CycleInit   : BOOL;
+   END_VAR
+
+   lx_CyclePulse := NOT(lx_CyclePulse);
+   li_CycleCount := li_CycleCount + 1;
+
+   FB_InitR_TRIG(CLK := TRUE, Q => lx_CycleInit);
+
+  /*
+   * Output Values
+   */
+   vox_InValError   := OR(GT(vir_In,vir_MaxInVal),LT(vir_In,vir_MinInVal));
+   vox_PhysValError := NOT(lx_NotEqualDeltaInVal);
+   
+   vor_OutPhysVal := 0.0;
+
+   vox_Err := FALSE;
+   voui_ErrNo := 0;
+   
+   IF GT(vir_In,vir_MaxInVal) THEN
+    vox_Err := TRUE;
+    voui_ErrNo := 1;
+   END_IF;
+   
+   IF LT(vir_In,vir_MinInVal) THEN
+    vox_Err := TRUE;
+    voui_ErrNo := 2;
+   END_IF;
+
+   IF SUB(vir_MaxInVal,vir_MinInVal) = 0.0 THEN
+    vox_Err := TRUE;
+    voui_ErrNo := 3;
+   END_IF;
+
+   IF vox_Err = FALSE THEN
+  /*
+   * Bereichgrenzen ueberwachen
+   */
+   lr_DeltaInVal         := SUB(vir_MaxInVal,vir_MinInVal);
+   lx_NotEqualDeltaInVal := NE(lr_DeltaInVal,0.0);
+   lr_DeltaPhysVal       := SUB(vir_MaxPhysVal,vir_MinPhysVal);
+
+   lr_Steigung           := DIV(EN:=lx_NotEqualDeltaInVal,
+	                        IN1:=lr_DeltaPhysVal,
+	                        IN2:=lr_DeltaInVal);
+
+    lr_Scale             := MUL(vir_In,lr_Steigung);
+
+   /*
+    * OutPhysVal calculated
+    */
+    vor_OutPhysVal:=ADD(lr_Scale,vir_OffsetPhysVal);
+    
+    END_IF;
+    
+END_FUNCTION_BLOCK

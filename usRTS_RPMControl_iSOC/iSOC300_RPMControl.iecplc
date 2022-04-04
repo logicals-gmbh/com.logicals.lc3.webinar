@@ -1,0 +1,52 @@
+/*
+ * SPS-Konfiguration
+ * LC3 V3.13.0
+ * usRTS V1.17.0 
+ */
+
+{
+	CHANNEL GatewayChannel2
+		TCP
+			ADDRESS := 127.0.0.1;
+			PORT    := 1535;
+		END_TCP
+	END_CHANNEL
+}
+
+{
+	TARGET RemoteTarget2
+		PARAMS := '{
+			"transport": {
+				"type": "TCP",
+				"parameters": {
+					"ip": "192.168.128.210",
+					"port": 2409
+				}
+			},
+			"infrastructure": {
+				"type": "CMDLINETOOL",
+				"parameters": {
+					"programmerExec": "@PROGRAMMER@",
+					"programmerParam": "192.168.128.210 @FILENAME@"
+				}
+			}
+		}';
+	END_TARGET
+}
+
+CONFIGURATION iSOC300_RPMControl
+	RESOURCE iSOC300 ON usRTSiSOC300 { ON_TARGET := RemoteTarget2, VIA_CHANNEL := GatewayChannel2 }
+
+		{ INCLUDE_GLOBALS GV_RPMControl_SetVal_iSOC }
+		{ INCLUDE_GLOBALS GV_RPMControl }
+
+		TASK TSK_Loop(INTERVAL := TIME#20ms, PRIORITY := 38228);
+		TASK TSK_Logic(INTERVAL := TIME#50ms, PRIORITY := 38229);
+		TASK TSK_Timer(INTERVAL := TIME#200ms, PRIORITY := 38230);
+
+		PROGRAM INST_AppLoop  WITH TSK_Loop  : PRG_AppLoop_FBD;
+		PROGRAM INST_AppLogic WITH TSK_Logic : PRG_AppLogic_FBD;
+		PROGRAM INST_AppTimer WITH TSK_Timer : PRG_AppTimer_FBD;
+
+	END_RESOURCE
+END_CONFIGURATION

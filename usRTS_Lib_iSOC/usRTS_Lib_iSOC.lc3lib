@@ -1,0 +1,32 @@
+/*
+ * Library Configuration
+ * SNAPSHOT
+ */
+
+LIBRARY usRTS_Lib_iSOC 
+  VERSION := 0.0.1-SNAPSHOT;
+  COPYRIGHT := "logi.cals GmbH";
+  DISPLAYNAME :="iSOC300_Lib";
+  
+  FOLDER "src_FB_iSOC_ST"
+
+  FOLDER "Logic"
+   IEC := FB_lc_1oo5_ST;   
+  END_FOLDER
+  
+  FOLDER "Scale"
+   IEC := FB_lc_Limit_ST;
+   IEC := FB_lc_Scale_ST;
+  END_FOLDER
+
+  FOLDER "SFC"
+   IEC := DT_lc_SFCVal;
+   IEC := FB_lc_GenSFCState_ST;
+   IEC := FB_lc_SFC20Steps_ST;
+   IEC := FB_lc_SFCConvTimeVal_ST;
+   IEC := FB_lc_SFCGenVal_ST;
+   IEC := FB_lc_SFCInitVal_ST;
+  END_FOLDER
+
+  END_FOLDER
+END_LIBRARY

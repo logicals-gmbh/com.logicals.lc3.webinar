@@ -1,0 +1,69 @@
+USING logicals.web.standard.safe;
+
+NAMESPACE logicals.web.standard.safe
+NAMESPACE plcopen
+
+/*
+ * This function block is a safety-related function block for monitoring an emergency stop button.
+ * This FB can be used for emergency switch off functionality (stop category 0),
+ * or - with additional peripheral support - as emergency stop (stop category 1 or 2)
+ */
+FUNCTION_BLOCK SF_EmergencyStop
+	{ altName:="SF_EmergencyStop"; bgColor:="Gold"; width:=380; }
+	VAR_INPUT
+		/* See Section 5.1.1 General Input Parameters */
+		Activate : BOOL := FALSE;
+		/* Safety demand input.
+		 * Variable.
+		 * FALSE: Demand for safety-related response (e.g., emergency stop button is engaged).
+		 * TRUE: No demand for safety-related response (e.g., emergen-cy stop button not engaged).
+		 */
+		S_EStopIn : SAFEBOOL := SAFEBOOL_Constant#SAFEFALSE;
+		/* See Section 5.1.1 General Input Parameters */
+		S_StartReset : SAFEBOOL := SAFEBOOL_Constant#SAFEFALSE;
+		/* See Section 5.1.1 General Input Parameters */
+		S_AutoReset : SAFEBOOL := SAFEBOOL_Constant#SAFEFALSE;
+		/* See Section 5.1.1 General Input Parameters */
+		Reset : BOOL := FALSE;
+	END_VAR
+	VAR_OUTPUT
+		/* See Section 5.1.2 General Output Parameters */
+		Ready : BOOL := FALSE;
+		/* Output for the safety-related response.
+		 * FALSE: Safety output disabled. Demand for safety-related response (e.g., emergency stop button engaged, reset required or internal errors active)
+		 * TRUE: Safety output enabled. No demand for safety-related response (e.g., emergency stop button not engaged, no internal errors active).
+		 */
+		S_EStopOut : SAFEBOOL := SAFEBOOL_Constant#SAFEFALSE;
+		/* Optional. See 5.1.2 General Output Parameters */
+		SafetyDemand : BOOL := FALSE;
+		/* Optional. See 5.1.2 General Output Parameters */
+		ResetRequest : BOOL := FALSE;
+		/* See Section 5.1.2 General Output Parameters */
+		Error : BOOL := FALSE;
+		/* See Section 5.1.2 General Output Parameters */
+		DiagCode : WORD := 16#0000;
+	END_VAR
+	VAR
+		GenericSafetyDemand : SFB_GenericSafetyDemand;
+	END_VAR
+
+	GenericSafetyDemand(
+		Activate := Activate,
+		S_SafetyDemandIn := S_EStopIn,
+		S_StartReset := S_StartReset,
+		S_AutoReset := S_AutoReset,
+		Reset := Reset,
+		Ready => Ready,
+		S_SafetyDemandOut => S_EStopOut,
+		SafetyDemand => SafetyDemand,
+		ResetRequest => ResetRequest,
+		Error => Error,
+		DiagCode => DiagCode,
+		ENO => ENO
+	);
+
+END_FUNCTION_BLOCK
+
+END_NAMESPACE
+END_NAMESPACE
+

@@ -1,0 +1,10 @@
+NAMESPACE logicals.web.standard.safe
+
+FUNCTION IS : BOOL
+	VAR_INPUT
+		In : SAFEBOOL;
+	END_VAR
+	IS := (In <> SAFEBOOL_Constant#SAFEFALSE);
+END_FUNCTION
+
+END_NAMESPACE

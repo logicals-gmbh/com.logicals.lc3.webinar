@@ -1,0 +1,7 @@
+eclipse.preferences.version=1
+ptk.properties.additionalSources.path.usRTSiSOC300=../../../src/c
+ptk.properties.disabledCodeGenerationServices.id.usRTSiSOC300=
+ptk.properties.include.path.usRTSiSOC300=../../../src/c
+ptk.properties.library.name.usRTSiSOC300=
+ptk.properties.library.path.usRTSiSOC300=
+ptk.properties.selected.platform=usRTSiSOC300

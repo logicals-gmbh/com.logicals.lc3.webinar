@@ -1,0 +1,271 @@
+USING logicals.web.standard.safe;
+
+NAMESPACE logicals.web.standard.safe
+NAMESPACE plcopen
+
+TYPE
+	SF_TwoHandControlTypeIII_State : UINT(
+	/* S_Button1 was TRUE on FB activation. */
+	Error_1_B1 := 16#C010,
+	/* S_Button2 was TRUE on FB activation. */
+	Error_1_B2 := 16#C020,
+	/* The signals at S_Button1 and S_Button2 were TRUE on FB activation. */
+	Error_1_B1_and_B2 := 16#C030,
+	/* S_Button1 was FALSE and S_Button 2 was TRUE after 500 ms in state 8005. */
+	Error_2_B1 := 16#C040,
+	/* S_Button1 was TRUE and S_Button 2 was FALSE after 500 ms in state 8005. */
+	Error_2_B2 := 16#C050,
+	/* S_Button1 was TRUE and S_Button 2 was TRUE after 500 ms in state 8005 or 8006.
+	 * This state is only possible when the states of the inputs (S_Button1 and S_Button2)
+	 * change from divergent to convergent (both TRUE) simultaneously when the timer elapses (500 ms) at the same cycle.
+	 */
+	Error_2_B1_and_B2 := 16#C060,
+	/* The function block is not active (initial state). */
+	Idle := 16#0000,
+	/* Both buttons actuated correctly. The safety related output is enabled. */
+	Buttons_Actuated := 16#8000,
+	/* Function block is active, but in the Init state. */
+	Init := 16#8001,
+	/* No Button is actuated. */
+	Buttons_Released := 16#8802,
+	/* Only Button 1 is actuated. Start monitoring timer. */
+	Button_1_Actuated := 16#8804,
+	/* Only Button 2 is actuated. Start monitoring timer. */
+	Button_2_Actuated := 16#8806,
+	/* The safety related output was enabled and is disabled again.
+	 * FALSE at both S_Button1 and S_Button2 was not achieved after disabling the safety related output.
+	 * In this state, S_Button1 is TRUE and S_Button2 is FALSE after disabling the safety related output.
+	 */
+	Button_2_Released := 16#8808,
+	/* The safety related output was enabled and is disabled again.
+	 * FALSE at both S_Button1 and S_Button2 was not achieved after disabling the safety related output.
+	 * In this state, S_Button1 is FALSE and S_Button2 is TRUE after disabling the safety related output.
+	 */
+	Button_1_Released := 16#880A,
+	/* The safety related output was enabled and is disabled again.
+	 * FALSE at both S_Button1 and S_Button2 was not achieved after disabling the safety related output.
+	 * In this state, S_Button1 is TRUE and S_Button2 is TRUE after disabling the safety related output.
+	 */
+	Locked_Off := 16#880C,
+	/* Incorrect actuation of the buttons. Waiting for release of both buttons. */
+	Locked_On := 16#880E
+	);
+END_TYPE
+
+/*
+ * This function block provides the two-hand control functionality for type III A, B and C.
+ * The difference is in the input processing of the switches (single contact, 2 switches per input (equivalent),
+ * 2 switches per input (antivalent). (see EN 574, Section 4 Type III. Fixed specified time difference is 500 ms).
+ */
+FUNCTION_BLOCK SF_TwoHandControlTypeIII
+	{ altName:="SF_TwoHandControlTypeIII"; bgColor:="Gold"; width:=420; }
+	VAR_INPUT
+		/* See Section 5.1.1 General Input Parameters */
+		Activate : BOOL := FALSE;
+		/* Variable.
+		 * Input of button 1 (for category 3 or 4: two antivalent contacts)
+		 * FALSE: Button 1 released.
+		 * TRUE: Button 1 actuated. */
+		S_Button1 : SAFEBOOL := SAFEBOOL_Constant#SAFEFALSE;
+		/* Variable.
+		 * Input of button 2 (for category 3 or 4: two antivalent contacts)
+		 * FALSE: Button 2 released.
+		 * TRUE: Button 2 actuated. */
+		S_Button2 : SAFEBOOL := SAFEBOOL_Constant#SAFEFALSE;
+	END_VAR
+	VAR_OUTPUT
+		/* See Section 5.1.2 General Output Parameters */
+		Ready : BOOL := FALSE;
+		/* Safety related output signal.
+		 * FALSE: No correct two hand operation.
+		 * TRUE: S_Button1 and S_Button2 inputs changed from FALSE to TRUE within 500 ms and no error occurred.
+		 * The two hand operation has been performed correctly. */
+		S_TwoHandOut : SAFEBOOL := FALSE;
+		/* Optional. See 5.1.2 General Output Parameters */
+		SafetyDemand : BOOL := FALSE;
+		/* See Section 5.1.2 General Output Parameters */
+		Error : BOOL := FALSE;
+		/* See Section 5.1.2 General Output Parameters */
+		DiagCode : WORD := 16#0000;
+	END_VAR
+	VAR
+		Timer : TON;
+	END_VAR
+
+	IF(NOT Activate) THEN
+		DiagCode := TO_WORD(SF_TwoHandControlTypeIII_State#Idle);
+	ELSE
+		CASE TO_UINT(DiagCode) OF
+			SF_TwoHandControlTypeIII_State#Idle:
+				/* IF(Activate) THEN - Active is always true here */
+					DiagCode := TO_WORD(SF_TwoHandControlTypeIII_State#Init);
+			SF_TwoHandControlTypeIII_State#Init:
+				IF(IS(S_Button1)) AND (IS_NOT(S_Button2)) THEN
+					DiagCode := TO_WORD(SF_TwoHandControlTypeIII_State#Error_1_B1);
+				ELSIF (IS_NOT(S_Button1)) AND (IS(S_Button2)) THEN
+					DiagCode := TO_WORD(SF_TwoHandControlTypeIII_State#Error_1_B2);
+				ELSIF (IS(S_Button1)) AND (IS(S_Button2)) THEN
+					DiagCode := TO_WORD(SF_TwoHandControlTypeIII_State#Error_1_B1_and_B2);
+				ELSE /* (IS_NOT(S_Button1)) AND (IS_NOT(S_Button2)) THEN */
+					DiagCode := TO_WORD(SF_TwoHandControlTypeIII_State#Buttons_Released);
+				END_IF;
+			SF_TwoHandControlTypeIII_State#Error_1_B1:
+				IF(IS_NOT(S_Button1)) AND (IS_NOT(S_Button2)) THEN
+					DiagCode := TO_WORD(SF_TwoHandControlTypeIII_State#Buttons_Released);
+				END_IF;
+			SF_TwoHandControlTypeIII_State#Error_1_B2:
+				IF(IS_NOT(S_Button1)) AND (IS_NOT(S_Button2)) THEN
+					DiagCode := TO_WORD(SF_TwoHandControlTypeIII_State#Buttons_Released);
+				END_IF;
+			SF_TwoHandControlTypeIII_State#Error_1_B1_and_B2:
+				IF(IS_NOT(S_Button1)) AND (IS_NOT(S_Button2)) THEN
+					DiagCode := TO_WORD(SF_TwoHandControlTypeIII_State#Buttons_Released);
+				END_IF;
+			SF_TwoHandControlTypeIII_State#Buttons_Released:
+				IF(IS(S_Button1)) AND (IS(S_Button2)) THEN
+					DiagCode := TO_WORD(SF_TwoHandControlTypeIII_State#Buttons_Actuated);
+				ELSIF(IS(S_Button1)) THEN
+					DiagCode := TO_WORD(SF_TwoHandControlTypeIII_State#Button_1_Actuated);
+				ELSIF(IS(S_Button2)) THEN
+					DiagCode := TO_WORD(SF_TwoHandControlTypeIII_State#Button_2_Actuated);
+				END_IF;
+			SF_TwoHandControlTypeIII_State#Locked_On:
+				IF(IS_NOT(S_Button1)) AND (IS_NOT(S_Button2)) THEN
+					DiagCode := TO_WORD(SF_TwoHandControlTypeIII_State#Buttons_Released);
+				END_IF;
+			SF_TwoHandControlTypeIII_State#Error_2_B1:
+				IF(IS_NOT(S_Button1)) AND (IS_NOT(S_Button2)) THEN
+					DiagCode := TO_WORD(SF_TwoHandControlTypeIII_State#Buttons_Released);
+				END_IF;
+			SF_TwoHandControlTypeIII_State#Error_2_B2:
+				IF(IS_NOT(S_Button1)) AND (IS_NOT(S_Button2)) THEN
+					DiagCode := TO_WORD(SF_TwoHandControlTypeIII_State#Buttons_Released);
+				END_IF;
+			SF_TwoHandControlTypeIII_State#Error_2_B1_and_B2:
+				IF(IS_NOT(S_Button1)) AND (IS_NOT(S_Button2)) THEN
+					DiagCode := TO_WORD(SF_TwoHandControlTypeIII_State#Buttons_Released);
+				END_IF;
+			SF_TwoHandControlTypeIII_State#Button_2_Actuated:
+				Timer();
+				IF(Timer.Q) THEN
+					IF(IS(S_Button1)) AND (IS(S_Button2)) THEN
+						DiagCode := TO_WORD(SF_TwoHandControlTypeIII_State#Error_2_B1_and_B2);
+					ELSE
+						DiagCode := TO_WORD(SF_TwoHandControlTypeIII_State#Error_2_B1);
+					END_IF;
+				ELSIF(IS_NOT(S_Button1)) AND (IS_NOT(S_Button2)) THEN
+					DiagCode := TO_WORD(SF_TwoHandControlTypeIII_State#Buttons_Released);
+				ELSIF(IS(S_Button1)) AND (IS_NOT(S_Button2)) THEN
+					DiagCode := TO_WORD(SF_TwoHandControlTypeIII_State#Locked_On);
+				ELSIF(IS(S_Button1)) AND (IS(S_Button2)) THEN
+					DiagCode := TO_WORD(SF_TwoHandControlTypeIII_State#Buttons_Actuated);
+				END_IF;
+			SF_TwoHandControlTypeIII_State#Button_1_Actuated:
+				Timer();
+				IF(Timer.Q) THEN
+					IF(IS(S_Button1)) AND (IS(S_Button2)) THEN
+						DiagCode := TO_WORD(SF_TwoHandControlTypeIII_State#Error_2_B1_and_B2);
+					ELSE
+						DiagCode := TO_WORD(SF_TwoHandControlTypeIII_State#Error_2_B2);
+					END_IF;
+				ELSIF(IS_NOT(S_Button1)) AND (IS_NOT(S_Button2)) THEN
+					DiagCode := TO_WORD(SF_TwoHandControlTypeIII_State#Buttons_Released);
+				ELSIF(IS_NOT(S_Button1)) AND (IS(S_Button2)) THEN
+					DiagCode := TO_WORD(SF_TwoHandControlTypeIII_State#Locked_On);
+				ELSIF(IS(S_Button1)) AND (IS(S_Button2)) THEN
+					DiagCode := TO_WORD(SF_TwoHandControlTypeIII_State#Buttons_Actuated);
+				END_IF;
+			SF_TwoHandControlTypeIII_State#Locked_Off:
+				IF(IS_NOT(S_Button1)) AND (IS(S_Button2)) THEN
+					DiagCode := TO_WORD(SF_TwoHandControlTypeIII_State#Button_1_Released);
+				ELSIF(IS(S_Button1)) AND (IS_NOT(S_Button2)) THEN
+					DiagCode := TO_WORD(SF_TwoHandControlTypeIII_State#Button_2_Released);
+				ELSIF(IS_NOT(S_Button1)) AND (IS_NOT(S_Button2)) THEN
+					DiagCode := TO_WORD(SF_TwoHandControlTypeIII_State#Buttons_Released);
+				END_IF;
+			SF_TwoHandControlTypeIII_State#Button_1_Released:
+				IF(IS(S_Button1)) AND (IS(S_Button2)) THEN
+					DiagCode := TO_WORD(SF_TwoHandControlTypeIII_State#Locked_Off);
+				ELSIF(IS(S_Button1)) AND (IS_NOT(S_Button2)) THEN
+					DiagCode := TO_WORD(SF_TwoHandControlTypeIII_State#Button_2_Released);
+				ELSIF(IS_NOT(S_Button1)) AND (IS_NOT(S_Button2)) THEN
+					DiagCode := TO_WORD(SF_TwoHandControlTypeIII_State#Buttons_Released);
+				END_IF;
+			SF_TwoHandControlTypeIII_State#Button_2_Released:
+				IF(IS(S_Button1)) AND (IS(S_Button2)) THEN
+					DiagCode := TO_WORD(SF_TwoHandControlTypeIII_State#Locked_Off);
+				ELSIF(IS_NOT(S_Button1)) AND (IS(S_Button2)) THEN
+					DiagCode := TO_WORD(SF_TwoHandControlTypeIII_State#Button_1_Released);
+				ELSIF(IS_NOT(S_Button1)) AND (IS_NOT(S_Button2)) THEN
+					DiagCode := TO_WORD(SF_TwoHandControlTypeIII_State#Buttons_Released);
+				END_IF;
+			SF_TwoHandControlTypeIII_State#Buttons_Actuated:
+				IF(IS(S_Button1)) AND (IS_NOT(S_Button2)) THEN
+					DiagCode := TO_WORD(SF_TwoHandControlTypeIII_State#Button_2_Released);
+				ELSIF(IS_NOT(S_Button1)) AND (IS(S_Button2)) THEN
+					DiagCode := TO_WORD(SF_TwoHandControlTypeIII_State#Button_1_Released);
+				ELSIF(IS_NOT(S_Button1)) AND (IS_NOT(S_Button2)) THEN
+					DiagCode := TO_WORD(SF_TwoHandControlTypeIII_State#Buttons_Released);
+				END_IF;
+			ELSE
+				ENO := FALSE;
+		END_CASE;
+	END_IF;
+
+	CASE TO_UINT(DiagCode) OF
+		SF_TwoHandControlTypeIII_State#Idle:
+			Timer(IN := FALSE);
+			Ready := FALSE;
+			S_TwoHandOut := SAFEBOOL_Constant#SAFEFALSE;
+			SafetyDemand := FALSE;
+			Error := FALSE;
+		SF_TwoHandControlTypeIII_State#Buttons_Actuated:
+			Timer(IN := FALSE);
+			Ready := TRUE;
+			S_TwoHandOut := SAFEBOOL_Constant#SAFETRUE;
+			SafetyDemand := FALSE;
+			Error := FALSE;
+		SF_TwoHandControlTypeIII_State#Init:
+			Timer(IN := FALSE);
+			Ready := TRUE;
+			S_TwoHandOut := SAFEBOOL_Constant#SAFEFALSE;
+			SafetyDemand := FALSE;
+			Error := FALSE;
+		SF_TwoHandControlTypeIII_State#Buttons_Released,
+		SF_TwoHandControlTypeIII_State#Button_2_Released,
+		SF_TwoHandControlTypeIII_State#Button_1_Released,
+		SF_TwoHandControlTypeIII_State#Locked_Off,
+		SF_TwoHandControlTypeIII_State#Locked_On:
+			Timer(IN := FALSE);
+			Ready := TRUE;
+			S_TwoHandOut := SAFEBOOL_Constant#SAFEFALSE;
+			SafetyDemand := TRUE;
+			Error := FALSE;
+		SF_TwoHandControlTypeIII_State#Button_1_Actuated,
+		SF_TwoHandControlTypeIII_State#Button_2_Actuated:
+			Timer(IN := TRUE, PT := T#500ms);
+			Ready := TRUE;
+			S_TwoHandOut := SAFEBOOL_Constant#SAFEFALSE;
+			SafetyDemand := TRUE;
+			Error := FALSE;
+		SF_TwoHandControlTypeIII_State#Error_1_B1,
+		SF_TwoHandControlTypeIII_State#Error_1_B2,
+		SF_TwoHandControlTypeIII_State#Error_1_B1_and_B2,
+		SF_TwoHandControlTypeIII_State#Error_2_B1,
+		SF_TwoHandControlTypeIII_State#Error_2_B2,
+		SF_TwoHandControlTypeIII_State#Error_2_B1_and_B2:
+			Timer(IN := FALSE);
+			Ready := TRUE;
+			S_TwoHandOut := SAFEBOOL_Constant#SAFEFALSE;
+			SafetyDemand := FALSE;
+			Error := TRUE;
+		ELSE
+			ENO := FALSE;
+	END_CASE;
+
+	ENO := ENO AND CheckSAFEBOOL(S_Button1) AND CheckSAFEBOOL(S_Button2);
+
+END_FUNCTION_BLOCK
+
+END_NAMESPACE
+END_NAMESPACE
