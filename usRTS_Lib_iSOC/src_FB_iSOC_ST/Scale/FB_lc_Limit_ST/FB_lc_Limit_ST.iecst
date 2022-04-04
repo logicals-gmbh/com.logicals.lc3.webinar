@@ -1,5 +1,8 @@
+Namespace com.logicals.Webinar.Basic.iSOC.Scale
 
-FUNCTION_BLOCK FB_lc_Limit_ST  
+FUNCTION_BLOCK FB_lc_Limit_ST  {
+    width := 290;
+  }  
 
   VAR_INPUT
     vir_AI    : REAL;
@@ -36,3 +39,5 @@ vox_L:=LT(vir_AI,vir_GW_L);
 vox_LL:=LT(vir_AI,vir_GW_LL);
 
 END_FUNCTION_BLOCK
+
+END_NAMESPACE

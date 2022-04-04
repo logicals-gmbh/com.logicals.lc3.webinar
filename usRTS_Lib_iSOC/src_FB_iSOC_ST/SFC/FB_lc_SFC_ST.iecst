@@ -1,3 +1,4 @@
+NAMESPACE com.logicals.Webinar.Basic.iSOC.SFC
  
 TYPE
  	DT_lc_SFCVal : STRUCT
@@ -1919,3 +1920,5 @@ ACTION ActionGlobal:
 END_ACTION
 
 END_FUNCTION_BLOCK
+
+END_NAMESPACE

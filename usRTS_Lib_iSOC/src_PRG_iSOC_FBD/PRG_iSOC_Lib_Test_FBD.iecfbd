@@ -1,5 +1,9 @@
-PROGRAM PRG_Lib_Test
-  USING com.logicals.Basic.SigGen;
+PROGRAM PRG_iSOC_Lib_Test_FBD
+  
+  USING com.logicals.Webinar.Basic.iSOC.Logic;
+  USING com.logicals.Webinar.Basic.iSOC.Scale;
+  USING com.logicals.Webinar.Basic.iSOC.SFC;
+  
   VAR
     AI1 : AI;
     AI2 : AI;

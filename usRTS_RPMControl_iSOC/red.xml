@@ -2,9 +2,9 @@
 <projectConfiguration>
     <configVersion>2</configVersion>
     <relativeTo>WORKSPACE</relativeTo>
-    <referencedLibrary type="PYTHON" name="com.logicals.lc3.testframework.robot.keywords.Keywords" path="D:/_LC3p-3.13.0-ISH_Workspace/20220406_Webinar_iSOC_Test/.metadata/.plugins/com.logicals.lc3.testframework.core/lc3TestKeywords/library"/>
+    <referencedLibrary type="PYTHON" name="com.logicals.lc3.testframework.robot.keywords.Keywords" path="D:/_LC3p-3.13.0-ISH_Workspace/20220406_Webinar_iSOC/.metadata/.plugins/com.logicals.lc3.testframework.core/lc3TestKeywords/library"/>
     <pythonpath>
-        <path location="D:\_LC3p-3.13.0-ISH_Workspace\20220406_Webinar_iSOC_Test\.metadata\.plugins\com.logicals.lc3.testframework.core\lc3TestKeywords\library"/>
+        <path location="D:\_LC3p-3.13.0-ISH_Workspace\20220406_Webinar_iSOC\.metadata\.plugins\com.logicals.lc3.testframework.core\lc3TestKeywords\library"/>
     </pythonpath>
     <excludedForValidation/>
     <isValidatedFileSizeCheckingEnabled>true</isValidatedFileSizeCheckingEnabled>

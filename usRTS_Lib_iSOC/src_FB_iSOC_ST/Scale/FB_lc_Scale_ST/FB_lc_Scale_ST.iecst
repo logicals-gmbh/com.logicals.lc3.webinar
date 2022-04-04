@@ -1,3 +1,5 @@
+Namespace com.logicals.Webinar.Basic.iSOC.Scale
+
 /*
  * Skalierungsbaustein fuer AnalogEin- und Ausgaaenge
  */
@@ -101,3 +103,4 @@ FUNCTION_BLOCK FB_lc_Scale_ST  {
     END_IF;
     
 END_FUNCTION_BLOCK
+END_NAMESPACE

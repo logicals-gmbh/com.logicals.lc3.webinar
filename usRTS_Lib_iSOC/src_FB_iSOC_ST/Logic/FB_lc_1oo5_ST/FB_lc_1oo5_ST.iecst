@@ -1,3 +1,4 @@
+Namespace com.logicals.Webinar.Basic.iSOC.Logic
 /*
  * 1oo5 in ST
  */
@@ -49,3 +50,5 @@ vox_Out5 := (vix_In5 AND vox_Out);
 vox_Err := NOT vox_OUT;
 
 END_FUNCTION_BLOCK
+
+END_NAMESPACE

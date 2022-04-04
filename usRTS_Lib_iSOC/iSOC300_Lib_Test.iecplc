@@ -24,20 +24,20 @@
 			"infrastructure": {
 				"type": "CMDLINETOOL",
 				"parameters": {
-					"programmerExec": "Download.bat",
-					"programmerParam": "192.168.128.210 {BinaryFileName}"
+					"programmerExec": "@PROGRAMMER@",
+					"programmerParam": "192.168.128.210 @FILENAME@"
 				}
 			}
 		}';
 	END_TARGET
 }
 
-CONFIGURATION iSOC300_Lib
+CONFIGURATION iSOC300_Lib_Test
 	RESOURCE iSOC300 ON usRTSiSOC300 { ON_TARGET := RemoteTarget2, VIA_CHANNEL := GatewayChannel2 }
 		
 		TASK TSK_Main(INTERVAL := TIME#100ms, PRIORITY := 38229);
 
-		PROGRAM INST_Lib_Test WITH TSK_Main : PRG_Lib_Test;
+		PROGRAM INST_Lib_Test WITH TSK_Main : PRG_iSOC_Lib_Test_FBD;
 
 	END_RESOURCE
 END_CONFIGURATION

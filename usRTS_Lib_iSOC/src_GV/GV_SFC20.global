@@ -1,3 +1,4 @@
+USING com.logicals.Webinar.Basic.iSOC.SFC;
 /*
  * Globale Variablen zum Test des Baustein FB_lc_SFC_20Steps_ST
  */
