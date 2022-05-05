@@ -9,6 +9,7 @@
  * 20220329 _ DG Created Version 0.0.2
  * 20220329 _ DG Created Version 0.0.3
  * 20220330 _ DG Created Version 0.0.4
+ * 20220505 _ DG Created Version 0.0.5
  * 
  */
  
@@ -17,7 +18,7 @@
   */
 LIBRARY com.logicals.Webinar.Basic
   
-  VERSION     := 0.0.4-SNAPSHOT;
+  VERSION     := 0.0.5-SNAPSHOT;
   VENDOR      := "logi.cals (c) GmbH";
   SUMMARY     := "logi.cals Aplication Lib / With Namespaces / Source Git-User-Dir";
   COPYRIGHT   := "(c) logi.cals GmbH 2021";
@@ -339,9 +340,19 @@ LIBRARY com.logicals.Webinar.Basic
      END_FOLDER
 
      FOLDER "Logic"
-       IEC := com.logicals.Basic.Logic.FB_lc_Toggle_ST;
+       IEC := com.logicals.Basic.Logic.FB_lc_1oo3_ST;       
+       IEC := com.logicals.Basic.Logic.FB_lc_1oo4_ST;
+       IEC := com.logicals.Basic.Logic.FB_lc_1oo5_ST;
+       IEC := com.logicals.Basic.Logic.FB_lc_1oo6_ST;
+
+       IEC := com.logicals.Basic.Logic.FB_lc_Toggle_ST;       
        IEC := com.logicals.Basic.Logic.FB_lc_ElTako_ST;
      END_FOLDER
+
+     FOLDER "LogicMode"
+       IEC := com.logicals.Basic.Logic.FB_lc_LogicMode_1oo6_ST;       
+     END_FOLDER
+
 
      FOLDER "OpHour"
        IEC := com.logicals.Basic.OpHour.DT_lc_OpHourDateTime;

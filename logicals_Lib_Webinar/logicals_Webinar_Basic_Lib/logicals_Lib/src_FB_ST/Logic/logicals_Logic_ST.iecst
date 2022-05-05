@@ -26,6 +26,93 @@ FUNCTION_BLOCK FB_lc_1oo3_ST
     
 END_FUNCTION_BLOCK
 
+FUNCTION_BLOCK FB_lc_1oo4_ST
+	VAR_INPUT
+		vix_In1 : BOOL;
+		vix_In2 : BOOL;
+		vix_In3 : BOOL;
+		vix_In4 : BOOL;
+	END_VAR
+
+	VAR_OUTPUT
+		vox_Out1 : BOOL;
+		vox_Out2 : BOOL;
+		vox_Out3 : BOOL;
+		vox_Out4 : BOOL;
+
+        vox_Err  : BOOL;
+	END_VAR
+    
+    vox_Out1 := vix_In1 = TRUE  AND vix_In2 = FALSE AND vix_In3 = FALSE AND vix_In4 = FALSE;
+    vox_Out2 := vix_In1 = FALSE AND vix_In2 = TRUE  AND vix_In3 = FALSE AND vix_In4 = FALSE;
+    vox_Out3 := vix_In1 = FALSE AND vix_In2 = FALSE AND vix_In3 = TRUE  AND vix_In4 = FALSE;
+    vox_Out4 := vix_In1 = FALSE AND vix_In2 = FALSE AND vix_In3 = FALSE AND vix_In4 = TRUE ;
+
+    vox_Err :=  NOT(vox_Out1 = TRUE OR vox_Out2 = TRUE OR vox_Out3 = TRUE OR vox_Out4 = TRUE);
+    
+END_FUNCTION_BLOCK
+
+FUNCTION_BLOCK FB_lc_1oo5_ST
+	VAR_INPUT
+		vix_In1 : BOOL;
+		vix_In2 : BOOL;
+		vix_In3 : BOOL;
+		vix_In4 : BOOL;
+		vix_In5 : BOOL;
+	END_VAR
+
+	VAR_OUTPUT
+		vox_Out1 : BOOL;
+		vox_Out2 : BOOL;
+		vox_Out3 : BOOL;
+		vox_Out4 : BOOL;
+		vox_Out5 : BOOL;
+
+        vox_Err  : BOOL;
+	END_VAR
+    
+    vox_Out1 := vix_In1 = TRUE  AND vix_In2 = FALSE AND vix_In3 = FALSE AND vix_In4 = FALSE AND vix_In5 = FALSE;
+    vox_Out2 := vix_In1 = FALSE AND vix_In2 = TRUE  AND vix_In3 = FALSE AND vix_In4 = FALSE AND vix_In5 = FALSE;
+    vox_Out3 := vix_In1 = FALSE AND vix_In2 = FALSE AND vix_In3 = TRUE  AND vix_In4 = FALSE AND vix_In5 = FALSE;
+    vox_Out4 := vix_In1 = FALSE AND vix_In2 = FALSE AND vix_In3 = FALSE AND vix_In4 = TRUE  AND vix_In5 = FALSE;
+    vox_Out5 := vix_In1 = FALSE AND vix_In2 = FALSE AND vix_In3 = FALSE AND vix_In4 = FALSE AND vix_In5 = TRUE;
+
+    vox_Err :=  NOT(vox_Out1 = TRUE OR vox_Out2 = TRUE OR vox_Out3 = TRUE OR vox_Out4 = TRUE OR vox_Out5 = TRUE );
+    
+END_FUNCTION_BLOCK
+
+
+FUNCTION_BLOCK FB_lc_1oo6_ST
+	VAR_INPUT
+		vix_In1 : BOOL;
+		vix_In2 : BOOL;
+		vix_In3 : BOOL;
+		vix_In4 : BOOL;
+		vix_In5 : BOOL;
+		vix_In6 : BOOL;
+	END_VAR
+
+	VAR_OUTPUT
+		vox_Out1 : BOOL;
+		vox_Out2 : BOOL;
+		vox_Out3 : BOOL;
+		vox_Out4 : BOOL;
+		vox_Out5 : BOOL;
+		vox_Out6 : BOOL;
+
+        vox_Err  : BOOL;
+	END_VAR
+    
+    vox_Out1 := vix_In1 = TRUE  AND vix_In2 = FALSE AND vix_In3 = FALSE AND vix_In4 = FALSE AND vix_In5 = FALSE AND vix_In6 = FALSE;
+    vox_Out2 := vix_In1 = FALSE AND vix_In2 = TRUE  AND vix_In3 = FALSE AND vix_In4 = FALSE AND vix_In5 = FALSE AND vix_In6 = FALSE;
+    vox_Out3 := vix_In1 = FALSE AND vix_In2 = FALSE AND vix_In3 = TRUE  AND vix_In4 = FALSE AND vix_In5 = FALSE AND vix_In6 = FALSE;
+    vox_Out4 := vix_In1 = FALSE AND vix_In2 = FALSE AND vix_In3 = FALSE AND vix_In4 = TRUE  AND vix_In5 = FALSE AND vix_In6 = FALSE;
+    vox_Out5 := vix_In1 = FALSE AND vix_In2 = FALSE AND vix_In3 = FALSE AND vix_In4 = FALSE AND vix_In5 = TRUE  AND vix_In6 = FALSE;
+    vox_Out6 := vix_In1 = FALSE AND vix_In2 = FALSE AND vix_In3 = FALSE AND vix_In4 = FALSE AND vix_In5 = FALSE AND vix_In6 = TRUE;
+
+    vox_Err :=  NOT(vox_Out1 = TRUE OR vox_Out2 = TRUE OR vox_Out3 = TRUE OR vox_Out4 = TRUE OR vox_Out5 = TRUE OR vox_Out6 = TRUE );
+    
+END_FUNCTION_BLOCK
  /*
   * Toogle per Eingang
   */

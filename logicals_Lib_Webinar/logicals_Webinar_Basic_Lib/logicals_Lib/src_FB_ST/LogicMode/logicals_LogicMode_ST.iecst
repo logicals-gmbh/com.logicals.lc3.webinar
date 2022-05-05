@@ -1,0 +1,114 @@
+NAMESPACE com.logicals.Basic.Logic
+
+USING com.logicals.Basic.Logic;
+
+FUNCTION_BLOCK FB_lc_LogicMode_1oo6_ST
+
+VAR_INPUT
+  //
+  // Betriebsart setzen
+  vix_ModeSet0 : BOOL;     //
+  vix_ModeSet1 : BOOL;     //
+  vix_ModeSet2 : BOOL;     //
+  vix_ModeSet3 : BOOL;     //
+  vix_ModeSet4 : BOOL;     //
+  vix_ModeSet5 : BOOL;     //
+  
+  vix_ResetMode : BOOL; // Reset
+END_VAR
+
+VAR_OUTPUT  
+  //
+  // Statusanzeige
+  vox_ModeOut0 : BOOL; //
+  vox_ModeOut1 : BOOL; //
+  vox_ModeOut2 : BOOL; //
+  vox_ModeOut3 : BOOL; //
+  vox_ModeOut4 : BOOL; //
+  vox_ModeOut5 : BOOL; //
+END_VAR
+
+VAR
+  FB_1oo6_ST  : FB_lc_1oo6_ST;
+  
+  lx_1oo6_Err : BOOL;
+END_VAR
+
+VAR
+  //
+  // Statusanzeige
+  lx_Mode0 : BOOL; //
+  lx_Mode1 : BOOL; //
+  lx_Mode2 : BOOL; //
+  lx_Mode3 : BOOL; //
+  lx_Mode4 : BOOL; //
+  lx_Mode5 : BOOL; //
+  
+  lx_ModeReset : BOOL;
+
+  //
+  // R_TRIG
+  FB_Mode0_R_TRIG : R_TRIG; //
+  FB_Mode1_R_TRIG : R_TRIG; //
+  FB_Mode2_R_TRIG : R_TRIG; //
+  FB_Mode3_R_TRIG : R_TRIG; //
+  FB_Mode4_R_TRIG : R_TRIG; //
+  FB_Mode5_R_TRIG : R_TRIG; //
+
+  FB_ModeResetOn_R_TRIG  : R_TRIG; // ResetOn
+  FB_ModeResetOff_F_TRIG : F_TRIG; // ResetOff
+
+  //
+  // RS
+  FB_Mode0_RS : RS;  //
+  FB_Mode1_RS : RS;  //
+  FB_Mode2_RS : RS;  //
+  FB_Mode3_RS : RS;  //
+  FB_Mode4_RS : RS;  //
+  FB_Mode5_RS : RS;  //
+
+  FB_ModeReset_RS : RS; // Reset
+END_VAR
+
+FB_1oo6_ST(vix_In1 := vix_ModeSet0,
+		   vix_In2 := vix_ModeSet1,
+		   vix_In3 := vix_ModeSet2,
+		   vix_In4 := vix_ModeSet3,
+		   vix_In5 := vix_ModeSet4,
+		   vix_In6 := vix_ModeSet5,
+                   
+   		   vox_Out1 => lx_Mode0,
+   		   vox_Out2 => lx_Mode1,
+   		   vox_Out3 => lx_Mode2,
+   		   vox_Out4 => lx_Mode3,
+   		   vox_Out5 => lx_Mode4,
+           vox_Out6 => lx_Mode5,
+   
+           vox_Err  => lx_1oo6_Err);
+
+
+FB_Mode0_R_TRIG(CLK := lx_Mode0 AND NOT lx_ModeReset);
+FB_Mode1_R_TRIG(CLK := lx_Mode1 AND NOT lx_ModeReset);
+FB_Mode2_R_TRIG(CLK := lx_Mode2 AND NOT lx_ModeReset);
+FB_Mode3_R_TRIG(CLK := lx_Mode3 AND NOT lx_ModeReset);
+FB_Mode4_R_TRIG(CLK := lx_Mode4 AND NOT lx_ModeReset);
+FB_Mode5_R_TRIG(CLK := lx_Mode5 AND NOT lx_ModeReset);
+
+FB_Mode0_RS(S:= FB_Mode0_R_TRIG.Q, R1 := FB_ModeResetOff_F_TRIG.Q, Q1 => vox_ModeOut0); // Mode 0
+FB_Mode1_RS(S:= FB_Mode1_R_TRIG.Q, R1 := FB_ModeResetOff_F_TRIG.Q, Q1 => vox_ModeOut1); // Mode 1
+FB_Mode2_RS(S:= FB_Mode2_R_TRIG.Q, R1 := FB_ModeResetOff_F_TRIG.Q, Q1 => vox_ModeOut2); // Mode 2
+FB_Mode3_RS(S:= FB_Mode3_R_TRIG.Q, R1 := FB_ModeResetOff_F_TRIG.Q, Q1 => vox_ModeOut3); // Mode 3
+FB_Mode4_RS(S:= FB_Mode4_R_TRIG.Q, R1 := FB_ModeResetOff_F_TRIG.Q, Q1 => vox_ModeOut4); // Mode 4 
+FB_Mode5_RS(S:= FB_Mode5_R_TRIG.Q, R1 := FB_ModeResetOff_F_TRIG.Q, Q1 => vox_ModeOut5); // Mode 5
+
+FB_ModeResetOn_R_TRIG(CLK := vix_ResetMode);
+FB_ModeResetOff_F_TRIG(CLK := vix_ResetMode);
+
+//
+// Wenn Betriebsart gesetzt, dann darf keine Umschaltung erfolgen
+// Erst Reset
+FB_ModeReset_RS(S := lx_Mode0 OR lx_Mode1 OR lx_Mode2 OR lx_Mode3 OR lx_Mode4 OR lx_Mode5, R1 := FB_ModeResetOn_R_TRIG.Q, Q1 => lx_ModeReset);
+
+END_FUNCTION_BLOCK
+
+END_NAMESPACE
